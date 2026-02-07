@@ -70,3 +70,8 @@ export const restoreFromBackup = async (backupFile) => {
   await fs.copyFile(backupFile, storePath());
   return { restored: true };
 };
+
+export const exportPackage = async (destination) => {
+  await fs.copyFile(storePath(), destination);
+  return { exported: true };
+};

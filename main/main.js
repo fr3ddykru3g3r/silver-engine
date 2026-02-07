@@ -1,7 +1,15 @@
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ensureStore, listSubscriptions, saveSubscriptions, loadPreferences, savePreferences, restoreFromBackup } from "../storage/jsonStore.js";
+import {
+  ensureStore,
+  listSubscriptions,
+  saveSubscriptions,
+  loadPreferences,
+  savePreferences,
+  restoreFromBackup,
+  exportPackage
+} from "../storage/jsonStore.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,4 +79,18 @@ ipcMain.handle("backup:restore", async () => {
   }
 
   return restoreFromBackup(result.filePaths[0]);
+});
+
+ipcMain.handle("backup:export", async () => {
+  const result = await dialog.showSaveDialog({
+    title: "Download package",
+    defaultPath: "subscriptions-package.json",
+    filters: [{ name: "JSON", extensions: ["json"] }]
+  });
+
+  if (result.canceled || !result.filePath) {
+    return { exported: false };
+  }
+
+  return exportPackage(result.filePath);
 });

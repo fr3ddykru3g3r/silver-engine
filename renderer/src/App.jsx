@@ -128,6 +128,7 @@ export default function App() {
             budget={preferences.monthlyBudget}
             currency={preferences.currency}
             onAdd={() => setShowModal(true)}
+            onDownload={() => window.subscriptionAPI?.exportPackage()}
           />
           <div className="main-grid">
             <SubscriptionList
