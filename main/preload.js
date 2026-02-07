@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld("subscriptionAPI", {
   loadPreferences: () => ipcRenderer.invoke("preferences:load"),
   savePreferences: (prefs) => ipcRenderer.invoke("preferences:save", prefs),
   restoreBackup: () => ipcRenderer.invoke("backup:restore"),
-  exportPackage: () => ipcRenderer.invoke("backup:export")
+  exportPackage: () => ipcRenderer.invoke("backup:export"),
+  downloadInstaller: () => ipcRenderer.invoke("app:download-installer")
 });

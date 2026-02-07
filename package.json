@@ -2,6 +2,7 @@
   "name": "silver-engine",
   "version": "0.1.0",
   "description": "Local-only subscription tracker Electron app",
+  "homepage": "https://github.com/your-org/silver-engine/releases",
   "main": "main/main.js",
   "author": "",
   "license": "MIT",

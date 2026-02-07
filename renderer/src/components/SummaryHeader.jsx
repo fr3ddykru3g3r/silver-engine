@@ -13,7 +13,8 @@ export default function SummaryHeader({
   budget,
   currency,
   onAdd,
-  onDownload
+  onDownload,
+  onDownloadInstaller
 }) {
   const headroom = budget - totals.monthly;
   const simulatedSavings = totals.monthly - simulatedTotals.monthly;
@@ -47,6 +48,9 @@ export default function SummaryHeader({
         </button>
         <button className="ghost" onClick={onDownload}>
           Download package
+        </button>
+        <button className="ghost" onClick={onDownloadInstaller}>
+          Download installer
         </button>
         <button className="ghost">Check updates</button>
       </div>

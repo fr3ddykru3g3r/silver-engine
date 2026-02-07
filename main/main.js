@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -15,6 +15,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const isDev = !app.isPackaged;
+const installerUrl =
+  process.env.INSTALLER_URL || "https://github.com/your-org/silver-engine/releases";
 
 const createWindow = async () => {
   await ensureStore();
@@ -93,4 +95,9 @@ ipcMain.handle("backup:export", async () => {
   }
 
   return exportPackage(result.filePath);
+});
+
+ipcMain.handle("app:download-installer", async () => {
+  await shell.openExternal(installerUrl);
+  return { opened: true };
 });

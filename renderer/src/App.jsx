@@ -129,6 +129,7 @@ export default function App() {
             currency={preferences.currency}
             onAdd={() => setShowModal(true)}
             onDownload={() => window.subscriptionAPI?.exportPackage()}
+            onDownloadInstaller={() => window.subscriptionAPI?.downloadInstaller()}
           />
           <div className="main-grid">
             <SubscriptionList
