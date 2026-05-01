@@ -1,0 +1,7 @@
+metric,value
+Durbin-Watson segmented residuals,1.7449082469353492
+Bootstrap slope-change median,-14.43710224455585
+Bootstrap 2.5%,-22.63631581268152
+Bootstrap 97.5%,-7.120916035278551
+ATP year VIF,5.8445566108875
+ATP height VIF,5.844556610887398
