@@ -1,0 +1,14 @@
+Figure,file,description
+Figure 1,fig01_marathon_frontier.png,Marathon world-record frontier
+Figure 2,fig02_segmented_model.png,Linear and segmented marathon frontier models
+Figure 3,fig03_breakpoint_grid.png,Breakpoint robustness grid
+Figure 4,fig04_toplist_histogram.png,Top-list year distribution
+Figure 5,fig05_compression_reference.png,Observed vs calendar-exposure compression benchmark
+Figure 6,fig06_atp_serve_outcomes.png,ATP ace/double-fault rates
+Figure 7,fig07_atp_height.png,ATP serve points won and height
+Figure 8,fig08_atp_surface_trends.png,ATP ace rates by surface
+Figure 9,fig09_surface_prediction_test.png,PFIA prediction check using surface-specific ace-rate change
+Figure 10,fig10_running_footwear_interface.png,Running footwear interface schematic
+Figure 11,fig11_tennis_racket_interface.png,Tennis racket interface schematic
+Figure 12,fig12_tennis_topspin_mechanism.png,Tennis string snapback/topspin schematic
+Figure 13,fig13_football_stud_interface.png,Football stud interface schematic
