@@ -1,7 +1,7 @@
 """
 PFIA v11 reproducibility script.
 
-Run from repository/package root:
+Run from the repository root:
     python pfia-v11/code/pfia_v11_reproduce.py
 
 The script recomputes the marathon linear and segmented models, reports a Durbin-Watson residual diagnostic, and prints ATP endpoint/regression summaries from processed CSV files.
@@ -13,11 +13,21 @@ import pandas as pd
 import statsmodels.api as sm
 from statsmodels.stats.stattools import durbin_watson
 
-BASE = Path(__file__).resolve().parents[1] / "data"
+HERE = Path(__file__).resolve()
+ROOT = HERE.parents[2]
+BASE = HERE.parents[1] / "data"
+FALLBACK_BASE = ROOT / "pfma-reproducibility" / "data"
+
+
+def data_path(filename: str) -> Path:
+    primary = BASE / filename
+    if primary.exists():
+        return primary
+    return FALLBACK_BASE / filename
 
 
 def fit_marathon_models() -> None:
-    wr = pd.read_csv(BASE / "marathon_world_records_modern.csv")
+    wr = pd.read_csv(data_path("marathon_world_records_modern.csv"))
     if "year" not in wr.columns:
         wr["year"] = wr["year_decimal"]
 
@@ -41,10 +51,10 @@ def fit_marathon_models() -> None:
 def print_atp_summaries() -> None:
     print("\nATP endpoint summary")
     print("--------------------")
-    print(pd.read_csv(BASE / "atp_change_summary.csv").to_string(index=False))
+    print(pd.read_csv(data_path("atp_change_summary.csv")).to_string(index=False))
     print("\nATP annual aggregate regression outputs")
     print("---------------------------------------")
-    print(pd.read_csv(BASE / "atp_model_outputs.csv").to_string(index=False))
+    print(pd.read_csv(data_path("atp_model_outputs.csv")).to_string(index=False))
 
 
 if __name__ == "__main__":
