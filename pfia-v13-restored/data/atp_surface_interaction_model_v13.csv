@@ -1,0 +1,7 @@
+term,estimate,se,p_value
+Intercept,4.296,0.184,<0.001
+C(surface)[T.Grass],3.008,0.244,<0.001
+C(surface)[T.Hard],2.270,0.269,<0.001
+year_c,0.041,0.008,<0.001
+year_c:C(surface)[T.Grass],0.056,0.014,<0.001
+year_c:C(surface)[T.Hard],0.042,0.014,0.003
