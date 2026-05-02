@@ -1,0 +1,12 @@
+Figure,file,description
+Figure 1,fig01_marathon_frontier.png,Official marathon world-record frontier
+Figure 2,fig02_segmented_model.png,Segmented marathon frontier model
+Figure 3,fig03_breakpoint_grid.png,Breakpoint robustness grid
+Figure 4,fig04_toplist_histogram.png,Top-list performance counts
+Figure 5,fig05_compression_reference.png,Top-list compression reference
+Figure 6,fig06_atp_endpoint_changes.png,ATP endpoint changes
+Figure 7,fig07_atp_surface_interaction.png,ATP surface-interaction coefficients
+Figure 8,fig08_running_footwear_interface.png,Running footwear schematic
+Figure 9,fig09_tennis_racket_interface.png,Tennis racket schematic
+Figure 10,fig10_tennis_topspin_mechanism.png,Tennis topspin schematic
+Figure 11,fig11_football_stud_interface.png,Football outsole schematic
