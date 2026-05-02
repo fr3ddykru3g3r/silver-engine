@@ -1,0 +1,4 @@
+model,term,estimate,se,p_value,aic
+linear,year_decimal,-13.1031,,,
+segmented,year_decimal,-7.0174,,,
+segmented,after_2017,-23.2921,,,
