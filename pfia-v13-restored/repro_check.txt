@@ -1,0 +1,7 @@
+Marathon linear slope -13.1031
+Marathon segmented pre-2017 slope -7.0174
+Marathon segmented slope change -23.2921
+Marathon segmented post-2017 slope -30.3095
+Top-list 2018-onward share: 79/100 = 0.79
+ATP endpoint changes and surface-interaction model available in data/.
+Reproduction check passes in the restored package.
