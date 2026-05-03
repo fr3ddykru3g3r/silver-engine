@@ -1,23 +1,21 @@
-# PFIA v17 DEEPENED submission package
+# PFIA v18 METHODFIX submission package
 
-This package builds on PFIA v16 PLUS and addresses the next audit layer: theoretical formalisation, rival-framework positioning, Methods/Results duplication, effect-size interpretation, and a progression-based top-list null sensitivity.
+This package builds on PFIA v17 DEEPENED and addresses the next audit finding: the smooth-progression top-list null should not be fitted on the full data that contain the post-2017 concentration being tested.
 
 Implemented upgrades:
-- Removes model-result duplication from Methods.
-- Adds rival-framework positioning against percentage-improvement, physiological-limit, and binary-regulation approaches.
-- Adds three predictive PFIA propositions: cumulative ground-contact, repeated ball-impact, and optimisation-window interfaces.
-- Adds a smooth-progression null simulation for top-list concentration.
-- Adds effect-size interpretation for the marathon slope change: roughly 72 seconds over five years.
-- Keeps the corrected figure set and SVG sources.
-- Re-runs the reproduction script.
+- Fits the top-list progression-null simulation only on pre-2018 performances.
+- Adds `toplist_pre2018_progression_null_v18.csv`.
+- Adds `code/pfia_v18_reproduce.py`.
+- Removes the duplicated top-list result from the marathon-frontier Results subsection.
+- Moves marathon and tennis confound discussion into the Discussion section.
+- Adds a clearer ceiling statement: the current paper still needs annual top-50/top-100 marathon data, player-level ATP mixed-effects models, women/WTA replication, and an empirical football module for a much stronger PFIA 2.0 version.
+- Keeps corrected figures, editable SVG sources, v17 rival-framework positioning, and the propositional PFIA predictions.
 
 Run:
 
 ```bash
 pip install -r requirements.txt
-python code/pfia_v17_reproduce.py
+python code/pfia_v18_reproduce.py
 ```
 
-The highest-effort audit recommendations that require new external datasets remain future work: complete annual top-50/top-100 marathon population data, raw player-level ATP mixed-effects modelling, women/WTA replication, and an empirical football-traction module.
-
-Do **not** submit older PFMA files, v15 visual-final files, or any package containing internal review/change-log language. This folder is the current PFIA source package.
+The high-effort upgrades requiring new external datasets remain future work, not fabricated additions. Do not submit older PFMA files, v15 visual-final files, or any package containing internal review/change-log language.
