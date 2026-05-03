@@ -1,4 +1,5 @@
-pandas>=2.0
-numpy>=1.24
-statsmodels>=0.14
-scipy>=1.10
+pandas
+numpy
+statsmodels
+matplotlib
+scipy
