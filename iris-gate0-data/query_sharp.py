@@ -13,11 +13,15 @@ END=datetime.fromisoformat('2026-08-24')  # exclusive
 BASES=['http://jsoc.stanford.edu/cgi-bin/ajax/jsoc_info','https://jsoc.stanford.edu/cgi-bin/ajax/jsoc_info']
 KEYS=['T_REC','HARPNUM','NOAA_AR','NOAA_NUM','NOAA_ARS','LON_FWT','LAT_FWT','QUALITY','USFLUX','R_VALUE','CDELT1','CDELT2','RSUN_REF','T_FIRST','T_LAST']
 SEG='magnetogram'
+ISSUE_CADENCE='1h'
 
 
 def jsoc_chunk(a:datetime,b:datetime):
-    # SHARP prime keys are HARPNUM,T_REC. Empty first selector means all HARPs.
-    ds=f"hmi.sharp_cea_720s[][{a.strftime('%Y.%m.%d_%H:%M:%S')}_TAI-{b.strftime('%Y.%m.%d_%H:%M:%S')}_TAI]"
+    # SHARP prime keys are HARPNUM,T_REC. The 1-hour issue cadence is frozen before
+    # any forecasting result exists; it reduces strongly overlapping 12-min samples
+    # while retaining six issue times across a 6-hour interval and 24/day.
+    dur_hours=max(1,int((b-a).total_seconds()/3600))
+    ds=f"hmi.sharp_cea_720s[][{a.strftime('%Y.%m.%d_%H:%M:%S')}_TAI/{dur_hours}h@{ISSUE_CADENCE}]"
     params={'op':'rs_list','ds':ds,'key':','.join(KEYS),'seg':SEG}
     failures=[]
     for base in BASES:
@@ -54,21 +58,20 @@ def rows_from(j):
 def main():
     allrows=[]; queries=[]
     a=START
-    # Seven-day chunks keep jsoc_info responses bounded while preserving native 12-min cadence.
+    # 31-day chunks at the frozen hourly issue cadence keep responses compact.
     while a<END:
-        b=min(a+timedelta(days=7),END)
+        b=min(a+timedelta(days=31),END)
         print('query',a,b,flush=True)
         ds,j,base=jsoc_chunk(a,b)
         rs=rows_from(j); allrows.extend(rs)
-        queries.append({'recordset':ds,'count':len(rs),'endpoint':base})
+        queries.append({'recordset':ds,'count':len(rs),'endpoint':base,'issue_cadence':ISSUE_CADENCE})
         a=b
     df=pd.DataFrame(allrows)
     if df.empty: raise SystemExit('No SHARP metadata returned')
-    # Deduplicate inclusive chunk-boundary timestamps if JSOC returns them twice.
     df=df.drop_duplicates(subset=['HARPNUM','T_REC']).sort_values(['T_REC','HARPNUM'])
     out=DER/'sharp_metadata.csv.gz'; df.to_csv(out,index=False,compression='gzip')
-    (DER/'sharp_query_log.json').write_text(json.dumps({'queries':queries,'rows_after_dedup':len(df),'columns':list(df.columns)},indent=2)+'\n')
-    print(f'SHARP rows: {len(df):,}; unique HARPs: {df.HARPNUM.nunique():,}')
+    (DER/'sharp_query_log.json').write_text(json.dumps({'queries':queries,'rows_after_dedup':len(df),'columns':list(df.columns),'issue_cadence':ISSUE_CADENCE},indent=2)+'\n')
+    print(f'SHARP rows: {len(df):,}; unique HARPs: {df.HARPNUM.nunique():,}; cadence={ISSUE_CADENCE}')
     print(out)
 
 if __name__=='__main__': main()
