@@ -1,0 +1,115 @@
+name: IRIS v2 Real-Data PIL Manipulation Pilot
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-pil-manipulation-pilot.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  arm:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [base, pil]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train v2 manipulation pilot
+        run: |
+          python iris-model/train_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache/${{ matrix.arm }} \
+            --out-dir outputs --condition ${{ matrix.arm }} --seed 2026 \
+            --per-group 1 --positive-slots 1 --batch-size 12 --physics-batch-size 12 \
+            --base-channels 16 --diffusion-steps 80 --max-steps 150 \
+            --physics-warmup-steps 30 --lambda-pil 0.10 --download-workers 16
+      - name: Sample frozen pilot generator
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint outputs/${{ matrix.arm }}/generator.pt --evidence-dir evidence \
+            --out-dir samples/${{ matrix.arm }} --per-group 2 --max-groups 32 \
+            --batch-size 8 --sampling-steps 20 --seed 2026
+      - name: Independent hard manipulation check
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache_eval/${{ matrix.arm }} \
+            --synthetic-manifest samples/${{ matrix.arm }}/synthetic_manifest.csv \
+            --out-dir eval/${{ matrix.arm }} --real-per-group 1 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-pil-pilot-${{ matrix.arm }}
+          path: |
+            outputs/${{ matrix.arm }}
+            samples/${{ matrix.arm }}
+            eval/${{ matrix.arm }}
+          retention-days: 30
+
+  manipulation-gate:
+    needs: arm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-pil-pilot-*
+          path: collected
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compare BASE vs PIL without forecasting
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('collected')
+          def find(arm):
+              files=list((root/f'iris-v2-pil-pilot-{arm}').rglob('v2_manipulation_metrics.json'))
+              if len(files)!=1: raise RuntimeError((arm,files))
+              return json.loads(files[0].read_text())
+          b=find('base'); p=find('pil')
+          bd=b['hard_pil_standardized_energy_distance']; pd=p['hard_pil_standardized_energy_distance']
+          improvement=(bd-pd)/bd if bd>0 else float('-inf')
+          br=b['synthetic_unsigned_flux_proxy']['median']; pr=p['synthetic_unsigned_flux_proxy']['median']
+          flux_ratio=pr/br if br else float('nan')
+          report={
+            'phase':'train-only manipulation pilot; no forecasting/test access',
+            'base_pil_distance':bd,'pil_pil_distance':pd,'relative_pil_distance_improvement':improvement,
+            'base_geometry_distance':b['hard_geometry_standardized_energy_distance'],
+            'pil_geometry_distance':p['hard_geometry_standardized_energy_distance'],
+            'pil_to_base_unsigned_flux_median_ratio':flux_ratio,
+            'base_diversity':b['synthetic_coarse_pairwise_diversity'],'pil_diversity':p['synthetic_coarse_pairwise_diversity'],
+            'pilot_gate_pass': bool(improvement>=0.20 and 0.67<=flux_ratio<=1.50 and p['synthetic_saturation_fraction_abs_gt_2900G']<0.05),
+            'gate_note':'Pilot only. A PASS authorizes a larger train-only lambda sweep; it does not authorize downstream claims.'
+          }
+          pathlib.Path('v2_pil_manipulation_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-pil-manipulation-gate
+          path: v2_pil_manipulation_gate.json
+          retention-days: 30
