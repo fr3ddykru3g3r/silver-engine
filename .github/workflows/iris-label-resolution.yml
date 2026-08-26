@@ -1,0 +1,56 @@
+name: IRIS Historical Flare Region Resolution
+
+on:
+  push:
+    branches: [iris-label-resolution]
+    paths:
+      - 'iris-gate0-data/resolve_missing_flare_regions.py'
+      - 'iris-gate0-data/apply_supplemental_resolutions.py'
+      - '.github/workflows/iris-label-resolution.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-label-resolution
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r iris-gate0-data/requirements.txt
+      - name: Download historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle
+          gh run download 32934661052 -n iris-historical-evidence -D evidence_bundle
+          cd iris-gate0-data
+          tar -xzf ../evidence_bundle/iris-historical-evidence.tar.gz
+          test -f data/derived/goes_m1plus_interval.csv
+          test -f data/derived/sharp_metadata.csv.gz
+      - name: Resolve missing flare active regions
+        run: python iris-gate0-data/resolve_missing_flare_regions.py
+      - name: Apply supplemental mappings
+        run: python iris-gate0-data/apply_supplemental_resolutions.py
+      - name: Rebuild manifest with enhanced labels
+        run: python iris-gate0-data/build_manifest.py
+      - name: Verify representative FITS retrieval
+        run: python iris-gate0-data/smoke_download.py
+      - name: Package enhanced evidence
+        run: |
+          cd iris-gate0-data
+          find data -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          tar -czf ../iris-historical-evidence-resolved.tar.gz data SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-historical-evidence-resolved
+          path: iris-historical-evidence-resolved.tar.gz
+          retention-days: 30
