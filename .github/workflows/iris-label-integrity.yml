@@ -1,0 +1,49 @@
+name: IRIS Historical Label Integrity
+
+on:
+  push:
+    branches: [iris-label-integrity]
+    paths:
+      - 'iris-gate0-data/censor_unresolved_windows.py'
+      - '.github/workflows/iris-label-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  censor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-label-integrity
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pandas numpy
+      - name: Download resolved historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle
+          gh run download 32936656849 -n iris-historical-evidence-resolved -D evidence_bundle
+          cd iris-gate0-data
+          tar -xzf ../evidence_bundle/iris-historical-evidence-resolved.tar.gz
+          test -f data/derived/training_manifest.csv.gz
+          test -f data/derived/resolved_m1plus_events.csv
+      - name: Censor unresolved-major-flare windows
+        run: python iris-gate0-data/censor_unresolved_windows.py
+      - name: Package integrity-locked evidence
+        run: |
+          cd iris-gate0-data
+          find data -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          tar -czf ../iris-historical-evidence-integrity.tar.gz data SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-historical-evidence-integrity
+          path: iris-historical-evidence-integrity.tar.gz
+          retention-days: 30
