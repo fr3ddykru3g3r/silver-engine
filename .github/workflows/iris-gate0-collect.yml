@@ -23,10 +23,12 @@ jobs:
         run: pip install -r iris-gate0-data/requirements.txt
       - name: Collect NOAA and HARP evidence
         run: python iris-gate0-data/fetch_gate0.py
-      - name: Query JSOC SHARP metadata
+      - name: Query complete JSOC SHARP census
         run: python iris-gate0-data/query_sharp.py
       - name: Build connected-region manifest and counts
         run: python iris-gate0-data/build_manifest.py
+      - name: Smoke-test real FITS retrieval
+        run: python iris-gate0-data/smoke_download.py
       - name: Package evidence
         run: |
           cd iris-gate0-data
