@@ -25,9 +25,10 @@ def make_dataset(args, partition:str, offset:int=0):
         return MagnetogramDataset(rec),rec
     if args.model=='cnn_bilstm':
         per=args.seq_per_group if partition=='train' else 1
+        maxg=args.seq_max_groups_train if partition=='train' else args.seq_max_groups_eval
         ds,end,_=cache_native_image_sequences(args.evidence_dir,partition,Path(args.cache_dir)/partition,
                                                per_group=per,pos_cap=1,seed=args.seed+offset,
-                                               workers=args.download_workers)
+                                               workers=args.download_workers,max_groups=maxg)
         return ds,end
     nf=2 if args.model=='transformer_2' else 10
     per=args.train_per_group if partition=='train' else args.eval_per_group
@@ -65,6 +66,7 @@ def main():
     ap.add_argument('--evidence-dir',required=True);ap.add_argument('--cache-dir',required=True);ap.add_argument('--out-dir',required=True)
     ap.add_argument('--seed',type=int,default=2026);ap.add_argument('--epochs',type=int,default=0)
     ap.add_argument('--train-per-group',type=int,default=8);ap.add_argument('--eval-per-group',type=int,default=10);ap.add_argument('--pos-cap',type=int,default=4);ap.add_argument('--seq-per-group',type=int,default=1)
+    ap.add_argument('--seq-max-groups-train',type=int,default=0);ap.add_argument('--seq-max-groups-eval',type=int,default=0)
     ap.add_argument('--download-workers',type=int,default=12);ap.add_argument('--evaluate-test',action='store_true')
     args=ap.parse_args();seed_all(args.seed);out=Path(args.out_dir);out.mkdir(parents=True,exist_ok=True)
     train,_=make_dataset(args,'train',0);val,_=make_dataset(args,'validation',1)
@@ -89,7 +91,7 @@ def main():
         print(json.dumps(r),flush=True)
     if state:model.load_state_dict(state)
     vp=predict(model,val,device);thr,vm=threshold(vp);vm05=all_metrics(vp.y,vp.p,.5);vp.to_csv(out/'validation_predictions.csv',index=False)
-    report={'model':args.model,'seed':args.seed,'device':str(device),'parameters':count_parameters(model),'paper_default_epochs':paper_epochs,'epochs_run':epochs,'paper_optimizer':'SGD' if args.model.startswith('cnn') else 'Adam','paper_lr':lr,'paper_batch':batch,'train_items':len(train),'validation_items':len(val),'validation_at_0.5':vm05,'validation_selected_threshold':thr,'validation_selected':vm,'history':history,'test_locked':not args.evaluate_test}
+    report={'model':args.model,'seed':args.seed,'device':str(device),'parameters':count_parameters(model),'paper_default_epochs':paper_epochs,'epochs_run':epochs,'paper_optimizer':'SGD' if args.model.startswith('cnn') else 'Adam','paper_lr':lr,'paper_batch':batch,'seq_max_groups_train':args.seq_max_groups_train,'seq_max_groups_eval':args.seq_max_groups_eval,'train_items':len(train),'validation_items':len(val),'validation_at_0.5':vm05,'validation_selected_threshold':thr,'validation_selected':vm,'history':history,'test_locked':not args.evaluate_test}
     if test is not None:
         tp=predict(model,test,device);tp.to_csv(out/'test_predictions.csv',index=False);report['test']=all_metrics(tp.y,tp.p,thr);report['test_region_bootstrap']=region_bootstrap(tp,2000,args.seed,thr);report['test_items']=len(test)
     torch.save({'state_dict':model.state_dict(),'model':args.model,'threshold':thr,'seed':args.seed},out/'model.pt')
