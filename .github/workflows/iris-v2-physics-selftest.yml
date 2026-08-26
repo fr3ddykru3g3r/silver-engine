@@ -28,11 +28,15 @@ jobs:
       - name: Compile v2 code
         run: python -m compileall -q iris-model
       - name: Run differentiable physics self-test
+        shell: bash
         run: |
+          set -euo pipefail
           cd iris-model
           python physics_v2_selftest.py | tee ../physics_v2_selftest.json
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: iris-v2-physics-selftest
           path: physics_v2_selftest.json
+          if-no-files-found: ignore
           retention-days: 30
