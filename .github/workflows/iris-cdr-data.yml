@@ -1,0 +1,51 @@
+name: IRIS CDR Historical Feature Data
+
+on:
+  push:
+    branches: [iris-cdr-data]
+    paths:
+      - 'iris-gate0-data/query_cdr_features.py'
+      - 'iris-gate0-data/prepare_cdr_sequences.py'
+      - '.github/workflows/iris-cdr-data.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-data
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pandas numpy requests
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          cd iris-gate0-data
+          tar -xzf ../evidence_bundle/iris-historical-evidence-integrity.tar.gz
+          test -f data/derived/training_manifest.csv.gz
+      - name: Query 10 knowledge-informed features
+        run: python iris-gate0-data/query_cdr_features.py
+      - name: Prepare chronology-safe 24h sequences
+        run: python iris-gate0-data/prepare_cdr_sequences.py
+      - name: Package CDR feature evidence
+        run: |
+          cd iris-gate0-data
+          find data -type f -print0 | sort -z | xargs -0 sha256sum > CDR_SHA256SUMS.txt
+          tar -czf ../iris-cdr-feature-evidence.tar.gz data CDR_SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-cdr-feature-evidence
+          path: iris-cdr-feature-evidence.tar.gz
+          retention-days: 30
