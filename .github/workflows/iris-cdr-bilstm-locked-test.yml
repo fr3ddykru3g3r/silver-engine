@@ -1,0 +1,71 @@
+name: IRIS CDR BiLSTM One-Shot Locked Test
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths:
+      - 'iris-model/eval_cdr_bilstm_locked.py'
+      - '.github/workflows/iris-cdr-bilstm-locked-test.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [supervised_bilstm, cdr_bilstm]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          mkdir -p cdr_bundle
+          gh run download 32950459311 -n iris-cdr-feature-evidence -D cdr_bundle
+          tar -xzf cdr_bundle/iris-cdr-feature-evidence.tar.gz -C evidence
+      - name: Download validation-frozen checkpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          mkdir -p frozen
+          gh run download 32957071870 -n iris-${{ matrix.arm }} -D frozen
+          mkdir -p frozen/unpacked
+          tar -xzf frozen/iris-${{ matrix.arm }}.tar.gz -C frozen/unpacked
+          if [[ '${{ matrix.arm }}' == 'supervised_bilstm' ]]; then
+            cp frozen/unpacked/outputs/supervised_bilstm/model.pt frozen/model.pt
+          else
+            cp frozen/unpacked/outputs/cdr_bilstm/cdr_model.pt frozen/model.pt
+          fi
+      - name: Evaluate test once without retraining
+        run: |
+          python iris-model/eval_cdr_bilstm_locked.py \
+            --evidence-dir evidence --checkpoint frozen/model.pt \
+            --cache-dir cache/${{ matrix.arm }} --out-dir locked/${{ matrix.arm }} \
+            --seed 2026 --download-workers 16
+      - name: Package result
+        run: tar -czf iris-${{ matrix.arm }}-locked-test.tar.gz locked/${{ matrix.arm }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-${{ matrix.arm }}-locked-test
+          path: iris-${{ matrix.arm }}-locked-test.tar.gz
+          retention-days: 30
