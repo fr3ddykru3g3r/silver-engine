@@ -1,0 +1,68 @@
+name: IRIS Baseline One-Shot Locked Test
+
+on:
+  push:
+    branches: [iris-benchmark-seeds]
+    paths:
+      - '.github/workflows/iris-baseline-locked-test.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  locked-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-benchmark-seeds
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Download validation-selected frozen benchmark checkpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p benchmark_bundle frozen_benchmark
+          gh run download 32937682857 -n iris-historical-benchmark-integrity -D benchmark_bundle
+          tar -xzf benchmark_bundle/iris-historical-benchmark.tar.gz -C frozen_benchmark
+          test -f frozen_benchmark/benchmark_outputs/w48_focal/model.pt
+      - name: Verify protocol and compile
+        run: |
+          test -f BASELINE_LOCKED_TEST_PROTOCOL_2026-08-26.md
+          python -m compileall -q iris-model
+      - name: Evaluate historical test once
+        run: |
+          python iris-model/evaluate_baseline_locked_test.py \
+            --evidence-dir evidence \
+            --checkpoint frozen_benchmark/benchmark_outputs/w48_focal/model.pt \
+            --cache-dir cache/test \
+            --out-dir locked_test \
+            --bootstrap 5000 \
+            --download-workers 8
+      - name: Package immutable result
+        run: |
+          cp BASELINE_LOCKED_TEST_PROTOCOL_2026-08-26.md locked_test/
+          sha256sum locked_test/* > locked_test/SHA256SUMS.txt
+          tar -czf iris-baseline-locked-test.tar.gz locked_test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-baseline-locked-test
+          path: iris-baseline-locked-test.tar.gz
+          retention-days: 30
