@@ -10,8 +10,8 @@ from torch import nn
 from cdr import (PAPER_CDR_PRESETS, IndexReplayBuffer, Experience, choose_actions,
                  immediate_rewards, cdr_loss, epsilon_after_episode, reward_counts)
 from cdr_models import CDRImageCNN, CDRImageBiLSTM, FeatureTransformer, count_parameters
-from cdr_data import (build_point_image_records, cache_image_sequences,
-                      CachedImageSequenceDataset, FeatureSequenceDataset)
+from cdr_data import (build_point_image_records, cache_native_image_sequences,
+                      FeatureSequenceDataset)
 from data import cache_records, MagnetogramDataset
 from metrics import all_metrics, region_bootstrap
 
@@ -57,8 +57,10 @@ def load_datasets(args):
         ds={};frames={}
         for j,p in enumerate(parts):
             per=args.seq_per_group if p=='train' else 1
-            rec,end=cache_image_sequences(args.evidence_dir,p,Path(args.cache_dir)/p,seq_len=args.seq_len,per_group=per,pos_cap=1,seed=args.seed+j,workers=args.download_workers)
-            ds[p]=CachedImageSequenceDataset(rec,end);frames[p]=end
+            d,end,_=cache_native_image_sequences(args.evidence_dir,p,Path(args.cache_dir)/p,
+                                                 per_group=per,pos_cap=1,seed=args.seed+j,
+                                                 workers=args.download_workers)
+            ds[p]=d;frames[p]=end
         return ds,frames
     nf=2 if args.model=='cdr_transformer_2' else 10;ds={};frames={}
     for j,p in enumerate(parts):
