@@ -3,26 +3,32 @@ from __future__ import annotations
 """V2 differentiable magnetic-structure losses.
 
 Design goals:
-1. Keep background quiet-Sun pixels from dominating polarity centroids.
-2. Treat strong-PIL gradient as a *distribution*, not one batch mean.
-3. Express spatial radii in physical Mm after the fixed-FOV resampling.
+1. Keep quiet/background pixels from dominating polarity centroids or PIL masks.
+2. Treat strong-PIL gradient as a distribution, not one scalar mean.
+3. Express spatial radii in physical Mm after fixed-FOV resampling.
 4. Keep the hard scientific diagnostic independent from this smooth training proxy.
 """
 
 import torch
 import torch.nn.functional as F
 
-
 EPS = 1e-6
+
+
+def energy_distance(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    x = x.reshape(x.shape[0], -1)
+    y = y.reshape(y.shape[0], -1)
+    if x.shape[0] < 2 or y.shape[0] < 2:
+        return torch.mean((x.mean(0) - y.mean(0)) ** 2)
+    xy = torch.cdist(x, y, p=2).mean()
+    xx = torch.cdist(x, x, p=2).mean()
+    yy = torch.cdist(y, y, p=2).mean()
+    return 2 * xy - xx - yy
 
 
 def quantile_distribution_loss(x: torch.Tensor, y: torch.Tensor,
                                quantiles=(0.10, 0.25, 0.50, 0.75, 0.90)) -> torch.Tensor:
-    """Match several marginal quantiles of a descriptor vector.
-
-    x/y: [batch, features]. Torch quantile is piecewise differentiable and gives a
-    stronger anti-collapse signal than matching one batch mean.
-    """
+    """Match several marginal quantiles of a descriptor vector."""
     x = x.reshape(x.shape[0], -1)
     y = y.reshape(y.shape[0], -1)
     q = torch.as_tensor(quantiles, device=x.device, dtype=x.dtype)
@@ -31,27 +37,32 @@ def quantile_distribution_loss(x: torch.Tensor, y: torch.Tensor,
     return F.smooth_l1_loss(qx, qy)
 
 
+def distribution_loss(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    """Blend global distribution matching with tail/quantile matching.
+
+    Energy distance supplies gradients across the whole batch; quantiles force the
+    generator to reproduce tails rather than merely the centre of the distribution.
+    """
+    return 0.5 * energy_distance(x, y.detach()) + 0.5 * quantile_distribution_loss(x, y)
+
+
 def _strong_polarity_weights(b: torch.Tensor, threshold_g: float = 150.0,
                              temperature_g: float = 50.0):
     if b.ndim == 3:
         b = b[:, None]
-    # Smooth thresholded *field-strength* weights. At B=0 these are tiny rather
-    # than the large softplus(0) background weights used by v1.
+    # ReLU makes exact quiet-Sun/background field contribute zero mass. The smooth
+    # threshold gate controls how rapidly pixels become relevant around 150 G.
     p_gate = torch.sigmoid((b - threshold_g) / temperature_g)
     n_gate = torch.sigmoid((-b - threshold_g) / temperature_g)
-    pos = p_gate * F.softplus(b / temperature_g) * temperature_g
-    neg = n_gate * F.softplus(-b / temperature_g) * temperature_g
+    pos = p_gate * F.relu(b)
+    neg = n_gate * F.relu(-b)
     return pos, neg
 
 
 def polarity_geometry_descriptor_v2(b: torch.Tensor, latitude_deg: torch.Tensor,
                                     threshold_g: float = 150.0,
                                     temperature_g: float = 50.0) -> torch.Tensor:
-    """Strong-field bipole orientation/separation descriptor.
-
-    The hemisphere sign is retained, but no fixed east/west polarity convention is
-    hard-coded; the generated distribution is matched to real training data.
-    """
+    """Strong-field bipole orientation/separation descriptor."""
     if b.ndim == 3:
         b = b[:, None]
     _, _, h, w = b.shape
@@ -67,7 +78,6 @@ def polarity_geometry_descriptor_v2(b: torch.Tensor, latitude_deg: torch.Tensor,
     dx = (px - nx).squeeze(1)
     dy = (py - ny).squeeze(1)
     sep = torch.sqrt(dx.square() + dy.square() + EPS)
-    # Direction represented continuously to avoid angle wrap-around.
     ux = dx / sep
     uy = dy / sep
     hemi = torch.where(latitude_deg >= 0, torch.ones_like(latitude_deg), -torch.ones_like(latitude_deg)).to(b.dtype)
@@ -81,7 +91,7 @@ def population_distribution_loss_v2(fake_b: torch.Tensor, real_b: torch.Tensor,
         if int(mask.sum()) >= 3:
             f = polarity_geometry_descriptor_v2(fake_b[mask], latitude_deg[mask])
             r = polarity_geometry_descriptor_v2(real_b[mask].detach(), latitude_deg[mask])
-            losses.append(quantile_distribution_loss(f, r))
+            losses.append(distribution_loss(f, r))
     return torch.stack(losses).mean() if losses else fake_b.sum() * 0.0
 
 
@@ -101,17 +111,20 @@ def _soft_dilate(x: torch.Tensor, radius_px: int) -> torch.Tensor:
 
 
 def soft_pil_contact(b: torch.Tensor, strong_field_g: float = 150.0,
-                     membership_temp_g: float = 50.0,
+                     membership_temp_g: float = 40.0,
                      contact_radius_px: int = 2) -> torch.Tensor:
-    """Smooth strong-field opposite-polarity proximity mask."""
+    """Smooth strong-field opposite-polarity proximity mask.
+
+    A soft logical-AND (relu(dp+dn-1)) suppresses the non-zero sigmoid background
+    that would otherwise accumulate across tens of thousands of quiet pixels.
+    """
     if b.ndim == 3:
         b = b[:, None]
     pos = torch.sigmoid((b - strong_field_g) / membership_temp_g)
     neg = torch.sigmoid((-b - strong_field_g) / membership_temp_g)
     dp = _soft_dilate(pos, contact_radius_px)
     dn = _soft_dilate(neg, contact_radius_px)
-    # Product is high only where strong positive and negative neighborhoods overlap.
-    return dp * dn
+    return F.relu(dp + dn - 1.0)
 
 
 def _weighted_mean(v: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
@@ -122,7 +135,7 @@ def strong_pil_gradient_descriptor_v2(
     b: torch.Tensor,
     pixel_mm: float = 2.0,
     strong_field_g: float = 150.0,
-    membership_temp_g: float = 50.0,
+    membership_temp_g: float = 40.0,
     contact_radius_mm: float = 4.0,
     high_gradient_g_per_mm: float = 250.0,
     high_gradient_temp: float = 40.0,
@@ -130,8 +143,8 @@ def strong_pil_gradient_descriptor_v2(
 ) -> torch.Tensor:
     """Distribution-sensitive strong-PIL-gradient descriptor.
 
-    All returned components derive from the same physical object: |grad B| near a
-    strong-field polarity inversion line. No vector-field quantity is introduced.
+    Every component derives from |grad B| near a strong-field LOS polarity inversion
+    line; no vector-field quantity is introduced.
     """
     if b.ndim == 3:
         b = b[:, None]
@@ -162,12 +175,11 @@ def pil_distribution_loss_v2(fake_b: torch.Tensor, real_b: torch.Tensor,
                              pixel_mm: float = 2.0) -> torch.Tensor:
     f = strong_pil_gradient_descriptor_v2(fake_b, pixel_mm=pixel_mm)
     r = strong_pil_gradient_descriptor_v2(real_b.detach(), pixel_mm=pixel_mm)
-    return quantile_distribution_loss(f, r)
+    return distribution_loss(f, r)
 
 
 def physics_components_v2(fake_b: torch.Tensor, real_b: torch.Tensor,
                           latitude_deg: torch.Tensor, pixel_mm: float = 2.0):
-    """Convenience helper for training/logging."""
     return {
         'hj': population_distribution_loss_v2(fake_b, real_b, latitude_deg),
         'pil': pil_distribution_loss_v2(fake_b, real_b, pixel_mm=pixel_mm),
