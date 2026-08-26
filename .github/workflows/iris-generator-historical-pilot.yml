@@ -6,6 +6,7 @@ on:
     paths:
       - 'iris-model/train_generator.py'
       - 'iris-model/evaluate_generator.py'
+      - 'iris-model/data.py'
       - '.github/workflows/iris-generator-historical-pilot.yml'
   workflow_dispatch:
 
@@ -61,7 +62,7 @@ jobs:
             --positive-fraction 0.40 \
             --per-group 4 \
             --positive-slots 4 \
-            --download-workers 16 \
+            --download-workers 8 \
             --physics-max-t-frac 0.25
       - name: Sample equal synthetic positives
         run: |
