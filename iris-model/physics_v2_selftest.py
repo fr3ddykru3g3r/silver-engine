@@ -13,16 +13,32 @@ from physics_v2 import (
 )
 
 
-def make_bipole(batch=8, size=128, sharp=True, device='cpu'):
+def make_bipole(batch=8, size=128, device='cpu'):
     y, x = torch.meshgrid(torch.linspace(-1,1,size,device=device), torch.linspace(-1,1,size,device=device), indexing='ij')
     fields=[]
     for i in range(batch):
         tilt=(i-(batch-1)/2)*0.02
         p=torch.exp(-((x+0.25)**2+(y-tilt)**2)/(2*0.12**2))
         n=torch.exp(-((x-0.25)**2+(y+tilt)**2)/(2*0.12**2))
-        b=1800*(p-n)
-        if not sharp:
-            b=F.avg_pool2d(b[None,None],kernel_size=9,stride=1,padding=4)[0,0]
+        fields.append(1800*(p-n))
+    return torch.stack(fields)[:,None]
+
+
+def make_strong_pil(batch=8,size=128,blurred=False,device='cpu'):
+    """Toy active region with a true sharp opposite-polarity interface.
+
+    This tests the intended object directly: selective smoothing must reduce the
+    high-gradient PIL descriptor while leaving a recognizable bipolar field.
+    """
+    y,x=torch.meshgrid(torch.linspace(-1,1,size,device=device),torch.linspace(-1,1,size,device=device),indexing='ij')
+    fields=[]
+    for i in range(batch):
+        tilt=(i-(batch-1)/2)*0.01
+        xr=x+tilt*y
+        envelope=torch.exp(-(x*x+y*y)/(2*0.35**2))
+        b=1600*torch.tanh(-xr/0.035)*envelope
+        if blurred:
+            b=F.avg_pool2d(b[None,None],kernel_size=11,stride=1,padding=5)[0,0]
         fields.append(b)
     return torch.stack(fields)[:,None]
 
@@ -34,15 +50,16 @@ def main():
     if zero_contact > 1e-5:
         raise AssertionError(f'quiet-field PIL contact too large: {zero_contact}')
 
-    sharp=make_bipole(device=device,sharp=True)
-    blur=make_bipole(device=device,sharp=False)
+    sharp=make_strong_pil(device=device,blurred=False)
+    blur=make_strong_pil(device=device,blurred=True)
     ds=strong_pil_gradient_descriptor_v2(sharp)
     db=strong_pil_gradient_descriptor_v2(blur)
-    # RMS/tail gradient descriptors must respond to selective PIL blurring.
     if not float(ds[:,1].mean()) > float(db[:,1].mean()):
-        raise AssertionError('PIL RMS descriptor does not distinguish sharp from blurred bipoles')
+        raise AssertionError('PIL RMS descriptor does not fall after selective blurring')
     if not float(ds[:,2].mean()) > float(db[:,2].mean()):
-        raise AssertionError('PIL tail descriptor does not distinguish sharp from blurred bipoles')
+        raise AssertionError('PIL tail descriptor does not fall after selective blurring')
+    if not float(ds[:,4].mean()) > float(db[:,4].mean()):
+        raise AssertionError('PIL >250 G/Mm exceedance does not fall after selective blurring')
 
     fake=blur.clone().requires_grad_(True)
     lp=pil_distribution_loss_v2(fake,sharp)
@@ -51,15 +68,16 @@ def main():
     if not torch.isfinite(fake.grad).all() or grad_norm <= 0:
         raise AssertionError('PIL distribution loss has invalid/zero gradient')
 
+    geom_real=make_bipole(device=device)
     lat=torch.tensor([20.,18.,15.,12.,-12.,-15.,-18.,-20.],device=device)
-    geom=polarity_geometry_descriptor_v2(sharp,lat)
-    flipped=torch.flip(sharp,dims=[3]).clone().requires_grad_(True)
-    lg=population_distribution_loss_v2(flipped,sharp,lat)
+    geom=polarity_geometry_descriptor_v2(geom_real,lat)
+    flipped=torch.flip(geom_real,dims=[3]).clone().requires_grad_(True)
+    lg=population_distribution_loss_v2(flipped,geom_real,lat)
     lg.backward()
     geom_delta=float((polarity_geometry_descriptor_v2(flipped.detach(),lat)-geom).abs().mean().item())
     geom_grad=float(flipped.grad.abs().mean().item())
     if geom_delta <= 1e-3 or geom_grad <= 0:
-        raise AssertionError('geometry descriptor/loss does not respond to polarity geometry change')
+        raise AssertionError('geometry descriptor/loss does not respond to east-west geometry change')
 
     report={
         'device':device,
