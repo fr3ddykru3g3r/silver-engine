@@ -1,0 +1,61 @@
+name: IRIS Locked-Test Multi-Seed CNN Validation
+
+on:
+  push:
+    branches: [iris-benchmark-seeds]
+    paths:
+      - 'iris-model/validate_best_seed.py'
+      - '.github/workflows/iris-benchmark-seeds.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  seed:
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [2026, 31415, 271828]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-benchmark-seeds
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download integrity-locked evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Validate selected CNN seed without test access
+        run: |
+          python iris-model/validate_best_seed.py \
+            --evidence-dir evidence \
+            --cache-dir cache/seed_${{ matrix.seed }} \
+            --out-dir seed_outputs/${{ matrix.seed }} \
+            --seed ${{ matrix.seed }} \
+            --epochs 8 \
+            --train-per-group 8 \
+            --val-per-group 10 \
+            --pos-cap 4 \
+            --batch-size 32 \
+            --download-workers 16
+      - name: Package seed result
+        run: tar -czf iris-cnn-seed-${{ matrix.seed }}.tar.gz seed_outputs/${{ matrix.seed }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-cnn-seed-${{ matrix.seed }}
+          path: iris-cnn-seed-${{ matrix.seed }}.tar.gz
+          retention-days: 30
