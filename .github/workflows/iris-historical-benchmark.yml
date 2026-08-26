@@ -1,0 +1,67 @@
+name: IRIS Historical Real-Only Benchmark
+
+on:
+  push:
+    branches: [iris-benchmark-v1]
+    paths:
+      - 'iris-model/benchmark_forecaster.py'
+      - 'iris-model/forecaster.py'
+      - 'iris-model/data.py'
+      - 'iris-model/preprocess.py'
+      - 'iris-model/metrics.py'
+      - '.github/workflows/iris-historical-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-benchmark-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download resolved historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32936656849 -n iris-historical-evidence-resolved -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-resolved.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+          test -f evidence/data/derived/sharp_metadata.csv.gz
+      - name: Compile benchmark code
+        run: python -m compileall -q iris-model
+      - name: Locked-test validation benchmark sweep
+        run: |
+          cd iris-model
+          python benchmark_forecaster.py \
+            --evidence-dir ../evidence \
+            --cache-dir ../cache/benchmark \
+            --out-dir ../benchmark_outputs \
+            --train-per-group 8 \
+            --val-per-group 10 \
+            --pos-cap 4 \
+            --epochs 4 \
+            --batch-size 32 \
+            --workers 0 \
+            --download-workers 16 \
+            --seed 2026
+      - name: Package benchmark results
+        run: tar -czf iris-historical-benchmark.tar.gz benchmark_outputs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-historical-benchmark
+          path: iris-historical-benchmark.tar.gz
+          retention-days: 30
