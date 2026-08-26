@@ -1,0 +1,48 @@
+name: IRIS Real SHARP PIL Validation
+
+on:
+  push:
+    branches: [iris-pil-real-validation]
+    paths:
+      - 'iris-model/**'
+      - '.github/workflows/iris-pil-real-validation.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: iris-pil-real-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-pil-real-validation
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install numpy pandas requests astropy scipy scikit-learn matplotlib torch
+      - name: Download frozen one-year Gate-0 evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32932755426 -n iris-gate0-evidence -D evidence_bundle
+          tar -xzf evidence_bundle/iris-gate0-evidence.tar.gz -C evidence
+      - name: Real training-only PIL validation
+        run: |
+          cd iris-model
+          python validate_pil_real.py --evidence-dir ../evidence --cache-dir ../cache/pil --out-dir ../pil_validation
+      - name: Package PIL audit
+        run: tar -czf iris-real-pil-validation.tar.gz pil_validation
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-real-pil-validation
+          path: iris-real-pil-validation.tar.gz
+          retention-days: 30
