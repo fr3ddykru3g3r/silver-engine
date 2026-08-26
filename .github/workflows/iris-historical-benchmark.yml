@@ -32,15 +32,16 @@ jobs:
           pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
           grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
           pip install -r /tmp/requirements-no-torch.txt
-      - name: Download resolved historical evidence
+      - name: Download integrity-locked historical evidence
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p evidence_bundle evidence
-          gh run download 32936656849 -n iris-historical-evidence-resolved -D evidence_bundle
-          tar -xzf evidence_bundle/iris-historical-evidence-resolved.tar.gz -C evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
           test -f evidence/data/derived/training_manifest.csv.gz
           test -f evidence/data/derived/sharp_metadata.csv.gz
+          test -f evidence/data/derived/label_integrity_audit.json
       - name: Compile benchmark code
         run: python -m compileall -q iris-model
       - name: Locked-test validation benchmark sweep
@@ -62,6 +63,6 @@ jobs:
         run: tar -czf iris-historical-benchmark.tar.gz benchmark_outputs
       - uses: actions/upload-artifact@v4
         with:
-          name: iris-historical-benchmark
+          name: iris-historical-benchmark-integrity
           path: iris-historical-benchmark.tar.gz
           retention-days: 30
