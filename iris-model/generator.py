@@ -108,3 +108,22 @@ class Diffusion:
             mean=(x-(beta/torch.sqrt(1-abar))*eps)/torch.sqrt(alpha)
             x=mean+(torch.sqrt(beta)*torch.randn_like(x) if i>0 else 0)
         return torch.clamp(x,-1,1)
+    @torch.no_grad()
+    def ddim_sample(self,model,n,label,latitude,shape=(1,128,128),sampling_steps=50,eta=0.0):
+        """Accelerated DDIM sampler using a subsequence of the training schedule."""
+        sampling_steps=max(2,min(int(sampling_steps),self.steps))
+        seq=torch.linspace(0,self.steps-1,sampling_steps,device=self.device).round().long().unique()
+        x=torch.randn((n,*shape),device=self.device)
+        for j in reversed(range(len(seq))):
+            i=int(seq[j].item()); t=torch.full((n,),i,device=self.device,dtype=torch.long)
+            eps=model(x,t,label,latitude)
+            abar=self.ab[i]
+            x0=torch.clamp((x-torch.sqrt(1-abar)*eps)/(torch.sqrt(abar)+1e-8),-1,1)
+            if j==0:
+                x=x0; continue
+            ip=int(seq[j-1].item()); abar_prev=self.ab[ip]
+            sigma=eta*torch.sqrt(torch.clamp((1-abar_prev)/(1-abar)*(1-abar/abar_prev),min=0.0))
+            direction=torch.sqrt(torch.clamp(1-abar_prev-sigma*sigma,min=0.0))*eps
+            noise=torch.randn_like(x) if eta>0 else 0.0
+            x=torch.sqrt(abar_prev)*x0+direction+sigma*noise
+        return torch.clamp(x,-1,1)
