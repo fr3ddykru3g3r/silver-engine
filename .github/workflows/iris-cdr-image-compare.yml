@@ -1,0 +1,82 @@
+name: IRIS CDR Image Comparator Validation
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths:
+      - 'iris-model/train_cdr.py'
+      - 'iris-model/train_cdr_supervised.py'
+      - 'iris-model/cdr_data.py'
+      - '.github/workflows/iris-cdr-image-compare.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [supervised_cnn, cdr_cnn, supervised_bilstm, cdr_bilstm]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p integrity_bundle integrity
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D integrity_bundle
+          tar -xzf integrity_bundle/iris-historical-evidence-integrity.tar.gz -C integrity
+      - name: Download exact 40x36m CDR evidence for sequence arms
+        if: contains(matrix.arm, 'bilstm')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p cdr_bundle cdr_evidence
+          ok=0
+          for i in $(seq 1 180); do
+            rm -rf cdr_bundle/*
+            if gh run download 32950459311 -n iris-cdr-feature-evidence -D cdr_bundle 2>/dev/null; then ok=1; break; fi
+            echo "CDR evidence not ready ($i/180); waiting 60 s"
+            sleep 60
+          done
+          test "$ok" = 1
+          tar -xzf cdr_bundle/iris-cdr-feature-evidence.tar.gz -C cdr_evidence
+          test -f cdr_evidence/data/derived/cdr_sequence_index.csv.gz
+      - name: Compile
+        run: python -m compileall -q iris-model
+      - name: Train validation-only image comparator
+        shell: bash
+        run: |
+          set -e
+          case "${{ matrix.arm }}" in
+            supervised_cnn)
+              python iris-model/train_cdr_supervised.py --model cnn --evidence-dir integrity --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --epochs 20 --train-per-group 2 --eval-per-group 4 --pos-cap 1 --download-workers 16 ;;
+            cdr_cnn)
+              python iris-model/train_cdr.py --model cdr_cnn --evidence-dir integrity --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --train-per-group 2 --eval-per-group 4 --pos-cap 1 --download-workers 16 ;;
+            supervised_bilstm)
+              python iris-model/train_cdr_supervised.py --model cnn_bilstm --evidence-dir cdr_evidence --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --epochs 12 --seq-per-group 1 --seq-max-groups-train 250 --seq-max-groups-eval 140 --download-workers 16 ;;
+            cdr_bilstm)
+              python iris-model/train_cdr.py --model cdr_cnn_bilstm --evidence-dir cdr_evidence --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --seq-per-group 1 --seq-max-groups-train 250 --seq-max-groups-eval 140 --download-workers 16 --reduced-update-rate ;;
+          esac
+      - name: Package
+        run: tar -czf iris-${{ matrix.arm }}.tar.gz outputs/${{ matrix.arm }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-${{ matrix.arm }}
+          path: iris-${{ matrix.arm }}.tar.gz
+          retention-days: 30
