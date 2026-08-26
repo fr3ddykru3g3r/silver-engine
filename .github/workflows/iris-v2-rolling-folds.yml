@@ -1,0 +1,27 @@
+name: IRIS v2 Rolling-Origin Fold Freeze
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths: ['.github/workflows/iris-v2-rolling-folds.yml','iris-model/make_rolling_folds.py']
+  workflow_dispatch:
+permissions: {actions: read, contents: read}
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install pandas numpy
+      - name: Download integrity-locked historical evidence
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D bundle
+          tar -xzf bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Freeze label-blind rolling folds
+        run: python iris-model/make_rolling_folds.py --evidence-dir evidence --out-dir rolling_folds --buffer-hours 36
+      - run: sha256sum rolling_folds/* > rolling_folds/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with: {name: iris-v2-rolling-folds, path: rolling_folds, retention-days: 90}
