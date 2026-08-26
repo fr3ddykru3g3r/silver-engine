@@ -1,0 +1,110 @@
+name: IRIS v2 Corrected BASE Convergence Reassessment
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-base-convergence-reassess.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  reassess:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Wait for all original train-only BASE checkpoint artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for steps in 500 2000 6000; do
+            ok=0
+            for i in $(seq 1 300); do
+              rm -rf "orig-$steps"
+              if gh run download 32997814571 -n "iris-v2-base-convergence-$steps" -D "orig-$steps" 2>/dev/null; then ok=1; break; fi
+              echo "BASE $steps artifact not ready ($i/300); waiting 60 s"
+              sleep 60
+            done
+            test "$ok" = 1
+          done
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Recompute generic gate with corrected outcome-blind metric
+        run: |
+          set -euo pipefail
+          for steps in 500 2000 6000; do
+            manifest=$(find "orig-$steps" -path '*/samples/base/synthetic_manifest.csv' -print -quit)
+            test -n "$manifest"
+            python iris-model/evaluate_generator_v2_fixed.py \
+              --evidence-dir evidence --cache-dir "cache-reassess-$steps" \
+              --synthetic-manifest "$manifest" --out-dir "reassess-$steps" \
+              --real-per-group 1 --seed 2026
+            python - "$steps" <<'PY'
+          import json, pathlib, sys
+          steps=int(sys.argv[1])
+          p=pathlib.Path(f'reassess-{steps}/v2_manipulation_metrics.json')
+          x=json.loads(p.read_text()); x['training_steps']=steps
+          p.write_text(json.dumps(x,indent=2,allow_nan=True)+'\n')
+          PY
+          done
+      - name: Select smallest corrected quality-passing budget
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          rows=[]
+          for steps in [500,2000,6000]:
+              x=json.loads(pathlib.Path(f'reassess-{steps}/v2_manipulation_metrics.json').read_text())
+              rows.append({
+                  'training_steps':steps,
+                  'generic_fidelity_gate_pass':bool(x['generic_fidelity_gate_pass']),
+                  'generic_distance_ratio':x['generic_distance_to_real_baseline_ratio'],
+                  'flux_ratio':x['synthetic_to_real_flux_median_ratio'],
+                  'active_area_ratio':x['synthetic_to_real_active_area_median_ratio'],
+                  'diversity_ratio':x['synthetic_to_real_diversity_ratio'],
+                  'saturation_fraction':x['synthetic_saturation_fraction_abs_gt_2900G'],
+                  'pil_distance':x['hard_pil_standardized_energy_distance'],
+                  'geometry_distance':x['hard_geometry_standardized_energy_distance'],
+              })
+          passing=[r for r in rows if r['generic_fidelity_gate_pass']]
+          selected=min(passing,key=lambda r:r['training_steps']) if passing else None
+          report={
+              'phase':'TRAIN-ONLY generator convergence reassessment; no forecast validation/test metrics used',
+              'correction':'saturation removed from multivariate generic distance because real dispersion is near zero; explicit absolute saturation gate retained',
+              'original_run':32997814571,
+              'runs':rows,
+              'selected_smallest_passing_budget':selected,
+              'status':'PASS' if selected else 'FAIL_REDESIGN_GENERATOR',
+          }
+          pathlib.Path('base_convergence_gate_corrected.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-base-convergence-gate-corrected
+          path: |
+            base_convergence_gate_corrected.json
+            reassess-500
+            reassess-2000
+            reassess-6000
+          retention-days: 30
