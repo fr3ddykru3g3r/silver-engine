@@ -100,6 +100,18 @@ def next_or_restart(iterator, loader):
         return next(iterator), iterator
 
 
+def make_rng(device: torch.device, seed: int) -> torch.Generator:
+    # Separate diffusion RNG streams prevent the extra physics forward pass from
+    # changing the denoising noise/timestep sequence in BASE vs constrained arms.
+    g = torch.Generator(device=device)
+    g.manual_seed(seed)
+    return g
+
+
+def randn_like_with(x: torch.Tensor, gen: torch.Generator) -> torch.Tensor:
+    return torch.randn(x.shape, dtype=x.dtype, device=x.device, generator=gen)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--evidence-dir', required=True)
@@ -122,6 +134,8 @@ def main():
     ap.add_argument('--per-group', type=int, default=8)
     ap.add_argument('--positive-slots', type=int, default=4)
     ap.add_argument('--physics-max-t-frac', type=float, default=0.25)
+    ap.add_argument('--generator-dropout', type=float, default=0.0,
+                    help='Frozen at 0 for matched v2 physics ablations; avoids stochastic dropout-stream confounding.')
     args = ap.parse_args()
 
     seed_all(args.seed)
@@ -143,6 +157,8 @@ def main():
         'positive_rows': len(positives),
         'positive_groups': int(positives.region_group_id.nunique()),
         'always_on_positive_physics_batch': True,
+        'matched_mixed_diffusion_rng_across_conditions': True,
+        'generator_dropout': args.generator_dropout,
         'seed': args.seed,
     }
     (out/'training_subset_summary.json').write_text(json.dumps(summary, indent=2)+'\n')
@@ -171,12 +187,14 @@ def main():
     )
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = ConditionalUNet(base=args.base_channels).to(device)
-    ema = ConditionalUNet(base=args.base_channels).to(device)
+    model = ConditionalUNet(base=args.base_channels, dropout=args.generator_dropout).to(device)
+    ema = ConditionalUNet(base=args.base_channels, dropout=args.generator_dropout).to(device)
     ema.load_state_dict(model.state_dict()); ema.eval()
     diffusion = Diffusion(args.diffusion_steps, device=device)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
 
+    mix_rng = make_rng(device, args.seed + 100_003)
+    phys_rng = make_rng(device, args.seed + 200_003)
     phys_cut = max(0, int(round((args.diffusion_steps-1)*args.physics_max_t_frac)))
     physics_iter = iter(physics_loader)
     history = []
@@ -187,8 +205,9 @@ def main():
             x = batch['x'].to(device)
             y = batch['y'].to(device)
             lat = batch['lat'].to(device)
-            t = torch.randint(0, args.diffusion_steps, (len(x),), device=device)
-            xt, noise = diffusion.q_sample(x, t)
+            t = torch.randint(0, args.diffusion_steps, (len(x),), device=device, generator=mix_rng)
+            mixed_noise = randn_like_with(x, mix_rng)
+            xt, noise = diffusion.q_sample(x, t, noise=mixed_noise)
             eps = model(xt, t, y, lat)
             denoise = torch.mean((eps-noise).square())
 
@@ -200,10 +219,9 @@ def main():
                 praw = pb['raw'].to(device)
                 py = pb['y'].to(device)
                 plat = pb['lat'].to(device)
-                # Unlike v1, every physics update explicitly draws an interpretable
-                # low-noise diffusion state from a positive-only, region-balanced batch.
-                pt = torch.randint(0, phys_cut+1, (len(px),), device=device)
-                pxt, pnoise = diffusion.q_sample(px, pt)
+                pt = torch.randint(0, phys_cut+1, (len(px),), device=device, generator=phys_rng)
+                physics_noise = randn_like_with(px, phys_rng)
+                pxt, _ = diffusion.q_sample(px, pt, noise=physics_noise)
                 peps = model(pxt, pt, py, plat)
                 px0hat = torch.clamp(diffusion.x0_from_eps(pxt, pt, peps), -1, 1)
                 pfake = denormalize_gauss(px0hat)
@@ -213,10 +231,7 @@ def main():
                     lpil = pil_distribution_loss_v2(pfake, praw, pixel_mm=2.0)
 
             step += 1
-            if args.physics_warmup_steps > 0:
-                ramp = min(1.0, step / float(args.physics_warmup_steps))
-            else:
-                ramp = 1.0
+            ramp = min(1.0, step / float(args.physics_warmup_steps)) if args.physics_warmup_steps > 0 else 1.0
             total = denoise + ramp * (args.lambda_hj*lhj + args.lambda_pil*lpil)
 
             opt.zero_grad(set_to_none=True)
@@ -256,12 +271,14 @@ def main():
         'lambda_pil': args.lambda_pil,
         'physics_max_t_frac': args.physics_max_t_frac,
         'physics_batch_size': args.physics_batch_size,
+        'generator_dropout': args.generator_dropout,
+        'matched_mixed_diffusion_rng_across_conditions': True,
         'v2': True,
     }
     torch.save(ck, out/'generator.pt')
     (out/'training_history.json').write_text(json.dumps(history, indent=2)+'\n')
     (out/'run_config.json').write_text(json.dumps(vars(args) | {'device': str(device), 'steps_completed': step}, indent=2)+'\n')
-    print(json.dumps({'condition': args.condition, 'device': str(device), 'steps': step, 'checkpoint': str(out/'generator.pt')}, indent=2), flush=True)
+    print(json.dumps({'condition': args.condition,'device': str(device),'steps': step,'checkpoint': str(out/'generator.pt')}, indent=2), flush=True)
 
 
 if __name__ == '__main__':
