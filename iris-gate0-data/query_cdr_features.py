@@ -18,7 +18,7 @@ CADENCE = '1h'
 # Wu et al. (MNRAS 547, stag349, 2026): best LOS pair + eight vector SHARP features.
 FEATURES = ['R_VALUE','AREA_ACR','TOTUSJZ','TOTUSJH','TOTPOT','ABSNJZH',
             'SAVNCPP','USFLUX','MEANPOT','SHRGT45']
-KEYS = ['T_REC','HARPNUM','QUALITY'] + FEATURES
+KEYS = ['T_REC','HARPNUM','QUALITY','LON_FWT','LAT_FWT'] + FEATURES
 
 
 def make_query(harp: int):
