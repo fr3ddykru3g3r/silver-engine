@@ -44,22 +44,11 @@ class UF:
         if a!=b:self.p[b]=a
 
 
-def resolve_event_ar(ar, windows):
-    '''Return canonical 5-digit NOAA AR when resolution is unique from SHARP activity windows.'''
-    if ar is None: return None,'MISSING'
-    ar=int(ar)
-    if ar>=10000:
-        return ar,'EXACT'
-    c=[n for n in windows if n%10000==ar]
-    return (c[0],'LAST4_UNIQUE') if len(c)==1 else (None,'LAST4_AMBIGUOUS' if c else 'LAST4_UNMATCHED')
-
-
 def main():
     sharp=pd.read_csv(DER/'sharp_metadata.csv.gz',dtype={'NOAA_ARS':str},low_memory=False)
     events=pd.read_csv(DER/'goes_m1plus_interval.csv',low_memory=False)
     hmap=pd.read_csv(DER/'harp_noaa_mapping.csv',dtype={'noaa_ars':str})
     sharp['time']=pd.to_datetime(sharp['T_REC'].astype(str).str.replace('_TAI','',regex=False).str.replace('.', '-', n=2, regex=False).str.replace('_',' ',regex=False),errors='coerce',utc=True)
-    # The generic parser above can fail on some JSOC strings; use regex fallback.
     bad=sharp.time.isna()
     if bad.any():
         def pt(s):
@@ -96,7 +85,6 @@ def main():
             if n not in nw: nw[n]=[r.time,r.time]
             else: nw[n]=[min(nw[n][0],r.time),max(nw[n][1],r.time)]
 
-    # Infer event columns robustly.
     cols={c.lower():c for c in events.columns}
     def pick(*keys):
         for k in keys:
@@ -154,19 +142,33 @@ def main():
         rows.append({'sample_id':f'H{h}_{t.strftime("%Y%m%dT%H%M%SZ")}', 't_rec':t.isoformat(),'harpnum':h,'region_group_id':gid,'noaa_ars':';'.join(map(str,noaas)),'latitude_deg':qnum(r.LAT_FWT),'cmd_deg':qnum(r.LON_FWT),'quality':str(r.QUALITY),'partition':p,'label_m1plus_24h':label,'matched_event_indices':';'.join(str(int(x.event_index)) for x in matches),'max_goes_class':max([str(x.goes_class) for x in matches],default=''),'magnetogram_url':r.get('segment_magnetogram'),'usflux':qnum(r.get('USFLUX')),'r_value':qnum(r.get('R_VALUE'))})
     man=pd.DataFrame(rows)
     man.to_csv(DER/'training_manifest.csv.gz',index=False,compression='gzip')
+
     prim=man[man.partition.isin(['train','validation','test']) & man.label_m1plus_24h.notna()].copy()
+    # Training cannot proceed if any primary split record lacks the actual image locator.
+    missing_url=prim.magnetogram_url.isna() | prim.magnetogram_url.astype(str).str.strip().isin(['','nan','None'])
+    if missing_url.any():
+        bad=prim.loc[missing_url,['sample_id','partition','harpnum','t_rec']]
+        bad.to_csv(DER/'missing_primary_image_urls.csv',index=False)
+        raise SystemExit(f'{len(bad)} primary split rows have no magnetogram URL; refusing training-ready status')
+
     counts=[]
     for p in ['train','validation','test']:
         x=prim[prim.partition==p]; pos=x[x.label_m1plus_24h==1]
-        counts.append({'partition':p,'rows':len(x),'positive_rows':len(pos),'independent_groups':x.region_group_id.nunique(),'independent_positive_groups':pos.region_group_id.nunique(),'independent_harps':x.harpnum.nunique(),'independent_positive_harps':pos.harpnum.nunique()})
+        counts.append({'partition':p,'rows':len(x),'positive_rows':len(pos),'independent_groups':x.region_group_id.nunique(),'independent_positive_groups':pos.region_group_id.nunique(),'independent_harps':x.harpnum.nunique(),'independent_positive_harps':pos.harpnum.nunique(),'image_urls':int(x.magnetogram_url.notna().sum())})
     pd.DataFrame(counts).to_csv(DER/'independent_positive_region_counts.csv',index=False)
+
     split={'method':'connected HARP-NOAA groups, chronology 60/20/20, 36h buffer','boundary_1':b1.isoformat(),'boundary_2':b2.isoformat(),'parts':part}
     split['sha256']=hsh(split); (DER/'frozen_split.json').write_text(json.dumps(split,indent=2,sort_keys=True)+'\n')
-    audit={'total_sharp_rows':len(sharp),'eligible_rows':int(sharp.eligible.sum()),'connected_groups':len(groups),'resolved_m1plus_events':int(ev.canonical_noaa_ar.notna().sum()),'unresolved_or_ambiguous_m1plus_events':int(ev.canonical_noaa_ar.isna().sum()),'partitions':counts,'split_sha256':split['sha256']}
+    audit={'total_sharp_rows':len(sharp),'interval_harps':int(sharp.HARPNUM.nunique()),'eligible_rows':int(sharp.eligible.sum()),'active_connected_groups':int(elig.group.nunique()),'all_mapping_connected_groups':len(groups),'resolved_m1plus_events':int(ev.canonical_noaa_ar.notna().sum()),'unresolved_or_ambiguous_m1plus_events':int(ev.canonical_noaa_ar.isna().sum()),'primary_rows':int(len(prim)),'primary_image_urls':int(prim.magnetogram_url.notna().sum()),'missing_primary_image_urls':int(missing_url.sum()),'partitions':counts,'split_sha256':split['sha256']}
     (DER/'manifest_audit.json').write_text(json.dumps(audit,indent=2,default=str)+'\n')
-    # Training URL list: complete image acquisition plan without duplicating binary FITS into git/artifact.
-    train=prim[prim.partition=='train'][['sample_id','magnetogram_url','label_m1plus_24h','region_group_id','harpnum','t_rec']].dropna(subset=['magnetogram_url'])
-    train.to_csv(DER/'training_image_urls.csv.gz',index=False,compression='gzip')
+
+    # Complete binary acquisition plans. Generator training must use train only;
+    # downstream calibration/evaluation also require validation and test images.
+    cols_out=['sample_id','magnetogram_url','label_m1plus_24h','partition','region_group_id','harpnum','t_rec','noaa_ars','cmd_deg']
+    prim[cols_out].to_csv(DER/'image_urls_all_splits.csv.gz',index=False,compression='gzip')
+    prim[prim.partition=='train'][cols_out].to_csv(DER/'training_image_urls.csv.gz',index=False,compression='gzip')
+    prim[prim.partition=='validation'][cols_out].to_csv(DER/'validation_image_urls.csv.gz',index=False,compression='gzip')
+    prim[prim.partition=='test'][cols_out].to_csv(DER/'test_image_urls.csv.gz',index=False,compression='gzip')
     print(json.dumps(audit,indent=2,default=str))
 
 if __name__=='__main__': main()
