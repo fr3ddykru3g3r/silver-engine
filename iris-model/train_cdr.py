@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse, json, random
+from dataclasses import replace
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -57,9 +58,10 @@ def load_datasets(args):
         ds={};frames={}
         for j,p in enumerate(parts):
             per=args.seq_per_group if p=='train' else 1
+            maxg=args.seq_max_groups_train if p=='train' else args.seq_max_groups_eval
             d,end,_=cache_native_image_sequences(args.evidence_dir,p,Path(args.cache_dir)/p,
                                                  per_group=per,pos_cap=1,seed=args.seed+j,
-                                                 workers=args.download_workers)
+                                                 workers=args.download_workers,max_groups=maxg)
             ds[p]=d;frames[p]=end
         return ds,frames
     nf=2 if args.model=='cdr_transformer_2' else 10;ds={};frames={}
@@ -75,13 +77,19 @@ def main():
     ap.add_argument('--evidence-dir',required=True);ap.add_argument('--cache-dir',default='cache/cdr');ap.add_argument('--out-dir',required=True)
     ap.add_argument('--seed',type=int,default=2026);ap.add_argument('--train-per-group',type=int,default=8);ap.add_argument('--eval-per-group',type=int,default=10);ap.add_argument('--pos-cap',type=int,default=4)
     ap.add_argument('--seq-per-group',type=int,default=1);ap.add_argument('--seq-len',type=int,default=40)
+    ap.add_argument('--seq-max-groups-train',type=int,default=0,help='Engineering-only cap for native image-sequence training groups; 0 keeps all eligible groups.')
+    ap.add_argument('--seq-max-groups-eval',type=int,default=0,help='Engineering-only cap for native image-sequence validation/test groups; 0 keeps all eligible groups.')
     ap.add_argument('--download-workers',type=int,default=12);ap.add_argument('--grad-clip',type=float,default=5.0)
     ap.add_argument('--reduced-update-rate',action='store_true',help='Engineering/resource mode: one replay update per encounter mini-batch. Default follows the paper description: update after every encountered state once replay is warm.')
     ap.add_argument('--evaluate-test',action='store_true',help='Touch locked test only after choices are frozen.')
     ap.add_argument('--episodes',type=int,default=0,help='0 uses Table 5 paper episode count.')
     ap.add_argument('--max-encounters',type=int,default=0,help='Engineering smoke limit per episode; 0 means the full selected training set.')
+    ap.add_argument('--reward-tp',type=float);ap.add_argument('--reward-tn',type=float);ap.add_argument('--reward-fp',type=float);ap.add_argument('--reward-fn',type=float)
     args=ap.parse_args();seed_all(args.seed);out=Path(args.out_dir);out.mkdir(parents=True,exist_ok=True)
-    preset='cdr_transformer' if args.model.startswith('cdr_transformer') else args.model;cfg=PAPER_CDR_PRESETS[preset];episodes=args.episodes or cfg.episodes
+    preset='cdr_transformer' if args.model.startswith('cdr_transformer') else args.model;cfg=PAPER_CDR_PRESETS[preset]
+    overrides={k:v for k,v in {'tp':args.reward_tp,'tn':args.reward_tn,'fp':args.reward_fp,'fn':args.reward_fn}.items() if v is not None}
+    if overrides:cfg=replace(cfg,**overrides)
+    episodes=args.episodes or cfg.episodes
     ds,frames=load_datasets(args);device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.model=='cdr_cnn':model=CDRImageCNN().to(device)
     elif args.model=='cdr_cnn_bilstm':model=CDRImageBiLSTM().to(device)
@@ -112,7 +120,7 @@ def main():
         history.append(rec);print(json.dumps(rec),flush=True)
     if best_state is not None:model.load_state_dict(best_state)
     val=predict(model,ds['validation'],device);thr,vm=choose_val_threshold(val);val05=all_metrics(val.y,val.p,0.5);val.to_csv(out/'validation_predictions.csv',index=False)
-    report={'model':args.model,'seed':args.seed,'device':str(device),'parameters':count_parameters(model),'paper_config':cfg.__dict__,'episodes_run':episodes,'update_mode':'reduced_minibatch' if args.reduced_update_rate else 'paper_per_state','sequence_length':args.seq_len,'train_items':len(ds['train']),'validation_items':len(ds['validation']),'validation_at_0.5':val05,'validation_selected_threshold':thr,'validation_selected':vm,'history':history,'test_locked':not args.evaluate_test}
+    report={'model':args.model,'seed':args.seed,'device':str(device),'parameters':count_parameters(model),'paper_config_or_reward_override':cfg.__dict__,'reward_overrides':overrides,'episodes_run':episodes,'update_mode':'reduced_minibatch' if args.reduced_update_rate else 'paper_per_state','sequence_length':args.seq_len,'seq_max_groups_train':args.seq_max_groups_train,'seq_max_groups_eval':args.seq_max_groups_eval,'train_items':len(ds['train']),'validation_items':len(ds['validation']),'validation_at_0.5':val05,'validation_selected_threshold':thr,'validation_selected':vm,'history':history,'test_locked':not args.evaluate_test}
     if args.evaluate_test:
         test=predict(model,ds['test'],device);test.to_csv(out/'test_predictions.csv',index=False);report['test']=all_metrics(test.y.values,test.p.values,thr);report['test_region_bootstrap']=region_bootstrap(test,2000,args.seed,thr);report['test_items']=len(ds['test'])
     torch.save({'state_dict':model.state_dict(),'model':args.model,'seed':args.seed,'config':cfg.__dict__,'threshold':thr,'seq_len':args.seq_len},out/'cdr_model.pt')
