@@ -10,7 +10,7 @@ import requests
 
 ROOT=Path(__file__).resolve().parent
 DER=ROOT/'data'/'derived'; DER.mkdir(parents=True,exist_ok=True)
-START=datetime.fromisoformat('2025-08-25')
+START=datetime.fromisoformat('2010-05-01')
 END=datetime.fromisoformat('2026-08-24')  # exclusive
 BASES=['http://jsoc.stanford.edu/cgi-bin/ajax/jsoc_info','https://jsoc.stanford.edu/cgi-bin/ajax/jsoc_info']
 KEYS=['T_REC','HARPNUM','NOAA_AR','NOAA_NUM','NOAA_ARS','LON_FWT','LAT_FWT','QUALITY','USFLUX','R_VALUE','CDELT1','CDELT2','RSUN_REF','T_FIRST','T_LAST']
@@ -33,7 +33,7 @@ def query_harp(harp:int):
     for base in BASES:
         for attempt in range(2):
             try:
-                r=requests.get(base,params=params,timeout=90,allow_redirects=True)
+                r=requests.get(base,params=params,timeout=120,allow_redirects=True)
                 r.raise_for_status(); return harp,ds,valid_json(r.json()),base,None
             except Exception as e:
                 failures.append(f'{base} attempt {attempt+1}: {e}'); time.sleep(1.5*(attempt+1))
@@ -41,12 +41,10 @@ def query_harp(harp:int):
 
 
 def curl_recover(harp:int):
-    ds,params=make_query(harp)
-    url=BASES[0]+'?'+urlencode(params)
-    last=''
+    ds,params=make_query(harp); url=BASES[0]+'?'+urlencode(params); last=''
     for attempt in range(5):
         try:
-            cp=subprocess.run(['curl','-L','--retry','3','--retry-delay','2','--max-time','120','-fsS',url],capture_output=True,text=True,timeout=140)
+            cp=subprocess.run(['curl','-L','--retry','3','--retry-delay','2','--max-time','180','-fsS',url],capture_output=True,text=True,timeout=200)
             if cp.returncode!=0: raise RuntimeError(cp.stderr.strip() or f'curl rc={cp.returncode}')
             return harp,ds,valid_json(json.loads(cp.stdout)),BASES[0]+' (curl recovery)',None
         except Exception as e:
@@ -68,18 +66,10 @@ def rows_from(j):
 
 
 def main():
-    # Completeness rule: do not infer the active population from the daily SRS archive,
-    # because individual SRS files can be missing. Instead query every HARP that the
-    # official JSOC HARP<->NOAA mapping says has ever had a NOAA active-region ID, and
-    # let the definitive SHARP time selector determine which ones actually overlap the
-    # frozen interval. This is outcome-blind and makes missing SRS days irrelevant to
-    # the negative-class census.
     map_path=DER/'harp_noaa_mapping.csv'
-    if not map_path.exists():raise SystemExit('harp_noaa_mapping.csv missing; run fetch_gate0.py first')
-    mapping=pd.read_csv(map_path)
-    harps=sorted(set(pd.to_numeric(mapping.harpnum,errors='coerce').dropna().astype(int)))
-    print(f'Querying ALL {len(harps)} NOAA-associated HARPs at {ISSUE_CADENCE} cadence; interval overlap is decided by JSOC',flush=True)
-
+    if not map_path.exists():raise SystemExit('harp_noaa_mapping.csv missing; run fetch_historical.py first')
+    mapping=pd.read_csv(map_path); harps=sorted(set(pd.to_numeric(mapping.harpnum,errors='coerce').dropna().astype(int)))
+    print(f'Querying ALL {len(harps)} NOAA-associated HARPs over 2010-05-01..2026-08-23 at {ISSUE_CADENCE} cadence',flush=True)
     results={}; failed=[]
     with ThreadPoolExecutor(max_workers=8) as ex:
         futs={ex.submit(query_harp,h):h for h in harps}
@@ -91,38 +81,25 @@ def main():
                 nonempty=sum(int(v[1].get('count',0) or 0)>0 for v in results.values())
                 print(f'first pass {n}/{len(harps)}; replies={len(results)}; nonempty={nonempty}; pending_failures={len(failed)}',flush=True)
     if failed:
-        print(f'Curl-recovering {len(failed)} transient failures serially',flush=True)
-        still=[]
+        print(f'Curl-recovering {len(failed)} transient failures serially',flush=True); still=[]
         for h in failed:
             hh,ds,j,base,err=curl_recover(h)
-            if err:
-                print(f'UNRECOVERED HARP {h}: {err}',flush=True); still.append({'harpnum':h,'error':err})
-            else:
-                results[h]=(ds,j,base); print(f'recovered HARP {h}',flush=True)
+            if err: print(f'UNRECOVERED HARP {h}: {err}',flush=True); still.append({'harpnum':h,'error':err})
+            else: results[h]=(ds,j,base); print(f'recovered HARP {h}',flush=True)
         failed=still
     pd.DataFrame(failed).to_csv(DER/'sharp_query_failures.csv',index=False)
-    if failed:raise SystemExit(f'{len(failed)} HARP queries failed after curl recovery; refusing incomplete manifest')
-
+    if failed:raise SystemExit(f'{len(failed)} HARP queries failed after recovery; refusing incomplete historical manifest')
     allrows=[]; queries=[]; nonempty_harps=[]
     for h in harps:
         ds,j,base=results[h]; rs=rows_from(j); allrows.extend(rs)
-        if rs: nonempty_harps.append(h)
+        if rs:nonempty_harps.append(h)
         queries.append({'harpnum':h,'recordset':ds,'count':len(rs),'endpoint':base,'issue_cadence':ISSUE_CADENCE})
     df=pd.DataFrame(allrows)
     if df.empty:raise SystemExit('No SHARP metadata returned')
     df=df.drop_duplicates(subset=['HARPNUM','T_REC']).sort_values(['T_REC','HARPNUM'])
-    out=DER/'sharp_metadata.csv.gz'; df.to_csv(out,index=False,compression='gzip')
+    df.to_csv(DER/'sharp_metadata.csv.gz',index=False,compression='gzip')
     pd.DataFrame({'harpnum':sorted(set(nonempty_harps))}).to_csv(DER/'interval_harps.csv',index=False)
-    (DER/'sharp_query_log.json').write_text(json.dumps({
-        'queries':queries,
-        'rows_after_dedup':len(df),
-        'columns':list(df.columns),
-        'issue_cadence':ISSUE_CADENCE,
-        'mapped_harps_queried':len(harps),
-        'nonempty_harps':len(set(nonempty_harps)),
-        'returned_harps_after_dedup':int(df.HARPNUM.nunique()),
-        'completeness_rule':'all HARPNUM values in official all_harps_with_noaa_ars mapping were queried over the frozen interval'
-    },indent=2)+'\n')
-    print(f'SHARP rows: {len(df):,}; unique interval HARPs: {df.HARPNUM.nunique():,}; mapped HARPs queried: {len(harps):,}; cadence={ISSUE_CADENCE}',flush=True)
+    (DER/'sharp_query_log.json').write_text(json.dumps({'queries':queries,'rows_after_dedup':len(df),'columns':list(df.columns),'issue_cadence':ISSUE_CADENCE,'mapped_harps_queried':len(harps),'nonempty_harps':len(set(nonempty_harps)),'returned_harps_after_dedup':int(df.HARPNUM.nunique()),'interval_start':'2010-05-01','interval_end':'2026-08-23'},indent=2)+'\n')
+    print(f'SHARP rows: {len(df):,}; unique HARPs: {df.HARPNUM.nunique():,}',flush=True)
 
 if __name__=='__main__':main()
