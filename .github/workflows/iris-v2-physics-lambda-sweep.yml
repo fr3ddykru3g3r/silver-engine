@@ -1,0 +1,234 @@
+name: IRIS v2 Train-Only Physics Lambda Sweep
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-physics-lambda-sweep.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    outputs:
+      steps: ${{ steps.read.outputs.steps }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Wait for train-only BASE convergence gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p gate
+          ok=0
+          for i in $(seq 1 300); do
+            rm -rf gate/*
+            if gh run download 32997814571 -n iris-v2-base-convergence-gate -D gate 2>/dev/null; then ok=1; break; fi
+            echo "BASE convergence gate not ready ($i/300); waiting 60 s"
+            sleep 60
+          done
+          test "$ok" = 1
+      - id: read
+        name: Read selected generic-fidelity-passing budget
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, pathlib
+          p=list(pathlib.Path('gate').rglob('base_convergence_gate.json'))
+          if len(p)!=1: raise RuntimeError(p)
+          x=json.loads(p[0].read_text())
+          s=x.get('selected_smallest_passing_budget')
+          if not s: raise SystemExit('No BASE budget passed generic fidelity; physics sweep is scientifically blocked')
+          print(f"steps={int(s['training_steps'])}")
+          PY
+
+  arm:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - code: base
+            condition: base
+            lambda_hj: '0.0'
+            lambda_pil: '0.0'
+            lambda_value: '0.0'
+          - code: pil_001
+            condition: pil
+            lambda_hj: '0.0'
+            lambda_pil: '0.01'
+            lambda_value: '0.01'
+          - code: pil_003
+            condition: pil
+            lambda_hj: '0.0'
+            lambda_pil: '0.03'
+            lambda_value: '0.03'
+          - code: pil_010
+            condition: pil
+            lambda_hj: '0.0'
+            lambda_pil: '0.10'
+            lambda_value: '0.10'
+          - code: pil_030
+            condition: pil
+            lambda_hj: '0.0'
+            lambda_pil: '0.30'
+            lambda_value: '0.30'
+          - code: hj_001
+            condition: hj
+            lambda_hj: '0.01'
+            lambda_pil: '0.0'
+            lambda_value: '0.01'
+          - code: hj_003
+            condition: hj
+            lambda_hj: '0.03'
+            lambda_pil: '0.0'
+            lambda_value: '0.03'
+          - code: hj_010
+            condition: hj
+            lambda_hj: '0.10'
+            lambda_pil: '0.0'
+            lambda_value: '0.10'
+          - code: hj_030
+            condition: hj
+            lambda_hj: '0.30'
+            lambda_pil: '0.0'
+            lambda_value: '0.30'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train matched v2 arm without forecasting access
+        run: |
+          python iris-model/train_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache/${{ matrix.code }} \
+            --out-dir work --condition ${{ matrix.condition }} --seed 2026 \
+            --per-group 1 --positive-slots 1 --batch-size 16 --physics-batch-size 16 \
+            --base-channels 24 --diffusion-steps 100 --max-steps ${{ needs.prepare.outputs.steps }} \
+            --physics-warmup-steps 300 --lambda-hj ${{ matrix.lambda_hj }} --lambda-pil ${{ matrix.lambda_pil }} \
+            --generator-dropout 0.0 --download-workers 16
+      - name: Sample arm with frozen sampling protocol
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint work/${{ matrix.condition }}/generator.pt --evidence-dir evidence \
+            --out-dir sample --per-group 2 --max-groups 64 \
+            --batch-size 8 --sampling-steps 30 --seed 2026
+      - name: Independent hard physics and generic audit
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache_eval/${{ matrix.code }} \
+            --synthetic-manifest sample/synthetic_manifest.csv \
+            --out-dir audit --real-per-group 1 --seed 2026
+      - name: Attach arm metadata
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('audit/v2_manipulation_metrics.json'); x=json.loads(p.read_text())
+          x.update({
+            'arm_code':'${{ matrix.code }}','condition':'${{ matrix.condition }}',
+            'lambda_value':float('${{ matrix.lambda_value }}'),
+            'lambda_hj':float('${{ matrix.lambda_hj }}'),'lambda_pil':float('${{ matrix.lambda_pil }}'),
+            'training_steps':int('${{ needs.prepare.outputs.steps }}'),
+            'selection_phase':'TRAIN_ONLY_PHYSICAL_MANIPULATION',
+            'forecast_metrics_accessed':False,
+          })
+          p.write_text(json.dumps(x,indent=2,allow_nan=True)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-lambda-${{ matrix.code }}
+          path: |
+            work/${{ matrix.condition }}
+            sample
+            audit
+          retention-days: 30
+
+  select:
+    needs: [prepare, arm]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-lambda-*
+          path: collected
+      - name: Select smallest physically effective coefficient
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('collected')
+          rows={}
+          for d in root.glob('iris-v2-lambda-*'):
+              fs=list(d.rglob('v2_manipulation_metrics.json'))
+              if len(fs)!=1: raise RuntimeError((d,fs))
+              x=json.loads(fs[0].read_text()); rows[x['arm_code']]=x
+          b=rows['base']
+          if not b['generic_fidelity_gate_pass']:
+              raise SystemExit('Fresh matched BASE failed generic fidelity; abort coefficient selection')
+
+          def choose(prefix,target,cross):
+              bd=float(b[target]); bc=float(b[cross])
+              candidates=[]
+              table=[]
+              for code,x in rows.items():
+                  if not code.startswith(prefix+'_'): continue
+                  td=float(x[target]); cd=float(x[cross]); lam=float(x['lambda_value'])
+                  improve=(bd-td)/bd if bd>0 else float('-inf')
+                  cross_ratio=cd/max(bc,1e-9)
+                  passed=bool(x['generic_fidelity_gate_pass'] and improve>=0.20 and cross_ratio<=1.50)
+                  rec={'code':code,'lambda':lam,'target_distance':td,'relative_target_improvement':improve,
+                       'cross_structure_distance_ratio_vs_base':cross_ratio,'generic_gate_pass':bool(x['generic_fidelity_gate_pass']),
+                       'pass':passed}
+                  table.append(rec)
+                  if passed: candidates.append(rec)
+              selected=min(candidates,key=lambda r:r['lambda']) if candidates else None
+              return {'target_metric':target,'cross_metric':cross,'candidates':sorted(table,key=lambda r:r['lambda']),
+                      'selected_smallest_passing':selected,'status':'PASS' if selected else 'FAIL_REDESIGN_OR_EXTEND_GRID'}
+
+          pil=choose('pil','hard_pil_standardized_energy_distance','hard_geometry_standardized_energy_distance')
+          hj=choose('hj','hard_geometry_standardized_energy_distance','hard_pil_standardized_energy_distance')
+          report={
+            'phase':'TRAIN-ONLY physical coefficient selection; forecasting metrics forbidden',
+            'training_steps':int('${{ needs.prepare.outputs.steps }}'),
+            'base':{
+              'pil_distance':b['hard_pil_standardized_energy_distance'],
+              'geometry_distance':b['hard_geometry_standardized_energy_distance'],
+              'generic_gate_pass':b['generic_fidelity_gate_pass'],
+            },
+            'PIL':pil,'HJ':hj,
+            'overall_status':'PASS' if pil['status']=='PASS' and hj['status']=='PASS' else 'INCOMPLETE',
+            'selection_rule':'smallest lambda with >=20% independent hard target-distance improvement, generic-fidelity PASS, and <=1.5x degradation of the other targeted structure',
+          }
+          pathlib.Path('v2_physics_lambda_selection.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-physics-lambda-selection
+          path: v2_physics_lambda_selection.json
+          retention-days: 30

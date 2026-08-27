@@ -1,0 +1,186 @@
+name: IRIS v2 Efficient Shared-Base Physics Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-efficient-physics-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  base:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen evidence
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Shared positive-only BASE pretrain
+        run: |
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/base --out-dir base \
+            --condition base --lambda-hj 0 --lambda-pil 0 --seed 2026 \
+            --per-group 3 --batch-size 12 --physics-batch-size 12 --base-channels 12 \
+            --diffusion-steps 64 --max-steps 700 --physics-warmup-steps 80 --download-workers 16
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-efficient-shared-base
+          path: base
+          retention-days: 30
+
+  constraint:
+    needs: base
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - {tag: pil010, condition: pil, lhj: '0.0', lpil: '0.10'}
+          - {tag: pil050, condition: pil, lhj: '0.0', lpil: '0.50'}
+          - {tag: pil100, condition: pil, lhj: '0.0', lpil: '1.00'}
+          - {tag: hj010, condition: hj, lhj: '0.10', lpil: '0.0'}
+          - {tag: hj050, condition: hj, lhj: '0.50', lpil: '0.0'}
+          - {tag: hj100, condition: hj, lhj: '1.00', lpil: '0.0'}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download evidence and shared base
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p evidence_bundle evidence shared
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          gh run download '${{ github.run_id }}' -n iris-v2-efficient-shared-base -D shared
+      - name: Controlled physics fine-tune from identical base
+        run: |
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/${{ matrix.tag }} --out-dir out/${{ matrix.tag }} \
+            --condition '${{ matrix.condition }}' --lambda-hj '${{ matrix.lhj }}' --lambda-pil '${{ matrix.lpil }}' --seed 2026 \
+            --init-checkpoint shared/generator.pt --per-group 3 --batch-size 12 --physics-batch-size 12 \
+            --base-channels 12 --diffusion-steps 64 --max-steps 250 --physics-warmup-steps 50 --lr 1e-4 --download-workers 16
+      - name: Sample matched physical regions
+        run: |
+          python iris-model/sample_generator.py --checkpoint out/${{ matrix.tag }}/generator.pt --evidence-dir evidence \
+            --out-dir samples/${{ matrix.tag }} --per-group 1 --max-groups 32 --batch-size 8 --sampling-steps 24 --seed 2026
+      - name: Independent hard evaluation
+        run: |
+          python iris-model/evaluate_generator_v2.py --evidence-dir evidence --cache-dir evalcache/${{ matrix.tag }} \
+            --synthetic-manifest samples/${{ matrix.tag }}/synthetic_manifest.csv --out-dir eval/${{ matrix.tag }} --real-per-group 1 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-efficient-${{ matrix.tag }}
+          path: |
+            out/${{ matrix.tag }}
+            samples/${{ matrix.tag }}
+            eval/${{ matrix.tag }}
+          retention-days: 30
+
+  base_eval:
+    needs: base
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download inputs
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p evidence_bundle evidence shared
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          gh run download '${{ github.run_id }}' -n iris-v2-efficient-shared-base -D shared
+      - run: |
+          python iris-model/sample_generator.py --checkpoint shared/generator.pt --evidence-dir evidence --out-dir samples/base --per-group 1 --max-groups 32 --batch-size 8 --sampling-steps 24 --seed 2026
+          python iris-model/evaluate_generator_v2.py --evidence-dir evidence --cache-dir evalcache/base --synthetic-manifest samples/base/synthetic_manifest.csv --out-dir eval/base --real-per-group 1 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-efficient-base-eval
+          path: |
+            samples/base
+            eval/base
+          retention-days: 30
+
+  pick:
+    needs: [constraint, base_eval]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-efficient-*
+          path: collected
+      - name: Freeze smallest effective PIL and HJ coefficients
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv
+          root=pathlib.Path('collected')
+          def load(tag):
+              fs=list((root/f'iris-v2-efficient-{tag}').rglob('v2_manipulation_metrics.json'))
+              if len(fs)!=1: raise RuntimeError((tag,fs))
+              return json.loads(fs[0].read_text())
+          base=load('base-eval')
+          bp=float(base['hard_pil_standardized_energy_distance']); bg=float(base['hard_geometry_standardized_energy_distance'])
+          rows=[]
+          for family in ['pil','hj']:
+              for val in [10,50,100]:
+                  tag=f'{family}{val:03d}'; m=load(tag)
+                  target=float(m['hard_pil_standardized_energy_distance'] if family=='pil' else m['hard_geometry_standardized_energy_distance'])
+                  ref=bp if family=='pil' else bg
+                  imp=(ref-target)/ref if ref>0 else -999
+                  row={'family':family,'tag':tag,'lambda':val/100,'target_distance':target,'improvement_vs_shared_base':imp,
+                       'generic_gate':bool(m['generic_fidelity_gate_pass']),'flux_ratio':m['synthetic_to_real_flux_median_ratio'],
+                       'area_ratio':m['synthetic_to_real_active_area_median_ratio'],'diversity_ratio':m['synthetic_to_real_diversity_ratio'],
+                       'saturation':m['synthetic_saturation_fraction_abs_gt_2900G']}
+                  row['pass']=bool(row['generic_gate'] and imp>=0.15)
+                  rows.append(row)
+          chosen={}
+          for fam in ['pil','hj']:
+              ok=[r for r in rows if r['family']==fam and r['pass']]
+              chosen[fam]=min(ok,key=lambda x:x['lambda']) if ok else None
+          report={'phase':'TRAIN-ONLY SHARED-BASE PHYSICS GATE; no forecast validation/test accessed',
+                  'base':{'pil_distance':bp,'geometry_distance':bg},'rows':rows,'chosen':chosen,
+                  'status':'PASS' if all(chosen.values()) else 'FAIL'}
+          pathlib.Path('efficient_physics_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('efficient_physics_gate.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-efficient-physics-gate
+          path: |
+            efficient_physics_gate.json
+            efficient_physics_gate.csv
+          retention-days: 30

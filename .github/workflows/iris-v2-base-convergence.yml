@@ -1,0 +1,124 @@
+name: IRIS v2 Base Generator Convergence Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-base-convergence.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  checkpoint:
+    strategy:
+      fail-fast: false
+      matrix:
+        max_steps: [500, 2000, 6000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train BASE without forecasting access
+        run: |
+          python iris-model/train_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache/base-${{ matrix.max_steps }} \
+            --out-dir outputs --condition base --seed 2026 \
+            --per-group 1 --positive-slots 1 --batch-size 16 --physics-batch-size 12 \
+            --base-channels 24 --diffusion-steps 100 --max-steps ${{ matrix.max_steps }} \
+            --download-workers 16
+      - name: Sample BASE
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint outputs/base/generator.pt --evidence-dir evidence \
+            --out-dir samples/base --per-group 2 --max-groups 48 \
+            --batch-size 8 --sampling-steps 30 --seed 2026
+      - name: Independent generic and physics audit
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache-eval-${{ matrix.max_steps }} \
+            --synthetic-manifest samples/base/synthetic_manifest.csv \
+            --out-dir eval/base --real-per-group 1 --seed 2026
+      - name: Attach step metadata
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('eval/base/v2_manipulation_metrics.json')
+          x=json.loads(p.read_text()); x['training_steps']=${{ matrix.max_steps }}
+          p.write_text(json.dumps(x,indent=2,allow_nan=True)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-base-convergence-${{ matrix.max_steps }}
+          path: |
+            outputs/base
+            samples/base
+            eval/base
+          retention-days: 30
+
+  select:
+    needs: checkpoint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-base-convergence-*
+          path: collected
+      - name: Select smallest quality-passing budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          rows=[]
+          for d in sorted(pathlib.Path('collected').glob('iris-v2-base-convergence-*')):
+              f=list(d.rglob('v2_manipulation_metrics.json'))
+              if len(f)!=1: raise RuntimeError((d,f))
+              x=json.loads(f[0].read_text())
+              rows.append({
+                  'training_steps':int(x['training_steps']),
+                  'generic_fidelity_gate_pass':bool(x['generic_fidelity_gate_pass']),
+                  'generic_distance_ratio':x['generic_distance_to_real_baseline_ratio'],
+                  'flux_ratio':x['synthetic_to_real_flux_median_ratio'],
+                  'active_area_ratio':x['synthetic_to_real_active_area_median_ratio'],
+                  'diversity_ratio':x['synthetic_to_real_diversity_ratio'],
+                  'saturation_fraction':x['synthetic_saturation_fraction_abs_gt_2900G'],
+                  'pil_distance':x['hard_pil_standardized_energy_distance'],
+                  'geometry_distance':x['hard_geometry_standardized_energy_distance'],
+              })
+          passing=[r for r in rows if r['generic_fidelity_gate_pass']]
+          selected=min(passing,key=lambda r:r['training_steps']) if passing else None
+          report={
+              'phase':'TRAIN-ONLY generator convergence; no forecast validation/test metrics used',
+              'runs':rows,
+              'selected_smallest_passing_budget':selected,
+              'status':'PASS' if selected else 'FAIL_REDESIGN_GENERATOR',
+          }
+          pathlib.Path('base_convergence_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-base-convergence-gate
+          path: base_convergence_gate.json
+          retention-days: 30

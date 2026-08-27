@@ -1,0 +1,63 @@
+name: IRIS v2 Freeze Nested Rolling Folds
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-build-nested-folds.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy
+      - name: Download immutable inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence folds
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          gh run download 32997936465 -n iris-v2-frozen-rolling-origin-folds -D folds
+          test -f folds/rolling_origin_summary.json
+      - name: Freeze nested folds
+        run: |
+          python iris-model/make_v2_fold_evidence.py \
+            --outer-fold-root folds --base-evidence-dir evidence \
+            --out-dir nested --inner-validation-fraction 0.15 --buffer-hours 36
+      - name: Verify build_records sees all three partitions
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+          PYTHONPATH=iris-model python - <<'PY'
+          from data import build_records
+          import pathlib, json
+          out=[]
+          for fd in sorted(pathlib.Path('nested').glob('fold_*')):
+              a=build_records(fd,'train'); b=build_records(fd,'validation'); c=build_records(fd,'test')
+              assert set(a.region_group_id).isdisjoint(set(b.region_group_id))
+              assert set(a.region_group_id).isdisjoint(set(c.region_group_id))
+              assert set(b.region_group_id).isdisjoint(set(c.region_group_id))
+              out.append({'fold':fd.name,'train':len(a),'validation':len(b),'test':len(c)})
+          print(json.dumps({'status':'PASS','folds':out},indent=2))
+          PY
+      - name: Hash artifact
+        run: find nested -type f -print0 | sort -z | xargs -0 sha256sum > nested/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-frozen-nested-folds
+          path: nested
+          retention-days: 30

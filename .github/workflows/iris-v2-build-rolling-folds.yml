@@ -1,0 +1,42 @@
+name: IRIS v2 Build Rolling-Origin Folds
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-build-rolling-folds.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  folds:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Build outcome-blind folds
+        run: |
+          python iris-model/build_rolling_folds.py \
+            --manifest evidence/data/derived/training_manifest.csv.gz \
+            --out-dir rolling_folds --buffer-hours 36 \
+            --train-fracs 0.55,0.65,0.75,0.85 --eval-width-frac 0.10
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-rolling-folds
+          path: rolling_folds
+          retention-days: 30

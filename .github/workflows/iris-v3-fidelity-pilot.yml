@@ -1,0 +1,77 @@
+name: IRIS v3 Positive-Only Fidelity Pilot
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths: ['.github/workflows/iris-v3-fidelity-pilot.yml']
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  arm:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [base, pil]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt >/tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen evidence
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D bundle
+          tar -xzf bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Train positive-only v3
+        run: |
+          EXTRA=""
+          if [ '${{ matrix.arm }}' = pil ]; then EXTRA='--lambda-pil 0.20'; fi
+          python iris-model/train_generator_v3.py --evidence-dir evidence --cache-dir cache/${{ matrix.arm }} --out-dir outputs --condition ${{ matrix.arm }} --seed 2026 --per-group 3 --batch-size 12 --base-channels 24 --diffusion-steps 120 --max-steps 500 --warmup-steps 80 --lambda-generic 0.12 $EXTRA --download-workers 16
+      - name: Sample
+        run: python iris-model/sample_generator.py --checkpoint outputs/${{ matrix.arm }}/generator.pt --evidence-dir evidence --out-dir samples/${{ matrix.arm }} --per-group 2 --max-groups 48 --batch-size 8 --sampling-steps 40 --seed 2026
+      - name: Hard fidelity audit
+        run: python iris-model/evaluate_generator_v2.py --evidence-dir evidence --cache-dir evalcache/${{ matrix.arm }} --synthetic-manifest samples/${{ matrix.arm }}/synthetic_manifest.csv --out-dir eval/${{ matrix.arm }} --real-per-group 1 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v3-${{ matrix.arm }}
+          path: |
+            outputs/${{ matrix.arm }}
+            samples/${{ matrix.arm }}
+            eval/${{ matrix.arm }}
+          retention-days: 30
+  gate:
+    needs: arm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'iris-v3-*', path: collected}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Compute train-only gates
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('collected')
+          def read(a):
+            p=list((root/f'iris-v3-{a}').rglob('v2_manipulation_metrics.json')); assert len(p)==1,p
+            return json.loads(p[0].read_text())
+          b,p=read('base'),read('pil')
+          # First gate is generic realism of BASE itself; second is incremental PIL manipulation.
+          def ratio(x,y): return x/y if y else float('inf')
+          base_flux=ratio(b['synthetic_unsigned_flux_proxy']['median'],b['real_unsigned_flux_proxy']['median'])
+          base_area=ratio(b['synthetic_strong_field_area_fraction']['median'],b['real_strong_field_area_fraction']['median'])
+          pil_imp=(b['hard_pil_standardized_energy_distance']-p['hard_pil_standardized_energy_distance'])/b['hard_pil_standardized_energy_distance']
+          report={'base_flux_ratio_to_real':base_flux,'base_strong_area_ratio_to_real':base_area,'base_saturation':b['synthetic_saturation_fraction_abs_gt_2900G'],'pil_relative_distance_improvement_vs_base':pil_imp,'base_generic_gate':bool(.5<=base_flux<=2 and .5<=base_area<=2 and b['synthetic_saturation_fraction_abs_gt_2900G']<.05),'pil_manipulation_gate':bool(pil_imp>=.15),'note':'train-only engineering gate; no validation/test forecasting used'}
+          pathlib.Path('v3_gate.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: iris-v3-fidelity-gate, path: v3_gate.json, retention-days: 30}

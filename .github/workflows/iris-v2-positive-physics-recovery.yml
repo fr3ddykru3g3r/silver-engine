@@ -1,0 +1,172 @@
+name: IRIS v2 Positive Physics Selection Recovery
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-positive-physics-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  recover-missing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Recover missing PIL 0.10 arm
+        run: |
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/shared --out-dir recovered/pil010/outputs \
+            --condition pil --lambda-pil 0.10 --lambda-hj 0.0 --seed 2026 \
+            --per-group 4 --batch-size 16 --physics-batch-size 16 --base-channels 16 \
+            --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 --download-workers 16
+          python iris-model/sample_generator.py \
+            --checkpoint recovered/pil010/outputs/generator.pt --evidence-dir evidence \
+            --out-dir recovered/pil010/samples --per-group 2 --max-groups 64 \
+            --batch-size 8 --sampling-steps 50 --seed 2026
+      - name: Recover missing HJ 0.50 arm using identical cached training set
+        run: |
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/shared --out-dir recovered/hj050/outputs \
+            --condition hj --lambda-hj 0.50 --lambda-pil 0.0 --seed 2026 \
+            --per-group 4 --batch-size 16 --physics-batch-size 16 --base-channels 16 \
+            --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 --download-workers 16
+          python iris-model/sample_generator.py \
+            --checkpoint recovered/hj050/outputs/generator.pt --evidence-dir evidence \
+            --out-dir recovered/hj050/samples --per-group 2 --max-groups 64 \
+            --batch-size 8 --sampling-steps 50 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-positive-physics-recovered-arms
+          path: recovered
+          retention-days: 30
+
+  select:
+    needs: recover-missing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU evaluation runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Download completed original arms and recovered arms
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p arms/base arms/pil050 arms/pil100 arms/hj010 arms/hj100 arms/recovered
+          gh run download 32998730393 -n iris-v2-positive-base -D arms/base
+          gh run download 32998730393 -n iris-v2-positive-pil050 -D arms/pil050
+          gh run download 32998730393 -n iris-v2-positive-pil100 -D arms/pil100
+          gh run download 33001484453 -n iris-v2-positive-hj-hj010 -D arms/hj010
+          gh run download 33001484453 -n iris-v2-positive-hj-hj100 -D arms/hj100
+      - uses: actions/download-artifact@v4
+        with:
+          name: iris-v2-positive-physics-recovered-arms
+          path: arms/recovered
+      - name: Re-evaluate every arm with corrected outcome-blind evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p corrected
+          manifest() { find "$1" -name synthetic_manifest.csv -print -quit; }
+          eval_arm() {
+            tag="$1"; src="$2"; m=$(manifest "$src"); test -n "$m"
+            python iris-model/evaluate_generator_v2_fixed.py \
+              --evidence-dir evidence --cache-dir cache_eval/shared \
+              --synthetic-manifest "$m" --out-dir "corrected/$tag" \
+              --real-per-group 2 --seed 2026
+          }
+          eval_arm base arms/base
+          eval_arm pil010 arms/recovered/pil010
+          eval_arm pil050 arms/pil050
+          eval_arm pil100 arms/pil100
+          eval_arm hj010 arms/hj010
+          eval_arm hj050 arms/recovered/hj050
+          eval_arm hj100 arms/hj100
+      - name: Freeze train-only PIL and HJ coefficients
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          tags=['base','pil010','pil050','pil100','hj010','hj050','hj100']
+          M={t:json.loads(pathlib.Path(f'corrected/{t}/v2_manipulation_metrics.json').read_text()) for t in tags}
+          b=M['base']
+          if not b['generic_fidelity_gate_pass']:
+              raise SystemExit('Positive-only BASE fails corrected generic fidelity; downstream physics claims blocked')
+          def row(tag, family, lam):
+              m=M[tag]
+              target='hard_pil_standardized_energy_distance' if family=='PIL' else 'hard_geometry_standardized_energy_distance'
+              cross='hard_geometry_standardized_energy_distance' if family=='PIL' else 'hard_pil_standardized_energy_distance'
+              bd=float(b[target]); bc=float(b[cross]); td=float(m[target]); cd=float(m[cross])
+              improvement=(bd-td)/bd if bd>0 else float('-inf')
+              cross_ratio=cd/max(bc,1e-9)
+              passed=bool(m['generic_fidelity_gate_pass'] and improvement>=0.20 and cross_ratio<=1.50)
+              return {'tag':tag,'lambda':lam,'target_distance':td,'target_improvement_vs_base':improvement,
+                      'cross_structure_distance_ratio_vs_base':cross_ratio,
+                      'generic_gate_pass':bool(m['generic_fidelity_gate_pass']),'pass':passed}
+          pil=[row('pil010','PIL',0.10),row('pil050','PIL',0.50),row('pil100','PIL',1.00)]
+          hj=[row('hj010','HJ',0.10),row('hj050','HJ',0.50),row('hj100','HJ',1.00)]
+          ppass=[r for r in pil if r['pass']]; hpass=[r for r in hj if r['pass']]
+          ps=min(ppass,key=lambda r:r['lambda']) if ppass else None
+          hs=min(hpass,key=lambda r:r['lambda']) if hpass else None
+          report={
+            'phase':'TRAIN_ONLY_POSITIVE_GENERATOR_PHYSICS_SELECTION',
+            'forecast_metrics_accessed':False,
+            'evaluator':'evaluate_generator_v2_fixed.py',
+            'selection_rule':'smallest lambda with corrected generic-fidelity PASS, >=20% independent hard target-distance improvement, and <=1.5x degradation of the other targeted structure',
+            'base':{'generic_gate_pass':bool(b['generic_fidelity_gate_pass']),
+                    'pil_distance':b['hard_pil_standardized_energy_distance'],
+                    'geometry_distance':b['hard_geometry_standardized_energy_distance']},
+            'PIL':{'candidates':pil,'selected_smallest_passing':ps,'status':'PASS' if ps else 'FAIL_REDESIGN_OR_EXTEND_GRID'},
+            'HJ':{'candidates':hj,'selected_smallest_passing':hs,'status':'PASS' if hs else 'FAIL_REDESIGN_OR_EXTEND_GRID'},
+          }
+          report['overall_status']='PASS' if ps and hs else 'INCOMPLETE'
+          pathlib.Path('positive_physics_selection_corrected.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          if report['overall_status']!='PASS':
+              raise SystemExit('One or more train-only physics manipulation gates failed; downstream benchmark intentionally blocked')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-positive-physics-selection-corrected
+          path: |
+            positive_physics_selection_corrected.json
+            corrected
+          retention-days: 30

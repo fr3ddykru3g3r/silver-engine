@@ -1,0 +1,59 @@
+name: IRIS v2 Freeze Rolling-Origin Outer Folds
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-build-outer-folds.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy
+      - name: Download integrity-locked evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Build frozen chronological outer folds
+        run: |
+          python iris-model/make_v2_rolling_folds.py \
+            --evidence-dir evidence --out-dir v2_outer_folds \
+            --initial-train-fraction 0.60 --outer-folds 4 --buffer-hours 36
+      - name: Structural leakage audit
+        run: |
+          python - <<'PY'
+          import pandas as pd, pathlib, json
+          root=pathlib.Path('v2_outer_folds')
+          eval_seen=set()
+          for fd in sorted(root.glob('fold_*')):
+              tr=pd.read_csv(fd/'train.csv.gz'); ev=pd.read_csv(fd/'evaluation.csv.gz')
+              a=set(tr.region_group_id.astype(str)); b=set(ev.region_group_id.astype(str))
+              assert not a & b, (fd,'train/eval group overlap')
+              assert not eval_seen & b, (fd,'outer eval group reused')
+              eval_seen |= b
+              assert tr.t_rec.max() < ev.t_rec.max()
+          print(json.dumps({'status':'PASS','outer_eval_groups_unique':len(eval_seen),'folds':4},indent=2))
+          PY
+      - name: Hash all fold files
+        run: find v2_outer_folds -type f -print0 | sort -z | xargs -0 sha256sum > v2_outer_folds/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-frozen-rolling-origin-folds
+          path: v2_outer_folds
+          retention-days: 30
