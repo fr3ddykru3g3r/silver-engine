@@ -47,6 +47,7 @@ def main():
     ap.add_argument('--physics-warmup-steps',type=int,default=200); ap.add_argument('--diffusion-steps',type=int,default=100)
     ap.add_argument('--base-channels',type=int,default=16); ap.add_argument('--physics-max-t-frac',type=float,default=0.25)
     ap.add_argument('--download-workers',type=int,default=16); ap.add_argument('--generator-dropout',type=float,default=0.0)
+    ap.add_argument('--init-checkpoint',default=None,help='Optional frozen BASE checkpoint. Loads weights before a physics-only fine-tune; architecture/diffusion settings must match.')
     args=ap.parse_args(); seed_all(args.seed)
 
     out=Path(args.out_dir); out.mkdir(parents=True,exist_ok=True)
@@ -60,7 +61,18 @@ def main():
 
     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model=ConditionalUNet(base=args.base_channels,dropout=args.generator_dropout).to(device)
-    ema=ConditionalUNet(base=args.base_channels,dropout=args.generator_dropout).to(device); ema.load_state_dict(model.state_dict()); ema.eval()
+    ema=ConditionalUNet(base=args.base_channels,dropout=args.generator_dropout).to(device)
+    init_meta=None
+    if args.init_checkpoint:
+        ck0=torch.load(args.init_checkpoint,map_location='cpu')
+        if int(ck0.get('base_channels',args.base_channels))!=args.base_channels: raise RuntimeError('init checkpoint base_channels mismatch')
+        if int(ck0.get('diffusion_steps',args.diffusion_steps))!=args.diffusion_steps: raise RuntimeError('init checkpoint diffusion_steps mismatch')
+        model.load_state_dict(ck0['ema'] if 'ema' in ck0 else ck0['model'])
+        ema.load_state_dict(model.state_dict())
+        init_meta={'path':str(args.init_checkpoint),'source_condition':ck0.get('condition'),'source_steps':ck0.get('steps'),'source_seed':ck0.get('seed')}
+    else:
+        ema.load_state_dict(model.state_dict())
+    ema.eval()
     diffusion=Diffusion(args.diffusion_steps,device=device)
     opt=torch.optim.AdamW(model.parameters(),lr=args.lr,weight_decay=1e-4)
     mix_rng=make_rng(device,args.seed+100003); phys_rng=make_rng(device,args.seed+200003)
@@ -90,11 +102,11 @@ def main():
             if step%100==0: print(json.dumps(rec),flush=True)
             if step>=args.max_steps: break
 
-    ck={'model':model.state_dict(),'ema':ema.state_dict(),'condition':args.condition,'seed':args.seed,'steps':step,'diffusion_steps':args.diffusion_steps,'base_channels':args.base_channels,'lambda_hj':args.lambda_hj,'lambda_pil':args.lambda_pil,'positive_only':True,'per_group':args.per_group,'v2':True}
+    ck={'model':model.state_dict(),'ema':ema.state_dict(),'condition':args.condition,'seed':args.seed,'steps':step,'diffusion_steps':args.diffusion_steps,'base_channels':args.base_channels,'lambda_hj':args.lambda_hj,'lambda_pil':args.lambda_pil,'positive_only':True,'per_group':args.per_group,'v2':True,'init_checkpoint':init_meta}
     torch.save(ck,out/'generator.pt')
     selected.to_csv(out/'training_subset.csv.gz',index=False,compression='gzip')
     (out/'training_history.json').write_text(json.dumps(history,indent=2)+'\n')
-    summary={'positive_only':True,'train_rows':len(selected),'train_groups':int(selected.region_group_id.nunique()),'steps':step,'condition':args.condition,'lambda_hj':args.lambda_hj,'lambda_pil':args.lambda_pil,'device':str(device)}
+    summary={'positive_only':True,'train_rows':len(selected),'train_groups':int(selected.region_group_id.nunique()),'steps':step,'condition':args.condition,'lambda_hj':args.lambda_hj,'lambda_pil':args.lambda_pil,'device':str(device),'init_checkpoint':init_meta}
     (out/'run_config.json').write_text(json.dumps(summary,indent=2)+'\n'); print(json.dumps(summary,indent=2),flush=True)
 
 if __name__=='__main__': main()
