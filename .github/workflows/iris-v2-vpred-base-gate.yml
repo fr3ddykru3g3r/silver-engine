@@ -1,0 +1,87 @@
+name: IRIS v2 V-Prediction BASE Fidelity Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-vpred-base-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train positive-only v-prediction BASE with min-SNR
+        run: |
+          python iris-model/train_generator_vpred.py \
+            --evidence-dir evidence --cache-dir cache --out-dir model \
+            --seed 2026 --per-group 8 --batch-size 16 --max-steps 2000 \
+            --diffusion-steps 100 --base-channels 16 --min-snr-gamma 5.0 --download-workers 16
+      - name: Sample matched positive-region audit set
+        run: |
+          python iris-model/sample_generator_vpred.py \
+            --checkpoint model/generator.pt --evidence-dir evidence --out-dir samples \
+            --per-group 2 --max-groups 64 --batch-size 8 --sampling-steps 100 --seed 2026
+      - name: Independent outcome-blind generic fidelity audit
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache_eval --synthetic-manifest samples/synthetic_manifest.csv \
+            --out-dir audit --real-per-group 2 --seed 2026
+      - name: Enforce generic fidelity before physics
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('audit/v2_manipulation_metrics.json'); m=json.loads(p.read_text())
+          report={
+            'phase':'TRAIN-ONLY objective redesign gate; no forecast validation/test accessed',
+            'objective':'v-prediction + min-SNR(gamma=5)',
+            'steps':2000,
+            'generic_gate':bool(m['generic_fidelity_gate_pass']),
+            'generic_ratio':m['generic_distance_to_real_baseline_ratio'],
+            'flux_ratio':m['synthetic_to_real_flux_median_ratio'],
+            'active_area_ratio':m['synthetic_to_real_active_area_median_ratio'],
+            'diversity_ratio':m['synthetic_to_real_diversity_ratio'],
+            'saturation':m['synthetic_saturation_fraction_abs_gt_2900G'],
+            'pil_distance':m['hard_pil_standardized_energy_distance'],
+            'geometry_distance':m['hard_geometry_standardized_energy_distance'],
+          }
+          pathlib.Path('vpred_base_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          if not report['generic_gate']:
+              raise SystemExit('V-prediction BASE failed generic fidelity; keep physics/downstream blocked and redesign generator family')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-vpred-base-gate
+          path: |
+            model
+            samples/sampling_summary.json
+            audit
+            vpred_base_gate.json
+          retention-days: 30
