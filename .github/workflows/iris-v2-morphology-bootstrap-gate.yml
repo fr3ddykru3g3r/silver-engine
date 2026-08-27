@@ -1,0 +1,98 @@
+name: IRIS v2 Morphology-Bootstrap BASE Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-morphology-bootstrap-gate.yml'
+      - 'iris-model/generate_morph_bootstrap.py'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Generate and audit morphology-preserving candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          for W in 2 4 6 8 10; do
+            TAG=$(printf 'w%02d' "$W")
+            python iris-model/generate_morph_bootstrap.py \
+              --evidence-dir evidence --cache-dir shared_cache --out-dir "candidate/${TAG}" \
+              --warp-px "$W" --residual-alpha 0.15 --residual-sigma 4.0 \
+              --per-group 2 --max-groups 64 --seed 2026 --download-workers 16
+            python iris-model/evaluate_generator_v2.py \
+              --evidence-dir evidence --cache-dir shared_cache \
+              --synthetic-manifest "candidate/${TAG}/synthetic_manifest.csv" \
+              --out-dir "audit/${TAG}" --real-per-group 2 --seed 2026
+            python iris-model/evaluate_synthetic_novelty.py \
+              --evidence-dir evidence --cache-dir shared_cache \
+              --synthetic-manifest "candidate/${TAG}/synthetic_manifest.csv" \
+              --out "novelty_${TAG}.json" --real-per-group 2 --seed 2026
+          done
+      - name: Select smallest passing warp
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib
+          rows=[]
+          for w in [2,4,6,8,10]:
+            tag=f'w{w:02d}'
+            p=json.loads(pathlib.Path(f'audit/{tag}/v2_manipulation_metrics.json').read_text())
+            n=json.loads(pathlib.Path(f'novelty_{tag}.json').read_text())
+            rows.append({
+              'warp_px':w,
+              'generic_gate':bool(p['generic_fidelity_gate_pass']),
+              'generic_distance_ratio':p['generic_distance_to_real_baseline_ratio'],
+              'flux_ratio':p['synthetic_to_real_flux_median_ratio'],
+              'active_area_ratio':p['synthetic_to_real_active_area_median_ratio'],
+              'diversity_ratio':p['synthetic_to_real_diversity_ratio'],
+              'novelty_ratio':n['novelty_ratio_to_real_nn_median'],
+              'novelty_gate':bool(n['novelty_gate_pass']),
+              'hard_pil_distance':p['hard_pil_standardized_energy_distance'],
+              'hard_geometry_distance':p['hard_geometry_standardized_energy_distance'],
+            })
+          passing=[r for r in rows if r['generic_gate'] and r['novelty_gate']]
+          chosen=min((r['warp_px'] for r in passing),default=None)
+          report={'phase':'TRAIN-ONLY morphology-bootstrap BASE selection; forecast validation/test not accessed','rows':rows,'chosen_smallest_passing_warp_px':chosen,'status':'PASS' if chosen is not None else 'FAIL','gate_rule':'generic_fidelity_gate_pass AND novelty_gate_pass; choose smallest warp','forecast_outcomes_accessed':False}
+          pathlib.Path('morphology_bootstrap_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          if chosen is None: raise SystemExit('No morphology-bootstrap candidate passes both generic fidelity and novelty; redesign required')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-morphology-bootstrap-gate
+          path: |
+            morphology_bootstrap_gate.json
+            novelty_*.json
+            audit
+            candidate/*/sampling_summary.json
+            candidate/*/synthetic_manifest.csv
+          retention-days: 30
