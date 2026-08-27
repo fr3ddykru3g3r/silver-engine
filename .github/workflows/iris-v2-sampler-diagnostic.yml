@@ -1,0 +1,88 @@
+name: IRIS v2 Sampler Fidelity Diagnostic
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-sampler-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download exact-6000 BASE and historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p exact evidence_bundle evidence
+          gh run download 33048697175 -n iris-v2-exact-6000-base -D exact
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f exact/outputs/base/generator.pt
+      - name: Sample DDIM-25 DDIM-50 DDIM-100 and ancestral-100
+        shell: bash
+        run: |
+          set -euo pipefail
+          for S in 25 50 100; do
+            python iris-model/sample_generator.py --checkpoint exact/outputs/base/generator.pt --evidence-dir evidence --out-dir samples/ddim${S} --per-group 1 --max-groups 32 --batch-size 8 --sampling-steps ${S} --seed 2026
+            python iris-model/evaluate_generator_v2.py --evidence-dir evidence --cache-dir cache_eval/ddim${S} --synthetic-manifest samples/ddim${S}/synthetic_manifest.csv --out-dir audit/ddim${S} --real-per-group 2 --seed 2026
+          done
+          python - <<'PY'
+          import pathlib, torch, numpy as np, pandas as pd, json, sys
+          sys.path.insert(0,'iris-model')
+          from data import build_records
+          from generator import ConditionalUNet, Diffusion
+          ck=torch.load('exact/outputs/base/generator.pt',map_location='cpu',weights_only=False)
+          device=torch.device('cpu'); model=ConditionalUNet(base=int(ck.get('base_channels',48))).to(device)
+          model.load_state_dict(ck.get('ema',ck['model'])); model.eval(); diff=Diffusion(int(ck.get('diffusion_steps',400)),device=device)
+          x=build_records('evidence','train'); x=x[x.label_m1plus_24h.eq(1)]
+          g=x.groupby('region_group_id').latitude_deg.median().reset_index().sort_values('region_group_id').head(32)
+          out=pathlib.Path('samples/ancestral100'); arr=out/'arrays'; arr.mkdir(parents=True,exist_ok=True); rows=[]
+          torch.manual_seed(2026)
+          for k,r in g.iterrows():
+              lab=torch.ones(1); lat=torch.tensor([float(r.latitude_deg)])
+              z=diff.sample(model,1,lab,lat).cpu().numpy().astype(np.float32)[0,0]
+              p=arr/f'a_{k:04d}.npy'; np.save(p,z)
+              rows.append({'synthetic_id':f'a_{k:04d}','array_path':str(p.resolve()),'source_region_group_id':r.region_group_id,'latitude_deg':float(r.latitude_deg),'label_m1plus_24h':1,'generator_condition':'base','generator_seed':2026,'sampling_steps':100})
+          pd.DataFrame(rows).to_csv(out/'synthetic_manifest.csv',index=False)
+          PY
+          python iris-model/evaluate_generator_v2.py --evidence-dir evidence --cache-dir cache_eval/ancestral100 --synthetic-manifest samples/ancestral100/synthetic_manifest.csv --out-dir audit/ancestral100 --real-per-group 2 --seed 2026
+      - name: Build outcome-blind sampler diagnostic table
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,pathlib,csv
+          rows=[]
+          for tag in ['ddim25','ddim50','ddim100','ancestral100']:
+              j=json.loads((pathlib.Path('audit')/tag/'v2_manipulation_metrics.json').read_text())
+              rows.append({'sampler':tag,'generic_gate':j['generic_fidelity_gate_pass'],'generic_ratio':j['generic_distance_to_real_baseline_ratio'],'flux_ratio':j['synthetic_to_real_flux_median_ratio'],'active_area_ratio':j['synthetic_to_real_active_area_median_ratio'],'diversity_ratio':j['synthetic_to_real_diversity_ratio'],'saturation':j['synthetic_saturation_fraction_abs_gt_2900G'],'pil_distance':j['hard_pil_standardized_energy_distance'],'geometry_distance':j['hard_geometry_standardized_energy_distance']})
+          pathlib.Path('sampler_diagnostic.json').write_text(json.dumps({'phase':'TRAIN-ONLY sampler diagnosis; no forecast validation/test accessed','rows':rows},indent=2)+'\n')
+          with open('sampler_diagnostic.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0].keys()));w.writeheader();w.writerows(rows)
+          print(json.dumps(rows,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-sampler-diagnostic
+          path: |
+            sampler_diagnostic.json
+            sampler_diagnostic.csv
+            audit
+          retention-days: 30
