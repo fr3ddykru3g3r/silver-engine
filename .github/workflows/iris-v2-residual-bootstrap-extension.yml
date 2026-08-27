@@ -5,6 +5,7 @@ on:
     branches: [iris-v2-physics-transfer]
     paths:
       - '.github/workflows/iris-v2-residual-bootstrap-extension.yml'
+      - 'iris-model/evaluate_synthetic_novelty.py'
   workflow_dispatch:
 
 permissions:
