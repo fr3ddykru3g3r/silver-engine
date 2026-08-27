@@ -76,7 +76,7 @@ jobs:
           python iris-model/evaluate_synthetic_novelty.py \
             --evidence-dir evidence --cache-dir cache_novelty \
             --synthetic-manifest candidate/${{ matrix.tag }}/synthetic_manifest.csv \
-            --out-json novelty_${{ matrix.tag }}.json --real-per-group 2 --seed 2026
+            --out novelty_${{ matrix.tag }}.json --real-per-group 2 --seed 2026
       - uses: actions/upload-artifact@v4
         with:
           name: iris-v2-morphphys-${{ matrix.tag }}
