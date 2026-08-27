@@ -1,0 +1,101 @@
+name: IRIS v2 Residual-Bootstrap BASE Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-residual-bootstrap-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  candidate:
+    strategy:
+      fail-fast: false
+      matrix:
+        alpha: ['0.05','0.10','0.20','0.30']
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Generate train-only residual-bootstrap positives
+        run: |
+          python iris-model/generate_residual_bootstrap.py \
+            --evidence-dir evidence --cache-dir cache --out-dir candidate \
+            --alpha '${{ matrix.alpha }}' --sigma 4.0 --per-group 2 --max-groups 64 --seed 2026 --download-workers 16
+      - name: Independent generic and physics audit
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache_eval --synthetic-manifest candidate/synthetic_manifest.csv \
+            --out-dir audit --real-per-group 2 --seed 2026
+      - name: Independent novelty audit
+        run: |
+          python iris-model/audit_novelty.py \
+            --evidence-dir evidence --cache-dir cache_novelty --synthetic-manifest candidate/synthetic_manifest.csv \
+            --out novelty.json --real-per-group 2 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-resboot-a${{ matrix.alpha }}
+          path: |
+            candidate
+            audit
+            novelty.json
+          retention-days: 30
+
+  summarize:
+    needs: candidate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-resboot-*
+          path: collected
+      - name: Select smallest train-only perturbation that is faithful and non-duplicate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,pathlib,csv
+          root=pathlib.Path('collected'); rows=[]
+          for d in sorted(root.glob('iris-v2-resboot-*')):
+              fs=list(d.rglob('v2_manipulation_metrics.json')); ns=list(d.rglob('novelty.json')); ss=list(d.rglob('sampling_summary.json'))
+              if len(fs)!=1 or len(ns)!=1 or len(ss)!=1: raise RuntimeError((d,fs,ns,ss))
+              f=json.loads(fs[0].read_text()); n=json.loads(ns[0].read_text()); s=json.loads(ss[0].read_text())
+              rows.append({'alpha':float(s['alpha']),'generic_gate':bool(f['generic_fidelity_gate_pass']),'generic_ratio':f['generic_distance_to_real_baseline_ratio'],'flux_ratio':f['synthetic_to_real_flux_median_ratio'],'active_ratio':f['synthetic_to_real_active_area_median_ratio'],'diversity_ratio':f['synthetic_to_real_diversity_ratio'],'novelty_gate':bool(n['novelty_gate_pass']),'novelty_ratio':n['novelty_ratio_to_real_nn_median'],'pil_distance':f['hard_pil_standardized_energy_distance'],'geometry_distance':f['hard_geometry_standardized_energy_distance']})
+          eligible=[r for r in rows if r['generic_gate'] and r['novelty_gate']]
+          chosen=min(eligible,key=lambda r:r['alpha']) if eligible else None
+          report={'phase':'TRAIN-ONLY generator-family gate; no forecast validation/test accessed','family':'residual-bootstrap','rows':rows,'chosen':chosen,'status':'PASS' if chosen else 'FAIL'}
+          pathlib.Path('residual_bootstrap_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('residual_bootstrap_gate.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          if not chosen: raise SystemExit('Residual-bootstrap family failed fidelity+novelty gate; downstream remains blocked')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-residual-bootstrap-gate
+          path: |
+            residual_bootstrap_gate.json
+            residual_bootstrap_gate.csv
+          retention-days: 30
