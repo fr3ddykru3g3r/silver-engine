@@ -1,0 +1,119 @@
+name: IRIS v3 CVAE Fidelity Pilot
+
+on:
+  push:
+    branches: [iris-v3-cvae]
+    paths:
+      - 'iris-model/cvae.py'
+      - 'iris-model/train_cvae_physics.py'
+      - 'iris-model/sample_cvae.py'
+      - '.github/workflows/iris-v3-cvae-fidelity-pilot.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v3-cvae
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Syntax and architecture self-check
+        run: |
+          python -m py_compile iris-model/cvae.py iris-model/train_cvae_physics.py iris-model/sample_cvae.py
+          PYTHONPATH=iris-model python - <<'PY'
+          import torch
+          from cvae import MagnetogramCVAE
+          m=MagnetogramCVAE(base=12,latent_dim=48)
+          x=torch.randn(3,1,128,128).clamp(-1,1); lat=torch.tensor([-15.,5.,22.])
+          y,mu,lv=m(x,lat)
+          assert y.shape==x.shape and mu.shape==(3,48) and torch.isfinite(y).all()
+          loss=(y-x).abs().mean()+1e-4*(mu.square().mean()+lv.square().mean()); loss.backward()
+          assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in m.parameters())
+          print('CVAE architecture/gradient self-check PASS')
+          PY
+      - name: Download frozen historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train positive-only reconstruction-first CVAE
+        run: |
+          PYTHONPATH=iris-model python iris-model/train_cvae_physics.py \
+            --evidence-dir evidence --cache-dir cache/train --out-dir outputs/base \
+            --condition base --seed 2026 --per-group 5 --batch-size 16 --steps 700 \
+            --base 12 --latent-dim 48 --beta-kl 0.0002 --lambda-strong 0.25 --lambda-grad 0.10 --download-workers 12
+      - name: Sample and independently audit latent-noise ladder
+        shell: bash
+        run: |
+          set -euo pipefail
+          for N in 005 010 020 030; do
+            case $N in
+              005) S=0.05 ;;
+              010) S=0.10 ;;
+              020) S=0.20 ;;
+              030) S=0.30 ;;
+            esac
+            PYTHONPATH=iris-model python iris-model/sample_cvae.py \
+              --checkpoint outputs/base/cvae.pt --evidence-dir evidence --cache-dir cache/sample \
+              --out-dir samples/n${N} --latent-bank-per-group 4 --per-source-group 2 --max-groups 48 \
+              --noise-scale $S --cross-region-mix 0.08 --seed 2026
+            PYTHONPATH=iris-model python iris-model/evaluate_generator_v2.py \
+              --evidence-dir evidence --cache-dir cache/eval --synthetic-manifest samples/n${N}/synthetic_manifest.csv \
+              --out-dir eval/n${N} --real-per-group 2 --seed 2026
+          done
+      - name: Select train-only latent sampling scale
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv
+          rows=[]
+          for tag in ['005','010','020','030']:
+            m=json.loads((pathlib.Path('eval')/f'n{tag}'/'v2_manipulation_metrics.json').read_text())
+            rows.append({
+              'tag':tag,'noise_scale':float(tag)/100.0,
+              'generic_distance':m['generic_standardized_energy_distance'],
+              'pil_distance':m['hard_pil_standardized_energy_distance'],
+              'geometry_distance':m['hard_geometry_standardized_energy_distance'],
+              'flux_ratio':m['synthetic_to_real_flux_median_ratio'],
+              'area_ratio':m['synthetic_to_real_active_area_median_ratio'],
+              'diversity_ratio':m['synthetic_to_real_diversity_ratio'],
+              'nearest_real':m['synthetic_mean_nearest_real_coarse_distance'],
+              'saturation':m['synthetic_saturation_fraction_abs_gt_2900G'],
+            })
+          for r in rows:
+            r['broad_fidelity_gate']=bool(0.65<=r['flux_ratio']<=1.50 and 0.60<=r['area_ratio']<=1.60 and 0.45<=r['diversity_ratio']<=1.60 and r['saturation']<0.01 and r['generic_distance']<=1.25)
+          ok=[r for r in rows if r['broad_fidelity_gate']]
+          chosen=min(ok,key=lambda z:z['generic_distance']) if ok else min(rows,key=lambda z:z['generic_distance'])
+          report={'phase':'TRAIN-ONLY CVAE fidelity/noise selection; no forecast validation/test accessed','rows':rows,'chosen':chosen,'status':'PASS' if ok else 'FAIL'}
+          pathlib.Path('cvae_fidelity_pilot.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('cvae_fidelity_pilot.csv','w',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v3-cvae-fidelity-pilot
+          path: |
+            outputs/base
+            samples/*/sampling_summary.json
+            eval
+            cvae_fidelity_pilot.json
+            cvae_fidelity_pilot.csv
+          retention-days: 30
