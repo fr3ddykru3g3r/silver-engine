@@ -1,0 +1,147 @@
+name: IRIS v2 Morphology Physics Selection
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-morph-physics-selection.yml'
+      - 'iris-model/generate_morph_physics_selected.py'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  arm:
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - tag: pil010
+            condition: pil
+            lambda_physics: '0.10'
+          - tag: pil050
+            condition: pil
+            lambda_physics: '0.50'
+          - tag: pil100
+            condition: pil
+            lambda_physics: '1.00'
+          - tag: hj010
+            condition: hj
+            lambda_physics: '0.10'
+          - tag: hj050
+            condition: hj
+            lambda_physics: '0.50'
+          - tag: hj100
+            condition: hj
+            lambda_physics: '1.00'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Generate physics-selected morphology candidate
+        run: |
+          python iris-model/generate_morph_physics_selected.py \
+            --evidence-dir evidence --cache-dir cache --out-dir candidate/${{ matrix.tag }} \
+            --condition '${{ matrix.condition }}' --lambda-physics '${{ matrix.lambda_physics }}' \
+            --warp-px 2 --residual-alpha 0.15 --candidates 8 --per-group 2 --max-groups 64 --seed 2026
+      - name: Independent hard manipulation audit
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache_eval \
+            --synthetic-manifest candidate/${{ matrix.tag }}/synthetic_manifest.csv \
+            --out-dir audit/${{ matrix.tag }} --real-per-group 2 --seed 2026
+      - name: Independent novelty audit
+        run: |
+          python iris-model/evaluate_synthetic_novelty.py \
+            --evidence-dir evidence --cache-dir cache_novelty \
+            --synthetic-manifest candidate/${{ matrix.tag }}/synthetic_manifest.csv \
+            --out-json novelty_${{ matrix.tag }}.json --real-per-group 2 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-morphphys-${{ matrix.tag }}
+          path: |
+            candidate/${{ matrix.tag }}
+            audit/${{ matrix.tag }}
+            novelty_${{ matrix.tag }}.json
+          retention-days: 30
+
+  summarize:
+    needs: arm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download BASE and candidate artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p base_gate collected
+          gh run download 33098031870 -n iris-v2-morphology-bootstrap-gate -D base_gate
+          gh run download '${{ github.run_id }}' -p 'iris-v2-morphphys-*' -D collected
+      - name: Select train-only PIL and HJ coefficients
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv
+          base=json.loads(pathlib.Path('base_gate/audit/w02/v2_manipulation_metrics.json').read_text())
+          base_nov=json.loads(pathlib.Path('base_gate/novelty_w02.json').read_text())
+          if not base['generic_fidelity_gate_pass'] or not base_nov['novelty_gate_pass']:
+              raise SystemExit('Frozen morphology BASE no longer passes fidelity+novelty gate')
+          bp=float(base['hard_pil_standardized_energy_distance']); bg=float(base['hard_geometry_standardized_energy_distance'])
+          rows=[]
+          for condition in ['pil','hj']:
+              for lam,tag in [(0.10,f'{condition}010'),(0.50,f'{condition}050'),(1.00,f'{condition}100')]:
+                  root=pathlib.Path('collected')/f'iris-v2-morphphys-{tag}'
+                  fs=list(root.rglob('v2_manipulation_metrics.json')); ns=list(root.rglob(f'novelty_{tag}.json'))
+                  if len(fs)!=1 or len(ns)!=1: raise RuntimeError((tag,fs,ns))
+                  m=json.loads(fs[0].read_text()); n=json.loads(ns[0].read_text())
+                  pd=float(m['hard_pil_standardized_energy_distance']); gd=float(m['hard_geometry_standardized_energy_distance'])
+                  intended=(bp-pd)/max(bp,1e-9) if condition=='pil' else (bg-gd)/max(bg,1e-9)
+                  cross=gd/max(bg,1e-9) if condition=='pil' else pd/max(bp,1e-9)
+                  passed=bool(m['generic_fidelity_gate_pass'] and n['novelty_gate_pass'] and intended>=0.20 and cross<=1.50)
+                  rows.append({'condition':condition,'lambda':lam,'tag':tag,'pil_distance':pd,'geometry_distance':gd,'intended_improvement_vs_base':intended,'cross_structure_ratio_vs_base':cross,'generic_gate':bool(m['generic_fidelity_gate_pass']),'novelty_gate':bool(n['novelty_gate_pass']),'pass':passed})
+          chosen={}
+          for condition in ['pil','hj']:
+              eligible=[r for r in rows if r['condition']==condition and r['pass']]
+              chosen[condition]=min(eligible,key=lambda z:z['lambda']) if eligible else None
+          report={'phase':'TRAIN-ONLY morphology physics coefficient selection; no forecast validation/test accessed','base':{'warp_px':2,'pil_distance':bp,'geometry_distance':bg,'generic_gate':True,'novelty_gate':True},'rows':rows,'chosen':chosen,'status':'PASS' if all(chosen.values()) else 'FAIL','gate_rule':'generic fidelity AND novelty AND >=20% intended hard-distance improvement vs BASE AND <=1.5x cross-structure degradation; choose smallest lambda','forecast_outcomes_accessed':False}
+          pathlib.Path('morph_physics_selection.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('morph_physics_selection.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          if report['status']!='PASS': raise SystemExit('At least one train-only physics manipulation gate failed; downstream remains blocked')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-morph-physics-selection
+          path: |
+            morph_physics_selection.json
+            morph_physics_selection.csv
+          retention-days: 30
