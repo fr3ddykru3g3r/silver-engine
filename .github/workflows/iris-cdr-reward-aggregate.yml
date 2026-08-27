@@ -1,0 +1,61 @@
+name: IRIS CDR Reward Sensitivity Aggregate
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths: ['.github/workflows/iris-cdr-reward-aggregate.yml']
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas
+      - name: Download all 40 validation-only sensitivity artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p rewards
+          gh run download 32957443391 -D rewards
+          find rewards -name '*.tar.gz' -print0 | while IFS= read -r -d '' f; do mkdir -p "${f%.tar.gz}.unpack"; tar -xzf "$f" -C "${f%.tar.gz}.unpack"; done
+      - name: Aggregate validation metrics
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          import pandas as pd
+          rows=[]
+          for f in Path('rewards').rglob('metrics.json'):
+              m=json.loads(f.read_text())
+              s=str(f)
+              hit=re.search(r'iris-cdr-reward-([^/\\.]+)',s)
+              name=hit.group(1) if hit else f.parent.name
+              v=m.get('validation_selected',{})
+              v05=m.get('validation_at_0.5',{})
+              cfg=m.get('paper_config',{})
+              rows.append({'condition':name,'tp_reward':cfg.get('tp'),'tn_reward':cfg.get('tn'),'fp_reward':cfg.get('fp'),'fn_reward':cfg.get('fn'),
+                           'threshold':m.get('validation_selected_threshold'),'tss':v.get('tss'),'hss':v.get('hss'),'auroc':v.get('auroc'),'auprc':v.get('auprc'),'brier':v.get('brier'),'bss':v.get('bss'),'ece10':v.get('ece10'),'tss_at_0.5':v05.get('tss')})
+          df=pd.DataFrame(rows).drop_duplicates('condition').sort_values(['tss','auroc'],ascending=[False,False])
+          if len(df)!=40: raise SystemExit(f'Expected 40 conditions, found {len(df)}')
+          Path('reward_summary').mkdir()
+          df.to_csv('reward_summary/reward_sensitivity.csv',index=False)
+          best=df.iloc[0].to_dict()
+          json.dump({'conditions':len(df),'selection':'validation TSS only; NEVER evaluate all reward variants on test','best_validation_condition':best,'top10':df.head(10).to_dict('records')},open('reward_summary/summary.json','w'),indent=2,allow_nan=True)
+          print(df.head(10).to_string(index=False)); print(json.dumps(best,indent=2,allow_nan=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-cdr-reward-sensitivity-summary
+          path: reward_summary
+          retention-days: 30

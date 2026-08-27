@@ -1,0 +1,73 @@
+name: IRIS CDR One-Shot Locked Test
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths:
+      - '.github/workflows/iris-cdr-locked-test.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  locked-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision|shap)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download exact 40x36m evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32950459311 -n iris-cdr-feature-evidence -D evidence_bundle
+          tar -xzf evidence_bundle/iris-cdr-feature-evidence.tar.gz -C evidence
+          test -f evidence/data/derived/cdr_sequence_index.csv.gz
+          test -f evidence/data/derived/cdr_feature_metadata.csv.gz
+      - name: Download frozen validation-selected checkpoints
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p models downloads
+          for name in supervised_2 cdr_2 supervised_10 cdr_10; do
+            mkdir -p "downloads/$name" "models/$name"
+            gh run download 32957029797 -n "iris-$name" -D "downloads/$name"
+            tar -xzf "downloads/$name/iris-$name.tar.gz" -C "models/$name"
+          done
+          test -f models/supervised_2/outputs/supervised_2/model.pt
+          test -f models/cdr_2/outputs/cdr_2/cdr_model.pt
+          test -f models/supervised_10/outputs/supervised_10/model.pt
+          test -f models/cdr_10/outputs/cdr_10/cdr_model.pt
+      - name: Verify locked protocol and compile
+        run: |
+          test -f LOCKED_TEST_PROTOCOL_2026-08-26.md
+          python -m compileall -q iris-model
+      - name: Evaluate test once with validation-frozen decisions
+        run: |
+          python iris-model/evaluate_cdr_locked_test.py \
+            --evidence-dir evidence \
+            --models-root models \
+            --out-dir locked_test \
+            --bootstrap 5000
+      - name: Package immutable test outputs
+        run: |
+          cp LOCKED_TEST_PROTOCOL_2026-08-26.md locked_test/
+          sha256sum locked_test/* > locked_test/SHA256SUMS.txt
+          tar -czf iris-cdr-locked-test.tar.gz locked_test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-cdr-locked-test
+          path: iris-cdr-locked-test.tar.gz
+          retention-days: 30

@@ -1,0 +1,272 @@
+name: IRIS CDR Full Reward Sensitivity
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths:
+      - '.github/workflows/iris-cdr-reward-sensitivity.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  sensitivity:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - name: tp_5
+            tp: 5
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_6
+            tp: 6
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_7
+            tp: 7
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_8
+            tp: 8
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_9
+            tp: 9
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_10
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_11
+            tp: 11
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_12
+            tp: 12
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_13
+            tp: 13
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_14
+            tp: 14
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tp_15
+            tp: 15
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tn_1
+            tp: 10
+            tn: 1
+            fp: -20
+            fn: -15
+          - name: tn_2
+            tp: 10
+            tn: 2
+            fp: -20
+            fn: -15
+          - name: tn_3
+            tp: 10
+            tn: 3
+            fp: -20
+            fn: -15
+          - name: tn_4
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: tn_5
+            tp: 10
+            tn: 5
+            fp: -20
+            fn: -15
+          - name: tn_6
+            tp: 10
+            tn: 6
+            fp: -20
+            fn: -15
+          - name: tn_7
+            tp: 10
+            tn: 7
+            fp: -20
+            fn: -15
+          - name: fp_m15
+            tp: 10
+            tn: 4
+            fp: -15
+            fn: -15
+          - name: fp_m16
+            tp: 10
+            tn: 4
+            fp: -16
+            fn: -15
+          - name: fp_m17
+            tp: 10
+            tn: 4
+            fp: -17
+            fn: -15
+          - name: fp_m18
+            tp: 10
+            tn: 4
+            fp: -18
+            fn: -15
+          - name: fp_m19
+            tp: 10
+            tn: 4
+            fp: -19
+            fn: -15
+          - name: fp_m20
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: fp_m21
+            tp: 10
+            tn: 4
+            fp: -21
+            fn: -15
+          - name: fp_m22
+            tp: 10
+            tn: 4
+            fp: -22
+            fn: -15
+          - name: fp_m23
+            tp: 10
+            tn: 4
+            fp: -23
+            fn: -15
+          - name: fp_m24
+            tp: 10
+            tn: 4
+            fp: -24
+            fn: -15
+          - name: fp_m25
+            tp: 10
+            tn: 4
+            fp: -25
+            fn: -15
+          - name: fn_m10
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -10
+          - name: fn_m11
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -11
+          - name: fn_m12
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -12
+          - name: fn_m13
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -13
+          - name: fn_m14
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -14
+          - name: fn_m15
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -15
+          - name: fn_m16
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -16
+          - name: fn_m17
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -17
+          - name: fn_m18
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -18
+          - name: fn_m19
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -19
+          - name: fn_m20
+            tp: 10
+            tn: 4
+            fp: -20
+            fn: -20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision|shap)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Wait for exact 40x36m CDR evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p cdr_bundle evidence
+          ok=0
+          for i in $(seq 1 180); do
+            rm -rf cdr_bundle/*
+            if gh run download 32950459311 -n iris-cdr-feature-evidence -D cdr_bundle 2>/dev/null; then ok=1; break; fi
+            echo "CDR evidence not ready ($i/180); waiting 60 s"
+            sleep 60
+          done
+          test "$ok" = 1
+          tar -xzf cdr_bundle/iris-cdr-feature-evidence.tar.gz -C evidence
+      - name: Run one-at-a-time reward perturbation on validation only
+        run: |
+          python iris-model/train_cdr.py \
+            --model cdr_transformer_10 \
+            --evidence-dir evidence \
+            --cache-dir cache \
+            --out-dir outputs/${{ matrix.name }} \
+            --seed 2026 \
+            --train-per-group 1 \
+            --eval-per-group 2 \
+            --pos-cap 1 \
+            --seq-len 40 \
+            --reduced-update-rate \
+            --reward-tp ${{ matrix.tp }} \
+            --reward-tn ${{ matrix.tn }} \
+            --reward-fp ${{ matrix.fp }} \
+            --reward-fn ${{ matrix.fn }}
+      - name: Package
+        run: tar -czf iris-cdr-reward-${{ matrix.name }}.tar.gz outputs/${{ matrix.name }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-cdr-reward-${{ matrix.name }}
+          path: iris-cdr-reward-${{ matrix.name }}.tar.gz
+          retention-days: 30

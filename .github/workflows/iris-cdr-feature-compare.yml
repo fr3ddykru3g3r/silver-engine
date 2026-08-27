@@ -1,0 +1,77 @@
+name: IRIS CDR Feature Comparator Validation
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths:
+      - 'iris-model/train_cdr.py'
+      - 'iris-model/train_cdr_supervised.py'
+      - 'iris-model/cdr_data.py'
+      - 'iris-model/cdr_models.py'
+      - 'iris-model/cdr.py'
+      - '.github/workflows/iris-cdr-feature-compare.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [supervised_2, cdr_2, supervised_10, cdr_10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Wait for and download exact 40x36m CDR evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p cdr_bundle evidence
+          ok=0
+          for i in $(seq 1 180); do
+            rm -rf cdr_bundle/*
+            if gh run download 32950459311 -n iris-cdr-feature-evidence -D cdr_bundle 2>/dev/null; then ok=1; break; fi
+            echo "CDR evidence not ready yet ($i/180); waiting 60 s"
+            sleep 60
+          done
+          test "$ok" = 1
+          tar -xzf cdr_bundle/iris-cdr-feature-evidence.tar.gz -C evidence
+          test -f evidence/data/derived/cdr_sequence_index.csv.gz
+          test -f evidence/data/derived/cdr_feature_metadata.csv.gz
+      - name: Compile
+        run: python -m compileall -q iris-model
+      - name: Train validation-only comparator
+        shell: bash
+        run: |
+          set -e
+          case "${{ matrix.arm }}" in
+            supervised_2)
+              python iris-model/train_cdr_supervised.py --model transformer_2 --evidence-dir evidence --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --epochs 40 --train-per-group 2 --eval-per-group 4 --pos-cap 1 ;;
+            cdr_2)
+              python iris-model/train_cdr.py --model cdr_transformer_2 --evidence-dir evidence --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --train-per-group 2 --eval-per-group 4 --pos-cap 1 --seq-len 40 ;;
+            supervised_10)
+              python iris-model/train_cdr_supervised.py --model transformer_10 --evidence-dir evidence --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --epochs 40 --train-per-group 2 --eval-per-group 4 --pos-cap 1 ;;
+            cdr_10)
+              python iris-model/train_cdr.py --model cdr_transformer_10 --evidence-dir evidence --cache-dir cache --out-dir outputs/${{ matrix.arm }} --seed 2026 --train-per-group 2 --eval-per-group 4 --pos-cap 1 --seq-len 40 ;;
+          esac
+      - name: Package
+        run: tar -czf iris-${{ matrix.arm }}.tar.gz outputs/${{ matrix.arm }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-${{ matrix.arm }}
+          path: iris-${{ matrix.arm }}.tar.gz
+          retention-days: 30

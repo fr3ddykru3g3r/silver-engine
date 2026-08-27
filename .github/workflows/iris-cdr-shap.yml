@@ -1,0 +1,79 @@
+name: IRIS CDR SHAP Interpretation
+
+on:
+  push:
+    branches: [iris-cdr-v1]
+    paths:
+      - 'iris-model/shap_cdr.py'
+      - '.github/workflows/iris-cdr-shap.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  shap:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [supervised_10, cdr_10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-cdr-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PyTorch, SHAP and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Wait for latest successful feature-comparator run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 180); do
+            RID=$(gh run list --workflow "IRIS CDR Feature Comparator Validation" --branch iris-cdr-v1 --limit 1 --json databaseId --jq '.[0].databaseId')
+            STATUS=$(gh run view "$RID" --json status,conclusion --jq '.status+":"+(.conclusion//"")')
+            echo "Comparator $RID => $STATUS"
+            if [ "$STATUS" = "completed:success" ]; then echo "$RID" > /tmp/comparator_run; break; fi
+            if [[ "$STATUS" == completed:* ]] && [ "$STATUS" != "completed:success" ]; then echo "latest comparator failed"; exit 1; fi
+            sleep 60
+          done
+          test -s /tmp/comparator_run
+      - name: Download selected checkpoint and exact CDR evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RID=$(cat /tmp/comparator_run)
+          mkdir -p model_bundle model_artifact cdr_bundle evidence
+          gh run download "$RID" -n iris-${{ matrix.arm }} -D model_bundle
+          tar -xzf model_bundle/iris-${{ matrix.arm }}.tar.gz -C model_artifact
+          gh run download 32950459311 -n iris-cdr-feature-evidence -D cdr_bundle
+          tar -xzf cdr_bundle/iris-cdr-feature-evidence.tar.gz -C evidence
+          test -f model_artifact/outputs/${{ matrix.arm }}/$( [ "${{ matrix.arm }}" = "cdr_10" ] && echo cdr_model.pt || echo model.pt ) || true
+      - name: Resolve checkpoint and run validation-only SHAP
+        shell: bash
+        run: |
+          if [ "${{ matrix.arm }}" = "cdr_10" ]; then CK=$(find model_artifact -name cdr_model.pt | head -1); else CK=$(find model_artifact -name model.pt | head -1); fi
+          test -n "$CK"
+          python iris-model/shap_cdr.py \
+            --checkpoint "$CK" \
+            --evidence-dir evidence \
+            --out-dir shap_outputs/${{ matrix.arm }} \
+            --model transformer_10 \
+            --partition validation \
+            --max-samples 128 \
+            --background 64 \
+            --seed 2026
+      - name: Package
+        run: tar -czf iris-shap-${{ matrix.arm }}.tar.gz shap_outputs/${{ matrix.arm }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-shap-${{ matrix.arm }}
+          path: iris-shap-${{ matrix.arm }}.tar.gz
+          retention-days: 30
