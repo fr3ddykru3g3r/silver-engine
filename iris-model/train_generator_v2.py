@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import math
 from pathlib import Path
 
 import numpy as np
@@ -79,7 +80,6 @@ def mixed_sampler(records: pd.DataFrame, target_positive_fraction: float, seed: 
 
 
 def positive_group_sampler(records: pd.DataFrame, seed: int):
-    """Positive-only replacement sampler with equal expected mass per physical region."""
     sizes = records.groupby('region_group_id').size().to_dict()
     weights = np.asarray([1.0/max(1, int(sizes[g])) for g in records.region_group_id], dtype=np.float64)
     gen = torch.Generator().manual_seed(seed)
@@ -101,8 +101,6 @@ def next_or_restart(iterator, loader):
 
 
 def make_rng(device: torch.device, seed: int) -> torch.Generator:
-    # Separate diffusion RNG streams prevent the extra physics forward pass from
-    # changing the denoising noise/timestep sequence in BASE vs constrained arms.
     g = torch.Generator(device=device)
     g.manual_seed(seed)
     return g
@@ -200,7 +198,12 @@ def main():
     history = []
     step = 0
 
-    for epoch in range(1, args.epochs+1):
+    steps_per_epoch = max(1, len(mixed_loader))
+    effective_epochs = args.epochs
+    if args.max_steps > 0:
+        effective_epochs = max(args.epochs, int(math.ceil(args.max_steps / steps_per_epoch)))
+
+    for epoch in range(1, effective_epochs+1):
         for batch in mixed_loader:
             x = batch['x'].to(device)
             y = batch['y'].to(device)
@@ -259,6 +262,9 @@ def main():
         if args.max_steps and step >= args.max_steps:
             break
 
+    if args.max_steps and step != args.max_steps:
+        raise RuntimeError(f'Exact max-step budget not reached: requested={args.max_steps}, completed={step}')
+
     ck = {
         'model': model.state_dict(),
         'ema': ema.state_dict(),
@@ -277,7 +283,7 @@ def main():
     }
     torch.save(ck, out/'generator.pt')
     (out/'training_history.json').write_text(json.dumps(history, indent=2)+'\n')
-    (out/'run_config.json').write_text(json.dumps(vars(args) | {'device': str(device), 'steps_completed': step}, indent=2)+'\n')
+    (out/'run_config.json').write_text(json.dumps(vars(args) | {'device': str(device), 'steps_completed': step, 'effective_epochs': effective_epochs, 'steps_per_epoch': steps_per_epoch}, indent=2)+'\n')
     print(json.dumps({'condition': args.condition,'device': str(device),'steps': step,'checkpoint': str(out/'generator.pt')}, indent=2), flush=True)
 
 
