@@ -1,0 +1,196 @@
+name: IRIS v2 Nested Morphology PIL Transfer
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-nested-morph-transfer.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  physics-selection:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        fold: [1,2,3,4]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable evidence and frozen rolling fold
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source_bundle source outer
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D source_bundle
+          tar -xzf source_bundle/iris-historical-evidence-integrity.tar.gz -C source
+          gh run download 32997936465 -n iris-v2-frozen-rolling-origin-folds -D outer
+          test -f outer/fold_${{ matrix.fold }}/train.csv.gz
+      - name: Build nested connected-region evidence
+        run: |
+          python iris-model/make_nested_fold_evidence.py --evidence-dir source --outer-fold-dir outer/fold_${{ matrix.fold }} --out-dir nested --inner-train-fraction 0.80 --buffer-hours 36
+      - name: Regenerate and audit morphology BASE on inner train only
+        run: |
+          python iris-model/generate_morph_bootstrap.py --evidence-dir nested --cache-dir cache --out-dir base --warp-px 2 --residual-alpha 0.15 --residual-sigma 4 --per-group 2 --max-groups 64 --seed 2026 --download-workers 16
+          python iris-model/evaluate_generator_v2.py --evidence-dir nested --cache-dir cache --synthetic-manifest base/synthetic_manifest.csv --out-dir audit/base --real-per-group 2 --seed 2026
+          python iris-model/evaluate_synthetic_novelty.py --evidence-dir nested --cache-dir cache --synthetic-manifest base/synthetic_manifest.csv --out audit/base_novelty.json --real-per-group 2 --seed 2026
+          python iris-model/evaluate_cycle_aware_hj.py --evidence-dir nested --cache-dir cache --synthetic-manifest base/synthetic_manifest.csv --out-dir audit/base_hj --real-per-group 2 --seed 2026
+      - name: Train-only PIL coefficient candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in '010 0.10' '050 0.50' '100 1.00'; do
+            set -- $spec; T=$1; L=$2
+            python iris-model/generate_morph_physics_selected.py --evidence-dir nested --cache-dir cache --out-dir candidate/pil${T} --condition pil --lambda-physics "$L" --warp-px 2 --residual-alpha 0.15 --per-group 2 --max-groups 64 --seed 2026
+            python iris-model/evaluate_generator_v2.py --evidence-dir nested --cache-dir cache --synthetic-manifest candidate/pil${T}/synthetic_manifest.csv --out-dir audit/pil${T} --real-per-group 2 --seed 2026
+            python iris-model/evaluate_synthetic_novelty.py --evidence-dir nested --cache-dir cache --synthetic-manifest candidate/pil${T}/synthetic_manifest.csv --out audit/pil${T}_novelty.json --real-per-group 2 --seed 2026
+            python iris-model/evaluate_cycle_aware_hj.py --evidence-dir nested --cache-dir cache --synthetic-manifest candidate/pil${T}/synthetic_manifest.csv --out-dir audit/pil${T}_hj --real-per-group 2 --seed 2026
+          done
+      - name: Freeze smallest independently passing PIL coefficient
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          def J(p): return json.loads(pathlib.Path(p).read_text())
+          b=J('audit/base/v2_manipulation_metrics.json'); bn=J('audit/base_novelty.json'); bh=J('audit/base_hj/cycle_hj_metrics.json')
+          if not b['generic_fidelity_gate_pass'] or not bn['novelty_gate_pass']: raise SystemExit('Nested BASE fidelity/novelty gate failed')
+          bp=float(b['hard_pil_standardized_energy_distance']); bg=float(b['hard_geometry_standardized_energy_distance'])
+          rows=[]
+          for tag,lam in [('010',.10),('050',.50),('100',1.0)]:
+            g=J(f'audit/pil{tag}/v2_manipulation_metrics.json'); n=J(f'audit/pil{tag}_novelty.json'); h=J(f'audit/pil{tag}_hj/cycle_hj_metrics.json')
+            imp=(bp-float(g['hard_pil_standardized_energy_distance']))/max(bp,1e-9)
+            geom=float(g['hard_geometry_standardized_energy_distance'])/max(bg,1e-9)
+            hj_ratio=float(h['distance_to_real_split_p90_ratio'])
+            ok=bool(g['generic_fidelity_gate_pass'] and n['novelty_gate_pass'] and imp>=.20 and geom<=1.50 and hj_ratio<=1.0)
+            rows.append({'tag':tag,'lambda':lam,'pil_improvement_vs_base':imp,'legacy_geometry_cross_ratio':geom,'cycle_hj_to_real_split_p90_ratio':hj_ratio,'generic_gate':bool(g['generic_fidelity_gate_pass']),'novelty_gate':bool(n['novelty_gate_pass']),'pass':ok})
+          good=[x for x in rows if x['pass']]; chosen=min(good,key=lambda x:x['lambda']) if good else None
+          report={'phase':'nested outer-fold TRAIN-ONLY physics selection','fold':${{ matrix.fold }},'base_pil_distance':bp,'base_cycle_hj_to_real_split_p90_ratio':float(bh['distance_to_real_split_p90_ratio']),'hj_constraint_decision':'NO-OP/NOT JUSTIFIED: frozen morphology BASE already lies within natural real-vs-real cycle-aware HJ variability; explicit HJ manipulations previously worsened independent HJ and PIL metrics','pil_rows':rows,'chosen':chosen,'status':'PASS' if chosen else 'FAIL','selection_accessed_outer_test':False,'gate':'generic fidelity + novelty + >=20% hard PIL improvement + <=1.5x independent geometry degradation + cycle-aware HJ remains within real split p90'}
+          pathlib.Path('physics_selection.json').write_text(json.dumps(report,indent=2)+'\n'); print(json.dumps(report,indent=2))
+          if chosen is None: raise SystemExit('Fold-specific PIL physics gate failed; downstream blocked')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-nested-physics-f${{ matrix.fold }}
+          path: |
+            nested/data/derived
+            nested/nested_split_audit.json
+            physics_selection.json
+          retention-days: 30
+
+  downstream:
+    needs: physics-selection
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        fold: [1,2,3,4]
+        seed: [2026,31415]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download nested fold evidence and restore immutable metadata
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p prep source_bundle source nested/data/derived
+          gh run download '${{ github.run_id }}' -n iris-v2-nested-physics-f${{ matrix.fold }} -D prep
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D source_bundle
+          tar -xzf source_bundle/iris-historical-evidence-integrity.tar.gz -C source
+          cp -a source/data/. nested/data/
+          cp -a prep/derived/. nested/data/derived/ 2>/dev/null || cp -a prep/data/derived/. nested/data/derived/
+          cp prep/nested_split_audit.json nested/ 2>/dev/null || true
+          cp prep/physics_selection.json .
+      - name: Generate matched BASE and selected PIL augmentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          L=$(python -c "import json;print(json.load(open('physics_selection.json'))['chosen']['lambda'])")
+          python iris-model/generate_morph_bootstrap.py --evidence-dir nested --cache-dir cache --out-dir gen/base --warp-px 2 --residual-alpha 0.15 --residual-sigma 4 --per-group 2 --max-groups 64 --seed '${{ matrix.seed }}' --download-workers 16
+          python iris-model/generate_morph_physics_selected.py --evidence-dir nested --cache-dir cache --out-dir gen/pil --condition pil --lambda-physics "$L" --warp-px 2 --residual-alpha 0.15 --per-group 2 --max-groups 64 --seed '${{ matrix.seed }}'
+          python iris-model/make_physics_destruction_controls.py --manifest gen/pil/synthetic_manifest.csv --out-dir gen/controls --seed '${{ matrix.seed }}'
+      - name: Independent physical audits for all synthetic/control arms
+        shell: bash
+        run: |
+          set -euo pipefail
+          for A in base pil; do
+            python iris-model/evaluate_generator_v2.py --evidence-dir nested --cache-dir cache --synthetic-manifest gen/$A/synthetic_manifest.csv --out-dir bundle/fold_${{ matrix.fold }}/seed_${{ matrix.seed }}/physical/$A --real-per-group 2 --seed '${{ matrix.seed }}'
+          done
+          for A in pil_blur geometry_flip block_shuffle; do
+            python iris-model/evaluate_generator_v2.py --evidence-dir nested --cache-dir cache --synthetic-manifest gen/controls/$A/synthetic_manifest.csv --out-dir bundle/fold_${{ matrix.fold }}/seed_${{ matrix.seed }}/physical/$A --real-per-group 2 --seed '${{ matrix.seed }}'
+          done
+      - name: Train identical forecasters with equal synthetic/duplicate exposure
+        shell: bash
+        run: |
+          set -euo pipefail
+          N=$(python -c "import pandas as pd;print(len(pd.read_csv('gen/base/synthetic_manifest.csv')))")
+          ROOT=bundle/fold_${{ matrix.fold }}/seed_${{ matrix.seed }}
+          run_arm () {
+            A=$1; MODE=$2; MAN=${3:-}
+            EXTRA=''; [ -n "$MAN" ] && EXTRA="--synthetic-manifest $MAN"
+            python iris-model/train_matched_augmentation.py --evidence-dir nested --cache-dir cache_forecast/$A --out-dir "$ROOT/$A" --arm "$MODE" $EXTRA --augmentation-count "$N" --seed '${{ matrix.seed }}' --train-per-group 4 --val-per-group 6 --pos-cap 2 --test-per-group 6 --test-pos-cap 2 --width 48 --dropout 0.2 --gamma 1.5 --lr 3e-4 --batch-size 32 --steps 1200 --eval-every 300 --validation-bootstrap 1000 --test-bootstrap 2000 --download-workers 16 --evaluate-test
+          }
+          run_arm real real
+          run_arm duplicate duplicate
+          run_arm base synthetic gen/base/synthetic_manifest.csv
+          run_arm pil synthetic gen/pil/synthetic_manifest.csv
+          run_arm pil_blur synthetic gen/controls/pil_blur/synthetic_manifest.csv
+          run_arm geometry_flip synthetic gen/controls/geometry_flip/synthetic_manifest.csv
+          run_arm block_shuffle synthetic gen/controls/block_shuffle/synthetic_manifest.csv
+          cp physics_selection.json "$ROOT/physics_selection.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-nested-transfer-f${{ matrix.fold }}-s${{ matrix.seed }}
+          path: bundle
+          retention-days: 30
+
+  summarize:
+    needs: downstream
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install pandas numpy scipy scikit-learn
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-nested-transfer-*
+          path: collected
+          merge-multiple: true
+      - name: Paired connected-region inference and fidelity-to-utility analysis
+        run: python iris-model/compare_nested_morph_transfer.py --root collected --out-dir final --bootstrap 10000 --seed 280826
+      - name: Build research-execution and prospective-blind ledger
+        run: |
+          python - <<'PY'
+          import json,pathlib,hashlib
+          r=json.loads(pathlib.Path('final/nested_transfer_report.json').read_text())
+          ledger={'status':'NON-HUMAN EXECUTION COMPLETE' if len(r.get('comparisons',{}))>=9 else 'INCOMPLETE','completed_nonhuman_gates':['immutable historical evidence','frozen connected-region rolling-origin outer folds','nested chronological inner validation','generic morphology-generator fidelity','synthetic novelty','train-only fold-specific independent PIL manipulation selection','HJ constraint null/no-op decision based on independent cycle-aware train-only metric','matched duplicate-positive control','equal added-positive exposure','destructive controls','two-seed four-fold outer evaluation','connected-region paired bootstrap','fidelity-to-utility analysis'],'v1_test_role':'exploratory only; not used for v2 tuning or selection','prospective_blind_validation':{'infrastructure_status':'READY','rule':'Any future post-freeze magnetogram/flare block must remain unopened until code, coefficients, thresholds and analysis plan are frozen; this workflow does not ingest such a future block.'},'human_or_external_gates_not_claimed':['Adult Sponsor approval','manual student audit','IRIS archival-data eligibility/approval'],'paper_pitch_excluded':True}
+          pathlib.Path('final/research_execution_ledger.json').write_text(json.dumps(ledger,indent=2)+'\n')
+          print(json.dumps(ledger,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-final-nested-morphology-evidence
+          path: final
+          retention-days: 30
