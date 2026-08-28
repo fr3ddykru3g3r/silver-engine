@@ -1,0 +1,89 @@
+name: IRIS v2 Morphology Physics Recovery Summary
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-morph-physics-recovery-summary.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  summarize-recovered-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Wait only for missing PIL 0.50 artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 700); do
+            N=$(gh api repos/${{ github.repository }}/actions/runs/33113938396/artifacts --paginate --jq '[.artifacts[] | select(.name=="iris-v2-morphphys-pil050")] | length')
+            if [ "$N" -ge 1 ]; then exit 0; fi
+            sleep 20
+          done
+          echo 'PIL 0.50 recovery artifact did not appear' >&2
+          exit 1
+      - name: Download frozen BASE and all recovered candidate artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p base_gate collected
+          gh run download 33098031870 -n iris-v2-morphology-bootstrap-gate -D base_gate
+          for tag in pil010 pil050 pil100 hj010 hj050 hj100; do
+            gh run download 33113938396 -n iris-v2-morphphys-${tag} -D collected/iris-v2-morphphys-${tag}
+          done
+      - name: Select train-only PIL and HJ coefficients with independent hard gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv
+          base=json.loads(pathlib.Path('base_gate/audit/w02/v2_manipulation_metrics.json').read_text())
+          base_nov=json.loads(pathlib.Path('base_gate/novelty_w02.json').read_text())
+          if not base['generic_fidelity_gate_pass'] or not base_nov['novelty_gate_pass']:
+              raise SystemExit('Frozen morphology BASE no longer passes fidelity+novelty gate')
+          bp=float(base['hard_pil_standardized_energy_distance']); bg=float(base['hard_geometry_standardized_energy_distance'])
+          rows=[]
+          for condition in ['pil','hj']:
+              for lam,tag in [(0.10,f'{condition}010'),(0.50,f'{condition}050'),(1.00,f'{condition}100')]:
+                  root=pathlib.Path('collected')/f'iris-v2-morphphys-{tag}'
+                  fs=list(root.rglob('v2_manipulation_metrics.json')); ns=list(root.rglob(f'novelty_{tag}.json'))
+                  if len(fs)!=1 or len(ns)!=1: raise RuntimeError((tag,fs,ns))
+                  m=json.loads(fs[0].read_text()); n=json.loads(ns[0].read_text())
+                  pd=float(m['hard_pil_standardized_energy_distance']); gd=float(m['hard_geometry_standardized_energy_distance'])
+                  intended=(bp-pd)/max(bp,1e-9) if condition=='pil' else (bg-gd)/max(bg,1e-9)
+                  cross=gd/max(bg,1e-9) if condition=='pil' else pd/max(bp,1e-9)
+                  passed=bool(m['generic_fidelity_gate_pass'] and n['novelty_gate_pass'] and intended>=0.20 and cross<=1.50)
+                  rows.append({'condition':condition,'lambda':lam,'tag':tag,'pil_distance':pd,'geometry_distance':gd,'intended_improvement_vs_base':intended,'cross_structure_ratio_vs_base':cross,'generic_gate':bool(m['generic_fidelity_gate_pass']),'novelty_gate':bool(n['novelty_gate_pass']),'pass':passed})
+          chosen={}
+          for condition in ['pil','hj']:
+              eligible=[r for r in rows if r['condition']==condition and r['pass']]
+              chosen[condition]=min(eligible,key=lambda z:z['lambda']) if eligible else None
+          report={'phase':'TRAIN-ONLY morphology physics coefficient selection; recovered after one arm infrastructure timeout; no forecast validation/test accessed','source_run':33113938396,'base':{'warp_px':2,'pil_distance':bp,'geometry_distance':bg,'generic_gate':True,'novelty_gate':True},'rows':rows,'chosen':chosen,'status':'PASS' if all(chosen.values()) else 'FAIL','gate_rule':'generic fidelity AND novelty AND >=20% intended hard-distance improvement vs BASE AND <=1.5x cross-structure degradation; choose smallest lambda','forecast_outcomes_accessed':False}
+          pathlib.Path('morph_physics_selection_recovered.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('morph_physics_selection_recovered.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          if report['status']!='PASS': raise SystemExit('At least one train-only physics manipulation gate failed; downstream remains blocked')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-morph-physics-selection-recovered
+          path: |
+            morph_physics_selection_recovered.json
+            morph_physics_selection_recovered.csv
+          if-no-files-found: ignore
+          retention-days: 30
