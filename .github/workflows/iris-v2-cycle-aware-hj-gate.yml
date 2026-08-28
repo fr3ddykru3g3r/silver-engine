@@ -1,0 +1,165 @@
+name: IRIS v2 Cycle-Aware Hale-Joy Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-cycle-aware-hj-gate.yml'
+      - 'iris-model/generate_morph_hj_cycle_selected.py'
+      - 'iris-model/evaluate_cycle_aware_hj.py'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  base-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable evidence and frozen morphology BASE
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence base_gate
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          gh run download 33098031870 -n iris-v2-morphology-bootstrap-gate -D base_gate
+          test -f base_gate/candidate/w02/synthetic_manifest.csv
+      - name: Independent cycle-aware hard BASE audit
+        run: |
+          python iris-model/evaluate_cycle_aware_hj.py \
+            --evidence-dir evidence --cache-dir cache \
+            --synthetic-manifest base_gate/candidate/w02/synthetic_manifest.csv \
+            --out-dir cycle_base --real-per-group 2 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-cycle-hj-base
+          path: cycle_base
+          retention-days: 30
+
+  arm:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - tag: hjc010
+            lambda_physics: '0.10'
+          - tag: hjc050
+            lambda_physics: '0.50'
+          - tag: hjc100
+            lambda_physics: '1.00'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download immutable historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+      - name: Generate cycle-aware Hale-Joy candidate
+        run: |
+          python iris-model/generate_morph_hj_cycle_selected.py \
+            --evidence-dir evidence --cache-dir cache --out-dir candidate/${{ matrix.tag }} \
+            --lambda-physics '${{ matrix.lambda_physics }}' --warp-px 2 --residual-alpha 0.15 \
+            --per-group 2 --max-groups 64 --passes 4 --seed 2026
+      - name: Generic fidelity and PIL cross-structure audit
+        run: |
+          python iris-model/evaluate_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache \
+            --synthetic-manifest candidate/${{ matrix.tag }}/synthetic_manifest.csv \
+            --out-dir generic_audit/${{ matrix.tag }} --real-per-group 2 --seed 2026
+      - name: Independent cycle-aware hard HJ audit
+        run: |
+          python iris-model/evaluate_cycle_aware_hj.py \
+            --evidence-dir evidence --cache-dir cache \
+            --synthetic-manifest candidate/${{ matrix.tag }}/synthetic_manifest.csv \
+            --out-dir cycle_audit/${{ matrix.tag }} --real-per-group 2 --seed 2026
+      - name: Independent novelty audit
+        run: |
+          python iris-model/evaluate_synthetic_novelty.py \
+            --evidence-dir evidence --cache-dir cache \
+            --synthetic-manifest candidate/${{ matrix.tag }}/synthetic_manifest.csv \
+            --out novelty_${{ matrix.tag }}.json --real-per-group 2 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-cycle-hj-${{ matrix.tag }}
+          path: |
+            candidate/${{ matrix.tag }}
+            generic_audit/${{ matrix.tag }}
+            cycle_audit/${{ matrix.tag }}
+            novelty_${{ matrix.tag }}.json
+          retention-days: 30
+
+  summarize:
+    needs: [base-audit,arm]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-cycle-hj-*
+          path: collected
+      - name: Select smallest passing cycle-aware HJ coefficient
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv
+          root=pathlib.Path('collected')
+          b=json.loads(next((root/'iris-v2-cycle-hj-base').rglob('cycle_hj_metrics.json')).read_text())
+          bd=float(b['hard_cycle_geometry_standardized_energy_distance'])
+          rows=[]
+          for lam,tag in [(0.10,'hjc010'),(0.50,'hjc050'),(1.00,'hjc100')]:
+            d=root/f'iris-v2-cycle-hj-{tag}'
+            c=json.loads(next(d.rglob('cycle_hj_metrics.json')).read_text())
+            g=json.loads(next(d.rglob('v2_manipulation_metrics.json')).read_text())
+            n=json.loads(next(d.rglob(f'novelty_{tag}.json')).read_text())
+            cd=float(c['hard_cycle_geometry_standardized_energy_distance'])
+            improvement=(bd-cd)/max(bd,1e-9)
+            # PIL cross-structure baseline is the previously frozen morphology BASE hard PIL distance.
+            bp=0.21772003173828125
+            cross=float(g['hard_pil_standardized_energy_distance'])/max(bp,1e-9)
+            passed=bool(g['generic_fidelity_gate_pass'] and n['novelty_gate_pass'] and improvement>=0.20 and cross<=1.50)
+            rows.append({'lambda':lam,'tag':tag,'cycle_hj_distance':cd,'improvement_vs_base':improvement,'pil_cross_ratio_vs_base':cross,'generic_gate':bool(g['generic_fidelity_gate_pass']),'novelty_gate':bool(n['novelty_gate_pass']),'pass':passed})
+          eligible=[r for r in rows if r['pass']]; chosen=min(eligible,key=lambda x:x['lambda']) if eligible else None
+          report={'phase':'TRAIN-ONLY cycle-aware Hale/Joy selection; no forecast validation/test accessed','scientific_correction':'Hale polarity ordering canonicalized by hemisphere AND solar-cycle parity; Cycle 25 start fixed at 2019-12-01','base_cycle_hj_distance':bd,'rows':rows,'chosen':chosen,'status':'PASS' if chosen else 'FAIL','gate_rule':'generic fidelity AND novelty AND >=20% independent cycle-aware hard-HJ improvement AND <=1.5x PIL cross-structure degradation','forecast_outcomes_accessed':False}
+          pathlib.Path('cycle_hj_selection.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('cycle_hj_selection.csv','w',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          if chosen is None: raise SystemExit('Cycle-aware HJ gate failed; downstream remains blocked')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-cycle-hj-selection
+          path: |
+            cycle_hj_selection.json
+            cycle_hj_selection.csv
+          retention-days: 30
