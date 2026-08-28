@@ -117,9 +117,12 @@ jobs:
           gh run download 32937498427 -n iris-historical-evidence-integrity -D source_bundle
           tar -xzf source_bundle/iris-historical-evidence-integrity.tar.gz -C source
           cp -a source/data/. nested/data/
-          cp -a prep/derived/. nested/data/derived/ 2>/dev/null || cp -a prep/data/derived/. nested/data/derived/
-          cp prep/nested_split_audit.json nested/ 2>/dev/null || true
+          test -f prep/nested/data/derived/training_manifest.csv.gz
+          cp -a prep/nested/data/derived/. nested/data/derived/
+          cp prep/nested/nested_split_audit.json nested/
           cp prep/physics_selection.json .
+          test -f nested/data/derived/training_manifest.csv.gz
+          test -f physics_selection.json
       - name: Generate matched BASE and selected PIL augmentation
         shell: bash
         run: |
