@@ -1,0 +1,241 @@
+name: IRIS v2 Nested Morphology PIL Transfer Resume 2
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-nested-morph-transfer-resume2.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  SOURCE_RUN: '33141877184'
+  PREV_RESUME_RUN: '33166589195'
+
+jobs:
+  recover-f2-s31415:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Restore frozen fold-2 train-only selection
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          set -euo pipefail
+          mkdir -p prep source_bundle source nested/data/derived
+          gh run download "$SOURCE_RUN" -n iris-v2-nested-physics-f2 -D prep
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D source_bundle
+          tar -xzf source_bundle/iris-historical-evidence-integrity.tar.gz -C source
+          cp -a source/data/. nested/data/
+          cp -a prep/nested/data/derived/. nested/data/derived/
+          cp prep/nested/nested_split_audit.json nested/
+          cp prep/physics_selection.json .
+          python - <<'PY'
+          import json
+          j=json.load(open('physics_selection.json'))
+          assert j['status']=='PASS' and j['selection_accessed_outer_test'] is False and j['chosen'] is not None
+          print('Frozen fold-2 train-only PIL selection:',j['chosen'])
+          PY
+      - name: Regenerate BASE deterministically with bounded retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          for TRY in 1 2; do
+            rm -rf gen/base
+            if timeout 1800 python iris-model/generate_morph_bootstrap.py --evidence-dir nested --cache-dir cache --out-dir gen/base --warp-px 2 --residual-alpha 0.15 --residual-sigma 4 --per-group 2 --max-groups 64 --seed 31415 --download-workers 16; then break; fi
+            [ "$TRY" = 2 ] && exit 1
+            echo 'BASE generation transient failure; retrying from immutable inputs'
+          done
+          test -f gen/base/synthetic_manifest.csv
+      - name: Regenerate PIL deterministically with bounded retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          L=$(python -c "import json;print(json.load(open('physics_selection.json'))['chosen']['lambda'])")
+          for TRY in 1 2; do
+            rm -rf gen/pil
+            if timeout 1800 python iris-model/generate_morph_physics_selected.py --evidence-dir nested --cache-dir cache --out-dir gen/pil --condition pil --lambda-physics "$L" --warp-px 2 --residual-alpha 0.15 --per-group 2 --max-groups 64 --seed 31415; then break; fi
+            [ "$TRY" = 2 ] && exit 1
+            echo 'PIL generation transient failure; retrying from immutable inputs'
+          done
+          test -f gen/pil/synthetic_manifest.csv
+      - name: Regenerate destructive controls and audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python iris-model/make_physics_destruction_controls.py --manifest gen/pil/synthetic_manifest.csv --out-dir gen/controls --seed 31415
+          ROOT=bundle/fold_2/seed_31415/physical
+          for A in base pil; do
+            python iris-model/evaluate_generator_v2.py --evidence-dir nested --cache-dir cache --synthetic-manifest gen/$A/synthetic_manifest.csv --out-dir "$ROOT/$A" --real-per-group 2 --seed 31415
+          done
+          for A in pil_blur geometry_flip block_shuffle; do
+            python iris-model/evaluate_generator_v2.py --evidence-dir nested --cache-dir cache --synthetic-manifest gen/controls/$A/synthetic_manifest.csv --out-dir "$ROOT/$A" --real-per-group 2 --seed 31415
+          done
+          cp physics_selection.json bundle/fold_2/seed_31415/physics_selection.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-resume2-prep-f2-s31415
+          path: |
+            nested/data/derived
+            nested/nested_split_audit.json
+            physics_selection.json
+            gen
+            bundle
+          retention-days: 30
+
+  train-arm:
+    needs: recover-f2-s31415
+    strategy:
+      fail-fast: false
+      max-parallel: 14
+      matrix:
+        include:
+          - {fold: 2, seed: 2026}
+          - {fold: 2, seed: 31415}
+          - {fold: 3, seed: 2026}
+          - {fold: 4, seed: 2026}
+          - {fold: 4, seed: 31415}
+        arm: [real,duplicate,base,pil,pil_blur,geometry_flip,block_shuffle]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Restore frozen prepared stratum
+        env: {GH_TOKEN: '${{ github.token }}'}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p prep source_bundle source nested/data/derived
+          if [ '${{ matrix.fold }}' = 2 ] && [ '${{ matrix.seed }}' = 31415 ]; then
+            gh run download '${{ github.run_id }}' -n iris-v2-resume2-prep-f2-s31415 -D prep
+          else
+            gh run download "$PREV_RESUME_RUN" -n iris-v2-resume-prep-f${{ matrix.fold }}-s${{ matrix.seed }} -D prep
+          fi
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D source_bundle
+          tar -xzf source_bundle/iris-historical-evidence-integrity.tar.gz -C source
+          cp -a source/data/. nested/data/
+          cp -a prep/nested/data/derived/. nested/data/derived/
+          cp prep/nested/nested_split_audit.json nested/
+          cp prep/physics_selection.json .
+          cp -a prep/gen ./gen
+          test -f gen/base/synthetic_manifest.csv
+          test -f gen/pil/synthetic_manifest.csv
+      - name: Train exactly one frozen prespecified arm
+        shell: bash
+        run: |
+          set -euo pipefail
+          A='${{ matrix.arm }}'
+          N=$(python -c "import pandas as pd;print(len(pd.read_csv('gen/base/synthetic_manifest.csv')))")
+          MODE=synthetic; MAN=''
+          case "$A" in
+            real) MODE=real ;;
+            duplicate) MODE=duplicate ;;
+            base) MAN=gen/base/synthetic_manifest.csv ;;
+            pil) MAN=gen/pil/synthetic_manifest.csv ;;
+            pil_blur|geometry_flip|block_shuffle) MAN=gen/controls/$A/synthetic_manifest.csv ;;
+            *) exit 2 ;;
+          esac
+          EXTRA=''; [ -n "$MAN" ] && EXTRA="--synthetic-manifest $MAN"
+          OUT=bundle/fold_${{ matrix.fold }}/seed_${{ matrix.seed }}/$A
+          python iris-model/train_matched_augmentation.py --evidence-dir nested --cache-dir cache_forecast/$A --out-dir "$OUT" --arm "$MODE" $EXTRA --augmentation-count "$N" --seed '${{ matrix.seed }}' --train-per-group 4 --val-per-group 6 --pos-cap 2 --test-per-group 6 --test-pos-cap 2 --width 48 --dropout 0.2 --gamma 1.5 --lr 3e-4 --batch-size 32 --steps 1200 --eval-every 300 --validation-bootstrap 1000 --test-bootstrap 2000 --download-workers 16 --evaluate-test
+          test -f "$OUT/metrics.json"; test -f "$OUT/test_predictions.csv"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-resume2-arm-f${{ matrix.fold }}-s${{ matrix.seed }}-${{ matrix.arm }}
+          path: bundle
+          retention-days: 30
+
+  summarize:
+    needs: train-arm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: iris-v2-physics-transfer}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install pandas numpy scipy scikit-learn
+      - name: Assemble three completed strata from original downstream run
+        env: {GH_TOKEN: '${{ github.token }}'}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p collected old
+          for SPEC in '1 2026' '1 31415' '3 31415'; do
+            set -- $SPEC; F=$1; S=$2
+            D=old/f${F}s${S}; mkdir -p "$D"
+            gh run download "$SOURCE_RUN" -n iris-v2-nested-transfer-f${F}-s${S} -D "$D"
+            cp -a "$D/bundle/." collected/
+          done
+      - name: Download resumed arm outputs and prep physical audits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-resume2-*
+          path: resumed2
+      - name: Download prior successful prep physical audits
+        env: {GH_TOKEN: '${{ github.token }}'}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p priorprep
+          for SPEC in '2 2026' '3 2026' '4 2026' '4 31415'; do
+            set -- $SPEC; F=$1; S=$2
+            D=priorprep/f${F}s${S}; mkdir -p "$D"
+            gh run download "$PREV_RESUME_RUN" -n iris-v2-resume-prep-f${F}-s${S} -D "$D"
+          done
+      - name: Merge evidence and verify all 8 strata
+        shell: bash
+        run: |
+          set -euo pipefail
+          find resumed2 priorprep -type d -name bundle -print0 | while IFS= read -r -d '' D; do cp -a "$D/." collected/; done
+          python - <<'PY'
+          from pathlib import Path
+          arms=['real','duplicate','base','pil','pil_blur','geometry_flip','block_shuffle']; root=Path('collected'); missing=[]
+          for f in range(1,5):
+            for s in (2026,31415):
+              d=root/f'fold_{f}'/f'seed_{s}'
+              for a in arms:
+                for n in ('metrics.json','test_predictions.csv'):
+                  if not (d/a/n).exists(): missing.append(str(d/a/n))
+              for a in ('base','pil','pil_blur','geometry_flip','block_shuffle'):
+                if not (d/'physical'/a/'v2_manipulation_metrics.json').exists(): missing.append(str(d/'physical'/a/'v2_manipulation_metrics.json'))
+          if missing: raise SystemExit('Missing evidence:\n'+'\n'.join(missing))
+          print('Verified complete 4-fold x 2-seed x 7-arm evidence tree')
+          PY
+      - name: Paired connected-region inference and fidelity-to-utility analysis
+        run: python iris-model/compare_nested_morph_transfer.py --root collected --out-dir final --bootstrap 10000 --seed 280826
+      - name: Build research-execution and prospective-blind ledger
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          r=json.loads(pathlib.Path('final/nested_transfer_report.json').read_text())
+          complete=(r.get('strata')==8 and len(r.get('comparisons',{}))>=9 and r.get('outer_evaluation_used_for_selection') is False)
+          ledger={'status':'NON-HUMAN EXECUTION COMPLETE' if complete else 'INCOMPLETE','completed_nonhuman_gates':['immutable historical evidence','frozen connected-region rolling-origin outer folds','nested chronological inner validation','generic morphology-generator fidelity','synthetic novelty','train-only fold-specific independent PIL manipulation selection','HJ constraint null/no-op decision based on independent cycle-aware train-only metric','matched duplicate-positive control','equal added-positive exposure','destructive controls','two-seed four-fold outer evaluation','connected-region paired bootstrap','fidelity-to-utility analysis'],'v1_test_role':'exploratory only; not used for v2 tuning or selection','prospective_blind_validation':{'infrastructure_status':'READY','rule':'Any future post-freeze magnetogram/flare block must remain unopened until code, coefficients, thresholds and analysis plan are frozen; this workflow does not ingest such a future block.'},'human_or_external_gates_not_claimed':['Adult Sponsor approval','manual student audit','IRIS archival-data eligibility/approval'],'paper_pitch_excluded':True,'resumption_note':'Three strata are immutable completed outputs from the original downstream run. Five interrupted strata use the same frozen selections, splits, models, seeds, exposure and analysis; only execution sharding/retry changed.'}
+          pathlib.Path('final/research_execution_ledger.json').write_text(json.dumps(ledger,indent=2)+'\n')
+          print(json.dumps(ledger,indent=2))
+          if not complete: raise SystemExit('Final non-human execution ledger incomplete')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-final-nested-morphology-evidence-resumed2
+          path: final
+          retention-days: 30
