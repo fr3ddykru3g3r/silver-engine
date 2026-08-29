@@ -6,6 +6,7 @@ from scipy.stats import spearmanr
 from metrics import all_metrics
 
 ARMS=['real','duplicate','base','pil','pil_blur','geometry_flip','block_shuffle']
+METRICS=['tss','hss','recall','fpr','precision','auroc','auprc','brier','bss']
 
 def load(d):
     p=pd.read_csv(d/'test_predictions.csv'); m=json.loads((d/'metrics.json').read_text()); return p,float(m['validation_threshold']),m
@@ -16,6 +17,18 @@ def delta_df(a,b):
     return z
 
 def metric_delta(z,ta,tb,k): return float(all_metrics(z.y,z.p_a,ta)[k]-all_metrics(z.y,z.p_b,tb)[k])
+
+def all_metric_deltas_arrays(y,pa,pb,ta,tb):
+    ma=all_metrics(y,pa,ta); mb=all_metrics(y,pb,tb)
+    return {k:float(ma[k]-mb[k]) for k in METRICS}
+
+def prepare_cluster_arrays(z):
+    # Preserve the original connected-region cluster bootstrap exactly at the
+    # sampling-unit level, while avoiding repeated pandas filtering/concats.
+    gid=z.region_group_id.astype(str).to_numpy()
+    groups=np.asarray(sorted(np.unique(gid)))
+    idx=[np.flatnonzero(gid==g) for g in groups]
+    return groups,idx,z.y.to_numpy(),z.p_a.to_numpy(),z.p_b.to_numpy()
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--root',required=True);ap.add_argument('--out-dir',required=True);ap.add_argument('--bootstrap',type=int,default=10000);ap.add_argument('--seed',type=int,default=280826);a=ap.parse_args()
@@ -31,21 +44,33 @@ def main():
         strata[(f,s)]=data
     if len(strata)<8: raise RuntimeError(f'expected 4 folds x 2 seeds, got {len(strata)}')
     pairs=[('duplicate','real'),('base','real'),('pil','real'),('base','duplicate'),('pil','duplicate'),('pil','base'),('pil','pil_blur'),('pil','geometry_flip'),('base','block_shuffle')]
-    metrics=['tss','hss','recall','fpr','precision','auroc','auprc','brier','bss']; rng=np.random.default_rng(a.seed); report={'protocol':'nested rolling-origin, two replicate seeds, connected-region paired bootstrap','strata':len(strata),'comparisons':{},'outer_evaluation_used_for_selection':False}
+    rng=np.random.default_rng(a.seed); report={'protocol':'nested rolling-origin, two replicate seeds, connected-region paired bootstrap','strata':len(strata),'comparisons':{},'outer_evaluation_used_for_selection':False}
     for aa,bb in pairs:
       report['comparisons'][f'{aa}_minus_{bb}']={}
-      zs=[]; points=[]
+      zs=[]
       for key,d in strata.items():
-        pa,ta,_=d[aa];pb,tb,_=d[bb];z=delta_df(pa,pb);zs.append((key,z,ta,tb))
-      for k in metrics:
-        pts=[metric_delta(z,ta,tb,k) for _,z,ta,tb in zs]; boots=[]
-        for _ in range(a.bootstrap):
-          vals=[]
-          for _,z,ta,tb in zs:
-            groups=np.asarray(sorted(z.region_group_id.astype(str).unique())); draw=rng.choice(groups,len(groups),replace=True)
-            q=pd.concat([z[z.region_group_id.astype(str).eq(g)] for g in draw],ignore_index=True);vals.append(metric_delta(q,ta,tb,k))
-          boots.append(float(np.mean(vals)))
-        x=np.asarray(boots);report['comparisons'][f'{aa}_minus_{bb}'][k]={'equal_stratum_mean_delta':float(np.mean(pts)),'lo95':float(np.percentile(x,2.5)),'hi95':float(np.percentile(x,97.5)),'p_two_sided':float(min(1,2*min(np.mean(x<=0),np.mean(x>=0)))),'per_stratum':{f'f{q[0]}_s{q[1]}':float(v) for q,v in zip([x[0] for x in zs],pts)},'bootstrap_replicates':a.bootstrap,'resampling_unit':'connected region within fold/seed stratum'}
+        pa,ta,_=d[aa];pb,tb,_=d[bb];z=delta_df(pa,pb);groups,idx,y,paa,pbb=prepare_cluster_arrays(z);zs.append((key,z,ta,tb,groups,idx,y,paa,pbb))
+      points={k:[] for k in METRICS}
+      for _,z,ta,tb,_,_,_,_,_ in zs:
+        ma=all_metrics(z.y,z.p_a,ta); mb=all_metrics(z.y,z.p_b,tb)
+        for k in METRICS: points[k].append(float(ma[k]-mb[k]))
+      # One connected-region resample per stratum per bootstrap replicate is
+      # shared across metrics. This is the same paired cluster-bootstrap
+      # estimand, gives coherent joint metric draws, and removes the previous
+      # 9x redundant all_metrics computation that exceeded Actions wall time.
+      boots={k:np.empty(a.bootstrap,dtype=float) for k in METRICS}
+      for bi in range(a.bootstrap):
+        sums={k:0.0 for k in METRICS}
+        for _,_,ta,tb,groups,idx,y,paa,pbb in zs:
+          draw=rng.integers(0,len(groups),size=len(groups))
+          ii=np.concatenate([idx[j] for j in draw])
+          ds=all_metric_deltas_arrays(y[ii],paa[ii],pbb[ii],ta,tb)
+          for k in METRICS: sums[k]+=ds[k]
+        for k in METRICS: boots[k][bi]=sums[k]/len(zs)
+      keys=[x[0] for x in zs]
+      for k in METRICS:
+        x=boots[k];pts=points[k]
+        report['comparisons'][f'{aa}_minus_{bb}'][k]={'equal_stratum_mean_delta':float(np.mean(pts)),'lo95':float(np.percentile(x,2.5)),'hi95':float(np.percentile(x,97.5)),'p_two_sided':float(min(1,2*min(np.mean(x<=0),np.mean(x>=0)))),'per_stratum':{f'f{q[0]}_s{q[1]}':float(v) for q,v in zip(keys,pts)},'bootstrap_replicates':a.bootstrap,'resampling_unit':'connected region within fold/seed stratum'}
     # Fidelity-to-utility: physical PIL distance versus TSS utility relative to duplicate.
     fu=[]
     for (f,s),d in strata.items():
