@@ -829,7 +829,7 @@ Local deletion & NOT STARTED & Correctly withheld until remote preservation is v
 
 The raw cache and temporary run roots are valuable for reproduction and were intentionally retained while the report was being built. The workspace also contains an unrelated La Liga project, so a command such as ``delete all files'' would be unsafe and outside a precise IRIS-only boundary. If cleanup is later requested, the safe candidate set is the named IRIS temporary roots and IRIS report/archive copies after a successful remote verification. Unrelated project files must not be removed.
 
-The combined archive is approximately 1.8 GB because it contains the raw FITS cache. Ordinary GitHub repositories reject individual files above the standard large-file limit, so direct Git publication should contain the report, code, manifests, checksums, and a documented pointer to the large archive or a GitHub Release/LFS object. The raw archive should not be silently split into opaque chunks or committed without a verified retrieval path.
+The combined archive is 2,125,481,144 bytes (about 1.98 GiB, or 2.13 GB in decimal units) because it contains the raw FITS cache. Ordinary GitHub repositories reject individual files above the standard large-file limit, so direct Git publication should contain the report, code, manifests, checksums, and a documented pointer to the large archive or a GitHub Release/LFS object. The raw archive should not be silently split into opaque chunks or committed without a verified retrieval path.
 
 \chapter{Glossary}
 

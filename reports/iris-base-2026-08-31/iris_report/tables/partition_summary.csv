@@ -1,4 +1,0 @@
-partition,rows,positive_rows,independent_groups,positive_groups,independent_harps,positive_harps,censored_negative_rows,image_urls
-train,112719,4324,1321,125,1385,129,4725,112719
-validation,39035,2436,434,82,473,82,3003,39035
-test,40342,3647,437,87,486,89,2854,40342

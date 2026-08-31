@@ -6,13 +6,9 @@
   "fits_bytes": 1586430060,
   "fits_cache_root": "IRIS_RUN_ROOT/fits",
   "fits_files": 5273,
-  "physics_screen_bytes": 86619421,
-  "physics_screen_files": 417,
-  "prepared_tensor_bytes": 64109172,
-  "prepared_tensor_files": 3,
-  "run_bytes": 158015217,
-  "run_files": 888,
+  "run_bytes": 144225777,
+  "run_files": 678,
   "run_root": "IRIS_RUN_ROOT/work/runs/base_local_resume",
-  "source_files": 106,
+  "source_files": 101,
   "source_root": "IRIS_RUN_ROOT/source"
 }

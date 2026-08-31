@@ -1,1 +1,0 @@
-The OBJ files are visualization meshes. x/y span the fixed 256 Mm field of view, and z is the line-of-sight magnetic field value in gauss (or its ensemble standard deviation). They are not 3-D coronal magnetic-field reconstructions. The real and synthetic meshes correspond to the report figure; the synthetic ensemble spread is computed pixelwise across 128 samples.

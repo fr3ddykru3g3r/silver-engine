@@ -1013,6 +1013,12 @@ def write_metadata_json(data: dict[str, object], tables: dict[str, pd.DataFrame]
     classifier_audit = json.loads(classifier_path.read_text()) if classifier_path.is_file() else None
     selftests_path = ARTIFACT / "offline_protocol_selftests.json"
     offline_selftests = json.loads(selftests_path.read_text()) if selftests_path.is_file() else None
+    conditional_path = ARTIFACT / "conditional_proxy_diagnostics.json"
+    conditional_audit = json.loads(conditional_path.read_text()) if conditional_path.is_file() else None
+    gate_stability_path = ARTIFACT / "gate_stability_diagnostics.json"
+    gate_stability = json.loads(gate_stability_path.read_text()) if gate_stability_path.is_file() else None
+    memorization_path = ARTIFACT / "memorization_diagnostics.json"
+    memorization = json.loads(memorization_path.read_text()) if memorization_path.is_file() else None
     summary = {
         "experiment": "IRIS BASE local resume and independent v2 audit",
         "as_of": "2026-08-31",
@@ -1038,6 +1044,9 @@ def write_metadata_json(data: dict[str, object], tables: dict[str, pd.DataFrame]
             "physics_factorial_screening": physics_screening,
             "two_sample_classifier_audit": classifier_audit,
             "offline_protocol_selftests": offline_selftests,
+            "conditional_proxy_diagnostics": conditional_audit,
+            "gate_stability_diagnostics": gate_stability,
+            "memorization_diagnostics": memorization,
         },
         "counts": {
             "manifest_rows": int(len(data["manifest"])),
