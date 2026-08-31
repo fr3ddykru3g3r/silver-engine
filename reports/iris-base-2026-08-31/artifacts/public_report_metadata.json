@@ -1916,6 +1916,65 @@
       "status": "PASS",
       "synthetic_count": 128,
       "synthetic_groups": 64
+    },
+    "conditional_proxy_diagnostics": {
+      "status": "PASS",
+      "method": "fixed latitude bands with independent connected-region bootstrap of medians",
+      "seed": 2026,
+      "bootstrap_replicates": 1000,
+      "real_count": 489,
+      "synthetic_count": 128,
+      "real_groups": 125,
+      "synthetic_groups": 64,
+      "bands": [
+        {
+          "band": "[-90,-15]",
+          "real_n": 171,
+          "synthetic_n": 44,
+          "real_groups": 46,
+          "synthetic_groups": 22
+        },
+        {
+          "band": "(-15,0]",
+          "real_n": 103,
+          "synthetic_n": 32,
+          "real_groups": 31,
+          "synthetic_groups": 16
+        },
+        {
+          "band": "(0,15]",
+          "real_n": 134,
+          "synthetic_n": 28,
+          "real_groups": 35,
+          "synthetic_groups": 14
+        },
+        {
+          "band": "(15,30]",
+          "real_n": 77,
+          "synthetic_n": 22,
+          "real_groups": 22,
+          "synthetic_groups": 11
+        },
+        {
+          "band": "(30,90]",
+          "real_n": 4,
+          "synthetic_n": 2,
+          "real_groups": 1,
+          "synthetic_groups": 1
+        }
+      ],
+      "outputs": [
+        "tables/conditional_proxy_bands.csv",
+        "tables/conditional_proxy_summary.csv",
+        "tables/conditional_proxy_summary.tex",
+        "figures/conditional_proxy_heatmap.svg",
+        "figures/conditional_proxy_heatmap.png"
+      ],
+      "limitations": [
+        "The upper-latitude band has very few rows and should not be overinterpreted.",
+        "These are descriptive train-only diagnostics and do not modify the frozen generic gate.",
+        "Conditional proxy agreement would not establish physical realism or forecasting utility."
+      ]
     }
   },
   "experiment": "IRIS BASE local resume and independent v2 audit",
@@ -2108,11 +2167,13 @@
   },
   "report_outputs": {
     "auxiliary_figures": [
+      "conditional_proxy_heatmap.svg",
       "two_sample_classifier.svg"
     ],
     "figures": [
       "acquisition_qc.png",
       "bootstrap_descriptor_uncertainty.png",
+      "conditional_proxy_heatmap.png",
       "core_gate_ratios.png",
       "dataset_partition_and_labels.png",
       "descriptor_scatter.png",
@@ -2147,6 +2208,9 @@
       "acquired_cache_summary.tex",
       "bootstrap_descriptor_uncertainty.csv",
       "bootstrap_descriptor_uncertainty.tex",
+      "conditional_proxy_bands.csv",
+      "conditional_proxy_summary.csv",
+      "conditional_proxy_summary.tex",
       "destruction_controls.csv",
       "destruction_controls.tex",
       "generated_values.tex",
@@ -2181,6 +2245,7 @@
       "resumability_selftest.json"
     ],
     "secondary_analyses": [
+      "conditional_proxy_diagnostics.json",
       "physics_proxy_diagnostics.json",
       "two_sample_classifier_audit.json"
     ]

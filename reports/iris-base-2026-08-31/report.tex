@@ -389,6 +389,10 @@ To quantify residual distinguishability without introducing a forecast target, a
 
 The scalar-proxy classifier achieved mean ROC AUC $0.9998$ (SD $0.0005$, fold range $0.9988$--$1.0000$) and mean balanced accuracy $0.9874$. The coarse-field classifier was less stable and much closer to chance, with mean AUC $0.5888$ (SD $0.1063$, range $0.4458$--$0.6841$) and balanced accuracy $0.7538$. The largest mean standardized coefficient in the scalar model was gradient RMS, followed by unsigned flux and the high-gradient fraction. This is a descriptive two-sample result: a high AUC establishes distinguishability, not that either distribution is scientifically preferable, and it does not replace the predeclared gate or establish forecast utility. Exact folds and coefficients are retained in \texttt{tables/two\_sample\_classifier\_*.csv}; the receipt is \texttt{artifacts/two\_sample\_classifier\_audit.json}. A dependency-free vector visualization is shipped as \texttt{figures/two\_sample\_classifier.svg}.
 
+As a conditioning check, the same proxies were then compared within five fixed latitude bands using connected-region bootstrap units. In the four well-populated bands, unsigned-flux ratios range from 1.24 to 1.88, gradient-RMS ratios from 1.30 to 1.56, high-wavenumber ratios from 1.37 to 1.81, and total strong-component ratios from 0.72 to 0.83. Signed-flux imbalance remains elevated at 4.43--6.10. The final $(30,90]$ band contains only four real and two synthetic rows from one group each, so its extreme ratios are not stable evidence. The conditional result therefore supports, but does not by itself prove, a residual mismatch after accounting for the latitude mixture. The full table and receipt are \texttt{tables/conditional\_proxy\_*.csv} and \texttt{artifacts/conditional\_proxy\_diagnostics.json}.
+
+\FigurePage{fig:conditional-proxy}{conditional_proxy_heatmap}{0.95}{Conditional synthetic-to-real proxy median ratios within fixed latitude bands. The upper-latitude band is intentionally shown but has only one connected group per class.}
+
 \chapter{3D visualization and sampling uncertainty}
 
 \section{Meaning of the 3D surfaces}
@@ -584,6 +588,9 @@ This appendix keeps the machine-generated numerical tables close to the narrativ
 \section{Two-sample classifier audit}
 \IfFileExists{tables/two_sample_classifier_summary.tex}{\input{tables/two_sample_classifier_summary.tex}}{\textit{Generated classifier table missing.}}
 
+\section{Conditional proxy audit}
+\IfFileExists{tables/conditional_proxy_summary.tex}{\input{tables/conditional_proxy_summary.tex}}{\textit{Generated conditional-proxy table missing.}}
+
 \section{Training summary}
 \IfFileExists{tables/training_summary.tex}{\input{tables/training_summary.tex}}{\textit{Generated table missing.}}
 
@@ -617,6 +624,8 @@ The following documents are shipped in the source bundle and were read as protoc
 \item \texttt{two\_sample\_classifier\_audit.json} (under \texttt{artifacts/}): group-held-out real-versus-generated classifier receipt;
 \item \texttt{two\_sample\_classifier\_audit.py} (under \texttt{scripts/}): independent scalar-proxy and coarse-field two-sample audit.
 \item \texttt{offline\_protocol\_selftests.json} (under \texttt{artifacts/}): offline acquisition, cache, time-repair, and downstream-policy self-test receipt.
+\item \texttt{conditional\_proxy\_diagnostics.json} (under \texttt{artifacts/}): latitude-conditioned proxy ratios and connected-region bootstrap receipt;
+\item \texttt{conditional\_proxy\_diagnostics.py} (under \texttt{scripts/}): train-only conditional proxy diagnostic and vector/raster plot writer.
 \end{itemize}
 
 The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
@@ -722,6 +731,9 @@ Path & Purpose \\
 \url{figures/two_sample_classifier.svg} & Auxiliary vector plot of fold AUCs and leading scalar coefficients. \\
 \url{tables/two_sample_classifier_*} & Classifier fold, coefficient, and summary tables. \\
 \url{artifacts/offline_protocol_selftests.json} & Five offline infrastructure and protocol self-tests; no training or forecasting. \\
+\url{artifacts/conditional_proxy_diagnostics.json} & Latitude-conditioned proxy diagnostic receipt. \\
+\url{figures/conditional_proxy_heatmap.*} & Conditional proxy ratio heatmap. \\
+\url{tables/conditional_proxy_*} & Latitude-band proxy ratios and bootstrap intervals. \\
 \bottomrule
 \end{longtable}
 
