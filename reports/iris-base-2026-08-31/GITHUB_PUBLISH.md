@@ -18,7 +18,7 @@ git -C /private/tmp/silver-engine-repo push -u origin codex/iris-base-report-202
 gh release create iris-2026-08-31 \
   --repo fr3ddykru3g3r/silver-engine \
   --title "IRIS full safety archive" \
-  --notes "SHA-256: 744172d12c3b382c80f50b6b18f5b64f21e9962a709628237df00a1d0db07978"
+  --notes "Use the SHA-256 recorded in IRIS_ARCHIVE_AUDIT_2026-09-01.json."
 gh release upload iris-2026-08-31 \
   '/Users/Kyrosah/Documents/ChatGPT/La Liga 38-0/IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip' \
   --repo fr3ddykru3g3r/silver-engine --clobber
