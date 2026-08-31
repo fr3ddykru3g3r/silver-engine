@@ -31,6 +31,15 @@ gh api repos/fr3ddykru3g3r/silver-engine/branches/codex/iris-base-report-2026-08
 gh release view iris-2026-08-31 --repo fr3ddykru3g3r/silver-engine
 ```
 
+After authentication and upload, the same checks can be run fail-closed with:
+
+```bash
+/Users/Kyrosah/Documents/ChatGPT/La\ Liga\ 38-0/IRIS_VERIFY_REMOTE_PRESERVATION.sh
+```
+
+It checks the local hashes first, then compares the remote branch commit and
+Release asset size/SHA-256 digest. It never deletes files.
+
 The local IRIS data must be retained until the branch, release, asset name,
 asset size, and SHA-256 value are all verified remotely. No deletion command
 is part of this recipe.
