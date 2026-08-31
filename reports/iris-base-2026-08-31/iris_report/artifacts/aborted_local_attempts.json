@@ -1,0 +1,22 @@
+{
+  "status": "RECORDED_NOT_A_RESULT",
+  "purpose": "Complete execution history and prevent partial CPU outputs from being treated as scientific results",
+  "attempts": [
+    {
+      "name": "base_seed2028_inference_only",
+      "type": "third sampler-seed robustness attempt",
+      "checkpoint": "BASE EMA checkpoint at step 1200",
+      "seed": 2028,
+      "sampling_steps": 50,
+      "requested_per_group": 2,
+      "requested_max_groups": 0,
+      "partial_array_files": 210,
+      "manifest_written": false,
+      "exit_code": 130,
+      "termination": "KeyboardInterrupt after extended CPU execution to prevent laptop thermal load",
+      "included_in_reported_results": false,
+      "included_in_archives": false,
+      "note": "The partial arrays remain in the temporary run root for provenance only. The completed seed-2027 audit is the authoritative alternate-sampling result."
+    }
+  ]
+}

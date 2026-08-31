@@ -1,0 +1,872 @@
+\documentclass[11pt,oneside]{report}
+
+% Self-contained report preamble.  All numerical values marked with macros are
+% generated from the immutable evidence/run directories by generate_analysis.py.
+\usepackage[a4paper,margin=25mm,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{graphicx}
+\usepackage{caption,subcaption}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{ink}{HTML}{17202A}
+\definecolor{blue}{HTML}{1769AA}
+\definecolor{orange}{HTML}{D97706}
+\definecolor{green}{HTML}{18864B}
+\definecolor{red}{HTML}{B42318}
+\definecolor{purple}{HTML}{7C3AED}
+\definecolor{lightblue}{HTML}{EAF2F8}
+\definecolor{lightgray}{HTML}{F4F6F7}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=purple,urlcolor=blue}
+\graphicspath{{figures/}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.62em}
+\captionsetup{font=small,labelfont=bf}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{IRIS BASE evidence report}
+\rhead{2026-08-31}
+\cfoot{\thepage}
+\lstset{basicstyle=\ttfamily\scriptsize,breaklines=true,frame=single,backgroundcolor=\color{lightgray},columns=fullflexible}
+
+\input{tables/generated_values.tex}
+
+\newcommand{\FigurePage}[4]{%
+  \clearpage
+  \begin{figure}[p]
+    \centering
+    \includegraphics[width=#3\textwidth]{#2}
+    \caption{#4}
+    \label{#1}
+  \end{figure}
+  \clearpage
+}
+\newcommand{\Metric}[2]{\textbf{#1}: #2}
+\newcommand{\TBD}{\textcolor{red}{not run in this BASE-only experiment}}
+
+\title{\textbf{IRIS BASE Experiment}\\[0.4em]
+  \Large A comprehensive evidence report on verified solar magnetogram acquisition,\\
+  conditional diffusion generation, distributional fidelity, and negative results}
+\author{IRIS / Silver Engine research record}
+\date{31 August 2026}
+
+\begin{document}
+
+\begin{titlepage}
+\maketitle
+\vfill
+\begin{center}
+\fcolorbox{red}{red!4}{\parbox{0.88\textwidth}{\centering\textbf{Interpretive status.} This is a BASE train-only image-generation and audit report with a separately labeled 100-step HJ/PIL physics screen. The BASE run passed a deliberately broad calibration gate, but its corrected generic distance was \AuditDistanceRatio{} times the real split-half reference. It does not establish forecasting utility, causal magnetic structure, or physical realism. Confirmatory 1,200-step physics arms and downstream forecasting were not executed.}}
+\end{center}
+\vfill
+\begin{center}
+\small Complete report package: figures, tables, machine-readable metadata, source code,\\
+OBJ visualization meshes, checkpoints, acquisition receipts, and the combined archive.\\
+\end{center}
+\end{titlepage}
+
+\chapter*{Executive summary}
+\addcontentsline{toc}{chapter}{Executive summary}
+
+This report documents the completed IRIS BASE experiment as an auditable research object. The objective was narrower than proving a useful flare forecaster: first obtain a verified set of historical HMI/SHARP line-of-sight magnetograms, preserve a chronology-safe data split, train the declared BASE conditional diffusion generator, draw synthetic positive-conditioned samples, and evaluate them with an independent descriptor audit. The initial experiment was deliberately stopped at that boundary. It therefore provides a meaningful generator diagnosis, not a final end-to-end forecasting result. Afterward, a compute-bounded 100-step positive-only HJ/PIL factorial screen was run from the frozen BASE EMA checkpoint; that follow-up is reported separately and does not upgrade the BASE result into a physics-transfer claim.
+
+The data pipeline began from \ManifestCount{} SHARP metadata rows covering \MOneEvents{} M1-or-larger GOES events in the collection interval and \GroupCount{} connected physical-region groups. Exact JSOC TAI timestamps were converted to UTC with the project’s Astropy-based repair. The repair changed \TaiLabelChanges{} primary labels and produced no group-partition changes. After censoring unresolved future-event windows, \PrimaryCount{} primary rows remained eligible for the frozen chronology. The training, validation, and test partitions contain \TrainRows{}, \ValidationRows{}, and \TestRows{} rows respectively, with no connected group crossing a boundary.
+
+The acquisition gate passed: \PlannedCount{} payloads were planned and \AcquiredCount{} valid FITS files were materialized in the local cache, with zero missing and zero invalid files. The cache is a BASE-stage model subset, not the complete \PrimaryCount{}-row archive. The completed model run resumed from a numbered step-400 checkpoint and reached step \BaseSteps{} on CPU. It used a 24-channel conditional U-Net, a 100-step cosine diffusion schedule, a 0.08 generic calibration coefficient, 50-step deterministic DDIM sampling, seed 2026, and 128 generated arrays from 64 positive source groups.
+
+The independent audit gives a mixed result. The predeclared broad gate is \AuditGate{} because the synthetic-to-real median ratios for the unsigned-flux proxy, active-area fraction, and coarse diversity are \AuditFluxRatio{}, \AuditAreaRatio{}, and \AuditDiversityRatio{}, while the absolute saturation fraction is \AuditSatFraction{}. However, the corrected five-feature generic distance is \AuditDistanceRatio{} times the real split-half p90 reference. The original six-feature calculation produced \AuditOriginalDistanceRatio{} times the reference because the real saturation feature had effectively zero dispersion; that failure was diagnosed, reported, and corrected by excluding saturation from the multivariate distance while retaining its explicit absolute threshold. This is a metric-stability result, not evidence that the generator is high fidelity.
+
+The strongest conclusion is therefore negative and useful: the current BASE checkpoint has learned enough broad amplitude and occupancy statistics to clear a lenient quality floor, but it has not demonstrated distributional closeness sufficient to justify physics transfer or forecasting augmentation. The follow-up screen confirms that the HJ, PIL, and HJ+PIL losses are executable and differentiable, but all three 100-step samples fail the broad generic gate; they are early diagnostics, not converged physics arms. The report records the completed additional analysis, all major outputs, limitations, and the exact next experiments required before any utility claim.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\chapter{Scope, research question, and claim discipline}
+
+\section{Why this report exists}
+
+The preceding project request was operational: acquire all available data for the current bundle, execute the model without stalling, produce the outputs, and then consolidate the scientific record. A report that only says “the job completed” would be insufficient. A credible record must make it possible to distinguish (i) what was downloaded and verified, (ii) what was actually used for training and auditing, (iii) what the generator produced, (iv) which metrics passed, (v) which metrics exposed a weakness, and (vi) which questions remain unanswered.
+
+This document is written as a full experimental report rather than a promotional summary. The repository documents included with the bundle are treated as protocol specifications and provenance records. They are not silently treated as evidence for results that were not executed. In particular, the protocol’s full physics-to-utility and rolling-fold requirements remain future gates. The initial notebook execution set the equivalent of \texttt{RUN\_BASE = '1'} and kept physics and downstream stages disabled; a later local screen ran only 100-step train-only HJ/PIL fine-tunes and no downstream stage.
+
+\section{Primary research question}
+
+The broader IRIS program asks which measurable magnetic structures must be reproduced by synthetic line-of-sight magnetograms before synthetic observations can transfer useful information to a 24-hour GOES M1+ flare-forecasting task. The completed experiment answers only the first layer of that question:
+
+\begin{quote}
+Can the current BASE conditional diffusion model, trained on a verified chronology-safe subset of real positive and negative HMI/SHARP magnetograms, generate fields that satisfy broad amplitude, occupancy, diversity, and saturation checks under an independent train-only audit?
+\end{quote}
+
+The word ``BASE'' matters. It denotes the unconstrained arm used as the reference for later Hale/Joy and strong-PIL-gradient arms. It does not denote a physical ground truth, a forecast model, or a successful augmentation treatment. The later 100-step HJ/PIL screen is a separate exploratory continuation, not a replacement for the BASE reference.
+
+\section{Predeclared claim boundaries}
+
+The report supports five claims. First, the specified historical FITS acquisition completed with a machine-readable PASS receipt. Second, the declared local BASE resume completed at step 1,200 and produced checkpoints, samples, training history, and audit files. Third, the independent broad gate passed under the corrected evaluator. Fourth, the audit exposes a substantial residual mismatch, so the BASE run is not sufficient to unlock a scientific conclusion about physics transfer. Fifth, the physics implementation self-test passed and the three 100-step exploratory arms executed with active intended losses, but all three failed the broad generic gate at that early budget.
+
+The report does not support a claim of improved TSS, AUROC, AUPRC, HSS2, calibration, or any other forecasting metric. It does not support a claim that synthetic fields are physically possible coronal configurations. It does not support a claim that the model learned causal flare precursors. It does not support a claim that a single seed or a single checkpoint is converged. The 100-step physics screen is an early training diagnostic, not the frozen 1,200-step confirmatory arm required by the protocol.
+
+\section{What was treated as an instruction versus a request}
+
+The user’s request was to complete and document the run, produce a reusable package, and pursue the next analyses. The attached project documents specify the intended data rules, independent audit definitions, and stop conditions. Their role was to constrain the analysis, not to manufacture missing outcomes. For example, the project’s readiness document says that a high forecast score alone would never satisfy the gate; that statement is compatible with this report’s emphasis on data integrity and manipulation checks. The short physics screen below exercises the implementation, but the documents’ full physics manipulation, rolling replication, human audit, and prospective blind-validation requirements remain open.
+
+\chapter{Scientific and technical background}
+
+\section{Photospheric magnetic observations}
+
+The Helioseismic and Magnetic Imager (HMI) is a Solar Dynamics Observatory instrument designed to study solar-surface magnetic fields and related solar dynamics. The instrument paper describes the HMI investigation and its standard data products \cite{scherrer2012}. The JSOC archive provides access to HMI products and explains that HMI is one of the SDO instruments used to study the photospheric magnetic field \cite{jsoc}. The SHARP product is particularly relevant because it automatically tracks substantial magnetic concentrations as active-region patches and provides maps and region-level parameters \cite{bobra2014}. The data therefore have a natural physical-region identity that can be used to prevent temporal duplicates from leaking across evaluation boundaries.
+
+This study uses the line-of-sight component of the HMI/SHARP magnetogram product. A magnetogram is a two-dimensional field, not a three-dimensional coronal reconstruction. The report’s 3D images and OBJ files represent field values as height over a 2D physical grid solely for visual inspection. They must not be read as magnetic loops, field lines, or a volume solution of the coronal equations.
+
+\section{GOES flare labels}
+
+The target labels originate from GOES soft-X-ray flare event information. NOAA’s science-quality flare report documentation states that GOES X-ray sensors measure two soft-X-ray passbands and that the event report is derived from one-minute XRS-B averages and indexed by flare peak time \cite{noaa_goes_readme}. The IRIS label construction maps these event records to HARP/NOAA-associated observations and marks whether an M1+ event begins in the following 24 hours. Because not every event can be attributed to a specific active region, unresolved windows are censored rather than silently turned into negative labels.
+
+The distinction between event detection and region attribution is central. The label is not “the Sun was quiet” when an unattributed flare may occur. It is a conservative supervised-learning label that avoids a known false-negative mechanism. This choice reduces nominal sample size but makes later forecasting comparisons more interpretable.
+
+\section{Diffusion generation}
+
+Denoising diffusion probabilistic models construct a forward corruption process and learn a reverse denoising process \cite{ho2020}. The present generator uses a conditional U-Net to predict noise from a corrupted 128-by-128 field, with conditioning on flare label and latitude. Sampling uses the deterministic DDIM formulation, which was introduced as a faster sampling process compatible with the diffusion training objective \cite{song2020ddim}. The 50-step sampler is therefore an engineering choice for throughput; it does not turn a 100-step training schedule into a physical simulator.
+
+\section{Why distributional evaluation is required}
+
+A generated magnetogram can look plausible while failing to reproduce the distributions that matter to a downstream learner. Conversely, a single global image metric can penalize harmless pixel-level differences or be dominated by a nearly constant feature. This report combines image inspection with several families of scalar descriptors: generic field strength and occupancy, hard geometry of strong polarities, and hard strong-PIL gradient descriptors. The generic gate is intentionally broad. Its purpose is to reject obvious collapse or gross scale errors, not to certify scientific fidelity.
+
+\chapter{Data provenance and audit trail}
+
+\section{Source records}
+
+The raw-source ledger records a NOAA GOES flare-event CSV and a JSOC HARP-to-NOAA mapping text file, including URLs, byte counts, and SHA-256 checksums. Historical SHARP metadata and the derived training manifest are included in the evidence directory. The raw binary magnetograms were acquired separately through the project’s FITS route and stored in the local cache. The acquisition report records the scope as BASE, the planned count as \PlannedCount{}, and the valid count as \AcquiredCount{}.
+
+The acquisition result is independently meaningful. It says that the model has real FITS payloads available; it does not say that all archive rows were downloaded, and it does not say that the downstream forecast experiment ran. The report retains this distinction in the inventory and in the package README.
+
+\section{Manifest scale and event mapping}
+
+Table~\ref{tab:scale} summarizes the collection-level quantities. The collection covers 2010--05--01 through 2026--08--23 in the local evidence. It contains \MOneEvents{} event records, \MappedHarps{} mapped HARP records, and \GroupCount{} active connected region groups after the manifest construction. The full manifest is larger than the model cache because the cache is a stage-specific subset.
+
+\begin{table}[H]
+\centering
+\caption{Collection and label-scale accounting.}
+\label{tab:scale}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+SHARP metadata rows & \ManifestCount{} \\
+M1+ event records & \MOneEvents{} \\
+M1+ events with an active-region association & 2,970 \\
+Unique reported active regions & 646 \\
+Mapped HARP records & \MappedHarps{} \\
+Connected active-region groups & \GroupCount{} \\
+Unresolved or ambiguous events & \UnresolvedEvents{} \\
+Rows censored by unresolved-event rule & \CensoredRows{} \\
+Primary rows after censoring & \PrimaryCount{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Time-scale repair}
+
+JSOC record keys in the source metadata use the explicit ``\_TAI'' suffix. The evidence pipeline parses those keys as TAI and converts them to UTC using Astropy before hourly joins, label windows, and chronology decisions. This prevents a record near an hour boundary from moving between labels or partitions simply because a time scale was interpreted as UTC text.
+
+Across \TaiRows{} metadata rows, the recorded TAI--UTC offsets were 37, 36, 35, or 34 seconds. The repair changed \TaiLabelChanges{} primary labels. The group-partition audit reported zero partition changes after the canonical repair, so the time correction was material to labels but did not alter the frozen connected-region partition assignment. Figure~\ref{fig:tai} makes the repair and the fail-closed execution gates visible.
+
+\section{Connected groups and chronological partitions}
+
+The split is based on connected HARPNUM--NOAA physical-region groups rather than independent image rows. This prevents two observations of the same evolving region from appearing in different partitions. The frozen boundaries are \BoundaryOne{} and \BoundaryTwo{}, with a declared 60/20/20 chronology and a 36-hour buffer. Table~\ref{tab:partitions} reports the row, positive-label, group, HARP, and censored-negative counts.
+
+\begin{table}[H]
+\centering
+\caption{Frozen chronological partition summary.}
+\label{tab:partitions}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Partition & Rows & M1+ & Groups & Pos. groups & HARPs & Pos. HARPs & Censored \\
+\midrule
+Train & \TrainRows{} & 4,324 & 1,321 & 125 & 1,385 & 129 & 4,725 \\
+Validation & \ValidationRows{} & 2,436 & 434 & 82 & 473 & 82 & 3,003 \\
+Test & \TestRows{} & 40,342 & 3,647 & 437 & 87 & 486 & 2,854 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sum of partition rows is not the same as the sum of primary rows after censoring if excluded or unresolved records are considered, because the manifest retains a broader accounting layer. The exact machine-readable values, hashes, and censoring rule are preserved in the evidence bundle. The report uses the partition table generated by the manifest audit rather than recomputing a casual count from a filtered CSV.
+
+\section{FITS payload validation}
+
+All \AcquiredCount{} planned BASE payloads were present and valid according to the acquisition report. The sample FITS records were HTTP 200 responses with the FITS ``SIMPLE'' card, and the local cache includes the per-file payloads used by the model. The source image extension is a two-dimensional array; geometry metadata such as CDELT and RSUN\_REF is taken from the evidence metadata join rather than assumed to be complete in the minimal FITS header. This is an important implementation detail: the physical crop cannot be reconstructed correctly from the image bytes alone without the corresponding metadata row.
+
+The acquired subset contains \AcquiredTrainFiles{} cached train-stage records, of which \AcquiredPositiveFiles{} carry positive labels and \AcquiredNegativeFiles{} carry negative labels. This subset is the materialization used to keep the BASE training and audit resumable. It should not be described as the complete HMI archive or as a full validation/test cache.
+
+\section{Censoring and label integrity}
+
+The unresolved-event rule globally censors otherwise-negative rows if an unresolved M1+ event could begin during their 24-hour forward window. The purpose is not to improve a metric; it is to avoid training and evaluating on labels that would silently call an unattributed major flare a negative example. In this evidence set, \UnresolvedEvents{} events contributed to \CensoredRows{} censored rows. The same rule is applied before the partition summary and model record construction.
+
+\FigurePage{fig:abstract}{graphical_abstract}{0.98}{Graphical abstract of the verified-data-to-audit pipeline. The final box deliberately says ``PASS / limits'' because passing the broad gate does not mean the generated distribution is close to the real distribution.}
+\FigurePage{fig:dataset}{dataset_partition_and_labels}{0.92}{Rows, positives, and censored negatives in the frozen chronological partitions.}
+\FigurePage{fig:acquisition}{acquisition_qc}{0.92}{FITS acquisition accounting and the distribution of local payload sizes. The right-hand panel is the gate that unlocked the model stage.}
+\FigurePage{fig:coverage}{latitude_and_time_coverage}{0.92}{Latitude and time coverage of the manifest and acquired BASE-stage records.}
+\FigurePage{fig:tai}{time_repair_and_execution_gates}{0.92}{TAI--UTC offset accounting and the fail-closed sequence from acquisition to BASE training.}
+
+\chapter{Preprocessing and mathematical methods}
+
+\section{Fixed physical field of view}
+
+The raw SHARP patches have variable dimensions and native pixel scales. The preprocessing map first replaces non-finite values with zero, estimates an unsigned-flux centroid above 100 G, and crops or pads a physical field of view of 256 Mm by 256 Mm. The crop size in native pixels is computed from CDELT and RSUN\_REF. The result is bilinearly resized to a 128-by-128 grid, fixing the model pixel scale at 2 Mm per pixel. This is necessary because a spatial gradient measured in pixels would otherwise mix resolution changes with physical structure.
+
+For a raw field $B$ in gauss, clipping and asinh normalization are applied as
+\begin{equation}
+  B_c = \operatorname{clip}(B,-3000,3000), \qquad
+  x = \frac{\operatorname{asinh}(B_c/250)}{\operatorname{asinh}(3000/250)}.
+\end{equation}
+The inverse used for audit plots is
+\begin{equation}
+  \widehat{B} = 250\sinh\left(x\,\operatorname{asinh}(3000/250)\right).
+\end{equation}
+The asinh transform preserves sign while compressing high field values; it is not a physical calibration correction. Generated arrays are stored in normalized form and converted to gauss only for descriptors and visualization.
+
+\section{Conditional diffusion model}
+
+Let $x_0$ denote the normalized field and $\epsilon\sim\mathcal{N}(0,I)$. The forward process uses the standard form
+\begin{equation}
+  x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon,
+\end{equation}
+where the cosine schedule supplies $\beta_t$, $\alpha_t=1-\beta_t$, and $\bar\alpha_t=\prod_{s\leq t}\alpha_s$. The conditional U-Net predicts $\epsilon_\theta(x_t,t,y,\ell)$, where $y$ is the flare label and $\ell$ is latitude scaled by 40 degrees and clipped to $[-1,1]$. The principal denoising objective is
+\begin{equation}
+  \mathcal{L}_{\mathrm{denoise}} = \mathbb{E}_{x_0,t,\epsilon}\left[\|\epsilon-\epsilon_\theta(x_t,t,y,\ell)\|_2^2\right].
+\end{equation}
+
+The BASE arm adds the generic calibration proxy with coefficient $\lambda_g=0.08$. The physics coefficients were retained in the checkpoint metadata for protocol consistency but their BASE contributions are zero because the condition is BASE and the physics arms were not run. The training history records the combined loss, denoising component, generic component, and the cosine learning rate.
+
+\section{Differentiable physics proxies}
+
+The HJ and PIL terms are smooth surrogate constraints on line-of-sight structure; they are not solutions of the coronal magnetic-field equations. For a field $B$ and strong-field threshold $B_0=150$ G, the differentiable positive and negative memberships are
+\begin{equation}
+  p(B)=\sigma\left(\frac{B-B_0}{T_B}\right), \qquad
+  n(B)=\sigma\left(\frac{-B-B_0}{T_B}\right),
+\end{equation}
+with $T_B=50$ G. The centroid weights are $w_+=p(B)\max(B,0)$ and $w_-=n(B)\max(-B,0)$. Their normalized centroids are $\mu_\pm=\sum w_\pm r/(\sum w_\pm+\epsilon)$, where $r$ is the normalized image coordinate. The separation and orientation descriptors are
+\begin{equation}
+  d=\sqrt{\|\mu_+-\mu_-\|_2^2+\epsilon}, \qquad
+  u=\frac{\mu_+-\mu_-}{d}, \qquad
+  h=\operatorname{sign}(\ell)u, \qquad s=\log(1+d),
+\end{equation}
+where $\ell$ is latitude. The HJ proxy compares the distribution of $(h_x,h_y,s)$ between generated and real positive batches, separately for the two latitude hemispheres when enough samples are present. It is therefore a population-level orientation/separation regularizer, not an individual-region law.
+
+For the PIL proxy, central differences use the declared physical pixel size $\Delta=2$ Mm:
+\begin{equation}
+  g=\sqrt{\left(\frac{\partial B}{\partial x}\right)^2+\left(\frac{\partial B}{\partial y}\right)^2+\epsilon}.
+\end{equation}
+The soft polarity memberships are dilated by a radius of two pixels and combined as a soft logical AND,
+\begin{equation}
+  C=\operatorname{ReLU}\bigl(D_2p+D_2n-1\bigr),
+\end{equation}
+which suppresses quiet-Sun background. The loss compares the weighted mean and RMS of $g$, a high-gradient tail mean, and sigmoid exceedance fractions at 100, 250, and 500 G Mm$^{-1}$. For example, the weighted RMS is $g_{\rm rms}=\sqrt{\sum Cg^2/(\sum C+\epsilon)}$. These quantities are useful differentiable image descriptors, but they do not establish a true polarity-inversion-line topology or a vector magnetic field.
+
+Both physics terms use the same distribution comparison,
+\begin{equation}
+  L_{\rm dist}=\tfrac12D_E+\tfrac12L_{\rm quantile}, \qquad
+  D_E=2\mathbb{E}\|X-Y\|-\mathbb{E}\|X-X'\|-\mathbb{E}\|Y-Y'\|,
+\end{equation}
+and the training objective applies a linear warm-up $r_k=\min(1,k/K)$:
+\begin{equation}
+  L_k=L_{\rm denoise}+r_k\left(\lambda_gL_g+\lambda_{HJ}L_{HJ}+\lambda_{PIL}L_{PIL}\right).
+\end{equation}
+The 100-step screen verified nonzero gradients and active targeted terms, but it did not establish that the finite-budget arms converge or that these proxies transfer to flare forecasting.
+
+\section{DDIM sampling}
+
+The final checkpoint is sampled with 50 evenly spaced diffusion indices and $\eta=0$. For the current model, the reconstructed clean estimate is
+\begin{equation}
+  \widehat{x}_0 = \operatorname{clip}\left(\frac{x_t-\sqrt{1-\bar\alpha_t}\,\epsilon_\theta(x_t,t,y,\ell)}{\sqrt{\bar\alpha_t}+10^{-8}},-1,1\right).
+\end{equation}
+The next state is formed with the deterministic DDIM direction. This acceleration makes sample production practical, but it introduces a sampling-resolution hyperparameter that must be audited in future convergence work.
+
+\section{Independent descriptor families}
+
+The audit is independent of the differentiable training proxy. Generic descriptors are computed from $|B|$: log mean absolute field, log 90th and 99th percentiles, fractions above 150 G and 500 G, and the fraction above 2,900 G. The saturation fraction is held out from the corrected multivariate generic distance because its real distribution has near-zero dispersion, but it remains an explicit absolute gate.
+
+The hard geometry descriptor thresholds positive and negative field at 150 G, computes polarity centroids, hemisphere-adjusted orientation components, log separation, log strong-field density, and a bipole indicator. The hard PIL descriptor identifies opposite-polarity contact using a radius-two-pixel max-pool, then summarizes the local gradient distribution using mean, RMS, top-tail, threshold-exceedance, and contact-area quantities. These are diagnostic descriptors; their empirical distributions do not prove the existence of a physical polarity-inversion-line topology in the unseen Sun.
+
+For two standardized descriptor sets $X$ and $Y$, the audit uses the energy-distance form
+\begin{equation}
+  D_E(X,Y)=2\,\mathbb{E}\|X-Y\|-\mathbb{E}\|X-X'\|-\mathbb{E}\|Y-Y'\|.
+\end{equation}
+Robust standardization uses the real median and interquartile scale. The real split-half reference repeatedly divides the real audit sample into two halves and reports its median and p90 distance. The synthetic-to-reference ratio is therefore interpretable as a distance relative to ordinary finite-sample variation, not as an absolute physical error.
+
+\section{Broad gate}
+
+The independent gate requires the synthetic-to-real median ratio for the unsigned-flux proxy and active-area fraction to lie between 0.5 and 2.0, diversity to lie between 0.4 and 2.5, saturation fraction below 0.01, and corrected generic distance ratio no greater than 8.0. These thresholds are intentionally broad and were designed to reject obviously untrained or collapsed generators. They are not a publication-quality similarity criterion and should not be confused with the stricter future physics manipulation gate.
+
+\chapter{Execution, checkpoints, and reproducibility}
+
+\section{Execution graph}
+
+The actual execution graph was acquisition, cache preflight, local BASE resume, DDIM sampling, independent audit, and report analysis. The acquisition report shows \texttt{run\_base=true}, \texttt{run\_physics=false}, and \texttt{run\_downstream=false}. This explicit state is important because a later user-facing notebook may contain cells for all stages; the presence of those cells is not evidence that their outputs exist.
+
+\section{Resume semantics}
+
+The local run resumed the model and EMA weights from the step-400 numbered checkpoint and performed 800 more update steps. The final checkpoint metadata states \texttt{resumed\_from\_step=400}, \texttt{steps=1200}, \texttt{device\_at\_save=cpu}, and \texttt{optimizer\_state\_available=false}. The numbered checkpoints did not store optimizer or random-number-generator state. Consequently this is a valid continued training run, but it is not a bit-for-bit continuation of the original optimizer trajectory. The report treats that fact as a limitation rather than hiding it behind the word ``resume''.
+
+The final learning rate was $5\times10^{-6}$ after the cosine schedule. The first recorded post-resume loss was \StartLoss{} and the final recorded loss was \EndLoss{}. The denoising component moved from \StartDenoise{} to \EndDenoise{}, and the generic component moved from \StartGeneric{} to \EndGeneric{}. These are optimization diagnostics only; lower loss does not imply better distributional fidelity.
+
+\section{Model configuration}
+
+\begin{table}[H]
+\centering
+\caption{Final BASE checkpoint and resume configuration.}
+\label{tab:config}
+\begin{tabular}{ll}
+\toprule
+Parameter & Value \\
+\midrule
+Condition & BASE \\
+Seed & 2026 \\
+Resume boundary & step 400 \\
+Final step & \BaseSteps{} \\
+Diffusion training steps & \DiffusionSteps{} \\
+U-Net base channels & \BaseChannels{} \\
+Generator dropout & 0 \\
+Batch size / physics batch size & 16 / 16 \\
+Generic coefficient & 0.08 \\
+Hale/Joy coefficient & 0.05 (inactive in BASE) \\
+PIL coefficient & 0.05 (inactive in BASE) \\
+Physics maximum timestep fraction & 0.25 (inactive in BASE) \\
+EMA decay & 0.995 \\
+Sampling method & DDIM, 50 steps, $\eta=0$ \\
+Optimizer/RNG state in source checkpoint & \CheckpointOptimizer{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{What is in the output tree}
+
+The output tree contains numbered checkpoints at steps 600, 800, 1000, and 1200, the final EMA/model checkpoint, a resume configuration, an 800-record training history, 128 normalized arrays, a synthetic manifest, a sampling summary, and six audit CSVs plus the JSON audit report. The report package adds machine-readable inventory and metadata, derived statistics, figures, and visualization meshes. The original source bundle remains separate from the report so that code and evidence can be compared.
+
+After the interrupted first physics attempt, the patched physics trainer was made interruption-tolerant: it writes a numbered model checkpoint and matching history snapshot at the configured interval. A three-step CPU self-test with an interval of one produced all six expected periodic files and passed; the receipt is \url{artifacts/resumability_selftest.json}. This improves recoverability but does not restore optimizer or random-number-generator state, so a future restart from a periodic weight remains a documented new trajectory unless those states are separately serialized.
+
+A third inference-only sampler-seed attempt (seed 2028) was started as a low-heat robustness check but was interrupted with exit code 130 after extended CPU execution. It wrote 210 partial arrays but no manifest or audit receipt; those arrays are explicitly excluded from all reported metrics and archives. The execution receipt is \url{artifacts/aborted_local_attempts.json}. This negative record is retained so a future run cannot accidentally treat an incomplete sampler directory as a valid result.
+
+\FigurePage{fig:training}{training_history}{0.92}{Loss trajectory from the first recorded post-resume update through step 1,200. The vertical line marks the numbered-checkpoint resume boundary; history before that boundary was not available in the stored checkpoint.}
+\FigurePage{fig:pair}{real_synthetic_magnetogram_pair}{0.92}{A real preprocessed field and one generated positive-conditioned BASE sample on the same fixed 256 Mm field of view. The pair is a qualitative inspection, not a paired reconstruction.}
+\FigurePage{fig:grid}{generated_sample_grid}{0.92}{Twelve of the 128 generated fields. The grid is included to reveal mode collapse or repeated motifs that a single example could hide.}
+
+\chapter{Results: generated fields and audit metrics}
+
+\section{Qualitative field inspection}
+
+The real and synthetic example in Figure~\ref{fig:pair} share the same field-of-view convention and color normalization, but they are not intended to depict the same active region. The generated field contains compact positive and negative structures and a low-field background. The sample grid in Figure~\ref{fig:grid} shows that the generator produces varying arrangements rather than an identical array repeated 128 times. Qualitative variation is necessary but not sufficient: the later descriptor results show that variation can coexist with substantial distribution mismatch.
+
+\section{Core calibration and diversity}
+
+The median unsigned-flux proxy ratio was \AuditFluxRatio{}, the active-area ratio was \AuditAreaRatio{}, and the coarse pairwise-diversity ratio was \AuditDiversityRatio{}. All three sit inside the broad declared intervals. The synthetic saturation fraction above 2,900 G was \AuditSatFraction{}, which is below the absolute 0.01 cap. In other words, the output is not trivially collapsed to zero, not grossly over-amplified, and not dominated by clipping.
+
+These results should be read as a necessary-condition check. A model could satisfy these four scalar checks while misplacing polarity geometry, smoothing strong gradients, or omitting rare high-value structures. The independent geometry and PIL tables are therefore part of the primary result rather than optional supplements.
+
+\FigurePage{fig:core}{core_gate_ratios}{0.82}{Core calibration ratios. The green band indicates the broad 0.5--2.0 interval used for the flux and active-area checks; diversity has its own declared interval.}
+\FigurePage{fig:generic}{generic_descriptor_distributions}{0.92}{Generic descriptor distributions for the real audit set and generated BASE set. Saturation is shown but excluded from the corrected multivariate distance because its real dispersion is effectively zero.}
+\FigurePage{fig:scatter}{descriptor_scatter}{0.92}{Two-dimensional relationships among generic descriptors. These plots make co-occurrence differences visible even when individual medians are close.}
+
+\section{Generic multivariate fidelity}
+
+The corrected generic-core energy distance was 0.4689, and the real split-half reference had median 0.0303 and p90 0.0611. Dividing by the p90 yields \AuditDistanceRatio{} times the ordinary real split-half distance. The gate threshold is 8.0, so the gate passes narrowly. The ratio is nevertheless far above one: the synthetic set is distinguishable from the finite-sample variability of the real set under this descriptor space.
+
+The original six-dimensional calculation gave an energy distance of 149.4357 and a ratio of \AuditOriginalDistanceRatio{} because saturation fraction was exactly or almost exactly zero in the real data while small but acceptable synthetic saturation was present. Robust standardization therefore treated a scientifically small absolute difference as a huge standardized difference. The correction excludes only that nearly constant feature from the multivariate distance and keeps the independent absolute saturation gate. Figure~\ref{fig:negative} shows both the failure and the correction. This was an outcome-blind evaluator repair, not a change selected from forecast performance.
+
+\section{Feature-level distributions}
+
+The generic table reports means, medians, 5th and 95th percentiles, median-ratio bootstrap intervals, Wasserstein distances, and two-sample KS diagnostics. Several field-strength descriptors are close in median but displaced in distribution. In particular, the generated log mean absolute field is higher than the real median, while the p99 descriptor is closer. This pattern is consistent with a generator that captures strong localized features but distributes moderate field values differently across the image.
+
+The saturation result illustrates why p-values alone are not useful here. With 248 real and 128 synthetic samples, a minuscule real dispersion can produce an extreme KS statistic even if the absolute synthetic saturation fraction remains below the declared safety floor. The report therefore retains both effect-scale diagnostics and predeclared gate logic.
+
+\section{Cluster-bootstrap uncertainty}
+
+To quantify how much the feature-level medians depend on the finite audit sample, the new uncertainty analysis resamples connected region groups rather than individual rows. It uses 2,500 deterministic bootstrap replicates over 125 real groups and 64 synthetic groups. The resulting intervals are descriptive uncertainty bands for median ratios; they do not turn the generated fields into paired observations and do not replace the multivariate energy-distance gate.
+
+The log-mean-absolute-field ratio is 1.354 with a 95\% cluster-bootstrap interval of [1.188, 1.548], while the log-p90 ratio is 1.203 [1.071, 1.461]. Geometry separation is lower at 0.910 [0.818, 0.984]. The PIL mean-gradient ratio is 0.885 [0.842, 0.951], and the fraction above 100 G/mm is 0.677 [0.628, 0.740]. These intervals strengthen the interpretation that some median-scale differences are systematic, while also showing which descriptors have intervals that include unity. The complete machine-readable result is \url{artifacts/bootstrap_descriptor_uncertainty.json}.
+
+\FigurePage{fig:bootstrap}{bootstrap_descriptor_uncertainty}{0.90}{Cluster-bootstrap intervals for descriptor median ratios. Region groups, not individual rows, were resampled; this figure is an uncertainty diagnostic rather than a replacement for the multivariate gate.}
+
+\section{Hard geometry}
+
+The independent hard-geometry descriptor compares hemisphere-adjusted polarity orientation, separation, strong-field density, and the bipole indicator. The complete feature-level comparison is preserved in \texttt{tables/hard\_descriptor\_statistics.csv}. The hard geometry energy distance is reported in the original audit JSON. The strongest visible displacement is in the hemisphere-adjusted orientation coordinate: the real audit set is not centered in the same way as the synthetic set. This is exactly the kind of structure that a broad amplitude gate can miss.
+
+\FigurePage{fig:geometry}{hard_geometry_distributions}{0.92}{Independent hard geometry descriptors. These are measured after generation and are not the differentiable training proxy.}
+\FigurePage{fig:pil}{hard_pil_distributions}{0.92}{Independent hard strong-PIL descriptors. The descriptor family retains gradient tails and threshold exceedances instead of reducing PIL structure to one mean.}
+
+\section{Hard strong-PIL gradients}
+
+The strong-PIL audit compares gradient means, RMS, top-tail values, exceedance fractions, contact area, and presence. The generated mean gradient is somewhat lower than the real distribution, whereas the top-tail mean is close in median. The exceedance fractions show that matching the high tail does not automatically match the amount of the PIL occupied by moderately high gradients. This negative result supports the protocol’s decision to use a vector-valued descriptor rather than a single scalar mean.
+
+No claim is made that the current BASE model was expected to match the hard PIL target; BASE has no active physics regularizer. The result is a baseline for the future PIL arm and a warning against interpreting the generic gate as a physics gate.
+
+\section{Independent line-of-sight magnetic proxies}
+
+As a separate post-generation diagnostic, the report computes thirteen inexpensive proxies directly from the 2D line-of-sight fields. They include unsigned flux, signed-flux imbalance, RMS field, the mean-square field-energy proxy, gradient RMS, a high-gradient fraction, positive and negative strong-field connected components, total component count, strong-polarity centroid separation, Fourier wavenumber centroid, high-wavenumber power fraction, and a normalized half-space spectral potential proxy. The last quantity is a Fourier-space 2D diagnostic; it is not a coronal extrapolation and does not imply a vector field or a volume solution.
+
+The analysis uses the fixed 489-field positive training cache and the 128 primary BASE samples, grouped into 125 and 64 connected physical-region groups. It uses 1,000 deterministic group-bootstrap replicates for descriptive intervals. The synthetic-to-real median ratios are 1.476 for mean $|B|$, 5.299 for signed-flux imbalance, 1.587 for the mean-square field proxy, 1.434 for gradient RMS, 0.960 for the fraction above 100 G Mm$^{-1}$, 0.772 for total strong-field component count, 1.576 for high-wavenumber power fraction, and 1.373 for the spectral potential proxy. The robust-standardized thirteen-feature energy distance is 2.537, compared with a real split-half p90 of 0.0419, giving a descriptive ratio of 60.52. These numbers reinforce the main audit’s conclusion that the BASE output is an operational baseline with substantial residual structure mismatch. They are secondary diagnostics, not a replacement for the predeclared generic gate and not evidence of physical realism or forecast utility. The complete receipt is \url{artifacts/physics_proxy_diagnostics.json}.
+
+\FigurePage{fig:physics-proxies}{physics_proxy_distributions}{0.92}{Independent line-of-sight proxy distributions for the real positive audit set and the generated BASE set. These scalar diagnostics are descriptive and are not a 3D coronal-field evaluation.}
+\FigurePage{fig:physics-spectral}{physics_proxy_spectral}{0.92}{Fourier-space diagnostics for the observed and generated line-of-sight fields, including spectral centroid, high-wavenumber power fraction, and the normalized half-space potential proxy.}
+\FigurePage{fig:physics-topology}{physics_proxy_topology}{0.92}{Strong-field connected-component counts and polarity-centroid separation for the real and generated fields.}
+
+\section{Classifier-based two-sample audit}
+
+To quantify residual distinguishability without introducing a forecast target, a separate five-fold StratifiedGroupKFold logistic classifier was fit to the 489 real positive training fields and 128 generated BASE fields. The first model used the thirteen scalar proxies above; the second used a $16\times16$ block-mean representation of each field. Region identifiers were carried into the split, giving 125 combined connected-region groups and preventing a classifier from memorising a region that appears in both classes. This audit uses no validation or test flare outcomes.
+
+The scalar-proxy classifier achieved mean ROC AUC $0.9998$ (SD $0.0005$, fold range $0.9988$--$1.0000$) and mean balanced accuracy $0.9874$. The coarse-field classifier was less stable and much closer to chance, with mean AUC $0.5888$ (SD $0.1063$, range $0.4458$--$0.6841$) and balanced accuracy $0.7538$. The largest mean standardized coefficient in the scalar model was gradient RMS, followed by unsigned flux and the high-gradient fraction. This is a descriptive two-sample result: a high AUC establishes distinguishability, not that either distribution is scientifically preferable, and it does not replace the predeclared gate or establish forecast utility. Exact folds and coefficients are retained in \texttt{tables/two\_sample\_classifier\_*.csv}; the receipt is \texttt{artifacts/two\_sample\_classifier\_audit.json}. A dependency-free vector visualization is shipped as \texttt{figures/two\_sample\_classifier.svg}.
+
+As a conditioning check, the same proxies were then compared within five fixed latitude bands using connected-region bootstrap units. In the four well-populated bands, unsigned-flux ratios range from 1.24 to 1.88, gradient-RMS ratios from 1.30 to 1.56, high-wavenumber ratios from 1.37 to 1.81, and total strong-component ratios from 0.72 to 0.83. Signed-flux imbalance remains elevated at 4.43--6.10. The final $(30,90]$ band contains only four real and two synthetic rows from one group each, so its extreme ratios are not stable evidence. The conditional result therefore supports, but does not by itself prove, a residual mismatch after accounting for the latitude mixture. The full table and receipt are \texttt{tables/conditional\_proxy\_*.csv} and \texttt{artifacts/conditional\_proxy\_diagnostics.json}.
+
+\FigurePage{fig:conditional-proxy}{conditional_proxy_heatmap}{0.95}{Conditional synthetic-to-real proxy median ratios within fixed latitude bands. The upper-latitude band is intentionally shown but has only one connected group per class.}
+
+\section{Gate stability under connected-group bootstrap}
+
+The point estimate passes the deliberately broad BASE gate, but a connected-group bootstrap shows that this pass is not robust to finite-sample variation. Resampling the 125 real and 64 synthetic connected-region groups 2,000 times gives a joint five-criterion pass fraction of 0.508. Flux, active-area, diversity, and saturation criteria pass in 0.999, 1.000, 1.000, and 1.000 of replicates, respectively; the corrected multivariate distance criterion passes in only 0.508. Its bootstrap median ratio is 7.976 with a 95\% interval of 6.001--11.337, crossing the predeclared ceiling of 8.0. This is not a probability that the generator is scientifically valid: it is an uncertainty diagnostic for the finite train-only audit sample and the already generated 128 fields. It strengthens the negative conclusion that the BASE gate is a permissive screening floor, not stable evidence of close distributional fidelity. The complete receipt is \texttt{artifacts/gate\_stability\_diagnostics.json}.
+
+\FigurePage{fig:gate-stability}{gate_stability}{0.95}{Fraction of connected-group bootstrap replicates satisfying each BASE gate criterion and all criteria jointly. The corrected multivariate distance is the limiting criterion.}
+
+\section{Memorization and nearest-neighbor checks}
+
+An exact-array hash audit found zero duplicate normalized arrays among the 128 generated fields. In the $16\times16$ pooled asinh representation, the median nearest-neighbor distance was 1.156 among synthetic fields, compared with 0.634 for real-to-real nearest neighbors and 1.134 for synthetic-to-real nearest neighbors. The synthetic-to-real distance is therefore not suspiciously close to the real sample, while the synthetic set is not collapsed to a single point. Pairwise distances among the two outputs sharing a source-region conditioning group had median 1.767, slightly above the 1.726 median for pairs from different source groups. The nearest real field from the same source group had median distance 1.671, compared with 1.134 for the nearest field from a different group. These results do not prove non-memorization; they are consistent with the BASE model producing diverse but distributionally displaced fields rather than copying its conditioning records. The audit is low-dimensional and uses no forecast outcomes. Its complete receipt is \texttt{artifacts/memorization\_diagnostics.json}.
+
+\FigurePage{fig:memorization}{memorization_nearest_neighbor}{0.95}{Nearest-neighbor and source-group distance distributions in the pooled asinh field representation. Exact duplicate hashing found no duplicate generated arrays.}
+
+\chapter{3D visualization and sampling uncertainty}
+
+\section{Meaning of the 3D surfaces}
+
+Every 3D surface in this report is a visualization of a scalar 2D magnetogram. The horizontal axes span the fixed 256 Mm field of view, and the vertical coordinate is the line-of-sight field value in gauss. A surface peak is therefore a high field value, not a loop apex; a valley is a negative polarity, not a coronal depression. The OBJ meshes use the same convention and include a text README with the units and claim boundary.
+
+\FigurePage{fig:surfaces}{real_synthetic_3d_surfaces}{0.92}{3D surfaces of one real preprocessed magnetogram and one generated BASE magnetogram. Vertical height encodes $B_{LOS}$ for visual contrast; no 3D coronal field is inferred.}
+
+\section{Ensemble spread}
+
+Across the 128 generated arrays, the report computes a pixelwise standard deviation in gauss. The resulting heat map identifies regions where the sampler varies most across draws, while the companion surface makes the spatial pattern easier to inspect. The spread is not a posterior uncertainty with calibrated coverage: it reflects variation across deterministic DDIM draws at a fixed checkpoint, condition, group selection, and sampling schedule. It can be useful for diagnosing concentration or mode collapse, but it is not an error bar on the Sun.
+
+\FigurePage{fig:uncertainty}{synthetic_ensemble_uncertainty}{0.92}{Pixelwise and 3D visualizations of the ensemble standard deviation over 128 generated fields.}
+
+\section{OBJ exports}
+
+\begin{sloppypar}
+Three meshes are included: \texttt{real\_magnetogram\_surface.obj}, \texttt{synthetic\_magnetogram\_surface.obj}, and \texttt{synthetic\_ensemble\_spread\_surface.obj}. Each is a regular 128-by-128 grid with 16,384 vertices and quadrilateral faces over adjacent grid cells. The meshes are intended for Blender, MeshLab, or similar inspection; their inclusion does not turn the 2D observations into 3D data.
+\end{sloppypar}
+
+\chapter{Robustness, negative results, and failure analysis}
+
+\section{Why the corrected gate is not a triumph}
+
+The word PASS in the audit JSON can be misleading without the full context. The gate was predeclared to be broad enough to reject obvious failures, and the corrected distance threshold was 8.0 times a real split-half p90. The observed ratio of \AuditDistanceRatio{} is below that ceiling but far from the real-data baseline. The generator is thus acceptable as a resumable baseline artifact and unsuitable as evidence of close distributional fidelity.
+
+\section{Metric degeneracy and correction}
+
+The first evaluator treated all six generic descriptors identically after robust scaling. The real saturation fraction was effectively constant at zero, so its interquartile range was replaced with a tiny numerical fallback scale. Synthetic values on the order of $10^{-4}$ then became enormous standardized values. This caused the six-dimensional energy distance to be 149.4357 and the ratio to be \AuditOriginalDistanceRatio{}. The absolute saturation fraction, however, was well below the predeclared 0.01 cap.
+
+The correction has three safeguards. It removes saturation only from the multivariate core distance, retains saturation as an explicit absolute constraint, and records the original and corrected metrics together. A less transparent fix would simply have removed the feature from all reporting, which would hide a real output property. The corrected audit instead makes the numerical pathology visible and preserves the scientific question: are generated fields close on the non-degenerate generic descriptors, and are they safely below saturation?
+
+\FigurePage{fig:negative}{negative_control_metric_correction}{0.92}{Negative-control analysis of the generic distance. The original formulation is shown alongside the corrected five-feature core and the declared threshold; the right panel shows why the saturation feature is kept as an absolute gate.}
+
+\section{Real split-half calibration}
+
+A distance has no meaning without a same-distribution scale. The evaluator repeatedly split the 248 real audit fields into two halves, computed the same standardized energy distance, and used the p90 as a conservative reference. The reference median was 0.0303 and p90 0.0611. The synthetic distance of 0.4689 is about 7.7 times the p90. This calibration prevents the report from describing any nonzero distance as a failure, but it also prevents a lenient absolute threshold from being mistaken for a close match.
+
+\section{Two-dimensional descriptor relationships}
+
+The scatter plots reveal that individual ratios can conceal changed correlations. A generator can have similar active and strong-field fractions while placing them in different combinations across samples. Such changes matter because downstream learners see spatial organization, not independent scalar features. The hard geometry and PIL descriptor families partially expose those relationships, but they remain low-dimensional summaries of a high-dimensional field.
+
+\section{Failure modes that were not observed}
+
+The acquisition did not show missing or invalid payloads in the planned BASE cache. The sampler did not produce NaN arrays, and the file manifest contains 128 arrays with matching rows. The absolute saturation gate did not fail. The model did not collapse to an identical sample under the inspected grid. These are operational successes.
+
+\section{Failure modes that remain}
+
+The corrected generic ratio is high relative to real variation. The generated strong-PIL mean and threshold-exceedance distributions are displaced. The hard geometry orientation distribution is displaced. The model was resumed without optimizer/RNG state. Only one training checkpoint and one main sampling seed were used for the primary result before the report build. The model was trained and audited on a small selected subset relative to the full manifest. These are scientific limitations even though the operational pipeline passed. The later HJ, PIL, and HJ+PIL screens also failed the generic gate at 100 steps; because they are intentionally short, that result diagnoses early incompatibility rather than proving non-convergence at the full budget.
+
+\chapter{Additional analysis: alternate sampling seed}
+
+\section{Purpose}
+
+One way a generated result can look more certain than it is would be to report only one random draw. To address that future-work item immediately, the final checkpoint was sampled again with seed 2027, keeping the checkpoint, positive-group selection size, per-group count, and 50-step DDIM schedule fixed. This is inference-only robustness, not a second training run and not an independent model fit.
+
+\section{Interpretation}
+
+The alternate-seed audit is reported in \texttt{artifacts/seed\_robustness.json} and the corresponding table. The correct interpretation is seed sensitivity of the output distribution under one checkpoint. Seed 2027 produced a generic ratio of 11.055, above the 8.0 gate, while its flux, active-area, diversity, and saturation ratios remained 1.703, 1.214, 1.189, and $8.206\times10^{-4}$. The main seed therefore passes narrowly and the alternate seed fails on the multivariate distance. This is a direct reason to require training and sampling replication before using the gate as a model-selection criterion. Neither outcome proves physical transfer.
+
+\FigurePage{fig:seed}{seed_robustness}{0.92}{Alternate sampling-seed robustness. The same checkpoint and real descriptor reference are used; only the sampler seed changes.}
+
+\IfFileExists{tables/seed_robustness.tex}{\input{tables/seed_robustness.tex}}{\textit{The alternate-seed table is generated after the seed-2027 audit.}}
+
+\section{What this analysis does and does not close}
+
+This robustness run closes one narrow question: whether a fresh sampler seed can be evaluated through the same independent gate. It does not close model-seed variation, training-resume variation, diffusion-step convergence, or fold replication. Those require additional model fits and should be run only after the evaluation freeze is preserved.
+
+\chapter{Future training directions and executed next steps}
+
+\section{Directions already executed}
+
+The report’s data audit, independent feature statistics, 3D exports, ensemble spread, metric correction, alternate sampling seed, v2 physics self-test, and 100-step HJ/PIL screen were all executed as part of the paper build. They are not speculative recommendations. Their scripts and machine-readable outputs are included in the package. The short screens do not close the full physics-to-utility gate.
+
+\section{Physics-constrained generator arms}
+
+The predeclared next experiment was started as a compute-bounded screening study after freezing the BASE checkpoint. Each screen used the same 489 positive training records from 125 connected groups, the same 24-channel architecture, 100 diffusion steps, learning rate $10^{-4}$ with cosine decay, generic weight 0.08, HJ/PIL weights 0.05, a 200-step physics warm-up, EMA decay 0.995, and seed 2026. Each arm was initialized from the final BASE EMA checkpoint and trained for exactly 100 positive-only steps. This is an exploratory screen, not the protocol’s 1,200-step confirmatory arm.
+
+Before training, the v2 physics self-test passed. It produced zero quiet-field soft-PIL contact, decreased all PIL-tail descriptors after blurring, and retained nonzero geometry and PIL gradients. The self-test receipt is \texttt{artifacts/physics\_v2\_selftest.json}. To prevent repeated FITS decoding, the 489 records were preprocessed once into a fixed tensor cache; all three screens used that cache and the local FITS requirement remained fail-closed.
+
+The resulting 128-sample audits used the fixed 248-field real reference from the primary BASE audit, 64 identical conditioning groups, and 50-step DDIM sampling. The corrected generic distance ratios were 20.855 for HJ, 21.521 for PIL, and 20.081 for HJ+PIL, all above the broad 8.0 ceiling. The HJ hard-geometry distance was 0.573 and its hard-PIL distance was 1.652; the PIL arm’s corresponding values were 0.619 and 4.128; the combined arm’s were 0.576 and 3.729. The targeted loss was active in each arm, but the early checkpoint did not pass the generic gate. The complete machine-readable table is \texttt{tables/physics\_screening.csv}.
+
+These screens produce two useful results. First, the implementation path is executable, differentiable, cacheable, and output-isolated. Second, a short physics fine-tune can move a targeted descriptor without producing an acceptable overall generator. The HJ result is not a proof of physical improvement, because the hard geometry distance was not compared with a predeclared improvement margin and the generic gate failed. The PIL and combined results are likewise not evidence of transfer. The full 1,200-step arms remain required before any coefficient selection or downstream evaluation.
+
+\FigurePage{fig:physics-screen}{physics_screening_comparison}{0.92}{Exploratory 100-step HJ/PIL physics-arm screen. The generic gate ratio remains above the broad threshold for every short screen; hard geometry and strong-PIL distances are shown as independent diagnostics.}
+\FigurePage{fig:physics-loss}{physics_screening_losses}{0.92}{Final loss components for the 100-step physics screens. Nonzero HJ and PIL components confirm that the intended differentiable constraints were active.}
+
+\IfFileExists{tables/physics_screening.tex}{\begin{table}[p]\centering\resizebox{\textwidth}{!}{\input{tables/physics_screening.tex}}\caption{Screening-arm metrics. The table is exploratory and is not a downstream utility result.}\label{tab:physics-screening}\end{table}}{\textit{Physics-screening table not generated.}}
+
+\section{Selective destruction controls}
+
+The protocol’s mechanistic test is stronger than asking whether a synthetic image looks realistic. Generated fields should be modified to selectively destroy strong-field polarity geometry, strong-PIL gradients, or spatial organization while preserving coarse field-value statistics as closely as possible. The exact controls are HJ-destroyed, PIL-blurred, and spatial-phase/block-shuffled variants. The independent audit must verify that the intended feature moved and that unrelated features were not catastrophically damaged.
+
+As an immediate diagnostic, all three controls were executed on the 128 primary BASE samples and audited without any forecasting model. The geometry flip preserved generic descriptors to numerical precision but changed the hard geometry distance from 0.5423 to 0.6498. The block shuffle preserved generic descriptors while moving hard geometry to 0.6982 and hard-PIL distance to 3.4782. The PIL blur changed the PIL descriptor most strongly, but it also changed hard geometry substantially and increased the generic distance ratio to 9.672. This is a useful warning: the current narrow PIL blur is not a clean intervention, so it cannot yet support a causal claim about PIL information. The controls are therefore diagnostic evidence and not utility evidence.
+
+\FigurePage{fig:destruction}{destruction_controls}{0.92}{Executed counterfactual destruction controls. The panels report independent distances after transforming the generated fields; no forecasting output is involved.}
+
+\section{Rolling-origin forecasting}
+
+Only after a generator arm passes its train-only physical manipulation check should it be evaluated in the frozen rolling-origin forecast matrix. The primary static CNN and secondary temporal CNN--BiLSTM should receive the same observations and the same evaluation rows. Real-only, duplicated-real-positive, and synthetic augmentation controls are mandatory because extra exposure alone can improve or worsen a learner. The primary utility metric is TSS, with HSS2, AUPRC, AUROC, Brier/BSS, recall, false-positive rate, precision, and calibration as secondary diagnostics.
+
+\section{Prospective blind confirmation}
+
+Retrospective folds can still inherit selection pressure if the model or protocol is repeatedly changed after inspecting results. The project protocol therefore calls for a prospective blind track in which predictions are timestamped before the 24-hour GOES outcome window closes. This report contains no prospective prediction receipt and therefore makes no prospective claim.
+
+\section{More efficient and safer training}
+
+The local run demonstrated a practical way to avoid a hot laptop: acquire and validate the FITS cache once, materialize a fixed preprocessed tensor cache for training, cap CPU threads, save numbered checkpoints, and keep a small watcher that resumes from the last complete checkpoint. The follow-up screen measured the benefit of the cache directly: the 489 FITS records were preprocessed once and then reused, removing repeated FITS parsing from every optimizer step. The remaining cost was the two U-Net passes required by an always-on physics update; a measured 24-channel CPU physics step took about 5.14 seconds at batch size 16, implying roughly 103 minutes for one 1,200-step arm before sampling and audit overhead. For future work, the preferred path is Colab GPU or another controlled GPU runtime, with the Drive cache mounted read-only during audits where possible. The full notebook remains available, but the report package should be the source of truth for what actually ran.
+
+Other efficient directions include mixed precision on GPU, gradient accumulation instead of multiplying image resolution, fewer sampling steps only after a sample-quality convergence curve is measured, and a compact held-out diagnostic panel that runs before a full 128-sample audit. Efficiency must not be obtained by bypassing FITS validation, disabling TLS, using PNG screenshots, or mixing validation/test rows into coefficient selection.
+
+The offline acquisition-helper, FITS-cache, TAI-to-UTC, historical-repair, and downstream-policy self-tests were also rerun after the report update; all five passed. This receipt validates infrastructure primitives only, without network access, model training, or forecast evaluation, and is stored in \texttt{artifacts/offline\_protocol\_selftests.json}.
+
+\section{Data expansion}
+
+The current cache contains \AcquiredCount{} FITS payloads, while the eligible primary manifest contains \PrimaryCount{} rows. Future full-scope work should acquire validation and test FITS only after the BASE and physics gates are frozen, and should keep those files in separate immutable directories. The full cache should not be confused with the selected training subset used here. A manifest-level acquisition receipt should record scope, missing counts, invalid counts, and checksums for every stage.
+
+\chapter{Discussion}
+
+\section{What the BASE result means}
+
+The BASE generator is operationally usable. It can be resumed, sampled, audited, and packaged without reacquiring the cached FITS files. It learned broad field-strength and occupancy scales sufficiently well to pass the declared broad gate. That makes it a valid reference arm for measuring whether later physics constraints change the intended descriptors.
+
+The BASE generator is not yet scientifically persuasive as a synthetic-observation source. The corrected generic ratio of \AuditDistanceRatio{} is much larger than the real split-half p90, and the hard geometry/PIL panels show structured discrepancies. The current result is best viewed as a baseline with partial calibration, not as a breakthrough in solar magnetic-field generation.
+
+\section{Why the negative result is valuable}
+
+The project’s mechanistic question requires negative results to be legible. If a later HJ or PIL arm produces a lower targeted distance but no downstream improvement, that will distinguish physical fidelity from utility. If the current broad BASE gate had been reported as ``realistic'' without the corrected multivariate analysis, a later comparison could be built on a false premise. The high residual distance and metric degeneracy are therefore useful design information.
+
+\section{No forecasting conclusion}
+
+The input labels and chronological splits are designed for forecasting, but no forecaster was trained in this execution. The generated arrays were not inserted into an evaluation fold, and no TSS or other forecast utility metric was produced. It would be scientifically incorrect to infer a forecasting result from the generator audit. Any future report must retain this boundary in its abstract, figures, and README.
+
+\section{No causal magnetic-structure conclusion}
+
+The BASE arm does not impose a Hale/Joy or strong-PIL-gradient objective. Even if its hard descriptor distributions were closer, that would show association with the selected summaries, not causal relevance to flare initiation. Causal language requires a controlled destruction experiment and downstream transfer comparison under the frozen protocol.
+
+\chapter{Limitations and reproducibility risks}
+
+\section{Checkpoint state}
+
+The final run resumed model and EMA weights but not optimizer state or RNG state. The reported trajectory is reproducible from the final checkpoint and the captured output files, but not exactly reproducible as a continuation from the original run. Future checkpoints should store optimizer, scheduler, dataloader, Python, NumPy, and Torch RNG states, plus package versions and hardware details.
+
+\section{Subset scale}
+
+The full manifest contains hundreds of thousands of primary rows, while the BASE cache contains \AcquiredCount{} files and the audit uses 248 real fields. This is appropriate for a bounded generator smoke and fidelity study, but it limits rare-structure coverage and uncertainty. A larger study should preserve a deterministic positive/negative and connected-group sampling plan and report it before acquisition.
+
+\section{FITS header minimalism}
+
+The retrieved FITS payloads contain the image extension and minimal FITS structural headers. The physical geometry needed for preprocessing is supplied from the evidence metadata join. A future archival package should retain the exact metadata row beside each payload or create a content-addressed sidecar so that a FITS file cannot be accidentally detached from its geometry.
+
+\section{Descriptor dependence}
+
+The audit descriptors are intentionally low-dimensional and partly threshold-based. They can identify gross mismatch but cannot establish full-image distributional equivalence. Energy distance on pooled pixels, learned perceptual metrics, topology-aware measures, and a domain-expert real/synthetic audit could add evidence, but each would need an outcome-blind specification before use.
+
+\section{One checkpoint and limited seed coverage}
+
+The main result is tied to a single completed checkpoint. The alternate sampling seed adds inference-level robustness but not training-level replication. The next report should include at least two additional training seeds or independently resumed fits, and it should separate checkpoint uncertainty from sampling uncertainty.
+
+\section{Protocol completeness}
+
+The project’s 90-percent readiness document still lists full physics manipulation, rolling replication, prospective freeze, human audits, and archival eligibility as incomplete. The v2 self-test and 100-step screening arms are now executed evidence, but they do not satisfy the full physics manipulation gate or authorize downstream evaluation. These are not “missing pages” in this report; they are explicitly bounded scientific gates. The report is comprehensive about the runs that occurred, not a substitute for the remaining confirmatory experiments.
+
+\chapter{Conclusion}
+
+The IRIS BASE run has been acquired, verified, executed, sampled, audited, visualized, and packaged. The data path passed for \AcquiredCount{} FITS records. The model reached step \BaseSteps{} from a step-400 resume and generated \SyntheticCount{} positive-conditioned arrays. The broad generic gate passed with flux, area, diversity, and saturation checks inside their declared floors.
+
+The more important result is the limitation: the corrected generic distance is \AuditDistanceRatio{} times the real split-half p90 reference, and the original six-dimensional metric was unstable because of near-zero saturation dispersion. Hard geometry and hard strong-PIL distributions remain displaced. The correct scientific conclusion is that BASE is an operational baseline with partial scalar calibration but substantial residual distribution mismatch. It should be used as the reference arm for the next train-only physics manipulation study, not as evidence of forecast improvement or a finished physical simulator.
+
+The package is reproducible at the level of the captured source, evidence, cache, checkpoints, outputs, figures, tables, and hashes. Before destructive cleanup, the report and a small GitHub publication package should be verified remotely. The raw FITS archive is too large for an ordinary Git commit; safe publication therefore requires a release or large-file storage decision, while the report, manifests, checksums, and code can be published directly.
+
+\appendix
+\chapter{Complete numerical tables}
+
+This appendix keeps the machine-generated numerical tables close to the narrative. The CSV versions are the canonical machine-readable forms; the LaTeX versions below are generated from the same files and are included to make the PDF self-contained.
+
+\section{Partition table}
+\IfFileExists{tables/partition_summary.tex}{\input{tables/partition_summary.tex}}{\textit{Generated table missing.}}
+
+\section{Acquired-cache table}
+\IfFileExists{tables/acquired_cache_summary.tex}{\input{tables/acquired_cache_summary.tex}}{\textit{Generated table missing.}}
+
+\section{Generic descriptor table}
+\IfFileExists{tables/generic_descriptor_statistics.tex}{\input{tables/generic_descriptor_statistics.tex}}{\textit{Generated table missing.}}
+
+\section{Hard descriptor table}
+\IfFileExists{tables/hard_descriptor_statistics.tex}{\input{tables/hard_descriptor_statistics.tex}}{\textit{Generated table missing.}}
+
+\section{Independent line-of-sight proxy tables}
+\IfFileExists{tables/physics_proxy_statistics.tex}{\input{tables/physics_proxy_statistics.tex}}{\textit{Generated physics-proxy table missing.}}
+\IfFileExists{tables/physics_proxy_bootstrap.tex}{\input{tables/physics_proxy_bootstrap.tex}}{\textit{Generated physics-proxy bootstrap table missing.}}
+
+\section{Two-sample classifier audit}
+\IfFileExists{tables/two_sample_classifier_summary.tex}{\input{tables/two_sample_classifier_summary.tex}}{\textit{Generated classifier table missing.}}
+
+\section{Conditional proxy audit}
+\IfFileExists{tables/conditional_proxy_summary.tex}{\input{tables/conditional_proxy_summary.tex}}{\textit{Generated conditional-proxy table missing.}}
+
+\section{Gate stability audit}
+\IfFileExists{tables/gate_stability_summary.tex}{\input{tables/gate_stability_summary.tex}}{\textit{Generated gate-stability table missing.}}
+
+\section{Memorization and nearest-neighbor audit}
+\IfFileExists{tables/memorization_distance_summary.tex}{\input{tables/memorization_distance_summary.tex}}{\textit{Generated memorization table missing.}}
+
+\section{Training summary}
+\IfFileExists{tables/training_summary.tex}{\input{tables/training_summary.tex}}{\textit{Generated table missing.}}
+
+\section{Alternate seed and destruction controls}
+\IfFileExists{tables/seed_robustness.tex}{\input{tables/seed_robustness.tex}}{\textit{Generated seed table missing.}}
+\IfFileExists{tables/destruction_controls.tex}{\input{tables/destruction_controls.tex}}{\textit{Generated destruction-control table missing.}}
+
+\section{Physics screening}
+\IfFileExists{tables/physics_screening.tex}{\input{tables/physics_screening.tex}}{\textit{Generated physics-screening table missing.}}
+\IfFileExists{tables/bootstrap_descriptor_uncertainty.tex}{\input{tables/bootstrap_descriptor_uncertainty.tex}}{\textit{Generated bootstrap table missing.}}
+
+\chapter{Source and protocol record}
+
+The following documents are shipped in the source bundle and were read as protocol/provenance records for this report:
+
+\begin{itemize}
+\item \texttt{README.md}: repository scope and evidence policy;
+\item \texttt{IRIS\_V2\_REWORK\_PROTOCOL\_2026-08-26.md}: physics-to-utility protocol;
+\item \texttt{IRIS\_V2\_PREPAPER\_90\_GATE.md}: readiness gates and claim discipline;
+\item \texttt{colab/COLAB\_START\_HERE.md}: corrected acquisition and execution sequence;
+\item \texttt{colab/FITS\_ACQUISITION.md}: FITS cache requirements and fail-closed behavior;
+\item \texttt{data/derived/source\_ledger.json}: source URLs and checksums;
+\item \texttt{data/derived/tai\_repair\_audit.json}: exact time-scale repair receipt;
+\item \texttt{data/derived/manifest\_audit.json}: partition and image-URL accounting;
+\item \texttt{work/runs/base\_local\_resume/outputs/base/run\_config\_resume.json}: local resume receipt.
+\item \texttt{artifacts/physics\_v2\_selftest.json}: differentiability and quiet-field self-test receipt;
+\item \texttt{artifacts/physics\_screening\_metrics.json}: executed HJ/PIL screen receipt and fixed-reference audit;
+\item \texttt{scripts/build\_physics\_screening\_artifacts.py}: screen summary and figure generator.
+\item \texttt{physics\_proxy\_diagnostics.json} (under \texttt{artifacts/}): independent line-of-sight proxy and group-bootstrap receipt;
+\item \texttt{physics\_proxy\_diagnostics.py} (under \texttt{scripts/}): secondary magnetic, spectral, and topology diagnostics.
+\item \texttt{two\_sample\_classifier\_audit.json} (under \texttt{artifacts/}): group-held-out real-versus-generated classifier receipt;
+\item \texttt{two\_sample\_classifier\_audit.py} (under \texttt{scripts/}): independent scalar-proxy and coarse-field two-sample audit.
+\item \texttt{offline\_protocol\_selftests.json} (under \texttt{artifacts/}): offline acquisition, cache, time-repair, and downstream-policy self-test receipt.
+\item \texttt{conditional\_proxy\_diagnostics.json} (under \texttt{artifacts/}): latitude-conditioned proxy ratios and connected-region bootstrap receipt;
+\item \texttt{conditional\_proxy\_diagnostics.py} (under \texttt{scripts/}): train-only conditional proxy diagnostic and vector/raster plot writer.
+\item \texttt{gate\_stability\_diagnostics.json} (under \texttt{artifacts/}): connected-region bootstrap stability receipt for all five BASE gate criteria;
+\item \texttt{gate\_stability\_diagnostics.py} (under \texttt{scripts/}): finite-sample gate stability audit using fixed train-only outputs.
+\item \texttt{memorization\_diagnostics.json} (under \texttt{artifacts/}): exact-hash, nearest-neighbor, and source-group distance receipt;
+\item \texttt{memorization\_diagnostics.py} (under \texttt{scripts/}): low-dimensional duplication and collapse diagnostic.
+\end{itemize}
+
+The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
+
+\chapter{Reproduction recipe}
+
+\section{Recreate the report from the package}
+
+The report is generated by the following command from the project workspace. It assumes that the immutable temporary evidence/cache roots still exist, or that they have been restored from the combined archive.
+
+\begin{lstlisting}[language=bash]
+MPLCONFIGDIR=/private/tmp/mplconfig \\
+XDG_CACHE_HOME=/private/tmp/cache \\
+/private/tmp/iris-venv/bin/python \\
+  iris_report/scripts/generate_analysis.py
+\end{lstlisting}
+
+The script reads the evidence, FITS cache, final checkpoint, training history, sample arrays, and audit CSVs. It writes figures, tables, machine-readable metadata, and OBJ meshes below \texttt{iris\_report}. It does not reacquire data and does not modify the source or checkpoint.
+
+\section{Recreate the primary BASE audit}
+
+The original evaluator command, expressed with absolute roots, is:
+
+\begin{lstlisting}[language=bash]
+PYTHONPATH=/private/tmp/iris_gated_run/source/iris-model:/private/tmp/iris_gated_run/source/common \\
+/private/tmp/iris-venv/bin/python \\
+  /private/tmp/iris_gated_run/source/iris-model/evaluate_generator_v2_fixed.py \\
+  --evidence-dir /private/tmp/iris_gated_run/evidence \\
+  --cache-dir /private/tmp/iris_gated_run/fits \\
+  --synthetic-manifest /private/tmp/iris_gated_run/work/runs/base_local_resume/samples/base/synthetic_manifest.csv \\
+  --out-dir /private/tmp/iris_gated_run/work/runs/base_local_resume/audit \\
+  --real-per-group 3 --seed 2026
+\end{lstlisting}
+
+The evaluator is independent of the differentiable training proxy and writes the real/synthetic generic, geometry, and PIL CSVs plus \texttt{v2\_manipulation\_metrics.json}. The fixed wrapper preserves the original six-dimensional output while adding the corrected core metric and the reason for the correction.
+
+\section{Recreate the executed physics screen}
+
+The following command reproduces one of the explicitly labeled 100-step screening arms. Change only \texttt{--condition} and keep each arm under the shared output root; the patched script writes to a condition-specific subdirectory so completed arms cannot overwrite one another.
+
+\begin{lstlisting}[language=bash]
+OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 \\
+IRIS_FITS_SOURCE=/private/tmp/iris_gated_run/fits \\
+IRIS_REQUIRE_LOCAL_FITS=1 \\
+/private/tmp/iris-venv/bin/python \\
+  /private/tmp/iris_gated_run/source/iris-model/train_generator_positive_v2.py \\
+  --evidence-dir /private/tmp/iris_gated_run/evidence \\
+  --cache-dir /private/tmp/iris_gated_run/fits \\
+  --out-dir /private/tmp/iris_gated_run/work/runs/physics_screening_2026 \\
+  --condition hj_pil --seed 2026 --per-group 4 \\
+  --batch-size 16 --physics-batch-size 16 --max-steps 100 \\
+  --lr 1e-4 --lr-schedule cosine --lambda-generic 0.08 \\
+  --lambda-hj 0.05 --lambda-pil 0.05 --physics-warmup-steps 200 \\
+  --diffusion-steps 100 --base-channels 24 --physics-max-t-frac 0.25 \\
+  --download-workers 0 --ema-decay 0.995 --ema-warmup-steps 100 \\
+  --threads 2 \\
+  --prepared-cache /private/tmp/iris_gated_run/work/prepared/positive_train_pergroup4 \\
+  --init-checkpoint /private/tmp/iris_gated_run/work/runs/base_local_resume/outputs/base/generator.pt
+\end{lstlisting}
+
+The sample and fixed-reference audit commands are the same ones recorded in the screen output tree. The 100-step budget is intentionally marked exploratory; replacing it with 1,200 is a new confirmatory run, not a silent continuation of the reported screen.
+
+\section{Run the Colab version}
+
+The full notebook and the light notebook are included in the parent workspace and in the combined archive. In Colab, mount Drive, set the Drive root to the project-specific path, enter the registered JSOC email only through the password-style prompt, acquire the BASE FITS scope, wait for \texttt{REAL\_FITS\_CACHE\_PREFLIGHT\_PASS}, and then enable only \texttt{RUN\_BASE = '1'}. Physics and downstream require their own acquisition and frozen-gate steps; simply toggling those flags would not reproduce this report.
+
+\chapter{Output manifest and storage policy}
+
+\section{Report files}
+
+\begin{longtable}{p{0.36\textwidth}p{0.52\textwidth}}
+\caption{Key files produced for this report.}\label{tab:files}\\
+\toprule
+Path & Purpose \\
+\midrule
+\endfirsthead
+\toprule
+Path & Purpose \\
+\midrule
+\endhead
+\texttt{report.tex} & Source of this PDF report. \\
+\texttt{tables/generated\_values.tex} & Numeric macros generated from evidence and outputs. \\
+\texttt{scripts/generate\_analysis.py} & Reproducible analysis and plotting script. \\
+\texttt{figures/*.png, *.pdf} & Publication figures, including 2D and 3D views. \\
+\texttt{figures/*.svg} & Auxiliary vector diagnostics, including the two-sample classifier audit. \\
+\texttt{tables/*.csv} & Machine-readable partition, descriptor, and training tables. \\
+\texttt{artifacts/}\\texttt{report\_metadata.json} & Claim boundary, provenance, and output manifest. \\
+\texttt{artifacts/file\_inventory.csv} & File-level inventory for source/evidence/cache/run. \\
+\texttt{models/*.obj} & 3D visualization meshes with unit/meaning README. \\
+\url{artifacts/physics_screening_metrics.json} & Fixed-reference receipt for the executed 100-step HJ/PIL screen. \\
+\url{artifacts/physics_v2_selftest.json} & Differentiable physics-loss self-test receipt. \\
+\url{artifacts/completion_audit.json} & Requirement-level status ledger for verified and open work. \\
+\url{artifacts/resumability_selftest.json} & Receipt for the periodic-checkpoint reliability self-test. \\
+\url{artifacts/bootstrap_descriptor_uncertainty.json} & Connected-region bootstrap intervals for descriptor medians. \\
+\url{artifacts/aborted_local_attempts.json} & Explicit receipt for an incomplete CPU sampler attempt excluded from results. \\
+\url{artifacts/physics_proxy_diagnostics.json} & Independent line-of-sight magnetic, spectral, topology, and bootstrap receipt. \\
+\url{figures/physics_screening_*} & Screen comparison and loss-component figures. \\
+\url{figures/bootstrap_descriptor_uncertainty.*} & Cluster-bootstrap interval figure. \\
+\url{tables/physics_screening.*} & Machine-readable and typeset screen summary. \\
+\url{figures/physics_proxy_*} & Secondary magnetic, spectral, and topology figures. \\
+\url{tables/physics_proxy_*} & Secondary proxy CSV and typeset bootstrap tables. \\
+\url{artifacts/two_sample_classifier_audit.json} & Group-held-out classifier receipt for real versus generated fields. \\
+\url{figures/two_sample_classifier.svg} & Auxiliary vector plot of fold AUCs and leading scalar coefficients. \\
+\url{tables/two_sample_classifier_*} & Classifier fold, coefficient, and summary tables. \\
+\url{artifacts/offline_protocol_selftests.json} & Five offline infrastructure and protocol self-tests; no training or forecasting. \\
+\url{artifacts/conditional_proxy_diagnostics.json} & Latitude-conditioned proxy diagnostic receipt. \\
+\url{figures/conditional_proxy_heatmap.*} & Conditional proxy ratio heatmap. \\
+\url{tables/conditional_proxy_*} & Latitude-band proxy ratios and bootstrap intervals. \\
+\url{artifacts/gate_stability_diagnostics.json} & Connected-group bootstrap stability receipt for the five BASE criteria. \\
+\url{figures/gate_stability.png} & Gate-criterion and joint-pass stability figure. \\
+\url{tables/gate_stability_*} & Gate-stability replicate and summary tables. \\
+\url{artifacts/memorization_diagnostics.json} & Exact-hash and nearest-neighbor diagnostic receipt. \\
+\url{figures/memorization_nearest_neighbor.png} & Nearest-neighbor and source-group distance figure. \\
+\url{tables/memorization_distance_summary.*} & Machine-readable and typeset distance summaries. \\
+\bottomrule
+\end{longtable}
+
+\section{Requirement-by-requirement completion audit}
+
+This audit prevents the existence of a large report from being mistaken for completion of every requested external action. ``Pass'' means that the current local evidence directly supports the requirement. ``Partial'', ``deferred'', and ``blocked'' entries are intentionally preserved as open work rather than converted into unsupported scientific claims.
+
+\begin{longtable}{p{0.29\textwidth}p{0.17\textwidth}p{0.43\textwidth}}
+\caption{Current completion audit.}\label{tab:completion-audit}\\
+\toprule
+Requirement & Status & Evidence or remaining boundary \\
+\midrule
+\endfirsthead
+\toprule
+Requirement & Status & Evidence or remaining boundary \\
+\midrule
+\endhead
+40+ page report & PASS & Compiled PDF is 88 A4 pages. \\
+Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
+Outputs, graphs, and 3D & PASS & 27 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
+Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
+Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
+GitHub preservation & BLOCKED & Public report branch is committed locally, but GitHub authentication rejected the push; raw archive is not remotely preserved. \\
+Local deletion & NOT STARTED & Correctly withheld until remote preservation is verified and the IRIS-only deletion boundary is explicit. \\
+\bottomrule
+\end{longtable}
+
+\section{Safe cleanup boundary}
+
+The raw cache and temporary run roots are valuable for reproduction and were intentionally retained while the report was being built. The workspace also contains an unrelated La Liga project, so a command such as ``delete all files'' would be unsafe and outside a precise IRIS-only boundary. If cleanup is later requested, the safe candidate set is the named IRIS temporary roots and IRIS report/archive copies after a successful remote verification. Unrelated project files must not be removed.
+
+The combined archive is 2,125,481,144 bytes (about 1.98 GiB, or 2.13 GB in decimal units) because it contains the raw FITS cache. Ordinary GitHub repositories reject individual files above the standard large-file limit, so direct Git publication should contain the report, code, manifests, checksums, and a documented pointer to the large archive or a GitHub Release/LFS object. The raw archive should not be silently split into opaque chunks or committed without a verified retrieval path.
+
+\chapter{Glossary}
+
+\begin{description}
+\item[BASE] Unconstrained reference generator arm; the only model condition executed here.
+\item[CEA] Cylindrical equal-area coordinate representation used by HMI/SHARP products.
+\item[DDIM] Denoising diffusion implicit model sampling procedure.
+\item[FITS] Flexible Image Transport System format used for the magnetogram payloads.
+\item[GOES] NOAA geostationary satellite series supplying soft-X-ray flare event information.
+\item[HARP] HMI Active Region Patch identifier.
+\item[HJ] Hale/Joy magnetic polarity-geometry constraint arm; screened for 100 steps, not confirmed at the full budget.
+\item[PIL] Polarity inversion line; the strong-PIL gradient arm was screened for 100 steps, not confirmed at the full budget.
+\item[SHARP] Space-weather HMI Active Region Patches data product.
+\item[TAI/UTC] Time scales; JSOC record keys are repaired from TAI to UTC before joins.
+\item[TSS] True Skill Statistic; the primary future downstream utility metric.
+\end{description}
+
+\begin{thebibliography}{99}
+
+\bibitem{scherrer2012}
+P. H. Scherrer, J. Schou, R. I. Bush, A. G. Kosovichev, R. S. Bogart, J. T. Hoeksema, Y. Liu, T. L. Duvall, J. Zhao, A. M. Title, C. J. Schrijver, T. D. Tarbell, and S. Tomczyk, ``The Helioseismic and Magnetic Imager (HMI) Investigation for the Solar Dynamics Observatory (SDO),'' \emph{Solar Physics}, 275, 207--227, 2012. DOI: \url{https://doi.org/10.1007/s11207-011-9834-2}.
+
+\bibitem{jsoc}
+Joint Science Operations Center, ``JSOC Data Products,'' official archive description, accessed 2026-08-31. \url{https://jsoc.stanford.edu/new/About_JSOC.html}.
+
+\bibitem{bobra2014}
+M. G. Bobra, X. Sun, J. T. Hoeksema, M. J. Turmon, Y. Liu, K. Hayashi, G. Barnes, and K. D. Leka, ``The Helioseismic and Magnetic Imager (HMI) Vector Magnetic Field Pipeline: SHARPs -- Space-weather HMI Active Region Patches,'' arXiv:1404.1879, 2014. \url{https://arxiv.org/abs/1404.1879}.
+
+\bibitem{noaa_goes_readme}
+E. Lucas and J. Machol, ``GOES Flare Report ReadMe,'' NOAA/NCEI, 10 June 2026. \url{https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l2/docs/GOES_Flare_Report_ReadMe.pdf}.
+
+\bibitem{ho2020}
+J. Ho, A. Jain, and P. Abbeel, ``Denoising Diffusion Probabilistic Models,'' arXiv:2006.11239, 2020. \url{https://arxiv.org/abs/2006.11239}.
+
+\bibitem{song2020ddim}
+J. Song, C. Meng, and S. Ermon, ``Denoising Diffusion Implicit Models,'' arXiv:2010.02502, 2020. \url{https://arxiv.org/abs/2010.02502}.
+
+\end{thebibliography}
+
+\end{document}

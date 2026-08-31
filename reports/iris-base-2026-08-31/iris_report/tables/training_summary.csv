@@ -1,0 +1,10 @@
+quantity,value,notes
+start_step,400.0,numbered checkpoint resume boundary
+end_step,1200.0,final step
+start_loss,0.023520221933722496,first recorded post-resume update
+end_loss,0.007378232665359974,final combined loss
+minimum_loss,0.004172037355601788,minimum recorded post-resume loss
+start_denoise,0.021941576153039932,first recorded post-resume component
+end_denoise,0.007072714157402515,final denoise component
+start_generic,0.019733067601919174,first recorded post-resume component
+end_generic,0.003818980883806944,final generic component

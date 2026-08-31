@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
+<rect width="100%" height="100%" fill="white"/>
+<text x="30.0" y="32.0" font-size="18px" text-anchor="start" fill="#1f2937" font-family="Arial,Helvetica,sans-serif" font-weight="bold">Real-versus-synthetic two-sample classifier audit</text>
+<text x="30.0" y="53.0" font-size="11px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">Five group-held-out folds; AUC=0.5 is chance. Tables/JSON contain the exact values.</text>
+<rect x="45" y="68" width="535" height="458" rx="8" fill="#f8fafc" stroke="#d1d5db"/>
+<text x="61.0" y="92.0" font-size="13px" text-anchor="start" fill="#1f2937" font-family="Arial,Helvetica,sans-serif" font-weight="bold">13 independent scalar proxies</text>
+<line x1="103" y1="268.0" x2="568" y2="268.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="272.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.4</text>
+<line x1="103" y1="238.0" x2="568" y2="238.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="242.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.5</text>
+<line x1="103" y1="208.0" x2="568" y2="208.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="212.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.6</text>
+<line x1="103" y1="178.0" x2="568" y2="178.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="182.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.7</text>
+<line x1="103" y1="148.0" x2="568" y2="148.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="152.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.8</text>
+<line x1="103" y1="118.0" x2="568" y2="118.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="122.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.9</text>
+<line x1="103" y1="88.0" x2="568" y2="88.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="94.0" y="92.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.0</text>
+<line x1="103" y1="238.0" x2="568" y2="238.0" stroke="#6b7280" stroke-width="1.2" stroke-dasharray="5,4"/>
+<line x1="103" y1="88.1" x2="568" y2="88.1" stroke="#1769aa" stroke-width="2" stroke-dasharray="7,4" opacity="0.55"/>
+<circle cx="103.0" cy="88.0" r="5" fill="#1769aa"/>
+<text x="103.0" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1</text>
+<circle cx="219.2" cy="88.0" r="5" fill="#1769aa"/>
+<text x="219.2" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">2</text>
+<circle cx="335.5" cy="88.4" r="5" fill="#1769aa"/>
+<text x="335.5" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">3</text>
+<circle cx="451.8" cy="88.0" r="5" fill="#1769aa"/>
+<text x="451.8" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">4</text>
+<circle cx="568.0" cy="88.0" r="5" fill="#1769aa"/>
+<text x="568.0" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">5</text>
+<polyline points="103.0,88.0 219.2,88.0 335.5,88.4 451.8,88.0 568.0,88.0" fill="none" stroke="#1769aa" stroke-width="2.5"/>
+<line x1="103" y1="268" x2="568" y2="268" stroke="#374151"/>
+<line x1="103" y1="88" x2="103" y2="268" stroke="#374151"/>
+<text x="335.5" y="308.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">held-out group fold</text>
+<text x="61.0" y="178.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">ROC AUC</text>
+<text x="564.0" y="233.0" font-size="10px" text-anchor="end" fill="#6b7280" font-family="Arial,Helvetica,sans-serif" font-weight="normal">chance</text>
+<text x="564.0" y="83.1" font-size="10px" text-anchor="end" fill="#1769aa" font-family="Arial,Helvetica,sans-serif" font-weight="normal">mean 1.000</text>
+<rect x="610" y="68" width="535" height="458" rx="8" fill="#f8fafc" stroke="#d1d5db"/>
+<text x="626.0" y="92.0" font-size="13px" text-anchor="start" fill="#1f2937" font-family="Arial,Helvetica,sans-serif" font-weight="bold">16x16 coarse field</text>
+<line x1="668" y1="268.0" x2="1133" y2="268.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="272.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.4</text>
+<line x1="668" y1="238.0" x2="1133" y2="238.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="242.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.5</text>
+<line x1="668" y1="208.0" x2="1133" y2="208.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="212.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.6</text>
+<line x1="668" y1="178.0" x2="1133" y2="178.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="182.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.7</text>
+<line x1="668" y1="148.0" x2="1133" y2="148.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="152.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.8</text>
+<line x1="668" y1="118.0" x2="1133" y2="118.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="122.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.9</text>
+<line x1="668" y1="88.0" x2="1133" y2="88.0" stroke="#dbe2ea" stroke-width="1"/>
+<text x="659.0" y="92.0" font-size="10px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.0</text>
+<line x1="668" y1="238.0" x2="1133" y2="238.0" stroke="#6b7280" stroke-width="1.2" stroke-dasharray="5,4"/>
+<line x1="668" y1="211.4" x2="1133" y2="211.4" stroke="#d97706" stroke-width="2" stroke-dasharray="7,4" opacity="0.55"/>
+<circle cx="668.0" cy="190.1" r="5" fill="#d97706"/>
+<text x="668.0" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1</text>
+<circle cx="784.2" cy="193.3" r="5" fill="#d97706"/>
+<text x="784.2" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">2</text>
+<circle cx="900.5" cy="254.2" r="5" fill="#d97706"/>
+<text x="900.5" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">3</text>
+<circle cx="1016.8" cy="236.5" r="5" fill="#d97706"/>
+<text x="1016.8" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">4</text>
+<circle cx="1133.0" cy="182.8" r="5" fill="#d97706"/>
+<text x="1133.0" y="288.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">5</text>
+<polyline points="668.0,190.1 784.2,193.3 900.5,254.2 1016.8,236.5 1133.0,182.8" fill="none" stroke="#d97706" stroke-width="2.5"/>
+<line x1="668" y1="268" x2="1133" y2="268" stroke="#374151"/>
+<line x1="668" y1="88" x2="668" y2="268" stroke="#374151"/>
+<text x="900.5" y="308.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">held-out group fold</text>
+<text x="626.0" y="178.0" font-size="10px" text-anchor="middle" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">ROC AUC</text>
+<text x="1129.0" y="233.0" font-size="10px" text-anchor="end" fill="#6b7280" font-family="Arial,Helvetica,sans-serif" font-weight="normal">chance</text>
+<text x="1129.0" y="206.4" font-size="10px" text-anchor="end" fill="#d97706" font-family="Arial,Helvetica,sans-serif" font-weight="normal">mean 0.589</text>
+<text x="626.0" y="322.0" font-size="11px" text-anchor="start" fill="#1f2937" font-family="Arial,Helvetica,sans-serif" font-weight="bold">scalar model: top mean |standardized coefficient|</text>
+<text x="807.0" y="354.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">positive components</text>
+<rect x="815" y="342" width="109.2" height="14" rx="2" fill="#7c3aed"/>
+<text x="929.2" y="354.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">0.93</text>
+<text x="807.0" y="374.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">spectral centroid</text>
+<rect x="815" y="362" width="126.9" height="14" rx="2" fill="#7c3aed"/>
+<text x="946.9" y="374.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.08</text>
+<text x="807.0" y="394.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">strong component count</text>
+<rect x="815" y="382" width="130.7" height="14" rx="2" fill="#7c3aed"/>
+<text x="950.7" y="394.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.11</text>
+<text x="807.0" y="414.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">spectral high fraction</text>
+<rect x="815" y="402" width="135.6" height="14" rx="2" fill="#7c3aed"/>
+<text x="955.6" y="414.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.15</text>
+<text x="807.0" y="434.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">rms field</text>
+<rect x="815" y="422" width="149.0" height="14" rx="2" fill="#7c3aed"/>
+<text x="969.0" y="434.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.27</text>
+<text x="807.0" y="454.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">high gradient fraction</text>
+<rect x="815" y="442" width="185.9" height="14" rx="2" fill="#7c3aed"/>
+<text x="1005.9" y="454.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.58</text>
+<text x="807.0" y="474.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">unsigned flux proxy</text>
+<rect x="815" y="462" width="200.9" height="14" rx="2" fill="#7c3aed"/>
+<text x="1020.9" y="474.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">1.71</text>
+<text x="807.0" y="494.0" font-size="9px" text-anchor="end" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">gradient rms</text>
+<rect x="815" y="482" width="325.0" height="14" rx="2" fill="#7c3aed"/>
+<text x="1145.0" y="494.0" font-size="9px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">2.76</text>
+<text x="45.0" y="548.0" font-size="11px" text-anchor="start" fill="#4b5563" font-family="Arial,Helvetica,sans-serif" font-weight="normal">Descriptive diagnostic only: a high AUC indicates distinguishability, not scientific preference or forecast validity.</text>
+</svg>

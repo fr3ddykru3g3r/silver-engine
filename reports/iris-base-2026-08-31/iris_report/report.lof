@@ -1,0 +1,45 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Graphical abstract of the verified-data-to-audit pipeline. The final box deliberately says ``PASS / limits'' because passing the broad gate does not mean the generated distribution is close to the real distribution.}}{16}{figure.caption.7}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Rows, positives, and censored negatives in the frozen chronological partitions.}}{17}{figure.caption.8}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces FITS acquisition accounting and the distribution of local payload sizes. The right-hand panel is the gate that unlocked the model stage.}}{18}{figure.caption.9}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Latitude and time coverage of the manifest and acquired BASE-stage records.}}{19}{figure.caption.10}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces TAI--UTC offset accounting and the fail-closed sequence from acquisition to BASE training.}}{20}{figure.caption.11}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Loss trajectory from the first recorded post-resume update through step 1,200. The vertical line marks the numbered-checkpoint resume boundary; history before that boundary was not available in the stored checkpoint.}}{26}{figure.caption.13}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces A real preprocessed field and one generated positive-conditioned BASE sample on the same fixed 256 Mm field of view. The pair is a qualitative inspection, not a paired reconstruction.}}{27}{figure.caption.14}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Twelve of the 128 generated fields. The grid is included to reveal mode collapse or repeated motifs that a single example could hide.}}{28}{figure.caption.15}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Core calibration ratios. The green band indicates the broad 0.5--2.0 interval used for the flux and active-area checks; diversity has its own declared interval.}}{30}{figure.caption.16}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Generic descriptor distributions for the real audit set and generated BASE set. Saturation is shown but excluded from the corrected multivariate distance because its real dispersion is effectively zero.}}{31}{figure.caption.17}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Two-dimensional relationships among generic descriptors. These plots make co-occurrence differences visible even when individual medians are close.}}{32}{figure.caption.18}%
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Cluster-bootstrap intervals for descriptor median ratios. Region groups, not individual rows, were resampled; this figure is an uncertainty diagnostic rather than a replacement for the multivariate gate.}}{34}{figure.caption.19}%
+\contentsline {figure}{\numberline {6.5}{\ignorespaces Independent hard geometry descriptors. These are measured after generation and are not the differentiable training proxy.}}{36}{figure.caption.20}%
+\contentsline {figure}{\numberline {6.6}{\ignorespaces Independent hard strong-PIL descriptors. The descriptor family retains gradient tails and threshold exceedances instead of reducing PIL structure to one mean.}}{37}{figure.caption.21}%
+\contentsline {figure}{\numberline {6.7}{\ignorespaces Independent line-of-sight proxy distributions for the real positive audit set and the generated BASE set. These scalar diagnostics are descriptive and are not a 3D coronal-field evaluation.}}{39}{figure.caption.22}%
+\contentsline {figure}{\numberline {6.8}{\ignorespaces Fourier-space diagnostics for the observed and generated line-of-sight fields, including spectral centroid, high-wavenumber power fraction, and the normalized half-space potential proxy.}}{40}{figure.caption.23}%
+\contentsline {figure}{\numberline {6.9}{\ignorespaces Strong-field connected-component counts and polarity-centroid separation for the real and generated fields.}}{41}{figure.caption.24}%
+\contentsline {figure}{\numberline {6.10}{\ignorespaces Conditional synthetic-to-real proxy median ratios within fixed latitude bands. The upper-latitude band is intentionally shown but has only one connected group per class.}}{43}{figure.caption.25}%
+\contentsline {figure}{\numberline {6.11}{\ignorespaces Fraction of connected-group bootstrap replicates satisfying each BASE gate criterion and all criteria jointly. The corrected multivariate distance is the limiting criterion.}}{45}{figure.caption.26}%
+\contentsline {figure}{\numberline {6.12}{\ignorespaces Nearest-neighbor and source-group distance distributions in the pooled asinh field representation. Exact duplicate hashing found no duplicate generated arrays.}}{47}{figure.caption.27}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {7.1}{\ignorespaces 3D surfaces of one real preprocessed magnetogram and one generated BASE magnetogram. Vertical height encodes $B_{LOS}$ for visual contrast; no 3D coronal field is inferred.}}{49}{figure.caption.28}%
+\contentsline {figure}{\numberline {7.2}{\ignorespaces Pixelwise and 3D visualizations of the ensemble standard deviation over 128 generated fields.}}{51}{figure.caption.29}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {8.1}{\ignorespaces Negative-control analysis of the generic distance. The original formulation is shown alongside the corrected five-feature core and the declared threshold; the right panel shows why the saturation feature is kept as an absolute gate.}}{54}{figure.caption.30}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {9.1}{\ignorespaces Alternate sampling-seed robustness. The same checkpoint and real descriptor reference are used; only the sampler seed changes.}}{57}{figure.caption.31}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {10.1}{\ignorespaces Exploratory 100-step HJ/PIL physics-arm screen. The generic gate ratio remains above the broad threshold for every short screen; hard geometry and strong-PIL distances are shown as independent diagnostics.}}{61}{figure.caption.32}%
+\contentsline {figure}{\numberline {10.2}{\ignorespaces Final loss components for the 100-step physics screens. Nonzero HJ and PIL components confirm that the intended differentiable constraints were active.}}{62}{figure.caption.33}%
+\contentsline {figure}{\numberline {10.3}{\ignorespaces Executed counterfactual destruction controls. The panels report independent distances after transforming the generated fields; no forecasting output is involved.}}{65}{figure.caption.35}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

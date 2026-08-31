@@ -1,0 +1,2747 @@
+{
+  "acquisition": {
+    "invalid_count": 0,
+    "invalid_samples": [],
+    "missing_count": 0,
+    "missing_samples": [],
+    "planned_samples": 5273,
+    "run_base": true,
+    "run_downstream": false,
+    "run_physics": false,
+    "scope": "base",
+    "seed": 2026,
+    "source_dir": "IRIS_RUN_ROOT/fits",
+    "status": "PASS",
+    "strict_fits_validation": false,
+    "valid_samples": 5273
+  },
+  "alternate_sampling_audit": {
+    "evaluator": "alternate sampler seed against fixed primary real descriptor reference",
+    "generic_distance_excluded_feature": "saturation_fraction (retained as separate absolute gate)",
+    "generic_distance_features": [
+      "log_mean_abs",
+      "log_p90_abs",
+      "log_p99_abs",
+      "active_fraction",
+      "strong_fraction"
+    ],
+    "generic_distance_to_real_baseline_ratio": 11.055371480555403,
+    "generic_distance_to_real_baseline_ratio_original_6d": 3469.911965039562,
+    "generic_fidelity_gate_pass": false,
+    "generic_real_split_half_distance": {
+      "median": 0.024927377700805664,
+      "p90": 0.05419797897338868,
+      "repeats": 64
+    },
+    "generic_real_split_half_distance_original_6d": {
+      "median": 0.02465188503265381,
+      "p90": 0.05265874862670899,
+      "repeats": 64
+    },
+    "generic_standardized_energy_distance": 0.5991787910461426,
+    "generic_standardized_energy_distance_original_6d": 182.72122192382812,
+    "hard_geometry_standardized_energy_distance": 0.5801496505737305,
+    "hard_pil_standardized_energy_distance": 2.9574666023254395,
+    "real_coarse_pairwise_diversity": 1.607210397720337,
+    "real_reference_count": 248,
+    "real_strong_field_area_fraction": {
+      "mean": 0.0701426844108871,
+      "median": 0.06402587900000001,
+      "p10": 0.026196289100000002,
+      "p90": 0.1185241712
+    },
+    "real_unsigned_flux_proxy": {
+      "mean": 40.34659068634935,
+      "median": 38.28256407453296,
+      "p10": 16.177208002354373,
+      "p90": 64.51008388020007
+    },
+    "reference_note": "Real descriptor rows are fixed to the primary seed-2026 audit so the alternate run changes only sampling randomness.",
+    "seed": 2027,
+    "synthetic_coarse_pairwise_diversity": 1.911755919456482,
+    "synthetic_count": 128,
+    "synthetic_saturation_fraction_abs_gt_2900G": 0.0008206367492675781,
+    "synthetic_strong_field_area_fraction": {
+      "mean": 0.08169937133789062,
+      "median": 0.07769775390625,
+      "p10": 0.038055419921875,
+      "p90": 0.13125
+    },
+    "synthetic_to_real_active_area_median_ratio": 1.2135366998436679,
+    "synthetic_to_real_diversity_ratio": 1.1894870280631034,
+    "synthetic_to_real_flux_median_ratio": 1.703076304388774,
+    "synthetic_unsigned_flux_proxy": {
+      "mean": 67.50444558262825,
+      "median": 65.19812774658203,
+      "p10": 38.280093383789065,
+      "p90": 104.1250228881836
+    },
+    "training_replicate": false
+  },
+  "as_of": "2026-08-31",
+  "claim_boundary": [
+    "A BASE train-only image/distribution audit passed its predeclared broad gate.",
+    "The corrected generic-core distance was 7.681 times the real split-half p90 reference, so fidelity is not close to real-data variability.",
+    "No physics-constrained or downstream forecasting conclusion is supported by this run.",
+    "The local resume did not restore optimizer or RNG state because numbered checkpoints did not contain them."
+  ],
+  "counts": {
+    "acquired_fits": 5273,
+    "audit_real": 248,
+    "audit_synthetic": 128,
+    "manifest_rows": 648926
+  },
+  "destruction_controls": {
+    "base_reference": {
+      "generic_core_distance": 0.468935489654541,
+      "hard_geometry_distance": 0.5422608852386475,
+      "hard_pil_distance": 2.5184569358825684
+    },
+    "controls": [
+      {
+        "control": "BASE",
+        "generic_core_distance": 0.468935489654541,
+        "generic_core_ratio_to_real_p90": 7.680905810925166,
+        "hard_geometry_distance": 0.5422608852386475,
+        "hard_pil_distance": 2.5184578895568848,
+        "parent_field_mae_gauss": 0.0,
+        "parent_pairwise_generic_change": 0.0,
+        "parent_pairwise_geometry_change": 0.0,
+        "parent_pairwise_pil_change": 0.0,
+        "parent_saturation_fraction": 0.00067138671875
+      },
+      {
+        "control": "pil_blur",
+        "generic_core_distance": 0.5904676914215088,
+        "generic_core_ratio_to_real_p90": 9.6715365380943,
+        "hard_geometry_distance": 1099.2076416015625,
+        "hard_pil_distance": 10.929874420166016,
+        "parent_field_mae_gauss": 19.48138427734375,
+        "parent_pairwise_generic_change": 0.10049635171890259,
+        "parent_pairwise_geometry_change": 0.16912411153316498,
+        "parent_pairwise_pil_change": 52.785560607910156,
+        "parent_saturation_fraction": 0.0004658699035644531
+      },
+      {
+        "control": "geometry_flip",
+        "generic_core_distance": 0.468935489654541,
+        "generic_core_ratio_to_real_p90": 7.680905810925166,
+        "hard_geometry_distance": 0.6498138904571533,
+        "hard_pil_distance": 2.518458843231201,
+        "parent_field_mae_gauss": 85.8896255493164,
+        "parent_pairwise_generic_change": 2.987993186209792E-9,
+        "parent_pairwise_geometry_change": 0.2984466254711151,
+        "parent_pairwise_pil_change": 0.0000018924474716186523,
+        "parent_saturation_fraction": 0.00067138671875
+      },
+      {
+        "control": "block_shuffle",
+        "generic_core_distance": 0.468935489654541,
+        "generic_core_ratio_to_real_p90": 7.680905810925166,
+        "hard_geometry_distance": 0.6981964111328125,
+        "hard_pil_distance": 3.4782052040100098,
+        "parent_field_mae_gauss": 89.7596435546875,
+        "parent_pairwise_generic_change": 1.979060471057892E-9,
+        "parent_pairwise_geometry_change": 0.35107117891311646,
+        "parent_pairwise_pil_change": 7.33901834487915,
+        "parent_saturation_fraction": 0.00067138671875
+      }
+    ],
+    "interpretation": "A control is useful only if it changes its targeted descriptor while preserving nuisance descriptors sufficiently; these controls are diagnostic and are not downstream evidence.",
+    "purpose": "counterfactual generated-field destruction controls; no forecasting outputs"
+  },
+  "executed_extensions": {
+    "offline_protocol_selftests": {
+      "generated_at": "2026-09-01",
+      "interpretation": "These are offline infrastructure and protocol checks. They validate acquisition, cache, time-repair, and downstream-policy primitives; they are not additional training, forecasting, or physical-transfer results.",
+      "model_training_used": false,
+      "network_used": false,
+      "status": "PASS",
+      "tests": [
+        {
+          "name": "acquisition helper self-test",
+          "result": "PASS",
+          "script": "source/colab/test_acquire_sharp_fits.py"
+        },
+        {
+          "name": "FITS cache gate self-test",
+          "result": "PASS",
+          "script": "source/colab/test_fit_cache.py"
+        },
+        {
+          "name": "JSOC TAI-to-UTC self-test",
+          "result": "PASS",
+          "script": "source/common/test_jsoc_time.py"
+        },
+        {
+          "name": "historical TAI repair primitive self-test",
+          "result": "PASS",
+          "script": "source/iris-gate0-data/test_repair_historical_tai_manifest.py"
+        },
+        {
+          "name": "downstream protocol self-test",
+          "result": "PASS",
+          "script": "source/iris-model/test_downstream_protocol.py"
+        }
+      ]
+    },
+    "physics_factorial_screening": {
+      "checkpoint_source": "IRIS_RUN_ROOT/work/runs/base_local_resume/outputs/base/generator.pt",
+      "conditions": [
+        "base",
+        "hj",
+        "pil",
+        "hj_pil"
+      ],
+      "experiment": "IRIS v2 physics factorial screening",
+      "fixed_real_reference": "IRIS_RUN_ROOT/work/runs/base_local_resume/audit",
+      "interpretation": [
+        "All three screen arms activated their intended differentiable physics loss.",
+        "All three screen arms failed the broad corrected generic gate at 100 steps; this is an early-training diagnostic, not evidence that a full arm cannot converge.",
+        "No downstream forecasting or test-set selection was performed from these screens."
+      ],
+      "rows": [
+        {
+          "active_area_median_ratio": 1.1296472831267874,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/base_local_resume/audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/base/generator.pt",
+          "condition": "base",
+          "diversity_ratio": 1.0871794620752695,
+          "final_denoise_loss": 0.007072714157402515,
+          "final_generic_loss": 0.003818980883806944,
+          "final_hj_loss": 0.0,
+          "final_loss": 0.007378232665359974,
+          "final_pil_loss": 0.0,
+          "flux_median_ratio": 1.514060073468855,
+          "generic_gate_pass": true,
+          "generic_ratio_to_real_p90": 7.680905810925166,
+          "hard_geometry_distance": 0.5422608852386475,
+          "hard_pil_distance": 2.5184569358825684,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.00067138671875,
+          "training_steps": 1200
+        },
+        {
+          "active_area_median_ratio": 1.5495710177501036,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj_audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj/generator.pt",
+          "condition": "hj",
+          "diversity_ratio": 1.2547413052027339,
+          "final_denoise_loss": 0.04252185672521591,
+          "final_generic_loss": 0.0088662663474679,
+          "final_hj_loss": 0.009223624132573605,
+          "final_loss": 0.04310709983110428,
+          "final_pil_loss": 0.0,
+          "flux_median_ratio": 1.987374780331828,
+          "generic_gate_pass": false,
+          "generic_ratio_to_real_p90": 20.855039869786157,
+          "hard_geometry_distance": 0.573249340057373,
+          "hard_pil_distance": 1.652261734008789,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.0007495880126953125,
+          "training_steps": 100
+        },
+        {
+          "active_area_median_ratio": 1.5305052408476107,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/pil_audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/pil/generator.pt",
+          "condition": "pil",
+          "diversity_ratio": 1.2600835854053527,
+          "final_denoise_loss": 0.04264918342232704,
+          "final_generic_loss": 0.006145238410681486,
+          "final_hj_loss": 0.0,
+          "final_loss": 0.043615855276584625,
+          "final_pil_loss": 0.028834527358412743,
+          "flux_median_ratio": 2.0059611161736,
+          "generic_gate_pass": false,
+          "generic_ratio_to_real_p90": 21.520933053359002,
+          "hard_geometry_distance": 0.6190896034240723,
+          "hard_pil_distance": 4.1280903816223145,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.0009427070617675781,
+          "training_steps": 100
+        },
+        {
+          "active_area_median_ratio": 1.4690181103370714,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj_pil_audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj_pil/generator.pt",
+          "condition": "hj_pil",
+          "diversity_ratio": 1.2218660257057832,
+          "final_denoise_loss": 0.0427018478512764,
+          "final_generic_loss": 0.0061952597461640835,
+          "final_hj_loss": 0.00916617177426815,
+          "final_loss": 0.04389356076717377,
+          "final_pil_loss": 0.02858990803360939,
+          "flux_median_ratio": 1.9759346436988896,
+          "generic_gate_pass": false,
+          "generic_ratio_to_real_p90": 20.08135240564046,
+          "hard_geometry_distance": 0.5762472152709961,
+          "hard_pil_distance": 3.7286434173583984,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.0008840560913085938,
+          "training_steps": 100
+        }
+      ],
+      "screen_type": "100-step positive-only fine-tune from frozen BASE EMA; exploratory, not confirmatory",
+      "shared": {
+        "base_channels": 24,
+        "batch_size": 16,
+        "diffusion_steps": 100,
+        "ema_decay": 0.995,
+        "ema_warmup_steps": 100,
+        "lambda_generic": 0.08,
+        "lambda_hj": 0.05,
+        "lambda_pil": 0.05,
+        "lr": 0.0001,
+        "lr_schedule": "cosine",
+        "physics_batch_size": 16,
+        "physics_max_t_frac": 0.25,
+        "physics_warmup_steps": 200,
+        "positive_groups": 125,
+        "positive_rows": 489,
+        "prepared_tensor_cache": "IRIS_RUN_ROOT/work/prepared/positive_train_pergroup4",
+        "real_reference_count": 248,
+        "sampling_steps": 50,
+        "screen_steps": 100,
+        "seed": 2026,
+        "synthetic_count_per_arm": 128
+      }
+    },
+    "physics_v2_selftest": {
+      "blurred_pil_descriptor_mean": [
+        1.1195814609527588,
+        1.1450715065002441,
+        1.2156367301940918,
+        0.5213103294372559,
+        0.030404001474380493,
+        0.00006113453855505213
+      ],
+      "device": "cpu",
+      "geometry_flip_descriptor_delta": 0.6559358239173889,
+      "geometry_gradient_mean_abs": 9.636714537464286E-9,
+      "geometry_loss": 2.119267225265503,
+      "pil_gradient_mean_abs": 3.727662090113881E-8,
+      "pil_loss_blur_to_sharp": 1.007179617881775,
+      "quiet_field_contact_mean": 0.0,
+      "sharp_pil_descriptor_mean": [
+        1.5639336109161377,
+        1.6297661066055298,
+        1.8311644792556763,
+        0.7864651679992676,
+        0.29372838139533997,
+        0.0019818847067654133
+      ],
+      "status": "PASS"
+    },
+    "two_sample_classifier_audit": {
+      "combined_groups": 125,
+      "limitations": [
+        "A high AUC shows distinguishability, not which distribution is scientifically preferable.",
+        "The classifier is a low-dimensional/coarse-field probe and cannot replace the declared independent descriptors.",
+        "This audit uses the positive training cache and does not access validation/test outcomes."
+      ],
+      "method": "five-fold StratifiedGroupKFold logistic classifier; group-held-out and independent of forecast outcomes",
+      "models": [
+        {
+          "all_standardized_coefficients": [
+            {
+              "feature": "gradient_rms",
+              "mean_abs_standardized_coefficient": 2.7644367581536904,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "unsigned_flux_proxy",
+              "mean_abs_standardized_coefficient": 1.7091439437644038,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "high_gradient_fraction",
+              "mean_abs_standardized_coefficient": 1.581495704824246,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "rms_field",
+              "mean_abs_standardized_coefficient": 1.2672562256448863,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "spectral_high_fraction",
+              "mean_abs_standardized_coefficient": 1.153216318389827,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "strong_component_count",
+              "mean_abs_standardized_coefficient": 1.112081369762628,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "spectral_centroid",
+              "mean_abs_standardized_coefficient": 1.0795017550870134,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "positive_components",
+              "mean_abs_standardized_coefficient": 0.9289094447818194,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "signed_flux_imbalance",
+              "mean_abs_standardized_coefficient": 0.8948792045916857,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "negative_components",
+              "mean_abs_standardized_coefficient": 0.8808045850100346,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "spectral_potential_proxy",
+              "mean_abs_standardized_coefficient": 0.6511795024626543,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "strong_centroid_separation",
+              "mean_abs_standardized_coefficient": 0.1935073806162511,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "field_energy_proxy",
+              "mean_abs_standardized_coefficient": 0.1547962015944421,
+              "model": "13 independent scalar proxies"
+            }
+          ],
+          "auc_max": 1.0,
+          "auc_mean": 0.9997645211930927,
+          "auc_min": 0.998822605965463,
+          "auc_std": 0.0005265466195054856,
+          "balanced_accuracy_mean": 0.9874411302982733,
+          "feature_count": 13,
+          "folds": [
+            {
+              "auc": 1.0,
+              "balanced_accuracy": 0.9807692307692308,
+              "fold": 1,
+              "model": "13 independent scalar proxies",
+              "test_groups": 25,
+              "test_rows": 123
+            },
+            {
+              "auc": 1.0,
+              "balanced_accuracy": 1.0,
+              "fold": 2,
+              "model": "13 independent scalar proxies",
+              "test_groups": 25,
+              "test_rows": 121
+            },
+            {
+              "auc": 0.998822605965463,
+              "balanced_accuracy": 0.9807692307692308,
+              "fold": 3,
+              "model": "13 independent scalar proxies",
+              "test_groups": 25,
+              "test_rows": 124
+            },
+            {
+              "auc": 1.0,
+              "balanced_accuracy": 0.9807692307692308,
+              "fold": 4,
+              "model": "13 independent scalar proxies",
+              "test_groups": 25,
+              "test_rows": 125
+            },
+            {
+              "auc": 1.0,
+              "balanced_accuracy": 0.9948979591836735,
+              "fold": 5,
+              "model": "13 independent scalar proxies",
+              "test_groups": 25,
+              "test_rows": 124
+            }
+          ],
+          "name": "13 independent scalar proxies",
+          "top_standardized_coefficients": [
+            {
+              "feature": "gradient_rms",
+              "mean_abs_standardized_coefficient": 2.7644367581536904,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "unsigned_flux_proxy",
+              "mean_abs_standardized_coefficient": 1.7091439437644038,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "high_gradient_fraction",
+              "mean_abs_standardized_coefficient": 1.581495704824246,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "rms_field",
+              "mean_abs_standardized_coefficient": 1.2672562256448863,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "spectral_high_fraction",
+              "mean_abs_standardized_coefficient": 1.153216318389827,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "strong_component_count",
+              "mean_abs_standardized_coefficient": 1.112081369762628,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "spectral_centroid",
+              "mean_abs_standardized_coefficient": 1.0795017550870134,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "positive_components",
+              "mean_abs_standardized_coefficient": 0.9289094447818194,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "signed_flux_imbalance",
+              "mean_abs_standardized_coefficient": 0.8948792045916857,
+              "model": "13 independent scalar proxies"
+            },
+            {
+              "feature": "negative_components",
+              "mean_abs_standardized_coefficient": 0.8808045850100346,
+              "model": "13 independent scalar proxies"
+            }
+          ]
+        },
+        {
+          "all_standardized_coefficients": [
+            {
+              "feature": "block_08_07",
+              "mean_abs_standardized_coefficient": 1.2773072719573975,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_06",
+              "mean_abs_standardized_coefficient": 1.1510930061340332,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_08",
+              "mean_abs_standardized_coefficient": 1.093551516532898,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_01",
+              "mean_abs_standardized_coefficient": 1.0443751811981201,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_06",
+              "mean_abs_standardized_coefficient": 1.000081181526184,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_07",
+              "mean_abs_standardized_coefficient": 0.9189597964286804,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_05",
+              "mean_abs_standardized_coefficient": 0.9055401086807251,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_09",
+              "mean_abs_standardized_coefficient": 0.8897759318351746,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_06",
+              "mean_abs_standardized_coefficient": 0.8839627504348755,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_00",
+              "mean_abs_standardized_coefficient": 0.8661367297172546,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_02",
+              "mean_abs_standardized_coefficient": 0.864324688911438,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_07",
+              "mean_abs_standardized_coefficient": 0.8371379971504211,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_10",
+              "mean_abs_standardized_coefficient": 0.8296712636947632,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_04",
+              "mean_abs_standardized_coefficient": 0.8055793046951294,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_14",
+              "mean_abs_standardized_coefficient": 0.7905102968215942,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_15",
+              "mean_abs_standardized_coefficient": 0.7877669930458069,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_03",
+              "mean_abs_standardized_coefficient": 0.7836347818374634,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_11",
+              "mean_abs_standardized_coefficient": 0.7665213346481323,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_06",
+              "mean_abs_standardized_coefficient": 0.762274980545044,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_07",
+              "mean_abs_standardized_coefficient": 0.7611958384513855,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_13",
+              "mean_abs_standardized_coefficient": 0.7588648200035095,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_04",
+              "mean_abs_standardized_coefficient": 0.7553940415382385,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_09",
+              "mean_abs_standardized_coefficient": 0.7517561912536621,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_01",
+              "mean_abs_standardized_coefficient": 0.7447041273117065,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_05",
+              "mean_abs_standardized_coefficient": 0.7324212789535522,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_02",
+              "mean_abs_standardized_coefficient": 0.7312586903572083,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_10",
+              "mean_abs_standardized_coefficient": 0.7024564743041992,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_15",
+              "mean_abs_standardized_coefficient": 0.6978107690811157,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_02",
+              "mean_abs_standardized_coefficient": 0.6928382515907288,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_10",
+              "mean_abs_standardized_coefficient": 0.6828791499137878,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_11",
+              "mean_abs_standardized_coefficient": 0.6777342557907104,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_12",
+              "mean_abs_standardized_coefficient": 0.6757614612579346,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_08",
+              "mean_abs_standardized_coefficient": 0.6584476232528687,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_03",
+              "mean_abs_standardized_coefficient": 0.6556469202041626,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_14",
+              "mean_abs_standardized_coefficient": 0.6503008604049683,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_11",
+              "mean_abs_standardized_coefficient": 0.6384309530258179,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_07",
+              "mean_abs_standardized_coefficient": 0.6367764472961426,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_02",
+              "mean_abs_standardized_coefficient": 0.631391167640686,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_10",
+              "mean_abs_standardized_coefficient": 0.6275440454483032,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_02",
+              "mean_abs_standardized_coefficient": 0.6226276159286499,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_03",
+              "mean_abs_standardized_coefficient": 0.6076409220695496,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_15",
+              "mean_abs_standardized_coefficient": 0.6015318036079407,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_01",
+              "mean_abs_standardized_coefficient": 0.5991680026054382,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_04",
+              "mean_abs_standardized_coefficient": 0.5761833190917969,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_06",
+              "mean_abs_standardized_coefficient": 0.5703569054603577,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_06",
+              "mean_abs_standardized_coefficient": 0.5646297335624695,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_04",
+              "mean_abs_standardized_coefficient": 0.5629497766494751,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_00",
+              "mean_abs_standardized_coefficient": 0.5590512156486511,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_11",
+              "mean_abs_standardized_coefficient": 0.5572402477264404,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_02",
+              "mean_abs_standardized_coefficient": 0.5460377931594849,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_12",
+              "mean_abs_standardized_coefficient": 0.5412375926971436,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_02",
+              "mean_abs_standardized_coefficient": 0.5343161821365356,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_09",
+              "mean_abs_standardized_coefficient": 0.5322726964950562,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_00",
+              "mean_abs_standardized_coefficient": 0.5294456481933594,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_01",
+              "mean_abs_standardized_coefficient": 0.526325523853302,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_00",
+              "mean_abs_standardized_coefficient": 0.5256848335266113,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_08",
+              "mean_abs_standardized_coefficient": 0.5239947438240051,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_12",
+              "mean_abs_standardized_coefficient": 0.5138179063796997,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_14",
+              "mean_abs_standardized_coefficient": 0.5094233751296997,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_08",
+              "mean_abs_standardized_coefficient": 0.5068110823631287,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_07",
+              "mean_abs_standardized_coefficient": 0.4944320619106293,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_13",
+              "mean_abs_standardized_coefficient": 0.48932307958602905,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_01",
+              "mean_abs_standardized_coefficient": 0.486960232257843,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_07",
+              "mean_abs_standardized_coefficient": 0.46790915727615356,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_07",
+              "mean_abs_standardized_coefficient": 0.467607319355011,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_04",
+              "mean_abs_standardized_coefficient": 0.4644021987915039,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_04",
+              "mean_abs_standardized_coefficient": 0.4603337347507477,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_11",
+              "mean_abs_standardized_coefficient": 0.4582853317260742,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_04",
+              "mean_abs_standardized_coefficient": 0.4580521583557129,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_07",
+              "mean_abs_standardized_coefficient": 0.45680180191993713,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_03",
+              "mean_abs_standardized_coefficient": 0.4565819799900055,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_09",
+              "mean_abs_standardized_coefficient": 0.4519862234592438,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_11",
+              "mean_abs_standardized_coefficient": 0.44725674390792847,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_15",
+              "mean_abs_standardized_coefficient": 0.4461548328399658,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_08",
+              "mean_abs_standardized_coefficient": 0.4411330223083496,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_14",
+              "mean_abs_standardized_coefficient": 0.43945685029029846,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_03",
+              "mean_abs_standardized_coefficient": 0.4338453710079193,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_10",
+              "mean_abs_standardized_coefficient": 0.4310322403907776,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_12",
+              "mean_abs_standardized_coefficient": 0.42277780175209045,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_02",
+              "mean_abs_standardized_coefficient": 0.4200006425380707,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_15",
+              "mean_abs_standardized_coefficient": 0.4186815619468689,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_00",
+              "mean_abs_standardized_coefficient": 0.417020320892334,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_10",
+              "mean_abs_standardized_coefficient": 0.4162658751010895,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_09",
+              "mean_abs_standardized_coefficient": 0.41615352034568787,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_07",
+              "mean_abs_standardized_coefficient": 0.4144630432128906,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_15",
+              "mean_abs_standardized_coefficient": 0.4138096868991852,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_10",
+              "mean_abs_standardized_coefficient": 0.4134069085121155,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_06",
+              "mean_abs_standardized_coefficient": 0.4110780656337738,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_13",
+              "mean_abs_standardized_coefficient": 0.4058965742588043,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_07",
+              "mean_abs_standardized_coefficient": 0.4023953378200531,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_06",
+              "mean_abs_standardized_coefficient": 0.4015672206878662,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_12",
+              "mean_abs_standardized_coefficient": 0.3990504741668701,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_10",
+              "mean_abs_standardized_coefficient": 0.39769911766052246,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_11",
+              "mean_abs_standardized_coefficient": 0.3973909020423889,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_15",
+              "mean_abs_standardized_coefficient": 0.3926911950111389,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_12",
+              "mean_abs_standardized_coefficient": 0.3895246386528015,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_00",
+              "mean_abs_standardized_coefficient": 0.3890986442565918,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_15",
+              "mean_abs_standardized_coefficient": 0.38451093435287476,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_09",
+              "mean_abs_standardized_coefficient": 0.38442695140838623,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_10",
+              "mean_abs_standardized_coefficient": 0.3791768252849579,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_05",
+              "mean_abs_standardized_coefficient": 0.3742564022541046,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_03",
+              "mean_abs_standardized_coefficient": 0.3726850152015686,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_03",
+              "mean_abs_standardized_coefficient": 0.37172824144363403,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_15",
+              "mean_abs_standardized_coefficient": 0.37115907669067383,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_04",
+              "mean_abs_standardized_coefficient": 0.36699002981185913,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_03",
+              "mean_abs_standardized_coefficient": 0.36372166872024536,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_11",
+              "mean_abs_standardized_coefficient": 0.3629125654697418,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_07",
+              "mean_abs_standardized_coefficient": 0.361707866191864,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_08",
+              "mean_abs_standardized_coefficient": 0.35996562242507935,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_02",
+              "mean_abs_standardized_coefficient": 0.35990291833877563,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_03",
+              "mean_abs_standardized_coefficient": 0.3592577874660492,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_03",
+              "mean_abs_standardized_coefficient": 0.357582151889801,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_14",
+              "mean_abs_standardized_coefficient": 0.3539150357246399,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_08",
+              "mean_abs_standardized_coefficient": 0.35352736711502075,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_04",
+              "mean_abs_standardized_coefficient": 0.35116785764694214,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_05",
+              "mean_abs_standardized_coefficient": 0.3489079475402832,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_12",
+              "mean_abs_standardized_coefficient": 0.3374005854129791,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_13",
+              "mean_abs_standardized_coefficient": 0.33244016766548157,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_05",
+              "mean_abs_standardized_coefficient": 0.33169230818748474,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_07",
+              "mean_abs_standardized_coefficient": 0.3298357427120209,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_08",
+              "mean_abs_standardized_coefficient": 0.32903584837913513,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_11",
+              "mean_abs_standardized_coefficient": 0.32690054178237915,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_02",
+              "mean_abs_standardized_coefficient": 0.32223808765411377,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_14",
+              "mean_abs_standardized_coefficient": 0.3201349079608917,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_02",
+              "mean_abs_standardized_coefficient": 0.3201298117637634,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_15",
+              "mean_abs_standardized_coefficient": 0.3180377781391144,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_10",
+              "mean_abs_standardized_coefficient": 0.3178907334804535,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_11",
+              "mean_abs_standardized_coefficient": 0.31725603342056274,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_09",
+              "mean_abs_standardized_coefficient": 0.31654325127601624,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_14",
+              "mean_abs_standardized_coefficient": 0.31565144658088684,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_12",
+              "mean_abs_standardized_coefficient": 0.3089173436164856,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_09",
+              "mean_abs_standardized_coefficient": 0.3023454546928406,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_14",
+              "mean_abs_standardized_coefficient": 0.30068063735961914,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_09",
+              "mean_abs_standardized_coefficient": 0.2961565852165222,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_11",
+              "mean_abs_standardized_coefficient": 0.29307645559310913,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_12",
+              "mean_abs_standardized_coefficient": 0.2910166382789612,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_08",
+              "mean_abs_standardized_coefficient": 0.28984251618385315,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_11",
+              "mean_abs_standardized_coefficient": 0.2886388301849365,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_09",
+              "mean_abs_standardized_coefficient": 0.2866211533546448,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_14",
+              "mean_abs_standardized_coefficient": 0.28396207094192505,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_03",
+              "mean_abs_standardized_coefficient": 0.2791956067085266,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_06",
+              "mean_abs_standardized_coefficient": 0.2791697382926941,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_03",
+              "mean_abs_standardized_coefficient": 0.2764648497104645,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_13",
+              "mean_abs_standardized_coefficient": 0.27607956528663635,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_05",
+              "mean_abs_standardized_coefficient": 0.27457842230796814,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_04",
+              "mean_abs_standardized_coefficient": 0.27391189336776733,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_02",
+              "mean_abs_standardized_coefficient": 0.2725525498390198,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_13",
+              "mean_abs_standardized_coefficient": 0.27062252163887024,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_11",
+              "mean_abs_standardized_coefficient": 0.26700085401535034,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_13",
+              "mean_abs_standardized_coefficient": 0.26632437109947205,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_12",
+              "mean_abs_standardized_coefficient": 0.2659643590450287,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_01",
+              "mean_abs_standardized_coefficient": 0.26567402482032776,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_14",
+              "mean_abs_standardized_coefficient": 0.2647322714328766,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_01",
+              "mean_abs_standardized_coefficient": 0.26074498891830444,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_12",
+              "mean_abs_standardized_coefficient": 0.25859272480010986,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_11",
+              "mean_abs_standardized_coefficient": 0.25713419914245605,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_13",
+              "mean_abs_standardized_coefficient": 0.25676044821739197,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_10",
+              "mean_abs_standardized_coefficient": 0.2561679482460022,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_00",
+              "mean_abs_standardized_coefficient": 0.2561366856098175,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_14",
+              "mean_abs_standardized_coefficient": 0.254611074924469,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_08",
+              "mean_abs_standardized_coefficient": 0.2537801265716553,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_08",
+              "mean_abs_standardized_coefficient": 0.25232574343681335,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_13",
+              "mean_abs_standardized_coefficient": 0.2509215772151947,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_15",
+              "mean_abs_standardized_coefficient": 0.24944722652435303,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_10",
+              "mean_abs_standardized_coefficient": 0.24919971823692322,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_00",
+              "mean_abs_standardized_coefficient": 0.24765126407146454,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_00",
+              "mean_abs_standardized_coefficient": 0.24456223845481873,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_05",
+              "mean_abs_standardized_coefficient": 0.24237939715385437,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_01",
+              "mean_abs_standardized_coefficient": 0.24179108440876007,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_06",
+              "mean_abs_standardized_coefficient": 0.24174897372722626,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_09",
+              "mean_abs_standardized_coefficient": 0.23945967853069305,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_00",
+              "mean_abs_standardized_coefficient": 0.23776133358478546,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_12",
+              "mean_abs_standardized_coefficient": 0.23744714260101318,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_07",
+              "mean_abs_standardized_coefficient": 0.23235270380973816,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_11",
+              "mean_abs_standardized_coefficient": 0.23115234076976776,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_09",
+              "mean_abs_standardized_coefficient": 0.2310948371887207,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_14",
+              "mean_abs_standardized_coefficient": 0.23072895407676697,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_00",
+              "mean_abs_standardized_coefficient": 0.23044633865356445,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_01",
+              "mean_abs_standardized_coefficient": 0.22754910588264465,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_12",
+              "mean_abs_standardized_coefficient": 0.22669854760169983,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_02",
+              "mean_abs_standardized_coefficient": 0.22524437308311462,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_13",
+              "mean_abs_standardized_coefficient": 0.22496172785758972,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_04",
+              "mean_abs_standardized_coefficient": 0.2215501070022583,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_06",
+              "mean_abs_standardized_coefficient": 0.22144751250743866,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_00",
+              "mean_abs_standardized_coefficient": 0.22064921259880066,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_04",
+              "mean_abs_standardized_coefficient": 0.219955712556839,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_07",
+              "mean_abs_standardized_coefficient": 0.2172248810529709,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_14",
+              "mean_abs_standardized_coefficient": 0.2138061225414276,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_01",
+              "mean_abs_standardized_coefficient": 0.21234004199504852,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_08",
+              "mean_abs_standardized_coefficient": 0.21201547980308533,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_04",
+              "mean_abs_standardized_coefficient": 0.20973996818065643,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_05",
+              "mean_abs_standardized_coefficient": 0.20933294296264648,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_01",
+              "mean_abs_standardized_coefficient": 0.20671729743480682,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_01",
+              "mean_abs_standardized_coefficient": 0.20666423439979553,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_00",
+              "mean_abs_standardized_coefficient": 0.2030617892742157,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_05",
+              "mean_abs_standardized_coefficient": 0.20300228893756866,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_12",
+              "mean_abs_standardized_coefficient": 0.20083896815776825,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_05",
+              "mean_abs_standardized_coefficient": 0.19959713518619537,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_08",
+              "mean_abs_standardized_coefficient": 0.1985378861427307,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_12",
+              "mean_abs_standardized_coefficient": 0.19823822379112244,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_08",
+              "mean_abs_standardized_coefficient": 0.1941843330860138,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_02",
+              "mean_abs_standardized_coefficient": 0.19411711394786835,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_09",
+              "mean_abs_standardized_coefficient": 0.1925392597913742,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_14",
+              "mean_abs_standardized_coefficient": 0.18915167450904846,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_13",
+              "mean_abs_standardized_coefficient": 0.18758819997310638,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_13",
+              "mean_abs_standardized_coefficient": 0.18647299706935883,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_07",
+              "mean_abs_standardized_coefficient": 0.185219869017601,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_06",
+              "mean_abs_standardized_coefficient": 0.18446949124336243,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_00",
+              "mean_abs_standardized_coefficient": 0.1835811287164688,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_10",
+              "mean_abs_standardized_coefficient": 0.18217185139656067,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_00",
+              "mean_abs_standardized_coefficient": 0.18169401586055756,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_15",
+              "mean_abs_standardized_coefficient": 0.17814476788043976,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_01",
+              "mean_abs_standardized_coefficient": 0.17012910544872284,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_08",
+              "mean_abs_standardized_coefficient": 0.16934974491596222,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_15",
+              "mean_abs_standardized_coefficient": 0.16772647202014923,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_15",
+              "mean_abs_standardized_coefficient": 0.16715863347053528,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_10",
+              "mean_abs_standardized_coefficient": 0.16655531525611877,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_05",
+              "mean_abs_standardized_coefficient": 0.16422918438911438,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_09",
+              "mean_abs_standardized_coefficient": 0.16195644438266754,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_04",
+              "mean_abs_standardized_coefficient": 0.16120049357414246,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_13",
+              "mean_abs_standardized_coefficient": 0.15857115387916565,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_14",
+              "mean_abs_standardized_coefficient": 0.1583215445280075,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_09",
+              "mean_abs_standardized_coefficient": 0.1548810601234436,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_04",
+              "mean_abs_standardized_coefficient": 0.15352575480937958,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_03",
+              "mean_abs_standardized_coefficient": 0.14858108758926392,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_05",
+              "mean_abs_standardized_coefficient": 0.14822439849376678,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_05",
+              "mean_abs_standardized_coefficient": 0.14677228033542633,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_00",
+              "mean_abs_standardized_coefficient": 0.14502264559268951,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_03",
+              "mean_abs_standardized_coefficient": 0.14393022656440735,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_13",
+              "mean_abs_standardized_coefficient": 0.13751563429832458,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_11",
+              "mean_abs_standardized_coefficient": 0.13129764795303345,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_06",
+              "mean_abs_standardized_coefficient": 0.1311899572610855,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_13",
+              "mean_abs_standardized_coefficient": 0.12970653176307678,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_01",
+              "mean_abs_standardized_coefficient": 0.12873780727386475,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_05",
+              "mean_abs_standardized_coefficient": 0.12817081809043884,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_03",
+              "mean_abs_standardized_coefficient": 0.12581630051136017,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_07_05",
+              "mean_abs_standardized_coefficient": 0.12409935146570206,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_14",
+              "mean_abs_standardized_coefficient": 0.12274216115474701,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_12_10",
+              "mean_abs_standardized_coefficient": 0.12239159643650055,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_15",
+              "mean_abs_standardized_coefficient": 0.1215696781873703,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_14_02",
+              "mean_abs_standardized_coefficient": 0.12040586769580841,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_06",
+              "mean_abs_standardized_coefficient": 0.11829278618097305,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_05",
+              "mean_abs_standardized_coefficient": 0.11421223729848862,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_09_01",
+              "mean_abs_standardized_coefficient": 0.11377662420272827,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_02",
+              "mean_abs_standardized_coefficient": 0.11374695599079132,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_06",
+              "mean_abs_standardized_coefficient": 0.11099547147750854,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_13",
+              "mean_abs_standardized_coefficient": 0.11080628633499146,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_15_03",
+              "mean_abs_standardized_coefficient": 0.10640124976634979,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_01",
+              "mean_abs_standardized_coefficient": 0.10010379552841187,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_13_06",
+              "mean_abs_standardized_coefficient": 0.09522701799869537,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_04",
+              "mean_abs_standardized_coefficient": 0.09340087324380875,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_03_09",
+              "mean_abs_standardized_coefficient": 0.08865054696798325,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_00_10",
+              "mean_abs_standardized_coefficient": 0.0850789025425911,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_01_12",
+              "mean_abs_standardized_coefficient": 0.08042003214359283,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_11_08",
+              "mean_abs_standardized_coefficient": 0.05971763655543327,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_02_15",
+              "mean_abs_standardized_coefficient": 0.054492972791194916,
+              "model": "16x16 coarse field"
+            }
+          ],
+          "auc_max": 0.6840659340659341,
+          "auc_mean": 0.5887610221557201,
+          "auc_min": 0.445839874411303,
+          "auc_std": 0.10629904826931917,
+          "balanced_accuracy_mean": 0.7538378737936913,
+          "feature_count": 256,
+          "folds": [
+            {
+              "auc": 0.6597938144329897,
+              "balanced_accuracy": 0.7938144329896908,
+              "fold": 1,
+              "model": "16x16 coarse field",
+              "test_groups": 25,
+              "test_rows": 123
+            },
+            {
+              "auc": 0.6490549828178693,
+              "balanced_accuracy": 0.7938144329896908,
+              "fold": 2,
+              "model": "16x16 coarse field",
+              "test_groups": 25,
+              "test_rows": 121
+            },
+            {
+              "auc": 0.445839874411303,
+              "balanced_accuracy": 0.673469387755102,
+              "fold": 3,
+              "model": "16x16 coarse field",
+              "test_groups": 25,
+              "test_rows": 124
+            },
+            {
+              "auc": 0.505050505050505,
+              "balanced_accuracy": 0.7070707070707071,
+              "fold": 4,
+              "model": "16x16 coarse field",
+              "test_groups": 25,
+              "test_rows": 125
+            },
+            {
+              "auc": 0.6840659340659341,
+              "balanced_accuracy": 0.8010204081632653,
+              "fold": 5,
+              "model": "16x16 coarse field",
+              "test_groups": 25,
+              "test_rows": 124
+            }
+          ],
+          "name": "16x16 coarse field",
+          "top_standardized_coefficients": [
+            {
+              "feature": "block_08_07",
+              "mean_abs_standardized_coefficient": 1.2773072719573975,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_05_06",
+              "mean_abs_standardized_coefficient": 1.1510930061340332,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_08",
+              "mean_abs_standardized_coefficient": 1.093551516532898,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_01",
+              "mean_abs_standardized_coefficient": 1.0443751811981201,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_06_06",
+              "mean_abs_standardized_coefficient": 1.000081181526184,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_04_07",
+              "mean_abs_standardized_coefficient": 0.9189597964286804,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_05",
+              "mean_abs_standardized_coefficient": 0.9055401086807251,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_09",
+              "mean_abs_standardized_coefficient": 0.8897759318351746,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_08_06",
+              "mean_abs_standardized_coefficient": 0.8839627504348755,
+              "model": "16x16 coarse field"
+            },
+            {
+              "feature": "block_10_00",
+              "mean_abs_standardized_coefficient": 0.8661367297172546,
+              "model": "16x16 coarse field"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        "tables/two_sample_classifier_folds.csv",
+        "tables/two_sample_classifier_coefficients.csv",
+        "tables/two_sample_classifier_summary.csv",
+        "tables/two_sample_classifier_summary.tex",
+        "figures/two_sample_classifier.svg"
+      ],
+      "real_count": 489,
+      "real_groups": 125,
+      "seed": 2026,
+      "shared_grouping_note": "Real and generated records use the same connected-region ID when the synthetic sample was conditioned on that region; this is conservative against region memorization.",
+      "status": "PASS",
+      "synthetic_count": 128,
+      "synthetic_groups": 64
+    },
+    "conditional_proxy_diagnostics": {
+      "status": "PASS",
+      "method": "fixed latitude bands with independent connected-region bootstrap of medians",
+      "seed": 2026,
+      "bootstrap_replicates": 1000,
+      "real_count": 489,
+      "synthetic_count": 128,
+      "real_groups": 125,
+      "synthetic_groups": 64,
+      "bands": [
+        {
+          "band": "[-90,-15]",
+          "real_n": 171,
+          "synthetic_n": 44,
+          "real_groups": 46,
+          "synthetic_groups": 22
+        },
+        {
+          "band": "(-15,0]",
+          "real_n": 103,
+          "synthetic_n": 32,
+          "real_groups": 31,
+          "synthetic_groups": 16
+        },
+        {
+          "band": "(0,15]",
+          "real_n": 134,
+          "synthetic_n": 28,
+          "real_groups": 35,
+          "synthetic_groups": 14
+        },
+        {
+          "band": "(15,30]",
+          "real_n": 77,
+          "synthetic_n": 22,
+          "real_groups": 22,
+          "synthetic_groups": 11
+        },
+        {
+          "band": "(30,90]",
+          "real_n": 4,
+          "synthetic_n": 2,
+          "real_groups": 1,
+          "synthetic_groups": 1
+        }
+      ],
+      "outputs": [
+        "tables/conditional_proxy_bands.csv",
+        "tables/conditional_proxy_summary.csv",
+        "tables/conditional_proxy_summary.tex",
+        "figures/conditional_proxy_heatmap.svg",
+        "figures/conditional_proxy_heatmap.png"
+      ],
+      "limitations": [
+        "The upper-latitude band has very few rows and should not be overinterpreted.",
+        "These are descriptive train-only diagnostics and do not modify the frozen generic gate.",
+        "Conditional proxy agreement would not establish physical realism or forecasting utility."
+      ]
+    },
+    "gate_stability_diagnostics": {
+      "status": "PASS",
+      "method": "connected-region bootstrap with replacement; corrected five-criterion BASE gate",
+      "seed": 2026,
+      "bootstrap_replicates": 2000,
+      "real_rows": 248,
+      "synthetic_rows": 128,
+      "real_groups": 125,
+      "synthetic_groups": 64,
+      "joint_gate_pass_fraction": 0.5075,
+      "criteria": [
+        {
+          "criterion": "flux_median_ratio",
+          "point_estimate": 1.514060073468855,
+          "bootstrap_median": 1.5007022438157718,
+          "ci_low": 1.2637071812798295,
+          "ci_high": 1.7986992895173848,
+          "pass_fraction": 0.999,
+          "joint_pass_fraction": 0.5075
+        },
+        {
+          "criterion": "active_area_median_ratio",
+          "point_estimate": 1.1296472831267874,
+          "bootstrap_median": 1.1280547331301856,
+          "ci_low": 0.9205833144640799,
+          "ci_high": 1.3683060168780627,
+          "pass_fraction": 1.0,
+          "joint_pass_fraction": 0.5075
+        },
+        {
+          "criterion": "diversity_ratio",
+          "point_estimate": 1.0871794620752695,
+          "bootstrap_median": 1.0804201078627567,
+          "ci_low": 0.9933845694521578,
+          "ci_high": 1.1774212742685637,
+          "pass_fraction": 1.0,
+          "joint_pass_fraction": 0.5075
+        },
+        {
+          "criterion": "saturation_fraction",
+          "point_estimate": 0.00067138671875,
+          "bootstrap_median": 0.000668525692234375,
+          "ci_low": 0.0005698204032527343,
+          "ci_high": 0.0007777333261992186,
+          "pass_fraction": 1.0,
+          "joint_pass_fraction": 0.5075
+        },
+        {
+          "criterion": "generic_distance_ratio",
+          "point_estimate": 7.680905810925166,
+          "bootstrap_median": 7.976274001765944,
+          "ci_low": 6.001358418139485,
+          "ci_high": 11.337285197570113,
+          "pass_fraction": 0.5075,
+          "joint_pass_fraction": 0.5075
+        }
+      ],
+      "gate_definition": {
+        "flux_median_ratio": [
+          0.5,
+          2.0
+        ],
+        "active_area_median_ratio": [
+          0.5,
+          2.0
+        ],
+        "diversity_ratio": [
+          0.4,
+          2.5
+        ],
+        "saturation_fraction_max": 0.01,
+        "generic_distance_to_real_split_p90_max": 8.0
+      },
+      "outputs": [
+        "tables/gate_stability_replicates.csv",
+        "tables/gate_stability_summary.csv",
+        "tables/gate_stability_summary.tex",
+        "figures/gate_stability.png"
+      ],
+      "limitations": [
+        "This is uncertainty around the finite train-only audit sample, not a probability that the generator is scientifically valid.",
+        "It resamples the completed 128 synthetic outputs and does not add new model samples.",
+        "It does not inspect validation/test outcomes or alter the frozen gate definition."
+      ]
+    },
+    "memorization_diagnostics": {
+      "status": "PASS",
+      "method": "16x16 pooled asinh field-space nearest-neighbor and exact-hash audit",
+      "seed": 2026,
+      "real_rows": 248,
+      "synthetic_rows": 128,
+      "real_groups": 125,
+      "synthetic_groups": 64,
+      "exact_normalized_array_duplicate_count": 0,
+      "same_source_pair_count": 64,
+      "cross_source_pair_count": 8064,
+      "same_source_pair_distance": {
+        "n": 64,
+        "p10": 1.2718781992406847,
+        "median": 1.7673258141814112,
+        "p90": 2.28266220137207,
+        "minimum": 1.048212360208173,
+        "maximum": 2.6427373422991467
+      },
+      "cross_source_pair_distance": {
+        "n": 8064,
+        "p10": 1.26143230437816,
+        "median": 1.7260446377435752,
+        "p90": 2.260035879410317,
+        "minimum": 0.6735956171892753,
+        "maximum": 3.3787279124482628
+      },
+      "distributions": {
+        "real_to_real": {
+          "n": 248,
+          "p10": 0.21364279949255952,
+          "median": 0.6335480567870939,
+          "p90": 1.2523448769951007,
+          "minimum": 0.050396003863073524,
+          "maximum": 2.533075381209617
+        },
+        "synthetic_to_synthetic": {
+          "n": 128,
+          "p10": 0.8269375933252908,
+          "median": 1.1557151470849993,
+          "p90": 1.4875446107361958,
+          "minimum": 0.6735956171892753,
+          "maximum": 1.9080883875658885
+        },
+        "synthetic_to_real": {
+          "n": 128,
+          "p10": 0.7627558092469662,
+          "median": 1.1338045617933776,
+          "p90": 1.5739840027697345,
+          "minimum": 0.5679995891495447,
+          "maximum": 1.9942738573756287
+        },
+        "synthetic_same_group": {
+          "n": 128,
+          "p10": 1.0346927024856496,
+          "median": 1.6705234170519996,
+          "p90": 2.2204835981556967,
+          "minimum": 0.7012496492777104,
+          "maximum": 3.2606196339647155
+        },
+        "synthetic_different_group": {
+          "n": 128,
+          "p10": 0.7627558092469662,
+          "median": 1.1338045617933776,
+          "p90": 1.5739840027697345,
+          "minimum": 0.5679995891495447,
+          "maximum": 1.9942738573756287
+        }
+      },
+      "outputs": [
+        "tables/memorization_distance_summary.csv",
+        "tables/memorization_distance_summary.tex",
+        "figures/memorization_nearest_neighbor.png"
+      ],
+      "limitations": [
+        "Nearest-neighbor distance is a low-dimensional similarity check, not proof of non-memorization or physical realism.",
+        "The synthetic sample is conditioned on label and latitude; same-source comparisons are descriptive and may reflect shared conditioning strata.",
+        "No validation/test flare outcomes are accessed and no model gate is changed."
+      ]
+    }
+  },
+  "experiment": "IRIS BASE local resume and independent v2 audit",
+  "independent_audit": {
+    "evaluator": "v2 independent hard thresholds; corrected generic-core distance",
+    "generic_distance_correction_reason": "real saturation has near-zero dispersion, causing pathological robust standardisation; absolute saturation gate remains unchanged",
+    "generic_distance_excluded_feature": "saturation_fraction (retained as separate absolute gate)",
+    "generic_distance_features": [
+      "log_mean_abs",
+      "log_p90_abs",
+      "log_p99_abs",
+      "active_fraction",
+      "strong_fraction"
+    ],
+    "generic_distance_to_real_baseline_ratio": 7.680905810925166,
+    "generic_distance_to_real_baseline_ratio_original_6d": 2454.908454836074,
+    "generic_fidelity_gate_definition": {
+      "active_area_median_ratio": [
+        0.5,
+        2.0
+      ],
+      "diversity_ratio": [
+        0.4,
+        2.5
+      ],
+      "flux_median_ratio": [
+        0.5,
+        2.0
+      ],
+      "generic_distance_to_real_split_p90_max": 8.0,
+      "saturation_fraction_max": 0.01
+    },
+    "generic_fidelity_gate_pass": true,
+    "generic_real_split_half_distance": {
+      "median": 0.030304312705993652,
+      "p90": 0.06105210781097414,
+      "repeats": 64
+    },
+    "generic_real_split_half_distance_original_6d": {
+      "median": 0.03135383129119873,
+      "p90": 0.060872220993042,
+      "repeats": 64
+    },
+    "generic_standardized_energy_distance": 0.468935489654541,
+    "generic_standardized_energy_distance_original_6d": 149.43572998046875,
+    "hard_geometry_standardized_energy_distance": 0.5422608852386475,
+    "hard_pil_standardized_energy_distance": 2.5184569358825684,
+    "real_coarse_pairwise_diversity": 1.607210397720337,
+    "real_count": 248,
+    "real_pil_mean_gradient_g_per_mm": {
+      "mean": 81.69853065859887,
+      "median": 84.20145797729492,
+      "p10": 55.74105453491211,
+      "p90": 107.64309005737306
+    },
+    "real_pil_top10_gradient_g_per_mm": {
+      "mean": 243.46544327274447,
+      "median": 250.0240936279297,
+      "p10": 158.8165267944336,
+      "p90": 330.25373229980477
+    },
+    "real_strong_field_area_fraction": {
+      "mean": 0.07014268444430444,
+      "median": 0.06402587890625,
+      "p10": 0.026196289062500003,
+      "p90": 0.118524169921875
+    },
+    "real_unsigned_flux_proxy": {
+      "mean": 40.34659057855606,
+      "median": 38.28256607055664,
+      "p10": 16.17720775604248,
+      "p90": 64.51008529663086
+    },
+    "robust_scaling": {
+      "generic_core_median": [
+        0.5685182213783264,
+        0.9687153100967407,
+        2.590394973754883,
+        0.06402587890625,
+        0.01507568359375
+      ],
+      "generic_core_scale": [
+        0.2682986259460449,
+        0.6294529438018799,
+        0.5280959606170654,
+        0.043670654296875,
+        0.0145721435546875
+      ],
+      "generic_median": [
+        0.5685182213783264,
+        0.9687153100967407,
+        2.590394973754883,
+        0.06402587890625,
+        0.01507568359375,
+        0.0
+      ],
+      "generic_scale": [
+        0.2682986259460449,
+        0.6294529438018799,
+        0.5280959606170654,
+        0.043670654296875,
+        0.0145721435546875,
+        0.0000048679175961297005
+      ],
+      "geometry_median": [
+        -0.961190938949585,
+        -0.060686834156513214,
+        0.419883131980896,
+        3.3237850666046143,
+        1.0
+      ],
+      "geometry_scale": [
+        0.4662002921104431,
+        0.4381279945373535,
+        0.19038093090057373,
+        0.7499992847442627,
+        9.999999974752427E-7
+      ],
+      "pil_median": [
+        84.20146179199219,
+        111.761474609375,
+        250.0240936279297,
+        0.30494117736816406,
+        0.03786467760801315,
+        0.0,
+        0.020172119140625,
+        1.0
+      ],
+      "pil_scale": [
+        28.117340087890625,
+        37.53850555419922,
+        83.72750854492188,
+        0.14233650267124176,
+        0.0511593371629715,
+        0.0013968016719445586,
+        0.0217742919921875,
+        0.125972718000412
+      ]
+    },
+    "synthetic_coarse_pairwise_diversity": 1.747326135635376,
+    "synthetic_count": 128,
+    "synthetic_mean_nearest_real_coarse_distance": 1.1576964855194092,
+    "synthetic_pil_mean_gradient_g_per_mm": {
+      "mean": 76.86441487073898,
+      "median": 74.55755233764648,
+      "p10": 60.7365421295166,
+      "p90": 94.74588623046876
+    },
+    "synthetic_pil_top10_gradient_g_per_mm": {
+      "mean": 259.8980785012245,
+      "median": 249.72399139404297,
+      "p10": 173.3603042602539,
+      "p90": 357.5736145019531
+    },
+    "synthetic_saturation_fraction_abs_gt_2900G": 0.00067138671875,
+    "synthetic_strong_field_area_fraction": {
+      "mean": 0.0747833251953125,
+      "median": 0.07232666015625,
+      "p10": 0.040063476562500006,
+      "p90": 0.11351318359375
+    },
+    "synthetic_to_real_active_area_median_ratio": 1.1296472831267874,
+    "synthetic_to_real_diversity_ratio": 1.0871794620752695,
+    "synthetic_to_real_flux_median_ratio": 1.514060073468855,
+    "synthetic_unsigned_flux_proxy": {
+      "mean": 60.29367537796497,
+      "median": 57.962106704711914,
+      "p10": 37.45224533081055,
+      "p90": 87.48881912231445
+    }
+  },
+  "model_checkpoint_metadata": {
+    "base_channels": 24,
+    "condition": "base",
+    "device_at_save": "cpu",
+    "diffusion_steps": 100,
+    "ema_decay": 0.995,
+    "generator_dropout": 0.0,
+    "lambda_generic": 0.08,
+    "lambda_hj": 0.05,
+    "lambda_pil": 0.05,
+    "lr_schedule": "cosine",
+    "optimizer_state_available": false,
+    "physics_batch_size": 16,
+    "physics_max_t_frac": 0.25,
+    "resumed_from_step": 400,
+    "seed": 2026,
+    "steps": 1200,
+    "v2": true
+  },
+  "report_outputs": {
+    "auxiliary_figures": [
+      "conditional_proxy_heatmap.svg",
+      "two_sample_classifier.svg"
+    ],
+    "figures": [
+      "acquisition_qc.png",
+      "bootstrap_descriptor_uncertainty.png",
+      "conditional_proxy_heatmap.png",
+      "core_gate_ratios.png",
+      "dataset_partition_and_labels.png",
+      "descriptor_scatter.png",
+      "destruction_controls.png",
+      "gate_stability.png",
+      "generated_sample_grid.png",
+      "generic_descriptor_distributions.png",
+      "graphical_abstract.png",
+      "hard_geometry_distributions.png",
+      "hard_pil_distributions.png",
+      "latitude_and_time_coverage.png",
+      "memorization_nearest_neighbor.png",
+      "negative_control_metric_correction.png",
+      "physics_proxy_distributions.png",
+      "physics_proxy_spectral.png",
+      "physics_proxy_topology.png",
+      "physics_screening_comparison.png",
+      "physics_screening_losses.png",
+      "real_synthetic_3d_surfaces.png",
+      "real_synthetic_magnetogram_pair.png",
+      "seed_robustness.png",
+      "synthetic_ensemble_uncertainty.png",
+      "time_repair_and_execution_gates.png",
+      "training_history.png"
+    ],
+    "models": [
+      "README.txt",
+      "real_magnetogram_surface.obj",
+      "synthetic_ensemble_spread_surface.obj",
+      "synthetic_magnetogram_surface.obj"
+    ],
+    "tables": [
+      "acquired_cache_summary.csv",
+      "acquired_cache_summary.tex",
+      "bootstrap_descriptor_uncertainty.csv",
+      "bootstrap_descriptor_uncertainty.tex",
+      "conditional_proxy_bands.csv",
+      "conditional_proxy_summary.csv",
+      "conditional_proxy_summary.tex",
+      "destruction_controls.csv",
+      "destruction_controls.tex",
+      "gate_stability_replicates.csv",
+      "gate_stability_summary.csv",
+      "gate_stability_summary.tex",
+      "generated_values.tex",
+      "generic_descriptor_statistics.csv",
+      "generic_descriptor_statistics.tex",
+      "hard_descriptor_statistics.csv",
+      "hard_descriptor_statistics.tex",
+      "memorization_distance_summary.csv",
+      "memorization_distance_summary.tex",
+      "partition_summary.csv",
+      "partition_summary.tex",
+      "physics_proxy_bootstrap.csv",
+      "physics_proxy_bootstrap.tex",
+      "physics_proxy_real.csv",
+      "physics_proxy_statistics.csv",
+      "physics_proxy_statistics.tex",
+      "physics_proxy_synthetic.csv",
+      "physics_screening.csv",
+      "physics_screening.tex",
+      "seed_robustness.csv",
+      "seed_robustness.tex",
+      "training_summary.csv",
+      "training_summary.tex",
+      "two_sample_classifier_coefficients.csv",
+      "two_sample_classifier_folds.csv",
+      "two_sample_classifier_summary.csv",
+      "two_sample_classifier_summary.tex"
+    ],
+    "receipts": [
+      "aborted_local_attempts.json",
+      "bootstrap_descriptor_uncertainty.json",
+      "completion_audit.json",
+      "offline_protocol_selftests.json",
+      "resumability_selftest.json"
+    ],
+    "secondary_analyses": [
+      "conditional_proxy_diagnostics.json",
+      "gate_stability_diagnostics.json",
+      "memorization_diagnostics.json",
+      "physics_proxy_diagnostics.json",
+      "two_sample_classifier_audit.json"
+    ]
+  },
+  "resume_config": {
+    "checkpoint": "IRIS_RUN_ROOT/work/runs/base/outputs/base/generator_step_400.pt",
+    "condition": "base",
+    "device": "cpu",
+    "evidence_dir": "IRIS_RUN_ROOT/evidence",
+    "fits_source": "IRIS_RUN_ROOT/fits",
+    "note": "Resumed from a numbered model checkpoint; original optimizer/RNG state was not stored.",
+    "optimizer_state_available": false,
+    "remaining_steps": 800,
+    "seed": 2026,
+    "source_dir": "IRIS_RUN_ROOT/source",
+    "start_step": 400,
+    "steps_completed": 1200,
+    "target_steps": 1200,
+    "torch_threads": 2
+  },
+  "sampling": {
+    "checkpoint": "IRIS_RUN_ROOT/work/runs/base_local_resume/outputs/base/generator.pt",
+    "condition": "base",
+    "device": "cpu",
+    "per_group": 2,
+    "positive_source_groups": 64,
+    "sampling_steps": 50,
+    "seed": 2026,
+    "synthetic_count": 128
+  },
+  "scope": "BASE only; physics and downstream intentionally disabled",
+  "source_provenance": {
+    "collection_summary": {
+      "interval_end": "2026-08-23",
+      "interval_start": "2010-05-01",
+      "m1plus_events": 3380,
+      "m1plus_events_with_ar": 2970,
+      "mapped_harps": 2595,
+      "unique_reported_active_regions": 646
+    },
+    "frozen_split": {
+      "boundary_1": "2022-05-12T06:59:23+00:00",
+      "boundary_2": "2024-06-14T06:59:23+00:00",
+      "method": "connected HARP-NOAA groups, exact JSOC TAI converted to UTC, chronology 60/20/20, 36h buffer",
+      "sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3"
+    },
+    "label_audit": {
+      "partitions_after_censoring": [
+        {
+          "censored_negative_rows": 4725,
+          "image_urls": 112719,
+          "independent_groups": 1321,
+          "independent_harps": 1385,
+          "independent_positive_groups": 125,
+          "independent_positive_harps": 129,
+          "partition": "train",
+          "positive_rows": 4324,
+          "rows": 112719
+        },
+        {
+          "censored_negative_rows": 3003,
+          "image_urls": 39035,
+          "independent_groups": 434,
+          "independent_harps": 473,
+          "independent_positive_groups": 82,
+          "independent_positive_harps": 82,
+          "partition": "validation",
+          "positive_rows": 2436,
+          "rows": 39035
+        },
+        {
+          "censored_negative_rows": 2854,
+          "image_urls": 40342,
+          "independent_groups": 437,
+          "independent_harps": 486,
+          "independent_positive_groups": 87,
+          "independent_positive_harps": 89,
+          "partition": "test",
+          "positive_rows": 3647,
+          "rows": 40342
+        }
+      ],
+      "primary_rows_after_censoring": 192096,
+      "reason": "prevents unattributed major flares from being silently converted into false-negative training/evaluation labels",
+      "rows_censored_total": 10582,
+      "rule": "global censor of otherwise-negative samples with an unresolved >=M1 flare onset in (t,t+24h]",
+      "split_sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3",
+      "unresolved_events": 378
+    },
+    "manifest_audit": {
+      "active_connected_groups": 2207,
+      "all_mapping_connected_groups": 2392,
+      "eligible_rows": 203902,
+      "interval_harps": 2595,
+      "missing_primary_image_urls": 0,
+      "partitions": [
+        {
+          "censored_negative_rows": 4725,
+          "image_urls": 112719,
+          "independent_groups": 1321,
+          "independent_harps": 1385,
+          "independent_positive_groups": 125,
+          "independent_positive_harps": 129,
+          "partition": "train",
+          "positive_rows": 4324,
+          "rows": 112719
+        },
+        {
+          "censored_negative_rows": 3003,
+          "image_urls": 39035,
+          "independent_groups": 434,
+          "independent_harps": 473,
+          "independent_positive_groups": 82,
+          "independent_positive_harps": 82,
+          "partition": "validation",
+          "positive_rows": 2436,
+          "rows": 39035
+        },
+        {
+          "censored_negative_rows": 2854,
+          "image_urls": 40342,
+          "independent_groups": 437,
+          "independent_harps": 486,
+          "independent_positive_groups": 87,
+          "independent_positive_harps": 89,
+          "partition": "test",
+          "positive_rows": 3647,
+          "rows": 40342
+        }
+      ],
+      "primary_image_urls": 202678,
+      "primary_rows": 202678,
+      "primary_rows_after_censoring": 192096,
+      "resolved_m1plus_events": 3002,
+      "split_sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3",
+      "time_scale": "T_REC parsed as TAI and converted to UTC with Astropy",
+      "total_sharp_rows": 648926,
+      "unresolved_or_ambiguous_m1plus_events": 378
+    },
+    "retrieval_smoke_test": {
+      "samples": [
+        {
+          "bytes": 129600,
+          "fits_first_card": "SIMPLE  =                    T / file does conform to FITS standard",
+          "harpnum": 2,
+          "http_status": 200,
+          "partition": "train",
+          "sample_id": "H2_20100501T010000Z",
+          "sha256": "b1e23532d805d3cb35b5c84ecac1a37610b7a73a0a33ebfb304b6a0e8200cecb",
+          "t_rec": "2010-05-01T01:00:00+00:00",
+          "url": "http://jsoc.stanford.edu/SUM99/D1037331753/S00000/magnetogram.fits"
+        },
+        {
+          "bytes": 175680,
+          "fits_first_card": "SIMPLE  =                    T / file does conform to FITS standard",
+          "harpnum": 8225,
+          "http_status": 200,
+          "partition": "validation",
+          "sample_id": "H8225_20220515T010000Z",
+          "sha256": "aa375897b2d680f03886aeac3ef9c1f8cdb81c7d312ea2b19de880ba299e627c",
+          "t_rec": "2022-05-15T01:00:00+00:00",
+          "url": "http://jsoc.stanford.edu/SUM15/D1523052799/S00000/magnetogram.fits"
+        },
+        {
+          "bytes": 141120,
+          "fits_first_card": "SIMPLE  =                    T / file does conform to FITS standard",
+          "harpnum": 11407,
+          "http_status": 200,
+          "partition": "test",
+          "sample_id": "H11407_20240619T010000Z",
+          "sha256": "906cb88d391a29d94f16c0ccb9236ce9cebda1fa5ddab2ccaa26a364701de5a2",
+          "t_rec": "2024-06-19T01:00:00+00:00",
+          "url": "http://jsoc.stanford.edu/SUM95/D1769806958/S00000/magnetogram.fits"
+        }
+      ],
+      "status": "PASS"
+    },
+    "source_ledger": [
+      {
+        "bytes": 12438083,
+        "path": "data/raw/goes_mission.csv",
+        "sha256": "828c211f3637a87219f6fbeaacdb9cd71e95a25bab9fc4524332c96c47af4aa9",
+        "url": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/multi/l2/data/xrsf-l2-flrpt_science/csv/sci_xrsf-l2-flrpt_geo_s19950103_e20260823_v1-0-1.csv"
+      },
+      {
+        "bytes": 34732,
+        "path": "data/raw/all_harps_with_noaa_ars.txt",
+        "sha256": "c9b7d298871e4ea301314a31c10b8507f981aeb49d5c3c0911350274c34d0380",
+        "url": "http://jsoc.stanford.edu/doc/data/hmi/harpnum_to_noaa/all_harps_with_noaa_ars.txt"
+      }
+    ],
+    "tai_repair": {
+      "chronology_groups": 2207,
+      "counts": [
+        {
+          "censored_negative_rows": 4725,
+          "image_urls": 112719,
+          "independent_groups": 1321,
+          "independent_harps": 1385,
+          "independent_positive_groups": 125,
+          "independent_positive_harps": 129,
+          "partition": "train",
+          "positive_rows": 4324,
+          "rows": 112719
+        },
+        {
+          "censored_negative_rows": 3003,
+          "image_urls": 39035,
+          "independent_groups": 434,
+          "independent_harps": 473,
+          "independent_positive_groups": 82,
+          "independent_positive_harps": 82,
+          "partition": "validation",
+          "positive_rows": 2436,
+          "rows": 39035
+        },
+        {
+          "censored_negative_rows": 2854,
+          "image_urls": 40342,
+          "independent_groups": 437,
+          "independent_harps": 486,
+          "independent_positive_groups": 87,
+          "independent_positive_harps": 89,
+          "partition": "test",
+          "positive_rows": 3647,
+          "rows": 40342
+        }
+      ],
+      "event_sha256": "80e6cfa0055892891c292b4373e4067e78af43669a468074d0f020b98b7feb8e",
+      "exact_boundary_1": "2022-05-12T06:59:23+00:00",
+      "exact_boundary_2": "2024-06-14T06:59:23+00:00",
+      "group_partition_changes": 0,
+      "hour_key_changes": 648926,
+      "input_manifest_sha256": "eb9be6657b1aead16ad79c0140d8fdc09add003cf948b1ad0f18cfb17eea5866",
+      "label_changes_primary": 21,
+      "metadata_sha256": "f775b4d20c61a9e9566e8d111d11c6274e58356ac78fb682f704b2d88bd134b1",
+      "method": "canonical JSOC TAI-to-UTC repair from sharp_metadata.T_REC",
+      "old_boundary_1": "2022-05-12T07:00:00+00:00",
+      "old_boundary_2": "2024-06-14T07:00:00+00:00",
+      "output_manifest_sha256": "a27bf0d8ee47d34f97f9517e80ce1c67070c09e17c2c539be25da2098ee5d131",
+      "rows": 648926,
+      "split_sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3",
+      "status": "PASS",
+      "timestamp_delta_seconds": {
+        "-34.0": 90561,
+        "-35.0": 163164,
+        "-36.0": 49199,
+        "-37.0": 346002
+      }
+    }
+  },
+  "completion_audit": {
+    "generated_at": "2026-09-01",
+    "status": "INCOMPLETE_PENDING_EXTERNAL_AUTH_AND_LONG_RUNS",
+    "requirements": [
+      {
+        "requirement": "At least 40 pages of research/report content",
+        "status": "PASS",
+        "evidence": "report.pdf",
+        "measured_value": "88 A4 pages"
+      },
+      {
+        "requirement": "Document the acquired data and provenance",
+        "status": "PASS",
+        "evidence": "acquisition_report.json, report_metadata.json, file_inventory.csv",
+        "measured_value": "5273 valid FITS; 0 missing; 0 invalid"
+      },
+      {
+        "requirement": "List and preserve useful simulation outputs",
+        "status": "PASS",
+        "evidence": "combined archive, output manifest, checksums, physics_proxy_diagnostics.json, two_sample_classifier_audit.json",
+        "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, 27 figure families, auxiliary classifier and conditional-audit SVGs, tables, OBJ meshes, and 13 independent secondary proxy descriptors"
+      },
+      {
+        "requirement": "Include graphs and 3D models",
+        "status": "PASS",
+        "evidence": "figures/ and models/",
+        "measured_value": "27 embedded figure families plus auxiliary classifier and conditional-audit SVGs; 3 scalar-field OBJ meshes; independent magnetic/spectral/topology proxy figures and tables"
+      },
+      {
+        "requirement": "Execute useful future-direction experiments",
+        "status": "PARTIAL",
+        "evidence": "physics_screening_metrics.json, physics_v2_selftest.json",
+        "measured_value": "self-test PASS; three 100-step exploratory screens; full 1200-step arms remain open"
+      },
+      {
+        "requirement": "Run downstream forecasting",
+        "status": "DEFERRED",
+        "evidence": "report claim boundary and reproduction recipe",
+        "measured_value": "not scientifically valid until a physics arm passes the frozen gates"
+      },
+      {
+        "requirement": "Upload the complete safety copy to the requested GitHub repository",
+        "status": "BLOCKED",
+        "evidence": "local commit on codex/iris-base-report-2026-08-31",
+        "measured_value": "public report branch prepared; authentication rejected the push; raw 2 GB archive is not in Git"
+      },
+      {
+        "requirement": "Delete local IRIS data only after verified remote preservation",
+        "status": "NOT_STARTED",
+        "evidence": "storage policy in report",
+        "measured_value": "no deletion performed because remote preservation is unverified"
+      }
+    ]
+  },
+  "resumability_selftest": {
+    "status": "PASS",
+    "purpose": "Verify periodic checkpoint and history emission added after the interrupted physics attempt",
+    "source": "train_generator_positive_v2.py",
+    "condition": "base",
+    "steps": 3,
+    "checkpoint_every": 1,
+    "threads": 1,
+    "device": "cpu",
+    "verified_files": [
+      "generator_step_1.pt",
+      "generator_step_2.pt",
+      "generator_step_3.pt",
+      "training_history_step_1.json",
+      "training_history_step_2.json",
+      "training_history_step_3.json"
+    ],
+    "note": "This is a short infrastructure self-test, not a scientific training result."
+  }
+}
