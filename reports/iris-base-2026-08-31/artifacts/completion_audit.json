@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-09-01",
+  "status": "INCOMPLETE_PENDING_EXTERNAL_AUTH_AND_LONG_RUNS",
+  "requirements": [
+    {
+      "requirement": "At least 40 pages of research/report content",
+      "status": "PASS",
+      "evidence": "report.pdf",
+      "measured_value": "73 A4 pages"
+    },
+    {
+      "requirement": "Document the acquired data and provenance",
+      "status": "PASS",
+      "evidence": "acquisition_report.json, report_metadata.json, file_inventory.csv",
+      "measured_value": "5273 valid FITS; 0 missing; 0 invalid"
+    },
+    {
+      "requirement": "List and preserve useful simulation outputs",
+      "status": "PASS",
+      "evidence": "combined archive, output manifest, checksums",
+      "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, figures, tables, OBJ meshes"
+    },
+    {
+      "requirement": "Include graphs and 3D models",
+      "status": "PASS",
+      "evidence": "figures/ and models/",
+      "measured_value": "21 figure families; 3 scalar-field OBJ meshes"
+    },
+    {
+      "requirement": "Execute useful future-direction experiments",
+      "status": "PARTIAL",
+      "evidence": "physics_screening_metrics.json, physics_v2_selftest.json",
+      "measured_value": "self-test PASS; three 100-step exploratory screens; full 1200-step arms remain open"
+    },
+    {
+      "requirement": "Run downstream forecasting",
+      "status": "DEFERRED",
+      "evidence": "report claim boundary and reproduction recipe",
+      "measured_value": "not scientifically valid until a physics arm passes the frozen gates"
+    },
+    {
+      "requirement": "Upload the complete safety copy to the requested GitHub repository",
+      "status": "BLOCKED",
+      "evidence": "local commit on codex/iris-base-report-2026-08-31",
+      "measured_value": "public report branch prepared; authentication rejected the push; raw 2 GB archive is not in Git"
+    },
+    {
+      "requirement": "Delete local IRIS data only after verified remote preservation",
+      "status": "NOT_STARTED",
+      "evidence": "storage policy in report",
+      "measured_value": "no deletion performed because remote preservation is unverified"
+    }
+  ]
+}

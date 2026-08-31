@@ -1,0 +1,808 @@
+{
+  "acquisition": {
+    "invalid_count": 0,
+    "invalid_samples": [],
+    "missing_count": 0,
+    "missing_samples": [],
+    "planned_samples": 5273,
+    "run_base": true,
+    "run_downstream": false,
+    "run_physics": false,
+    "scope": "base",
+    "seed": 2026,
+    "source_dir": "IRIS_RUN_ROOT/fits",
+    "status": "PASS",
+    "strict_fits_validation": false,
+    "valid_samples": 5273
+  },
+  "alternate_sampling_audit": {
+    "evaluator": "alternate sampler seed against fixed primary real descriptor reference",
+    "generic_distance_excluded_feature": "saturation_fraction (retained as separate absolute gate)",
+    "generic_distance_features": [
+      "log_mean_abs",
+      "log_p90_abs",
+      "log_p99_abs",
+      "active_fraction",
+      "strong_fraction"
+    ],
+    "generic_distance_to_real_baseline_ratio": 11.055371480555403,
+    "generic_distance_to_real_baseline_ratio_original_6d": 3469.911965039562,
+    "generic_fidelity_gate_pass": false,
+    "generic_real_split_half_distance": {
+      "median": 0.024927377700805664,
+      "p90": 0.05419797897338868,
+      "repeats": 64
+    },
+    "generic_real_split_half_distance_original_6d": {
+      "median": 0.02465188503265381,
+      "p90": 0.05265874862670899,
+      "repeats": 64
+    },
+    "generic_standardized_energy_distance": 0.5991787910461426,
+    "generic_standardized_energy_distance_original_6d": 182.72122192382812,
+    "hard_geometry_standardized_energy_distance": 0.5801496505737305,
+    "hard_pil_standardized_energy_distance": 2.9574666023254395,
+    "real_coarse_pairwise_diversity": 1.607210397720337,
+    "real_reference_count": 248,
+    "real_strong_field_area_fraction": {
+      "mean": 0.0701426844108871,
+      "median": 0.06402587900000001,
+      "p10": 0.026196289100000002,
+      "p90": 0.1185241712
+    },
+    "real_unsigned_flux_proxy": {
+      "mean": 40.34659068634935,
+      "median": 38.28256407453296,
+      "p10": 16.177208002354373,
+      "p90": 64.51008388020007
+    },
+    "reference_note": "Real descriptor rows are fixed to the primary seed-2026 audit so the alternate run changes only sampling randomness.",
+    "seed": 2027,
+    "synthetic_coarse_pairwise_diversity": 1.911755919456482,
+    "synthetic_count": 128,
+    "synthetic_saturation_fraction_abs_gt_2900G": 0.0008206367492675781,
+    "synthetic_strong_field_area_fraction": {
+      "mean": 0.08169937133789062,
+      "median": 0.07769775390625,
+      "p10": 0.038055419921875,
+      "p90": 0.13125
+    },
+    "synthetic_to_real_active_area_median_ratio": 1.2135366998436679,
+    "synthetic_to_real_diversity_ratio": 1.1894870280631034,
+    "synthetic_to_real_flux_median_ratio": 1.703076304388774,
+    "synthetic_unsigned_flux_proxy": {
+      "mean": 67.50444558262825,
+      "median": 65.19812774658203,
+      "p10": 38.280093383789065,
+      "p90": 104.1250228881836
+    },
+    "training_replicate": false
+  },
+  "as_of": "2026-08-31",
+  "claim_boundary": [
+    "A BASE train-only image/distribution audit passed its predeclared broad gate.",
+    "The corrected generic-core distance was 7.681 times the real split-half p90 reference, so fidelity is not close to real-data variability.",
+    "No physics-constrained or downstream forecasting conclusion is supported by this run.",
+    "The local resume did not restore optimizer or RNG state because numbered checkpoints did not contain them."
+  ],
+  "counts": {
+    "acquired_fits": 5273,
+    "audit_real": 248,
+    "audit_synthetic": 128,
+    "manifest_rows": 648926
+  },
+  "destruction_controls": {
+    "base_reference": {
+      "generic_core_distance": 0.468935489654541,
+      "hard_geometry_distance": 0.5422608852386475,
+      "hard_pil_distance": 2.5184569358825684
+    },
+    "controls": [
+      {
+        "control": "BASE",
+        "generic_core_distance": 0.468935489654541,
+        "generic_core_ratio_to_real_p90": 7.680905810925166,
+        "hard_geometry_distance": 0.5422608852386475,
+        "hard_pil_distance": 2.5184578895568848,
+        "parent_field_mae_gauss": 0.0,
+        "parent_pairwise_generic_change": 0.0,
+        "parent_pairwise_geometry_change": 0.0,
+        "parent_pairwise_pil_change": 0.0,
+        "parent_saturation_fraction": 0.00067138671875
+      },
+      {
+        "control": "pil_blur",
+        "generic_core_distance": 0.5904676914215088,
+        "generic_core_ratio_to_real_p90": 9.6715365380943,
+        "hard_geometry_distance": 1099.2076416015625,
+        "hard_pil_distance": 10.929874420166016,
+        "parent_field_mae_gauss": 19.48138427734375,
+        "parent_pairwise_generic_change": 0.10049635171890259,
+        "parent_pairwise_geometry_change": 0.16912411153316498,
+        "parent_pairwise_pil_change": 52.785560607910156,
+        "parent_saturation_fraction": 0.0004658699035644531
+      },
+      {
+        "control": "geometry_flip",
+        "generic_core_distance": 0.468935489654541,
+        "generic_core_ratio_to_real_p90": 7.680905810925166,
+        "hard_geometry_distance": 0.6498138904571533,
+        "hard_pil_distance": 2.518458843231201,
+        "parent_field_mae_gauss": 85.8896255493164,
+        "parent_pairwise_generic_change": 2.987993186209792E-9,
+        "parent_pairwise_geometry_change": 0.2984466254711151,
+        "parent_pairwise_pil_change": 0.0000018924474716186523,
+        "parent_saturation_fraction": 0.00067138671875
+      },
+      {
+        "control": "block_shuffle",
+        "generic_core_distance": 0.468935489654541,
+        "generic_core_ratio_to_real_p90": 7.680905810925166,
+        "hard_geometry_distance": 0.6981964111328125,
+        "hard_pil_distance": 3.4782052040100098,
+        "parent_field_mae_gauss": 89.7596435546875,
+        "parent_pairwise_generic_change": 1.979060471057892E-9,
+        "parent_pairwise_geometry_change": 0.35107117891311646,
+        "parent_pairwise_pil_change": 7.33901834487915,
+        "parent_saturation_fraction": 0.00067138671875
+      }
+    ],
+    "interpretation": "A control is useful only if it changes its targeted descriptor while preserving nuisance descriptors sufficiently; these controls are diagnostic and are not downstream evidence.",
+    "purpose": "counterfactual generated-field destruction controls; no forecasting outputs"
+  },
+  "executed_extensions": {
+    "physics_factorial_screening": {
+      "checkpoint_source": "IRIS_RUN_ROOT/work/runs/base_local_resume/outputs/base/generator.pt",
+      "conditions": [
+        "base",
+        "hj",
+        "pil",
+        "hj_pil"
+      ],
+      "experiment": "IRIS v2 physics factorial screening",
+      "fixed_real_reference": "IRIS_RUN_ROOT/work/runs/base_local_resume/audit",
+      "interpretation": [
+        "All three screen arms activated their intended differentiable physics loss.",
+        "All three screen arms failed the broad corrected generic gate at 100 steps; this is an early-training diagnostic, not evidence that a full arm cannot converge.",
+        "No downstream forecasting or test-set selection was performed from these screens."
+      ],
+      "rows": [
+        {
+          "active_area_median_ratio": 1.1296472831267874,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/base_local_resume/audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/base/generator.pt",
+          "condition": "base",
+          "diversity_ratio": 1.0871794620752695,
+          "final_denoise_loss": 0.007072714157402515,
+          "final_generic_loss": 0.003818980883806944,
+          "final_hj_loss": 0.0,
+          "final_loss": 0.007378232665359974,
+          "final_pil_loss": 0.0,
+          "flux_median_ratio": 1.514060073468855,
+          "generic_gate_pass": true,
+          "generic_ratio_to_real_p90": 7.680905810925166,
+          "hard_geometry_distance": 0.5422608852386475,
+          "hard_pil_distance": 2.5184569358825684,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.00067138671875,
+          "training_steps": 1200
+        },
+        {
+          "active_area_median_ratio": 1.5495710177501036,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj_audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj/generator.pt",
+          "condition": "hj",
+          "diversity_ratio": 1.2547413052027339,
+          "final_denoise_loss": 0.04252185672521591,
+          "final_generic_loss": 0.0088662663474679,
+          "final_hj_loss": 0.009223624132573605,
+          "final_loss": 0.04310709983110428,
+          "final_pil_loss": 0.0,
+          "flux_median_ratio": 1.987374780331828,
+          "generic_gate_pass": false,
+          "generic_ratio_to_real_p90": 20.855039869786157,
+          "hard_geometry_distance": 0.573249340057373,
+          "hard_pil_distance": 1.652261734008789,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.0007495880126953125,
+          "training_steps": 100
+        },
+        {
+          "active_area_median_ratio": 1.5305052408476107,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/pil_audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/pil/generator.pt",
+          "condition": "pil",
+          "diversity_ratio": 1.2600835854053527,
+          "final_denoise_loss": 0.04264918342232704,
+          "final_generic_loss": 0.006145238410681486,
+          "final_hj_loss": 0.0,
+          "final_loss": 0.043615855276584625,
+          "final_pil_loss": 0.028834527358412743,
+          "flux_median_ratio": 2.0059611161736,
+          "generic_gate_pass": false,
+          "generic_ratio_to_real_p90": 21.520933053359002,
+          "hard_geometry_distance": 0.6190896034240723,
+          "hard_pil_distance": 4.1280903816223145,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.0009427070617675781,
+          "training_steps": 100
+        },
+        {
+          "active_area_median_ratio": 1.4690181103370714,
+          "audit_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj_pil_audit/v2_manipulation_metrics.json",
+          "checkpoint_path": "IRIS_RUN_ROOT/work/runs/physics_screening_2026/hj_pil/generator.pt",
+          "condition": "hj_pil",
+          "diversity_ratio": 1.2218660257057832,
+          "final_denoise_loss": 0.0427018478512764,
+          "final_generic_loss": 0.0061952597461640835,
+          "final_hj_loss": 0.00916617177426815,
+          "final_loss": 0.04389356076717377,
+          "final_pil_loss": 0.02858990803360939,
+          "flux_median_ratio": 1.9759346436988896,
+          "generic_gate_pass": false,
+          "generic_ratio_to_real_p90": 20.08135240564046,
+          "hard_geometry_distance": 0.5762472152709961,
+          "hard_pil_distance": 3.7286434173583984,
+          "positive_groups": 125,
+          "positive_rows": 489,
+          "saturation_fraction": 0.0008840560913085938,
+          "training_steps": 100
+        }
+      ],
+      "screen_type": "100-step positive-only fine-tune from frozen BASE EMA; exploratory, not confirmatory",
+      "shared": {
+        "base_channels": 24,
+        "batch_size": 16,
+        "diffusion_steps": 100,
+        "ema_decay": 0.995,
+        "ema_warmup_steps": 100,
+        "lambda_generic": 0.08,
+        "lambda_hj": 0.05,
+        "lambda_pil": 0.05,
+        "lr": 0.0001,
+        "lr_schedule": "cosine",
+        "physics_batch_size": 16,
+        "physics_max_t_frac": 0.25,
+        "physics_warmup_steps": 200,
+        "positive_groups": 125,
+        "positive_rows": 489,
+        "prepared_tensor_cache": "IRIS_RUN_ROOT/work/prepared/positive_train_pergroup4",
+        "real_reference_count": 248,
+        "sampling_steps": 50,
+        "screen_steps": 100,
+        "seed": 2026,
+        "synthetic_count_per_arm": 128
+      }
+    },
+    "physics_v2_selftest": {
+      "blurred_pil_descriptor_mean": [
+        1.1195814609527588,
+        1.1450715065002441,
+        1.2156367301940918,
+        0.5213103294372559,
+        0.030404001474380493,
+        0.00006113453855505213
+      ],
+      "device": "cpu",
+      "geometry_flip_descriptor_delta": 0.6559358239173889,
+      "geometry_gradient_mean_abs": 9.636714537464286E-9,
+      "geometry_loss": 2.119267225265503,
+      "pil_gradient_mean_abs": 3.727662090113881E-8,
+      "pil_loss_blur_to_sharp": 1.007179617881775,
+      "quiet_field_contact_mean": 0.0,
+      "sharp_pil_descriptor_mean": [
+        1.5639336109161377,
+        1.6297661066055298,
+        1.8311644792556763,
+        0.7864651679992676,
+        0.29372838139533997,
+        0.0019818847067654133
+      ],
+      "status": "PASS"
+    }
+  },
+  "experiment": "IRIS BASE local resume and independent v2 audit",
+  "independent_audit": {
+    "evaluator": "v2 independent hard thresholds; corrected generic-core distance",
+    "generic_distance_correction_reason": "real saturation has near-zero dispersion, causing pathological robust standardisation; absolute saturation gate remains unchanged",
+    "generic_distance_excluded_feature": "saturation_fraction (retained as separate absolute gate)",
+    "generic_distance_features": [
+      "log_mean_abs",
+      "log_p90_abs",
+      "log_p99_abs",
+      "active_fraction",
+      "strong_fraction"
+    ],
+    "generic_distance_to_real_baseline_ratio": 7.680905810925166,
+    "generic_distance_to_real_baseline_ratio_original_6d": 2454.908454836074,
+    "generic_fidelity_gate_definition": {
+      "active_area_median_ratio": [
+        0.5,
+        2.0
+      ],
+      "diversity_ratio": [
+        0.4,
+        2.5
+      ],
+      "flux_median_ratio": [
+        0.5,
+        2.0
+      ],
+      "generic_distance_to_real_split_p90_max": 8.0,
+      "saturation_fraction_max": 0.01
+    },
+    "generic_fidelity_gate_pass": true,
+    "generic_real_split_half_distance": {
+      "median": 0.030304312705993652,
+      "p90": 0.06105210781097414,
+      "repeats": 64
+    },
+    "generic_real_split_half_distance_original_6d": {
+      "median": 0.03135383129119873,
+      "p90": 0.060872220993042,
+      "repeats": 64
+    },
+    "generic_standardized_energy_distance": 0.468935489654541,
+    "generic_standardized_energy_distance_original_6d": 149.43572998046875,
+    "hard_geometry_standardized_energy_distance": 0.5422608852386475,
+    "hard_pil_standardized_energy_distance": 2.5184569358825684,
+    "real_coarse_pairwise_diversity": 1.607210397720337,
+    "real_count": 248,
+    "real_pil_mean_gradient_g_per_mm": {
+      "mean": 81.69853065859887,
+      "median": 84.20145797729492,
+      "p10": 55.74105453491211,
+      "p90": 107.64309005737306
+    },
+    "real_pil_top10_gradient_g_per_mm": {
+      "mean": 243.46544327274447,
+      "median": 250.0240936279297,
+      "p10": 158.8165267944336,
+      "p90": 330.25373229980477
+    },
+    "real_strong_field_area_fraction": {
+      "mean": 0.07014268444430444,
+      "median": 0.06402587890625,
+      "p10": 0.026196289062500003,
+      "p90": 0.118524169921875
+    },
+    "real_unsigned_flux_proxy": {
+      "mean": 40.34659057855606,
+      "median": 38.28256607055664,
+      "p10": 16.17720775604248,
+      "p90": 64.51008529663086
+    },
+    "robust_scaling": {
+      "generic_core_median": [
+        0.5685182213783264,
+        0.9687153100967407,
+        2.590394973754883,
+        0.06402587890625,
+        0.01507568359375
+      ],
+      "generic_core_scale": [
+        0.2682986259460449,
+        0.6294529438018799,
+        0.5280959606170654,
+        0.043670654296875,
+        0.0145721435546875
+      ],
+      "generic_median": [
+        0.5685182213783264,
+        0.9687153100967407,
+        2.590394973754883,
+        0.06402587890625,
+        0.01507568359375,
+        0.0
+      ],
+      "generic_scale": [
+        0.2682986259460449,
+        0.6294529438018799,
+        0.5280959606170654,
+        0.043670654296875,
+        0.0145721435546875,
+        0.0000048679175961297005
+      ],
+      "geometry_median": [
+        -0.961190938949585,
+        -0.060686834156513214,
+        0.419883131980896,
+        3.3237850666046143,
+        1.0
+      ],
+      "geometry_scale": [
+        0.4662002921104431,
+        0.4381279945373535,
+        0.19038093090057373,
+        0.7499992847442627,
+        9.999999974752427E-7
+      ],
+      "pil_median": [
+        84.20146179199219,
+        111.761474609375,
+        250.0240936279297,
+        0.30494117736816406,
+        0.03786467760801315,
+        0.0,
+        0.020172119140625,
+        1.0
+      ],
+      "pil_scale": [
+        28.117340087890625,
+        37.53850555419922,
+        83.72750854492188,
+        0.14233650267124176,
+        0.0511593371629715,
+        0.0013968016719445586,
+        0.0217742919921875,
+        0.125972718000412
+      ]
+    },
+    "synthetic_coarse_pairwise_diversity": 1.747326135635376,
+    "synthetic_count": 128,
+    "synthetic_mean_nearest_real_coarse_distance": 1.1576964855194092,
+    "synthetic_pil_mean_gradient_g_per_mm": {
+      "mean": 76.86441487073898,
+      "median": 74.55755233764648,
+      "p10": 60.7365421295166,
+      "p90": 94.74588623046876
+    },
+    "synthetic_pil_top10_gradient_g_per_mm": {
+      "mean": 259.8980785012245,
+      "median": 249.72399139404297,
+      "p10": 173.3603042602539,
+      "p90": 357.5736145019531
+    },
+    "synthetic_saturation_fraction_abs_gt_2900G": 0.00067138671875,
+    "synthetic_strong_field_area_fraction": {
+      "mean": 0.0747833251953125,
+      "median": 0.07232666015625,
+      "p10": 0.040063476562500006,
+      "p90": 0.11351318359375
+    },
+    "synthetic_to_real_active_area_median_ratio": 1.1296472831267874,
+    "synthetic_to_real_diversity_ratio": 1.0871794620752695,
+    "synthetic_to_real_flux_median_ratio": 1.514060073468855,
+    "synthetic_unsigned_flux_proxy": {
+      "mean": 60.29367537796497,
+      "median": 57.962106704711914,
+      "p10": 37.45224533081055,
+      "p90": 87.48881912231445
+    }
+  },
+  "model_checkpoint_metadata": {
+    "base_channels": 24,
+    "condition": "base",
+    "device_at_save": "cpu",
+    "diffusion_steps": 100,
+    "ema_decay": 0.995,
+    "generator_dropout": 0.0,
+    "lambda_generic": 0.08,
+    "lambda_hj": 0.05,
+    "lambda_pil": 0.05,
+    "lr_schedule": "cosine",
+    "optimizer_state_available": false,
+    "physics_batch_size": 16,
+    "physics_max_t_frac": 0.25,
+    "resumed_from_step": 400,
+    "seed": 2026,
+    "steps": 1200,
+    "v2": true
+  },
+  "report_outputs": {
+    "figures": [
+      "acquisition_qc.png",
+      "core_gate_ratios.png",
+      "dataset_partition_and_labels.png",
+      "descriptor_scatter.png",
+      "destruction_controls.png",
+      "generated_sample_grid.png",
+      "generic_descriptor_distributions.png",
+      "graphical_abstract.png",
+      "hard_geometry_distributions.png",
+      "hard_pil_distributions.png",
+      "latitude_and_time_coverage.png",
+      "negative_control_metric_correction.png",
+      "bootstrap_descriptor_uncertainty.png",
+      "physics_screening_comparison.png",
+      "physics_screening_losses.png",
+      "real_synthetic_3d_surfaces.png",
+      "real_synthetic_magnetogram_pair.png",
+      "seed_robustness.png",
+      "synthetic_ensemble_uncertainty.png",
+      "time_repair_and_execution_gates.png",
+      "training_history.png"
+    ],
+    "models": [
+      "README.txt",
+      "real_magnetogram_surface.obj",
+      "synthetic_ensemble_spread_surface.obj",
+      "synthetic_magnetogram_surface.obj"
+    ],
+    "tables": [
+      "acquired_cache_summary.csv",
+      "acquired_cache_summary.tex",
+      "destruction_controls.csv",
+      "destruction_controls.tex",
+      "generated_values.tex",
+      "generic_descriptor_statistics.csv",
+      "generic_descriptor_statistics.tex",
+      "hard_descriptor_statistics.csv",
+      "hard_descriptor_statistics.tex",
+      "partition_summary.csv",
+      "partition_summary.tex",
+      "physics_screening.csv",
+      "physics_screening.tex",
+      "bootstrap_descriptor_uncertainty.csv",
+      "bootstrap_descriptor_uncertainty.tex",
+      "seed_robustness.csv",
+      "seed_robustness.tex",
+      "training_summary.csv",
+      "training_summary.tex"
+    ],
+    "receipts": [
+      "aborted_local_attempts.json",
+      "bootstrap_descriptor_uncertainty.json",
+      "completion_audit.json",
+      "resumability_selftest.json"
+    ]
+  },
+  "completion_audit": {
+    "path": "artifacts/completion_audit.json",
+    "status": "INCOMPLETE_PENDING_EXTERNAL_AUTH_AND_LONG_RUNS"
+  },
+  "resumability_selftest": {
+    "path": "artifacts/resumability_selftest.json",
+    "status": "PASS"
+  },
+  "resume_config": {
+    "checkpoint": "IRIS_RUN_ROOT/work/runs/base/outputs/base/generator_step_400.pt",
+    "condition": "base",
+    "device": "cpu",
+    "evidence_dir": "IRIS_RUN_ROOT/evidence",
+    "fits_source": "IRIS_RUN_ROOT/fits",
+    "note": "Resumed from a numbered model checkpoint; original optimizer/RNG state was not stored.",
+    "optimizer_state_available": false,
+    "remaining_steps": 800,
+    "seed": 2026,
+    "source_dir": "IRIS_RUN_ROOT/source",
+    "start_step": 400,
+    "steps_completed": 1200,
+    "target_steps": 1200,
+    "torch_threads": 2
+  },
+  "sampling": {
+    "checkpoint": "IRIS_RUN_ROOT/work/runs/base_local_resume/outputs/base/generator.pt",
+    "condition": "base",
+    "device": "cpu",
+    "per_group": 2,
+    "positive_source_groups": 64,
+    "sampling_steps": 50,
+    "seed": 2026,
+    "synthetic_count": 128
+  },
+  "scope": "BASE only; physics and downstream intentionally disabled",
+  "source_provenance": {
+    "collection_summary": {
+      "interval_end": "2026-08-23",
+      "interval_start": "2010-05-01",
+      "m1plus_events": 3380,
+      "m1plus_events_with_ar": 2970,
+      "mapped_harps": 2595,
+      "unique_reported_active_regions": 646
+    },
+    "frozen_split": {
+      "boundary_1": "2022-05-12T06:59:23+00:00",
+      "boundary_2": "2024-06-14T06:59:23+00:00",
+      "method": "connected HARP-NOAA groups, exact JSOC TAI converted to UTC, chronology 60/20/20, 36h buffer",
+      "sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3"
+    },
+    "label_audit": {
+      "partitions_after_censoring": [
+        {
+          "censored_negative_rows": 4725,
+          "image_urls": 112719,
+          "independent_groups": 1321,
+          "independent_harps": 1385,
+          "independent_positive_groups": 125,
+          "independent_positive_harps": 129,
+          "partition": "train",
+          "positive_rows": 4324,
+          "rows": 112719
+        },
+        {
+          "censored_negative_rows": 3003,
+          "image_urls": 39035,
+          "independent_groups": 434,
+          "independent_harps": 473,
+          "independent_positive_groups": 82,
+          "independent_positive_harps": 82,
+          "partition": "validation",
+          "positive_rows": 2436,
+          "rows": 39035
+        },
+        {
+          "censored_negative_rows": 2854,
+          "image_urls": 40342,
+          "independent_groups": 437,
+          "independent_harps": 486,
+          "independent_positive_groups": 87,
+          "independent_positive_harps": 89,
+          "partition": "test",
+          "positive_rows": 3647,
+          "rows": 40342
+        }
+      ],
+      "primary_rows_after_censoring": 192096,
+      "reason": "prevents unattributed major flares from being silently converted into false-negative training/evaluation labels",
+      "rows_censored_total": 10582,
+      "rule": "global censor of otherwise-negative samples with an unresolved >=M1 flare onset in (t,t+24h]",
+      "split_sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3",
+      "unresolved_events": 378
+    },
+    "manifest_audit": {
+      "active_connected_groups": 2207,
+      "all_mapping_connected_groups": 2392,
+      "eligible_rows": 203902,
+      "interval_harps": 2595,
+      "missing_primary_image_urls": 0,
+      "partitions": [
+        {
+          "censored_negative_rows": 4725,
+          "image_urls": 112719,
+          "independent_groups": 1321,
+          "independent_harps": 1385,
+          "independent_positive_groups": 125,
+          "independent_positive_harps": 129,
+          "partition": "train",
+          "positive_rows": 4324,
+          "rows": 112719
+        },
+        {
+          "censored_negative_rows": 3003,
+          "image_urls": 39035,
+          "independent_groups": 434,
+          "independent_harps": 473,
+          "independent_positive_groups": 82,
+          "independent_positive_harps": 82,
+          "partition": "validation",
+          "positive_rows": 2436,
+          "rows": 39035
+        },
+        {
+          "censored_negative_rows": 2854,
+          "image_urls": 40342,
+          "independent_groups": 437,
+          "independent_harps": 486,
+          "independent_positive_groups": 87,
+          "independent_positive_harps": 89,
+          "partition": "test",
+          "positive_rows": 3647,
+          "rows": 40342
+        }
+      ],
+      "primary_image_urls": 202678,
+      "primary_rows": 202678,
+      "primary_rows_after_censoring": 192096,
+      "resolved_m1plus_events": 3002,
+      "split_sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3",
+      "time_scale": "T_REC parsed as TAI and converted to UTC with Astropy",
+      "total_sharp_rows": 648926,
+      "unresolved_or_ambiguous_m1plus_events": 378
+    },
+    "retrieval_smoke_test": {
+      "samples": [
+        {
+          "bytes": 129600,
+          "fits_first_card": "SIMPLE  =                    T / file does conform to FITS standard",
+          "harpnum": 2,
+          "http_status": 200,
+          "partition": "train",
+          "sample_id": "H2_20100501T010000Z",
+          "sha256": "b1e23532d805d3cb35b5c84ecac1a37610b7a73a0a33ebfb304b6a0e8200cecb",
+          "t_rec": "2010-05-01T01:00:00+00:00",
+          "url": "http://jsoc.stanford.edu/SUM99/D1037331753/S00000/magnetogram.fits"
+        },
+        {
+          "bytes": 175680,
+          "fits_first_card": "SIMPLE  =                    T / file does conform to FITS standard",
+          "harpnum": 8225,
+          "http_status": 200,
+          "partition": "validation",
+          "sample_id": "H8225_20220515T010000Z",
+          "sha256": "aa375897b2d680f03886aeac3ef9c1f8cdb81c7d312ea2b19de880ba299e627c",
+          "t_rec": "2022-05-15T01:00:00+00:00",
+          "url": "http://jsoc.stanford.edu/SUM15/D1523052799/S00000/magnetogram.fits"
+        },
+        {
+          "bytes": 141120,
+          "fits_first_card": "SIMPLE  =                    T / file does conform to FITS standard",
+          "harpnum": 11407,
+          "http_status": 200,
+          "partition": "test",
+          "sample_id": "H11407_20240619T010000Z",
+          "sha256": "906cb88d391a29d94f16c0ccb9236ce9cebda1fa5ddab2ccaa26a364701de5a2",
+          "t_rec": "2024-06-19T01:00:00+00:00",
+          "url": "http://jsoc.stanford.edu/SUM95/D1769806958/S00000/magnetogram.fits"
+        }
+      ],
+      "status": "PASS"
+    },
+    "source_ledger": [
+      {
+        "bytes": 12438083,
+        "path": "data/raw/goes_mission.csv",
+        "sha256": "828c211f3637a87219f6fbeaacdb9cd71e95a25bab9fc4524332c96c47af4aa9",
+        "url": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/multi/l2/data/xrsf-l2-flrpt_science/csv/sci_xrsf-l2-flrpt_geo_s19950103_e20260823_v1-0-1.csv"
+      },
+      {
+        "bytes": 34732,
+        "path": "data/raw/all_harps_with_noaa_ars.txt",
+        "sha256": "c9b7d298871e4ea301314a31c10b8507f981aeb49d5c3c0911350274c34d0380",
+        "url": "http://jsoc.stanford.edu/doc/data/hmi/harpnum_to_noaa/all_harps_with_noaa_ars.txt"
+      }
+    ],
+    "tai_repair": {
+      "chronology_groups": 2207,
+      "counts": [
+        {
+          "censored_negative_rows": 4725,
+          "image_urls": 112719,
+          "independent_groups": 1321,
+          "independent_harps": 1385,
+          "independent_positive_groups": 125,
+          "independent_positive_harps": 129,
+          "partition": "train",
+          "positive_rows": 4324,
+          "rows": 112719
+        },
+        {
+          "censored_negative_rows": 3003,
+          "image_urls": 39035,
+          "independent_groups": 434,
+          "independent_harps": 473,
+          "independent_positive_groups": 82,
+          "independent_positive_harps": 82,
+          "partition": "validation",
+          "positive_rows": 2436,
+          "rows": 39035
+        },
+        {
+          "censored_negative_rows": 2854,
+          "image_urls": 40342,
+          "independent_groups": 437,
+          "independent_harps": 486,
+          "independent_positive_groups": 87,
+          "independent_positive_harps": 89,
+          "partition": "test",
+          "positive_rows": 3647,
+          "rows": 40342
+        }
+      ],
+      "event_sha256": "80e6cfa0055892891c292b4373e4067e78af43669a468074d0f020b98b7feb8e",
+      "exact_boundary_1": "2022-05-12T06:59:23+00:00",
+      "exact_boundary_2": "2024-06-14T06:59:23+00:00",
+      "group_partition_changes": 0,
+      "hour_key_changes": 648926,
+      "input_manifest_sha256": "eb9be6657b1aead16ad79c0140d8fdc09add003cf948b1ad0f18cfb17eea5866",
+      "label_changes_primary": 21,
+      "metadata_sha256": "f775b4d20c61a9e9566e8d111d11c6274e58356ac78fb682f704b2d88bd134b1",
+      "method": "canonical JSOC TAI-to-UTC repair from sharp_metadata.T_REC",
+      "old_boundary_1": "2022-05-12T07:00:00+00:00",
+      "old_boundary_2": "2024-06-14T07:00:00+00:00",
+      "output_manifest_sha256": "a27bf0d8ee47d34f97f9517e80ce1c67070c09e17c2c539be25da2098ee5d131",
+      "rows": 648926,
+      "split_sha256": "52d197567d6bbb2476228eb817d8ee8a6969e63b95004e900c20eeaa1b338aa3",
+      "status": "PASS",
+      "timestamp_delta_seconds": {
+        "-34.0": 90561,
+        "-35.0": 163164,
+        "-36.0": 49199,
+        "-37.0": 346002
+      }
+    }
+  }
+}
