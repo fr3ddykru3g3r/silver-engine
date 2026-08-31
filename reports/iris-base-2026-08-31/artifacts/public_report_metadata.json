@@ -2505,7 +2505,7 @@
         "requirement": "At least 40 pages of research/report content",
         "status": "PASS",
         "evidence": "report.pdf",
-        "measured_value": "81 A4 pages"
+        "measured_value": "82 A4 pages"
       },
       {
         "requirement": "Document the acquired data and provenance",
@@ -2517,13 +2517,13 @@
         "requirement": "List and preserve useful simulation outputs",
         "status": "PASS",
         "evidence": "combined archive, output manifest, checksums, physics_proxy_diagnostics.json, two_sample_classifier_audit.json",
-        "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, 24 figure families, auxiliary classifier SVG, tables, OBJ meshes, and 13 independent secondary proxy descriptors"
+        "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, 25 figure families, auxiliary classifier and conditional-audit SVGs, tables, OBJ meshes, and 13 independent secondary proxy descriptors"
       },
       {
         "requirement": "Include graphs and 3D models",
         "status": "PASS",
         "evidence": "figures/ and models/",
-        "measured_value": "24 embedded figure families plus auxiliary classifier SVG; 3 scalar-field OBJ meshes; independent magnetic/spectral/topology proxy figures and tables"
+        "measured_value": "25 embedded figure families plus auxiliary classifier and conditional-audit SVGs; 3 scalar-field OBJ meshes; independent magnetic/spectral/topology proxy figures and tables"
       },
       {
         "requirement": "Execute useful future-direction experiments",
