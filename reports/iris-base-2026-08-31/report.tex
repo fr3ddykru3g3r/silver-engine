@@ -399,6 +399,12 @@ The point estimate passes the deliberately broad BASE gate, but a connected-grou
 
 \FigurePage{fig:gate-stability}{gate_stability}{0.95}{Fraction of connected-group bootstrap replicates satisfying each BASE gate criterion and all criteria jointly. The corrected multivariate distance is the limiting criterion.}
 
+\section{Memorization and nearest-neighbor checks}
+
+An exact-array hash audit found zero duplicate normalized arrays among the 128 generated fields. In the $16\times16$ pooled asinh representation, the median nearest-neighbor distance was 1.156 among synthetic fields, compared with 0.634 for real-to-real nearest neighbors and 1.134 for synthetic-to-real nearest neighbors. The synthetic-to-real distance is therefore not suspiciously close to the real sample, while the synthetic set is not collapsed to a single point. Pairwise distances among the two outputs sharing a source-region conditioning group had median 1.767, slightly above the 1.726 median for pairs from different source groups. The nearest real field from the same source group had median distance 1.671, compared with 1.134 for the nearest field from a different group. These results do not prove non-memorization; they are consistent with the BASE model producing diverse but distributionally displaced fields rather than copying its conditioning records. The audit is low-dimensional and uses no forecast outcomes. Its complete receipt is \texttt{artifacts/memorization\_diagnostics.json}.
+
+\FigurePage{fig:memorization}{memorization_nearest_neighbor}{0.95}{Nearest-neighbor and source-group distance distributions in the pooled asinh field representation. Exact duplicate hashing found no duplicate generated arrays.}
+
 \chapter{3D visualization and sampling uncertainty}
 
 \section{Meaning of the 3D surfaces}
@@ -600,6 +606,9 @@ This appendix keeps the machine-generated numerical tables close to the narrativ
 \section{Gate stability audit}
 \IfFileExists{tables/gate_stability_summary.tex}{\input{tables/gate_stability_summary.tex}}{\textit{Generated gate-stability table missing.}}
 
+\section{Memorization and nearest-neighbor audit}
+\IfFileExists{tables/memorization_distance_summary.tex}{\input{tables/memorization_distance_summary.tex}}{\textit{Generated memorization table missing.}}
+
 \section{Training summary}
 \IfFileExists{tables/training_summary.tex}{\input{tables/training_summary.tex}}{\textit{Generated table missing.}}
 
@@ -637,6 +646,8 @@ The following documents are shipped in the source bundle and were read as protoc
 \item \texttt{conditional\_proxy\_diagnostics.py} (under \texttt{scripts/}): train-only conditional proxy diagnostic and vector/raster plot writer.
 \item \texttt{gate\_stability\_diagnostics.json} (under \texttt{artifacts/}): connected-region bootstrap stability receipt for all five BASE gate criteria;
 \item \texttt{gate\_stability\_diagnostics.py} (under \texttt{scripts/}): finite-sample gate stability audit using fixed train-only outputs.
+\item \texttt{memorization\_diagnostics.json} (under \texttt{artifacts/}): exact-hash, nearest-neighbor, and source-group distance receipt;
+\item \texttt{memorization\_diagnostics.py} (under \texttt{scripts/}): low-dimensional duplication and collapse diagnostic.
 \end{itemize}
 
 The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
@@ -748,6 +759,9 @@ Path & Purpose \\
 \url{artifacts/gate_stability_diagnostics.json} & Connected-group bootstrap stability receipt for the five BASE criteria. \\
 \url{figures/gate_stability.png} & Gate-criterion and joint-pass stability figure. \\
 \url{tables/gate_stability_*} & Gate-stability replicate and summary tables. \\
+\url{artifacts/memorization_diagnostics.json} & Exact-hash and nearest-neighbor diagnostic receipt. \\
+\url{figures/memorization_nearest_neighbor.png} & Nearest-neighbor and source-group distance figure. \\
+\url{tables/memorization_distance_summary.*} & Machine-readable and typeset distance summaries. \\
 \bottomrule
 \end{longtable}
 
@@ -765,9 +779,9 @@ Requirement & Status & Evidence or remaining boundary \\
 Requirement & Status & Evidence or remaining boundary \\
 \midrule
 \endhead
-40+ page report & PASS & Compiled PDF is 85 A4 pages. \\
+40+ page report & PASS & Compiled PDF is 87 A4 pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
-Outputs, graphs, and 3D & PASS & 26 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
+Outputs, graphs, and 3D & PASS & 27 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
 Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
 GitHub preservation & BLOCKED & Public report branch is committed locally, but GitHub authentication rejected the push; raw archive is not remotely preserved. \\

@@ -2060,6 +2060,86 @@
         "It resamples the completed 128 synthetic outputs and does not add new model samples.",
         "It does not inspect validation/test outcomes or alter the frozen gate definition."
       ]
+    },
+    "memorization_diagnostics": {
+      "status": "PASS",
+      "method": "16x16 pooled asinh field-space nearest-neighbor and exact-hash audit",
+      "seed": 2026,
+      "real_rows": 248,
+      "synthetic_rows": 128,
+      "real_groups": 125,
+      "synthetic_groups": 64,
+      "exact_normalized_array_duplicate_count": 0,
+      "same_source_pair_count": 64,
+      "cross_source_pair_count": 8064,
+      "same_source_pair_distance": {
+        "n": 64,
+        "p10": 1.2718781992406847,
+        "median": 1.7673258141814112,
+        "p90": 2.28266220137207,
+        "minimum": 1.048212360208173,
+        "maximum": 2.6427373422991467
+      },
+      "cross_source_pair_distance": {
+        "n": 8064,
+        "p10": 1.26143230437816,
+        "median": 1.7260446377435752,
+        "p90": 2.260035879410317,
+        "minimum": 0.6735956171892753,
+        "maximum": 3.3787279124482628
+      },
+      "distributions": {
+        "real_to_real": {
+          "n": 248,
+          "p10": 0.21364279949255952,
+          "median": 0.6335480567870939,
+          "p90": 1.2523448769951007,
+          "minimum": 0.050396003863073524,
+          "maximum": 2.533075381209617
+        },
+        "synthetic_to_synthetic": {
+          "n": 128,
+          "p10": 0.8269375933252908,
+          "median": 1.1557151470849993,
+          "p90": 1.4875446107361958,
+          "minimum": 0.6735956171892753,
+          "maximum": 1.9080883875658885
+        },
+        "synthetic_to_real": {
+          "n": 128,
+          "p10": 0.7627558092469662,
+          "median": 1.1338045617933776,
+          "p90": 1.5739840027697345,
+          "minimum": 0.5679995891495447,
+          "maximum": 1.9942738573756287
+        },
+        "synthetic_same_group": {
+          "n": 128,
+          "p10": 1.0346927024856496,
+          "median": 1.6705234170519996,
+          "p90": 2.2204835981556967,
+          "minimum": 0.7012496492777104,
+          "maximum": 3.2606196339647155
+        },
+        "synthetic_different_group": {
+          "n": 128,
+          "p10": 0.7627558092469662,
+          "median": 1.1338045617933776,
+          "p90": 1.5739840027697345,
+          "minimum": 0.5679995891495447,
+          "maximum": 1.9942738573756287
+        }
+      },
+      "outputs": [
+        "tables/memorization_distance_summary.csv",
+        "tables/memorization_distance_summary.tex",
+        "figures/memorization_nearest_neighbor.png"
+      ],
+      "limitations": [
+        "Nearest-neighbor distance is a low-dimensional similarity check, not proof of non-memorization or physical realism.",
+        "The synthetic sample is conditioned on label and latitude; same-source comparisons are descriptive and may reflect shared conditioning strata.",
+        "No validation/test flare outcomes are accessed and no model gate is changed."
+      ]
     }
   },
   "experiment": "IRIS BASE local resume and independent v2 audit",
@@ -2270,6 +2350,7 @@
       "hard_geometry_distributions.png",
       "hard_pil_distributions.png",
       "latitude_and_time_coverage.png",
+      "memorization_nearest_neighbor.png",
       "negative_control_metric_correction.png",
       "physics_proxy_distributions.png",
       "physics_proxy_spectral.png",
@@ -2307,6 +2388,8 @@
       "generic_descriptor_statistics.tex",
       "hard_descriptor_statistics.csv",
       "hard_descriptor_statistics.tex",
+      "memorization_distance_summary.csv",
+      "memorization_distance_summary.tex",
       "partition_summary.csv",
       "partition_summary.tex",
       "physics_proxy_bootstrap.csv",
@@ -2336,6 +2419,7 @@
     "secondary_analyses": [
       "conditional_proxy_diagnostics.json",
       "gate_stability_diagnostics.json",
+      "memorization_diagnostics.json",
       "physics_proxy_diagnostics.json",
       "two_sample_classifier_audit.json"
     ]
@@ -2595,7 +2679,7 @@
         "requirement": "At least 40 pages of research/report content",
         "status": "PASS",
         "evidence": "report.pdf",
-        "measured_value": "85 A4 pages"
+        "measured_value": "87 A4 pages"
       },
       {
         "requirement": "Document the acquired data and provenance",
@@ -2607,13 +2691,13 @@
         "requirement": "List and preserve useful simulation outputs",
         "status": "PASS",
         "evidence": "combined archive, output manifest, checksums, physics_proxy_diagnostics.json, two_sample_classifier_audit.json",
-        "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, 26 figure families, auxiliary classifier and conditional-audit SVGs, tables, OBJ meshes, and 13 independent secondary proxy descriptors"
+        "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, 27 figure families, auxiliary classifier and conditional-audit SVGs, tables, OBJ meshes, and 13 independent secondary proxy descriptors"
       },
       {
         "requirement": "Include graphs and 3D models",
         "status": "PASS",
         "evidence": "figures/ and models/",
-        "measured_value": "26 embedded figure families plus auxiliary classifier and conditional-audit SVGs; 3 scalar-field OBJ meshes; independent magnetic/spectral/topology proxy figures and tables"
+        "measured_value": "27 embedded figure families plus auxiliary classifier and conditional-audit SVGs; 3 scalar-field OBJ meshes; independent magnetic/spectral/topology proxy figures and tables"
       },
       {
         "requirement": "Execute useful future-direction experiments",
