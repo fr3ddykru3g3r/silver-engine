@@ -2679,7 +2679,7 @@
         "requirement": "At least 40 pages of research/report content",
         "status": "PASS",
         "evidence": "report.pdf",
-        "measured_value": "87 A4 pages"
+        "measured_value": "88 A4 pages"
       },
       {
         "requirement": "Document the acquired data and provenance",

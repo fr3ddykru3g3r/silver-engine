@@ -247,6 +247,42 @@ where the cosine schedule supplies $\beta_t$, $\alpha_t=1-\beta_t$, and $\bar\al
 
 The BASE arm adds the generic calibration proxy with coefficient $\lambda_g=0.08$. The physics coefficients were retained in the checkpoint metadata for protocol consistency but their BASE contributions are zero because the condition is BASE and the physics arms were not run. The training history records the combined loss, denoising component, generic component, and the cosine learning rate.
 
+\section{Differentiable physics proxies}
+
+The HJ and PIL terms are smooth surrogate constraints on line-of-sight structure; they are not solutions of the coronal magnetic-field equations. For a field $B$ and strong-field threshold $B_0=150$ G, the differentiable positive and negative memberships are
+\begin{equation}
+  p(B)=\sigma\left(\frac{B-B_0}{T_B}\right), \qquad
+  n(B)=\sigma\left(\frac{-B-B_0}{T_B}\right),
+\end{equation}
+with $T_B=50$ G. The centroid weights are $w_+=p(B)\max(B,0)$ and $w_-=n(B)\max(-B,0)$. Their normalized centroids are $\mu_\pm=\sum w_\pm r/(\sum w_\pm+\epsilon)$, where $r$ is the normalized image coordinate. The separation and orientation descriptors are
+\begin{equation}
+  d=\sqrt{\|\mu_+-\mu_-\|_2^2+\epsilon}, \qquad
+  u=\frac{\mu_+-\mu_-}{d}, \qquad
+  h=\operatorname{sign}(\ell)u, \qquad s=\log(1+d),
+\end{equation}
+where $\ell$ is latitude. The HJ proxy compares the distribution of $(h_x,h_y,s)$ between generated and real positive batches, separately for the two latitude hemispheres when enough samples are present. It is therefore a population-level orientation/separation regularizer, not an individual-region law.
+
+For the PIL proxy, central differences use the declared physical pixel size $\Delta=2$ Mm:
+\begin{equation}
+  g=\sqrt{\left(\frac{\partial B}{\partial x}\right)^2+\left(\frac{\partial B}{\partial y}\right)^2+\epsilon}.
+\end{equation}
+The soft polarity memberships are dilated by a radius of two pixels and combined as a soft logical AND,
+\begin{equation}
+  C=\operatorname{ReLU}\bigl(D_2p+D_2n-1\bigr),
+\end{equation}
+which suppresses quiet-Sun background. The loss compares the weighted mean and RMS of $g$, a high-gradient tail mean, and sigmoid exceedance fractions at 100, 250, and 500 G Mm$^{-1}$. For example, the weighted RMS is $g_{\rm rms}=\sqrt{\sum Cg^2/(\sum C+\epsilon)}$. These quantities are useful differentiable image descriptors, but they do not establish a true polarity-inversion-line topology or a vector magnetic field.
+
+Both physics terms use the same distribution comparison,
+\begin{equation}
+  L_{\rm dist}=\tfrac12D_E+\tfrac12L_{\rm quantile}, \qquad
+  D_E=2\mathbb{E}\|X-Y\|-\mathbb{E}\|X-X'\|-\mathbb{E}\|Y-Y'\|,
+\end{equation}
+and the training objective applies a linear warm-up $r_k=\min(1,k/K)$:
+\begin{equation}
+  L_k=L_{\rm denoise}+r_k\left(\lambda_gL_g+\lambda_{HJ}L_{HJ}+\lambda_{PIL}L_{PIL}\right).
+\end{equation}
+The 100-step screen verified nonzero gradients and active targeted terms, but it did not establish that the finite-budget arms converge or that these proxies transfer to flare forecasting.
+
 \section{DDIM sampling}
 
 The final checkpoint is sampled with 50 evenly spaced diffusion indices and $\eta=0$. For the current model, the reconstructed clean estimate is
@@ -779,7 +815,7 @@ Requirement & Status & Evidence or remaining boundary \\
 Requirement & Status & Evidence or remaining boundary \\
 \midrule
 \endhead
-40+ page report & PASS & Compiled PDF is 87 A4 pages. \\
+40+ page report & PASS & Compiled PDF is 88 A4 pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
 Outputs, graphs, and 3D & PASS & 27 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
