@@ -14,8 +14,8 @@
   },
   "full_bundle": {
     "zip": "IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip",
-    "zip_bytes": 2125481413,
-    "zip_sha256": "23b8a2b00d3874f5276805369e8d9c4f5d060a67b14d9a701668746c179f0e1a",
+    "zip_bytes": 2125483825,
+    "zip_sha256": "8425396ed03cc956d6e0685c23bbe7f99273f9b1b9f2c61535860d23071547c9",
     "zip_entries": 7447,
     "verified_fits_entries": 5273,
     "zip_test": "PASS"
