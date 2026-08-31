@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-09-01",
+  "purpose": "Public verification metadata for the IRIS report and full safety archive. This file is not included in the binary archive whose hash it records.",
+  "repository": "https://github.com/fr3ddykru3g3r/silver-engine",
+  "publication_branch": "codex/iris-base-report-2026-08-31",
+  "report": {
+    "pdf": "report.pdf",
+    "pdf_pages": 88,
+    "pdf_bytes": 2711770,
+    "pdf_sha256": "bfc2f9e7329c61117c7ec312d5bdacf04c7dd05de389f4c029a291cb28b16da1",
+    "report_zip": "IRIS_BASE_REPORT_PACKAGE_2026-08-31.zip",
+    "report_zip_bytes": 17852851,
+    "report_zip_sha256": "b3dc219ca03a984e26ec442008fb2c07f4c7d2ea6436b38883e068d20fba54fd"
+  },
+  "full_bundle": {
+    "zip": "IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip",
+    "zip_bytes": 2125481413,
+    "zip_sha256": "23b8a2b00d3874f5276805369e8d9c4f5d060a67b14d9a701668746c179f0e1a",
+    "zip_entries": 7447,
+    "verified_fits_entries": 5273,
+    "zip_test": "PASS"
+  },
+  "remote_verification_policy": "Verify the release asset name, byte count, and SHA-256 before deleting any local IRIS data."
+}
