@@ -127,7 +127,7 @@ Run all cells in this order:
 
 Do not start physics or downstream cells during this run. The notebook must report the real-FITS cache gate as passed before BASE training starts.
 
-## 6. Verify the final result
+## 6. Verify the BASE result
 
 After the notebook completes, inspect the Drive run directory:
 
@@ -144,6 +144,72 @@ if reports:
 ```
 
 The successful run must contain a BASE audit report and a passing BASE fidelity gate. A training checkpoint or loss log alone is not the final simulation result.
+
+## 7. Run the confirmatory physics arms on a GPU
+
+Do this only after the BASE report and its train-only gate have been reviewed.
+The full runner uses 1,200 optimizer steps, writes checkpoints every 200 steps,
+and runs the required `hj` and `hj_pil` generator arms. The `pil`-only arm is an
+auxiliary factorial diagnostic, not a primary downstream arm.
+
+Change only the stage controls in the notebook and rerun the controls,
+preflight, and runner cells in order:
+
+```python
+RUN_BASE = '0'
+RUN_PHYSICS = '1'
+RUN_DOWNSTREAM = '0'
+FITS_SCOPE = 'physics'
+ACQUIRE_FITS = '1'  # use '0' only if the physics preflight already passes
+```
+
+The full bundle contains the BASE cache, but it is not evidence that every
+physics-scope FITS payload is present. If `REAL_FITS_CACHE_PREFLIGHT_PASS` does
+not appear, leave acquisition enabled and enter the registered JSOC email only
+at the prompt. Never substitute PNGs or disable TLS verification.
+
+The runner must produce, for both arms:
+
+```text
+runs/l2/outputs/hj/generator.pt
+runs/l2/samples/hj/synthetic_manifest.csv
+runs/l2/audit/v2_manipulation_metrics.json
+runs/l3/outputs/hj_pil/generator.pt
+runs/l3/samples/hj_pil/synthetic_manifest.csv
+runs/l3/audit/v2_manipulation_metrics.json
+```
+
+Afterward, inspect the independent generic audit and the targeted geometry/PIL
+manipulation checks. A lower training loss alone is not a physics pass. Select
+coefficients using training-only evidence, and do not inspect any downstream
+test metric while choosing a physics arm.
+
+## 8. Run the frozen downstream matrix
+
+Only after the physics arms satisfy the predeclared gates and Gate 0
+administrative checks, acquire the complete `all` scope and run:
+
+```python
+RUN_BASE = '0'
+RUN_PHYSICS = '0'
+RUN_DOWNSTREAM = '1'
+FITS_SCOPE = 'all'
+ACQUIRE_FITS = '1'  # use '0' only after the all-scope preflight passes
+```
+
+The runner enforces matched synthetic exposure and trains the six frozen primary
+arms: `R`, `Rw`, `D`, `L0`, `L2`, and `L3`. It writes per-arm metrics and test
+predictions plus:
+
+```text
+runs/downstream/primary_metrics.csv
+runs/downstream/primary_paired_tss_bootstrap.json
+```
+
+Thresholds are selected from validation TSS and the test partition is evaluated
+once. Do not change thresholds, seeds, preprocessing, arm definitions, or
+exclusions after test results are visible. A null or negative `L2/L3 - D`
+result is a valid scientific result and must be reported as such.
 
 ## Important
 
