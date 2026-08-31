@@ -1,8 +1,8 @@
 # IRIS BASE evidence report
 
-`report.pdf` is the compiled 77-page report for the completed IRIS BASE run and its 100-step HJ/PIL screening follow-up. It covers the verified FITS acquisition, chronology and label audits, the local step-400 → step-1200 resume, 128 generated arrays, independent generic/geometry/PIL audits, the corrected metric negative control, an alternate sampler seed, selective-destruction controls, the v2 physics self-test, three cached physics screens, cluster-bootstrap intervals, the independent thirteen-feature line-of-sight magnetic/spectral/topology proxy audit, 2D/3D figures, OBJ visualization meshes, limitations, and the exact future gates that remain open.
+`report.pdf` is the compiled 80-page report for the completed IRIS BASE run and its separately labeled 100-step HJ/PIL screening follow-up. It covers the verified FITS acquisition, chronology and label audits, the local step-400 → step-1200 resume, 128 generated arrays, independent generic/geometry/PIL audits, the corrected metric negative control, an alternate sampler seed, selective-destruction controls, the v2 physics self-test, three cached physics screens, cluster-bootstrap uncertainty intervals, an independent thirteen-feature line-of-sight magnetic/spectral/topology proxy audit, a group-held-out real-versus-generated classifier audit, 2D/3D figures, OBJ visualization meshes, limitations, and the exact future gates that remain open.
 
-The primary scientific result is deliberately bounded: the BASE broad calibration gate passes for seed 2026, but the corrected generic distance is 7.681 times the real split-half p90 reference. A second sampler seed fails that gate at 11.055. The 100-step HJ, PIL, and HJ+PIL screens activate their intended losses but fail the broad generic gate at 20.855, 21.521, and 20.081. No forecasting result or causal physics claim is supported.
+The primary scientific result is deliberately bounded: the BASE broad calibration gate passes for seed 2026, but the corrected generic distance is 7.681 times the real split-half p90 reference. A second sampler seed fails that gate at 11.055. The 100-step HJ, PIL, and HJ+PIL screens activate their intended losses but fail the broad generic gate at 20.855, 21.521, and 20.081 times the real split-half p90 reference. The independent secondary proxy audit finds a robust-standardized distance ratio of 60.52 against its own real split-half p90. No forecasting result or causal physics claim is supported.
 
 ## Rebuild the report
 
@@ -27,14 +27,14 @@ The default temporary roots expected by the script are:
 Compile with the bundled LaTeX helper:
 
 ```bash
-COMPILE_LATEX \
+/Users/Kyrosah/.codex/plugins/cache/openai-bundled/latex/0.2.6/scripts/compile_latex.py \
   iris_report/report.tex
 ```
 
 The raw FITS payloads are not duplicated inside this small report directory. They are included in the parent archive `IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip`, along with the source bundle, evidence, checkpoints, generated arrays, alternate seed, and destruction-control outputs.
 
-`artifacts/public_report_metadata.json` and `artifacts/public_inventory_summary.json` are sanitized publication manifests with workstation-specific paths replaced by symbolic roots. The unsanitized receipts are retained locally for audit purposes.
-
-The `scripts/` directory includes the exact patched physics-screen trainer, sampler, fixed evaluator, and v2 self-test entry points used for the follow-up.
+`artifacts/public_report_metadata.json` and `artifacts/public_inventory_summary.json` are sanitized publication manifests with workstation-specific paths replaced by symbolic roots. The unsanitized receipts are retained locally for audit purposes. The `scripts/` directory also includes the exact physics-screen trainer, sampler, fixed evaluator, and v2 self-test entry points used for the follow-up. `artifacts/completion_audit.json` is the machine-readable requirement ledger; it records which requested deliverables are verified and which remain open because of the unrun long physics arms or unavailable GitHub authentication.
 
 The OBJ files are scalar-field visualization meshes: x/y are in Mm and z is a magnetogram value or ensemble standard deviation. They are not coronal field-line or volume reconstructions.
+
+The auxiliary `figures/two_sample_classifier.svg` is a dependency-free vector plot of the classifier fold AUCs and leading scalar-proxy coefficients. Its high scalar AUC is a distinguishability result, not a forecast or physical-realism claim.

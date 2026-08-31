@@ -383,6 +383,12 @@ The analysis uses the fixed 489-field positive training cache and the 128 primar
 \FigurePage{fig:physics-spectral}{physics_proxy_spectral}{0.92}{Fourier-space diagnostics for the observed and generated line-of-sight fields, including spectral centroid, high-wavenumber power fraction, and the normalized half-space potential proxy.}
 \FigurePage{fig:physics-topology}{physics_proxy_topology}{0.92}{Strong-field connected-component counts and polarity-centroid separation for the real and generated fields.}
 
+\section{Classifier-based two-sample audit}
+
+To quantify residual distinguishability without introducing a forecast target, a separate five-fold StratifiedGroupKFold logistic classifier was fit to the 489 real positive training fields and 128 generated BASE fields. The first model used the thirteen scalar proxies above; the second used a $16\times16$ block-mean representation of each field. Region identifiers were carried into the split, giving 125 combined connected-region groups and preventing a classifier from memorising a region that appears in both classes. This audit uses no validation or test flare outcomes.
+
+The scalar-proxy classifier achieved mean ROC AUC $0.9998$ (SD $0.0005$, fold range $0.9988$--$1.0000$) and mean balanced accuracy $0.9874$. The coarse-field classifier was less stable and much closer to chance, with mean AUC $0.5888$ (SD $0.1063$, range $0.4458$--$0.6841$) and balanced accuracy $0.7538$. The largest mean standardized coefficient in the scalar model was gradient RMS, followed by unsigned flux and the high-gradient fraction. This is a descriptive two-sample result: a high AUC establishes distinguishability, not that either distribution is scientifically preferable, and it does not replace the predeclared gate or establish forecast utility. Exact folds and coefficients are retained in \texttt{tables/two\_sample\_classifier\_*.csv}; the receipt is \texttt{artifacts/two\_sample\_classifier\_audit.json}. A dependency-free vector visualization is shipped as \texttt{figures/two\_sample\_classifier.svg}.
+
 \chapter{3D visualization and sampling uncertainty}
 
 \section{Meaning of the 3D surfaces}
@@ -573,6 +579,9 @@ This appendix keeps the machine-generated numerical tables close to the narrativ
 \IfFileExists{tables/physics_proxy_statistics.tex}{\input{tables/physics_proxy_statistics.tex}}{\textit{Generated physics-proxy table missing.}}
 \IfFileExists{tables/physics_proxy_bootstrap.tex}{\input{tables/physics_proxy_bootstrap.tex}}{\textit{Generated physics-proxy bootstrap table missing.}}
 
+\section{Two-sample classifier audit}
+\IfFileExists{tables/two_sample_classifier_summary.tex}{\input{tables/two_sample_classifier_summary.tex}}{\textit{Generated classifier table missing.}}
+
 \section{Training summary}
 \IfFileExists{tables/training_summary.tex}{\input{tables/training_summary.tex}}{\textit{Generated table missing.}}
 
@@ -603,6 +612,8 @@ The following documents are shipped in the source bundle and were read as protoc
 \item \texttt{scripts/build\_physics\_screening\_artifacts.py}: screen summary and figure generator.
 \item \texttt{physics\_proxy\_diagnostics.json} (under \texttt{artifacts/}): independent line-of-sight proxy and group-bootstrap receipt;
 \item \texttt{physics\_proxy\_diagnostics.py} (under \texttt{scripts/}): secondary magnetic, spectral, and topology diagnostics.
+\item \texttt{two\_sample\_classifier\_audit.json} (under \texttt{artifacts/}): group-held-out real-versus-generated classifier receipt;
+\item \texttt{two\_sample\_classifier\_audit.py} (under \texttt{scripts/}): independent scalar-proxy and coarse-field two-sample audit.
 \end{itemize}
 
 The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
@@ -687,6 +698,7 @@ Path & Purpose \\
 \texttt{tables/generated\_values.tex} & Numeric macros generated from evidence and outputs. \\
 \texttt{scripts/generate\_analysis.py} & Reproducible analysis and plotting script. \\
 \texttt{figures/*.png, *.pdf} & Publication figures, including 2D and 3D views. \\
+\texttt{figures/*.svg} & Auxiliary vector diagnostics, including the two-sample classifier audit. \\
 \texttt{tables/*.csv} & Machine-readable partition, descriptor, and training tables. \\
 \texttt{artifacts/}\\texttt{report\_metadata.json} & Claim boundary, provenance, and output manifest. \\
 \texttt{artifacts/file\_inventory.csv} & File-level inventory for source/evidence/cache/run. \\
@@ -703,6 +715,9 @@ Path & Purpose \\
 \url{tables/physics_screening.*} & Machine-readable and typeset screen summary. \\
 \url{figures/physics_proxy_*} & Secondary magnetic, spectral, and topology figures. \\
 \url{tables/physics_proxy_*} & Secondary proxy CSV and typeset bootstrap tables. \\
+\url{artifacts/two_sample_classifier_audit.json} & Group-held-out classifier receipt for real versus generated fields. \\
+\url{figures/two_sample_classifier.svg} & Auxiliary vector plot of fold AUCs and leading scalar coefficients. \\
+\url{tables/two_sample_classifier_*} & Classifier fold, coefficient, and summary tables. \\
 \bottomrule
 \end{longtable}
 
@@ -722,7 +737,7 @@ Requirement & Status & Evidence or remaining boundary \\
 \endhead
 40+ page report & PASS & Compiled PDF is 77 A4 pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
-Outputs, graphs, and 3D & PASS & 24 figure families, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
+Outputs, graphs, and 3D & PASS & 24 embedded figure families plus an auxiliary classifier SVG, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
 Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
 GitHub preservation & BLOCKED & Public report branch is committed locally, but GitHub authentication rejected the push; raw archive is not remotely preserved. \\
