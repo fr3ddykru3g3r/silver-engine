@@ -1011,6 +1011,8 @@ def write_metadata_json(data: dict[str, object], tables: dict[str, pd.DataFrame]
         physics_selftest = json.loads(selftest_path.read_text())
     classifier_path = ARTIFACT / "two_sample_classifier_audit.json"
     classifier_audit = json.loads(classifier_path.read_text()) if classifier_path.is_file() else None
+    selftests_path = ARTIFACT / "offline_protocol_selftests.json"
+    offline_selftests = json.loads(selftests_path.read_text()) if selftests_path.is_file() else None
     summary = {
         "experiment": "IRIS BASE local resume and independent v2 audit",
         "as_of": "2026-08-31",
@@ -1035,6 +1037,7 @@ def write_metadata_json(data: dict[str, object], tables: dict[str, pd.DataFrame]
             "physics_v2_selftest": physics_selftest,
             "physics_factorial_screening": physics_screening,
             "two_sample_classifier_audit": classifier_audit,
+            "offline_protocol_selftests": offline_selftests,
         },
         "counts": {
             "manifest_rows": int(len(data["manifest"])),

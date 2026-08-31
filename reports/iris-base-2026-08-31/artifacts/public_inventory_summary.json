@@ -13,6 +13,6 @@
   "run_bytes": 158015217,
   "run_files": 888,
   "run_root": "IRIS_RUN_ROOT/work/runs/base_local_resume",
-  "source_files": 102,
+  "source_files": 106,
   "source_root": "IRIS_RUN_ROOT/source"
 }

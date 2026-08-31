@@ -151,6 +151,40 @@
     "purpose": "counterfactual generated-field destruction controls; no forecasting outputs"
   },
   "executed_extensions": {
+    "offline_protocol_selftests": {
+      "generated_at": "2026-09-01",
+      "interpretation": "These are offline infrastructure and protocol checks. They validate acquisition, cache, time-repair, and downstream-policy primitives; they are not additional training, forecasting, or physical-transfer results.",
+      "model_training_used": false,
+      "network_used": false,
+      "status": "PASS",
+      "tests": [
+        {
+          "name": "acquisition helper self-test",
+          "result": "PASS",
+          "script": "source/colab/test_acquire_sharp_fits.py"
+        },
+        {
+          "name": "FITS cache gate self-test",
+          "result": "PASS",
+          "script": "source/colab/test_fit_cache.py"
+        },
+        {
+          "name": "JSOC TAI-to-UTC self-test",
+          "result": "PASS",
+          "script": "source/common/test_jsoc_time.py"
+        },
+        {
+          "name": "historical TAI repair primitive self-test",
+          "result": "PASS",
+          "script": "source/iris-gate0-data/test_repair_historical_tai_manifest.py"
+        },
+        {
+          "name": "downstream protocol self-test",
+          "result": "PASS",
+          "script": "source/iris-model/test_downstream_protocol.py"
+        }
+      ]
+    },
     "physics_factorial_screening": {
       "checkpoint_source": "IRIS_RUN_ROOT/work/runs/base_local_resume/outputs/base/generator.pt",
       "conditions": [
@@ -2143,6 +2177,7 @@
       "aborted_local_attempts.json",
       "bootstrap_descriptor_uncertainty.json",
       "completion_audit.json",
+      "offline_protocol_selftests.json",
       "resumability_selftest.json"
     ],
     "secondary_analyses": [
@@ -2405,7 +2440,7 @@
         "requirement": "At least 40 pages of research/report content",
         "status": "PASS",
         "evidence": "report.pdf",
-        "measured_value": "80 A4 pages"
+        "measured_value": "81 A4 pages"
       },
       {
         "requirement": "Document the acquired data and provenance",

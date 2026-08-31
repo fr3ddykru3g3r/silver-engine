@@ -500,6 +500,8 @@ The local run demonstrated a practical way to avoid a hot laptop: acquire and va
 
 Other efficient directions include mixed precision on GPU, gradient accumulation instead of multiplying image resolution, fewer sampling steps only after a sample-quality convergence curve is measured, and a compact held-out diagnostic panel that runs before a full 128-sample audit. Efficiency must not be obtained by bypassing FITS validation, disabling TLS, using PNG screenshots, or mixing validation/test rows into coefficient selection.
 
+The offline acquisition-helper, FITS-cache, TAI-to-UTC, historical-repair, and downstream-policy self-tests were also rerun after the report update; all five passed. This receipt validates infrastructure primitives only, without network access, model training, or forecast evaluation, and is stored in \texttt{artifacts/offline\_protocol\_selftests.json}.
+
 \section{Data expansion}
 
 The current cache contains \AcquiredCount{} FITS payloads, while the eligible primary manifest contains \PrimaryCount{} rows. Future full-scope work should acquire validation and test FITS only after the BASE and physics gates are frozen, and should keep those files in separate immutable directories. The full cache should not be confused with the selected training subset used here. A manifest-level acquisition receipt should record scope, missing counts, invalid counts, and checksums for every stage.
@@ -614,6 +616,7 @@ The following documents are shipped in the source bundle and were read as protoc
 \item \texttt{physics\_proxy\_diagnostics.py} (under \texttt{scripts/}): secondary magnetic, spectral, and topology diagnostics.
 \item \texttt{two\_sample\_classifier\_audit.json} (under \texttt{artifacts/}): group-held-out real-versus-generated classifier receipt;
 \item \texttt{two\_sample\_classifier\_audit.py} (under \texttt{scripts/}): independent scalar-proxy and coarse-field two-sample audit.
+\item \texttt{offline\_protocol\_selftests.json} (under \texttt{artifacts/}): offline acquisition, cache, time-repair, and downstream-policy self-test receipt.
 \end{itemize}
 
 The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
@@ -718,6 +721,7 @@ Path & Purpose \\
 \url{artifacts/two_sample_classifier_audit.json} & Group-held-out classifier receipt for real versus generated fields. \\
 \url{figures/two_sample_classifier.svg} & Auxiliary vector plot of fold AUCs and leading scalar coefficients. \\
 \url{tables/two_sample_classifier_*} & Classifier fold, coefficient, and summary tables. \\
+\url{artifacts/offline_protocol_selftests.json} & Five offline infrastructure and protocol self-tests; no training or forecasting. \\
 \bottomrule
 \end{longtable}
 

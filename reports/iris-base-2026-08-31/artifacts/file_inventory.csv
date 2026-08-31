@@ -90,6 +90,7 @@ source,.github/workflows/jsoc-debug.yml,746
 source,.github/workflows/iris-v2-rolling-real-duplicate.yml,6953
 source,.github/workflows/iris-v2-positive-physics-2000.yml,8660
 source,.github/workflows/iris-v2-reaudit-3280-base.yml,3829
+source,iris-gate0-data/__pycache__/repair_historical_tai_manifest.cpython-314.pyc,29806
 source,iris-gate0-data/compliance/IRIS_ARCHIVAL_ASTRONOMY_CLARIFICATION_REQUEST.md,2135
 source,common/__pycache__/jsoc_time.cpython-314.pyc,4396
 source,iris-model/__pycache__/train_generator_v2.cpython-314.pyc,27271
@@ -99,8 +100,11 @@ source,iris-model/__pycache__/preprocess.cpython-314.pyc,9631
 source,iris-model/__pycache__/fit_cache.cpython-314.pyc,19521
 source,iris-model/__pycache__/generator.cpython-314.pyc,18161
 source,iris-model/__pycache__/physics_v2.cpython-314.pyc,13767
+source,iris-model/__pycache__/train_matched_augmentation.cpython-314.pyc,27845
+source,iris-model/__pycache__/forecaster.cpython-314.pyc,5191
 source,iris-model/__pycache__/generic_fidelity.cpython-314.pyc,3862
 source,iris-model/__pycache__/train_generator_positive_v2.cpython-314.pyc,26863
+source,iris-model/__pycache__/metrics.cpython-314.pyc,7818
 evidence,SHA256SUMS.txt,88340
 evidence,data/derived/sharp_metadata.csv.gz,18040079
 evidence,data/derived/sharp_query_log.json,613646
