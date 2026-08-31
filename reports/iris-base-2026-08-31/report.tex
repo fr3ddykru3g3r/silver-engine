@@ -393,6 +393,12 @@ As a conditioning check, the same proxies were then compared within five fixed l
 
 \FigurePage{fig:conditional-proxy}{conditional_proxy_heatmap}{0.95}{Conditional synthetic-to-real proxy median ratios within fixed latitude bands. The upper-latitude band is intentionally shown but has only one connected group per class.}
 
+\section{Gate stability under connected-group bootstrap}
+
+The point estimate passes the deliberately broad BASE gate, but a connected-group bootstrap shows that this pass is not robust to finite-sample variation. Resampling the 125 real and 64 synthetic connected-region groups 2,000 times gives a joint five-criterion pass fraction of 0.508. Flux, active-area, diversity, and saturation criteria pass in 0.999, 1.000, 1.000, and 1.000 of replicates, respectively; the corrected multivariate distance criterion passes in only 0.508. Its bootstrap median ratio is 7.976 with a 95\% interval of 6.001--11.337, crossing the predeclared ceiling of 8.0. This is not a probability that the generator is scientifically valid: it is an uncertainty diagnostic for the finite train-only audit sample and the already generated 128 fields. It strengthens the negative conclusion that the BASE gate is a permissive screening floor, not stable evidence of close distributional fidelity. The complete receipt is \texttt{artifacts/gate\_stability\_diagnostics.json}.
+
+\FigurePage{fig:gate-stability}{gate_stability}{0.95}{Fraction of connected-group bootstrap replicates satisfying each BASE gate criterion and all criteria jointly. The corrected multivariate distance is the limiting criterion.}
+
 \chapter{3D visualization and sampling uncertainty}
 
 \section{Meaning of the 3D surfaces}
@@ -591,6 +597,9 @@ This appendix keeps the machine-generated numerical tables close to the narrativ
 \section{Conditional proxy audit}
 \IfFileExists{tables/conditional_proxy_summary.tex}{\input{tables/conditional_proxy_summary.tex}}{\textit{Generated conditional-proxy table missing.}}
 
+\section{Gate stability audit}
+\IfFileExists{tables/gate_stability_summary.tex}{\input{tables/gate_stability_summary.tex}}{\textit{Generated gate-stability table missing.}}
+
 \section{Training summary}
 \IfFileExists{tables/training_summary.tex}{\input{tables/training_summary.tex}}{\textit{Generated table missing.}}
 
@@ -626,6 +635,8 @@ The following documents are shipped in the source bundle and were read as protoc
 \item \texttt{offline\_protocol\_selftests.json} (under \texttt{artifacts/}): offline acquisition, cache, time-repair, and downstream-policy self-test receipt.
 \item \texttt{conditional\_proxy\_diagnostics.json} (under \texttt{artifacts/}): latitude-conditioned proxy ratios and connected-region bootstrap receipt;
 \item \texttt{conditional\_proxy\_diagnostics.py} (under \texttt{scripts/}): train-only conditional proxy diagnostic and vector/raster plot writer.
+\item \texttt{gate\_stability\_diagnostics.json} (under \texttt{artifacts/}): connected-region bootstrap stability receipt for all five BASE gate criteria;
+\item \texttt{gate\_stability\_diagnostics.py} (under \texttt{scripts/}): finite-sample gate stability audit using fixed train-only outputs.
 \end{itemize}
 
 The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
@@ -734,6 +745,9 @@ Path & Purpose \\
 \url{artifacts/conditional_proxy_diagnostics.json} & Latitude-conditioned proxy diagnostic receipt. \\
 \url{figures/conditional_proxy_heatmap.*} & Conditional proxy ratio heatmap. \\
 \url{tables/conditional_proxy_*} & Latitude-band proxy ratios and bootstrap intervals. \\
+\url{artifacts/gate_stability_diagnostics.json} & Connected-group bootstrap stability receipt for the five BASE criteria. \\
+\url{figures/gate_stability.png} & Gate-criterion and joint-pass stability figure. \\
+\url{tables/gate_stability_*} & Gate-stability replicate and summary tables. \\
 \bottomrule
 \end{longtable}
 
@@ -751,9 +765,9 @@ Requirement & Status & Evidence or remaining boundary \\
 Requirement & Status & Evidence or remaining boundary \\
 \midrule
 \endhead
-40+ page report & PASS & Compiled PDF is 82 A4 pages. \\
+40+ page report & PASS & Compiled PDF is 85 A4 pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
-Outputs, graphs, and 3D & PASS & 25 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
+Outputs, graphs, and 3D & PASS & 26 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
 Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
 GitHub preservation & BLOCKED & Public report branch is committed locally, but GitHub authentication rejected the push; raw archive is not remotely preserved. \\
