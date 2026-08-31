@@ -509,6 +509,9 @@
       "bootstrap_descriptor_uncertainty.png",
       "physics_screening_comparison.png",
       "physics_screening_losses.png",
+      "physics_proxy_distributions.png",
+      "physics_proxy_spectral.png",
+      "physics_proxy_topology.png",
       "real_synthetic_3d_surfaces.png",
       "real_synthetic_magnetogram_pair.png",
       "seed_robustness.png",
@@ -538,6 +541,12 @@
       "physics_screening.tex",
       "bootstrap_descriptor_uncertainty.csv",
       "bootstrap_descriptor_uncertainty.tex",
+      "physics_proxy_real.csv",
+      "physics_proxy_synthetic.csv",
+      "physics_proxy_statistics.csv",
+      "physics_proxy_statistics.tex",
+      "physics_proxy_bootstrap.csv",
+      "physics_proxy_bootstrap.tex",
       "seed_robustness.csv",
       "seed_robustness.tex",
       "training_summary.csv",
@@ -548,6 +557,9 @@
       "bootstrap_descriptor_uncertainty.json",
       "completion_audit.json",
       "resumability_selftest.json"
+    ],
+    "secondary_analyses": [
+      "physics_proxy_diagnostics.json"
     ]
   },
   "completion_audit": {

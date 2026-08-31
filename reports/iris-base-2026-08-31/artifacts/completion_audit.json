@@ -6,7 +6,7 @@
       "requirement": "At least 40 pages of research/report content",
       "status": "PASS",
       "evidence": "report.pdf",
-      "measured_value": "73 A4 pages"
+      "measured_value": "77 A4 pages"
     },
     {
       "requirement": "Document the acquired data and provenance",
@@ -17,14 +17,14 @@
     {
       "requirement": "List and preserve useful simulation outputs",
       "status": "PASS",
-      "evidence": "combined archive, output manifest, checksums",
-      "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, figures, tables, OBJ meshes"
+      "evidence": "combined archive, output manifest, checksums, physics_proxy_diagnostics.json",
+      "measured_value": "source, evidence, FITS, checkpoints, arrays, audits, 24 figure families, tables, OBJ meshes, and 13 independent secondary proxy descriptors"
     },
     {
       "requirement": "Include graphs and 3D models",
       "status": "PASS",
       "evidence": "figures/ and models/",
-      "measured_value": "21 figure families; 3 scalar-field OBJ meshes"
+      "measured_value": "24 figure families; 3 scalar-field OBJ meshes; independent magnetic/spectral/topology proxy figures and tables"
     },
     {
       "requirement": "Execute useful future-direction experiments",

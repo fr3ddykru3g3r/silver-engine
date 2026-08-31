@@ -373,6 +373,16 @@ The strong-PIL audit compares gradient means, RMS, top-tail values, exceedance f
 
 No claim is made that the current BASE model was expected to match the hard PIL target; BASE has no active physics regularizer. The result is a baseline for the future PIL arm and a warning against interpreting the generic gate as a physics gate.
 
+\section{Independent line-of-sight magnetic proxies}
+
+As a separate post-generation diagnostic, the report computes thirteen inexpensive proxies directly from the 2D line-of-sight fields. They include unsigned flux, signed-flux imbalance, RMS field, the mean-square field-energy proxy, gradient RMS, a high-gradient fraction, positive and negative strong-field connected components, total component count, strong-polarity centroid separation, Fourier wavenumber centroid, high-wavenumber power fraction, and a normalized half-space spectral potential proxy. The last quantity is a Fourier-space 2D diagnostic; it is not a coronal extrapolation and does not imply a vector field or a volume solution.
+
+The analysis uses the fixed 489-field positive training cache and the 128 primary BASE samples, grouped into 125 and 64 connected physical-region groups. It uses 1,000 deterministic group-bootstrap replicates for descriptive intervals. The synthetic-to-real median ratios are 1.476 for mean $|B|$, 5.299 for signed-flux imbalance, 1.587 for the mean-square field proxy, 1.434 for gradient RMS, 0.960 for the fraction above 100 G Mm$^{-1}$, 0.772 for total strong-field component count, 1.576 for high-wavenumber power fraction, and 1.373 for the spectral potential proxy. The robust-standardized thirteen-feature energy distance is 2.537, compared with a real split-half p90 of 0.0419, giving a descriptive ratio of 60.52. These numbers reinforce the main audit’s conclusion that the BASE output is an operational baseline with substantial residual structure mismatch. They are secondary diagnostics, not a replacement for the predeclared generic gate and not evidence of physical realism or forecast utility. The complete receipt is \url{artifacts/physics_proxy_diagnostics.json}.
+
+\FigurePage{fig:physics-proxies}{physics_proxy_distributions}{0.92}{Independent line-of-sight proxy distributions for the real positive audit set and the generated BASE set. These scalar diagnostics are descriptive and are not a 3D coronal-field evaluation.}
+\FigurePage{fig:physics-spectral}{physics_proxy_spectral}{0.92}{Fourier-space diagnostics for the observed and generated line-of-sight fields, including spectral centroid, high-wavenumber power fraction, and the normalized half-space potential proxy.}
+\FigurePage{fig:physics-topology}{physics_proxy_topology}{0.92}{Strong-field connected-component counts and polarity-centroid separation for the real and generated fields.}
+
 \chapter{3D visualization and sampling uncertainty}
 
 \section{Meaning of the 3D surfaces}
@@ -559,6 +569,10 @@ This appendix keeps the machine-generated numerical tables close to the narrativ
 \section{Hard descriptor table}
 \IfFileExists{tables/hard_descriptor_statistics.tex}{\input{tables/hard_descriptor_statistics.tex}}{\textit{Generated table missing.}}
 
+\section{Independent line-of-sight proxy tables}
+\IfFileExists{tables/physics_proxy_statistics.tex}{\input{tables/physics_proxy_statistics.tex}}{\textit{Generated physics-proxy table missing.}}
+\IfFileExists{tables/physics_proxy_bootstrap.tex}{\input{tables/physics_proxy_bootstrap.tex}}{\textit{Generated physics-proxy bootstrap table missing.}}
+
 \section{Training summary}
 \IfFileExists{tables/training_summary.tex}{\input{tables/training_summary.tex}}{\textit{Generated table missing.}}
 
@@ -587,6 +601,8 @@ The following documents are shipped in the source bundle and were read as protoc
 \item \texttt{artifacts/physics\_v2\_selftest.json}: differentiability and quiet-field self-test receipt;
 \item \texttt{artifacts/physics\_screening\_metrics.json}: executed HJ/PIL screen receipt and fixed-reference audit;
 \item \texttt{scripts/build\_physics\_screening\_artifacts.py}: screen summary and figure generator.
+\item \texttt{physics\_proxy\_diagnostics.json} (under \texttt{artifacts/}): independent line-of-sight proxy and group-bootstrap receipt;
+\item \texttt{physics\_proxy\_diagnostics.py} (under \texttt{scripts/}): secondary magnetic, spectral, and topology diagnostics.
 \end{itemize}
 
 The documents do not contain the binary FITS files. Those are kept in the separate verified cache and included in the large combined archive. The report’s local scripts never write into the source directory.
@@ -681,9 +697,12 @@ Path & Purpose \\
 \url{artifacts/resumability_selftest.json} & Receipt for the periodic-checkpoint reliability self-test. \\
 \url{artifacts/bootstrap_descriptor_uncertainty.json} & Connected-region bootstrap intervals for descriptor medians. \\
 \url{artifacts/aborted_local_attempts.json} & Explicit receipt for an incomplete CPU sampler attempt excluded from results. \\
+\url{artifacts/physics_proxy_diagnostics.json} & Independent line-of-sight magnetic, spectral, topology, and bootstrap receipt. \\
 \url{figures/physics_screening_*} & Screen comparison and loss-component figures. \\
 \url{figures/bootstrap_descriptor_uncertainty.*} & Cluster-bootstrap interval figure. \\
 \url{tables/physics_screening.*} & Machine-readable and typeset screen summary. \\
+\url{figures/physics_proxy_*} & Secondary magnetic, spectral, and topology figures. \\
+\url{tables/physics_proxy_*} & Secondary proxy CSV and typeset bootstrap tables. \\
 \bottomrule
 \end{longtable}
 
@@ -701,9 +720,9 @@ Requirement & Status & Evidence or remaining boundary \\
 Requirement & Status & Evidence or remaining boundary \\
 \midrule
 \endhead
-40+ page report & PASS & Compiled PDF is 73 A4 pages. \\
+40+ page report & PASS & Compiled PDF is 77 A4 pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
-Outputs, graphs, and 3D & PASS & 21 figure families, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
+Outputs, graphs, and 3D & PASS & 24 figure families, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
 Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
 GitHub preservation & BLOCKED & Public report branch is committed locally, but GitHub authentication rejected the push; raw archive is not remotely preserved. \\
