@@ -1,6 +1,11 @@
 name: IRIS Physics Checkpoint Trajectory Screen
 
 on:
+  push:
+    branches: [codex/iris-base-report-2026-08-31]
+    paths:
+      - '.github/workflows/iris-physics-checkpoint-trajectory.yml'
+      - 'iris-model/train_generator_positive_v2.py'
   workflow_dispatch:
     inputs:
       source_run:
@@ -15,6 +20,7 @@ permissions:
 env:
   EVIDENCE_RUN: '32937498427'
   SEED: '2026'
+  SOURCE_RUN: '33479159121'
   PYTHONUNBUFFERED: '1'
 
 jobs:
@@ -58,10 +64,11 @@ jobs:
       - name: Restore the selected constrained artifact
         env:
           GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ inputs.source_run || '33479159121' }}
         run: |
           set -euo pipefail
           mkdir -p generator_artifact
-          gh run download '${{ inputs.source_run }}' -n 'physics-${{ matrix.condition }}' -D generator_artifact
+          gh run download "$SOURCE_RUN" -n 'physics-${{ matrix.condition }}' -D generator_artifact
           checkpoint=$(find generator_artifact -name 'generator_step_${{ matrix.step }}.pt' -print -quit)
           test -n "$checkpoint"
           printf '%s\n' "$checkpoint" > selected_checkpoint.txt
