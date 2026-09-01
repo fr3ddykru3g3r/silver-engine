@@ -1,25 +1,44 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+import os
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
+import sys
 import pandas as pd
 import requests
 import torch
 from torch.utils.data import Dataset
 
 from preprocess import PreprocessConfig, preprocess_fits
+from fit_cache import index_local_fits, is_fits_payload
+
+COMMON = Path(__file__).resolve().parents[1] / 'common'
+if str(COMMON) not in sys.path:
+    sys.path.insert(0, str(COMMON))
+from jsoc_time import parse_jsoc_trec_to_utc
 
 
 def _parse_jsoc_time(s: pd.Series) -> pd.Series:
-    x = s.astype(str).str.replace('_TAI', '', regex=False)
-    x = x.str.replace(r'^(\d{4})\.(\d{2})\.(\d{2})_', r'\1-\2-\3T', regex=True)
-    return pd.to_datetime(x, utc=True, errors='coerce')
+    return parse_jsoc_trec_to_utc(s)
 
 
 def build_records(evidence_dir: str | Path, partition: str) -> pd.DataFrame:
     d = Path(evidence_dir) / 'data' / 'derived'
+    receipt_path = d / 'tai_repair_audit.json'
+    if not receipt_path.exists():
+        raise RuntimeError(
+            'Evidence is missing tai_repair_audit.json; run the fail-closed '
+            'historical TAI-to-UTC repair before model loading.'
+        )
+    try:
+        receipt = json.loads(receipt_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f'Invalid TAI repair receipt: {receipt_path}') from exc
+    if str(receipt.get('status', '')) != 'PASS':
+        raise RuntimeError(f'Evidence TAI repair did not pass: {receipt_path}')
     man = pd.read_csv(d / 'training_manifest.csv.gz', low_memory=False)
     meta = pd.read_csv(d / 'sharp_metadata.csv.gz', low_memory=False)
     man = man[man.partition.eq(partition) & man.label_m1plus_24h.notna()].copy()
@@ -80,6 +99,37 @@ def _download_one(row: dict, cache_dir: Path, max_attempts: int = 5) -> tuple[st
 
 def cache_records(df: pd.DataFrame, cache_dir: str | Path, workers: int = 8) -> pd.DataFrame:
     """Cache all records; retry transient JSOC failures serially before aborting."""
+    local_source = os.environ.get('IRIS_FITS_SOURCE', '').strip()
+    if os.environ.get('IRIS_REQUIRE_LOCAL_FITS', '0') == '1' and not local_source:
+        raise RuntimeError(
+            'IRIS_REQUIRE_LOCAL_FITS=1 but IRIS_FITS_SOURCE is unset; '
+            'materialize and verify the real FITS cache before training.'
+        )
+    if local_source:
+        index = index_local_fits(local_source)
+        missing = []
+        invalid = []
+        paths = {}
+        for row in df.to_dict('records'):
+            sid = str(row['sample_id'])
+            path = index.get(sid)
+            if path is None:
+                missing.append(sid)
+            elif not is_fits_payload(path):
+                invalid.append(sid)
+            else:
+                paths[sid] = (str(path.resolve()), int(path.stat().st_size))
+        if missing or invalid:
+            raise RuntimeError(
+                f'Local FITS cache is incomplete for this stage: '
+                f'missing={len(missing)}, invalid={len(invalid)}; '
+                f'examples={(missing + invalid)[:5]}'
+            )
+        out = df.copy()
+        out['fits_path'] = out.sample_id.map(lambda x: paths[str(x)][0])
+        out['fits_bytes'] = out.sample_id.map(lambda x: paths[str(x)][1])
+        print(f'using verified local FITS cache: {len(out)} records from {local_source}', flush=True)
+        return out
     cache = Path(cache_dir); rows = df.to_dict('records'); got = {}; failed = []
     with ThreadPoolExecutor(max_workers=max(1, min(int(workers), 8))) as ex:
         futs = {ex.submit(_download_one, r, cache, 5): r for r in rows}
