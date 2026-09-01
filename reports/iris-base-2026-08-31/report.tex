@@ -29,7 +29,7 @@
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=purple,urlcolor=blue}
 \graphicspath{{figures/}}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.62em}
+\setlength{\parskip}{0.38em}
 \captionsetup{font=small,labelfont=bf}
 \pagestyle{fancy}
 \fancyhf{}
@@ -37,18 +37,17 @@
 \rhead{2026-08-31}
 \cfoot{\thepage}
 \lstset{basicstyle=\ttfamily\scriptsize,breaklines=true,frame=single,backgroundcolor=\color{lightgray},columns=fullflexible}
+\raggedbottom
 
 \input{tables/generated_values.tex}
 
 \newcommand{\FigurePage}[4]{%
-  \clearpage
-  \begin{figure}[p]
+  \begin{figure}[htbp]
     \centering
     \includegraphics[width=#3\textwidth]{#2}
     \caption{#4}
     \label{#1}
   \end{figure}
-  \clearpage
 }
 \newcommand{\Metric}[2]{\textbf{#1}: #2}
 \newcommand{\TBD}{\textcolor{red}{not run in this BASE-only experiment}}
@@ -62,16 +61,22 @@
 \begin{document}
 
 \begin{titlepage}
-\maketitle
-\vfill
-\begin{center}
-\fcolorbox{red}{red!4}{\parbox{0.88\textwidth}{\centering\textbf{Interpretive status.} This is a BASE train-only image-generation and audit report with a separately labeled 100-step HJ/PIL physics screen. The BASE run passed a deliberately broad calibration gate, but its corrected generic distance was \AuditDistanceRatio{} times the real split-half reference. It does not establish forecasting utility, causal magnetic structure, or physical realism. Confirmatory 1,200-step physics arms and downstream forecasting were not executed.}}
-\end{center}
-\vfill
-\begin{center}
-\small Complete report package: figures, tables, machine-readable metadata, source code,\\
-OBJ visualization meshes, checkpoints, acquisition receipts, and the combined archive.\\
-\end{center}
+\thispagestyle{empty}
+\centering
+\vspace*{12mm}
+{\LARGE\bfseries IRIS BASE Experiment\par}
+\vspace{7mm}
+{\large A comprehensive evidence report on verified solar magnetogram acquisition,\\
+conditional diffusion generation, distributional fidelity, and negative results\par}
+\vspace{14mm}
+{\large IRIS / Silver Engine research record\par}
+\vspace{4mm}
+{\large 31 August 2026\par}
+\vspace{16mm}
+\noindent\fcolorbox{red}{red!4}{\parbox{0.86\textwidth}{\centering\small\textbf{Interpretive status.} This is a BASE train-only image-generation and audit report with a separately labeled 100-step HJ/PIL physics screen. The BASE run passed a deliberately broad calibration gate, but its corrected generic distance was \AuditDistanceRatio{} times the real split-half reference. It does not establish forecasting utility, causal magnetic structure, or physical realism. Confirmatory 1,200-step physics arms and downstream forecasting were not executed.}}\par
+\vspace{16mm}
+{\small Complete report package: figures, tables, machine-readable metadata, source code,\\
+OBJ visualization meshes, checkpoints, acquisition receipts, and the combined archive.\par}
 \end{titlepage}
 
 \chapter*{Executive summary}
@@ -115,9 +120,13 @@ The report supports five claims. First, the specified historical FITS acquisitio
 
 The report does not support a claim of improved TSS, AUROC, AUPRC, HSS2, calibration, or any other forecasting metric. It does not support a claim that synthetic fields are physically possible coronal configurations. It does not support a claim that the model learned causal flare precursors. It does not support a claim that a single seed or a single checkpoint is converged. The 100-step physics screen is an early training diagnostic, not the frozen 1,200-step confirmatory arm required by the protocol.
 
+The later GitHub morphology-transfer summary was separately downloaded and reconciled. It is useful exploratory evidence, but its arms are \texttt{base}, \texttt{pil}, \texttt{pil\_blur}, \texttt{geometry\_flip}, and \texttt{block\_shuffle}; it is not the locked primary matrix. The full-source protocol defines the exact primary mapping as \texttt{R}=\texttt{real} unweighted, \texttt{Rw}=\texttt{real\_weighted} with balanced positive weighting, \texttt{D}=\texttt{duplicate}, \texttt{L0}=\texttt{base}, \texttt{L2}=\texttt{hj}, and \texttt{L3}=\texttt{hj\_pil}. A dependency-free validator is included to reject the exploratory artifact and to enforce shared test identities and matched positive exposure before primary metrics are accepted.
+
 \section{What was treated as an instruction versus a request}
 
 The user’s request was to complete and document the run, produce a reusable package, and pursue the next analyses. The attached project documents specify the intended data rules, independent audit definitions, and stop conditions. Their role was to constrain the analysis, not to manufacture missing outcomes. For example, the project’s readiness document says that a high forecast score alone would never satisfy the gate; that statement is compatible with this report’s emphasis on data integrity and manipulation checks. The short physics screen below exercises the implementation, but the documents’ full physics manipulation, rolling replication, human audit, and prospective blind-validation requirements remain open.
+
+The continuation review also identified a nomenclature mismatch between an older seven-arm implementation and the requested primary matrix. The older morphology controls remain auxiliary. The validator and the frozen protocol file in the package make the distinction explicit: \texttt{Rw} is not a new data source, but a real-only control whose positive-class weight is computed once from the real training subset; \texttt{L0}, \texttt{L2}, and \texttt{L3} are the three synthetic additions that enter the primary comparison. This prevents a morphology-bootstrap result from being relabeled as a physics-transfer result.
 
 \chapter{Scientific and technical background}
 
@@ -604,6 +613,12 @@ The main result is tied to a single completed checkpoint. The alternate sampling
 
 The project’s 90-percent readiness document still lists full physics manipulation, rolling replication, prospective freeze, human audits, and archival eligibility as incomplete. The v2 self-test and 100-step screening arms are now executed evidence, but they do not satisfy the full physics manipulation gate or authorize downstream evaluation. These are not “missing pages” in this report; they are explicitly bounded scientific gates. The report is comprehensive about the runs that occurred, not a substitute for the remaining confirmatory experiments.
 
+\section{Continuation gate and artifact reconciliation}
+
+The full FITS cache, evidence manifest, and captured BASE checkpoint are present in the continuation archive and are checked by \texttt{scripts/validate\_primary\_matrix.py}. The validator is deliberately fail-closed. It refuses an artifact that contains only morphology arms, refuses an incomplete six-arm set, rejects unequal test identities, rejects unequal added-positive counts for \texttt{D}/\texttt{L0}/\texttt{L2}/\texttt{L3}, and rejects any explicit use of test metrics for selection. It is a structural admission check, not a replacement for the independent physics evaluator.
+
+The correct next sequence is therefore: restore the verified inputs; run a converged BASE train-only audit; fine-tune the HJ and HJ+PIL arms from the same BASE checkpoint; select or reject coefficients using only train/validation physics evidence; and only after that gate passes, run the exact primary matrix \texttt{R}/\texttt{Rw}/\texttt{D}/\texttt{L0}/\texttt{L2}/\texttt{L3}. The exploratory morphology summary is retained as a negative control for protocol discipline, not counted as completion of that sequence.
+
 \chapter{Conclusion}
 
 The IRIS BASE run has been acquired, verified, executed, sampled, audited, visualized, and packaged. The data path passed for \AcquiredCount{} FITS records. The model reached step \BaseSteps{} from a step-400 resume and generated \SyntheticCount{} positive-conditioned arrays. The broad generic gate passed with flux, area, diversity, and saturation checks inside their declared floors.
@@ -815,7 +830,7 @@ Requirement & Status & Evidence or remaining boundary \\
 Requirement & Status & Evidence or remaining boundary \\
 \midrule
 \endhead
-40+ page report & PASS & Compiled PDF is 88 A4 pages. \\
+40+ page report & PASS & Compiled PDF is 61 dense A4 pages after removing forced blank figure pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
 Outputs, graphs, and 3D & PASS & 27 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\

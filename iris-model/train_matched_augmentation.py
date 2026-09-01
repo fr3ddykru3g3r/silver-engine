@@ -13,6 +13,21 @@ from forecaster import FlareCNN,parameter_count
 from metrics import all_metrics,region_bootstrap
 
 
+def resolve_loss_policy(arm: str, class_weighting: str) -> tuple[str, str]:
+    """Validate the frozen class-weighting policy for each downstream arm."""
+    valid_arms = {'real', 'real_weighted', 'duplicate', 'synthetic'}
+    if arm not in valid_arms:
+        raise ValueError(f'Unknown downstream arm: {arm}')
+    if class_weighting not in {'none', 'balanced'}:
+        raise ValueError(f'Unknown class-weighting policy: {class_weighting}')
+    expected = 'balanced' if arm == 'real_weighted' else 'none'
+    if class_weighting != expected:
+        raise ValueError(
+            f'Frozen policy requires class_weighting={expected!r} for arm={arm!r}'
+        )
+    return arm, class_weighting
+
+
 def seed_all(seed:int):
     random.seed(seed);np.random.seed(seed);torch.manual_seed(seed)
     if torch.cuda.is_available():torch.cuda.manual_seed_all(seed)
@@ -77,7 +92,9 @@ class FocalBCE(nn.Module):
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--evidence-dir',required=True);ap.add_argument('--cache-dir',required=True);ap.add_argument('--out-dir',required=True)
-    ap.add_argument('--arm',choices=['real','duplicate','synthetic'],required=True);ap.add_argument('--synthetic-manifest');ap.add_argument('--augmentation-count',type=int,default=250)
+    ap.add_argument('--arm',choices=['real','real_weighted','duplicate','synthetic'],required=True);ap.add_argument('--synthetic-manifest');ap.add_argument('--augmentation-count',type=int,default=0)
+    ap.add_argument('--class-weighting',choices=['none','balanced'],required=True,
+                    help='Only real_weighted may use balanced positive weighting.')
     ap.add_argument('--seed',type=int,default=2026);ap.add_argument('--train-per-group',type=int,default=4);ap.add_argument('--val-per-group',type=int,default=6);ap.add_argument('--pos-cap',type=int,default=2);ap.add_argument('--test-per-group',type=int,default=6);ap.add_argument('--test-pos-cap',type=int,default=2)
     ap.add_argument('--width',type=int,default=48);ap.add_argument('--dropout',type=float,default=.2);ap.add_argument('--gamma',type=float,default=1.5);ap.add_argument('--lr',type=float,default=3e-4)
     ap.add_argument('--batch-size',type=int,default=32);ap.add_argument('--steps',type=int,default=1200);ap.add_argument('--eval-every',type=int,default=300);ap.add_argument('--download-workers',type=int,default=8);ap.add_argument('--validation-bootstrap',type=int,default=1000);ap.add_argument('--test-bootstrap',type=int,default=5000);ap.add_argument('--evaluate-test',action='store_true')
@@ -86,11 +103,24 @@ def main():
     train=cache_records(train,Path(args.cache_dir)/'train',args.download_workers);val=cache_records(val,Path(args.cache_dir)/'validation',args.download_workers);test=None
     if args.evaluate_test:
         test=group_subset(build_records(args.evidence_dir,'test'),args.test_per_group,args.test_pos_cap,args.seed+2);test=cache_records(test,Path(args.cache_dir)/'test',args.download_workers);test.to_csv(out/'test_records.csv.gz',index=False,compression='gzip')
+    resolve_loss_policy(args.arm,args.class_weighting)
     if args.arm=='synthetic' and not args.synthetic_manifest:raise ValueError('--synthetic-manifest required')
+    if args.arm in {'real','real_weighted'} and (args.synthetic_manifest or args.augmentation_count != 0):
+        raise ValueError(f'{args.arm} cannot include duplicate or synthetic examples')
+    if args.arm=='duplicate' and args.augmentation_count <= 0:
+        raise ValueError('duplicate requires --augmentation-count > 0')
+    if args.arm=='synthetic':
+        synthetic_count=len(pd.read_csv(args.synthetic_manifest))
+        if args.augmentation_count <= 0 or synthetic_count != args.augmentation_count:
+            raise ValueError(
+                f'synthetic manifest count ({synthetic_count}) must equal positive --augmentation-count ({args.augmentation_count})'
+            )
     syn=args.synthetic_manifest if args.arm=='synthetic' else None;dup=args.augmentation_count if args.arm=='duplicate' else 0;tr=AugmentedDataset(train,syn,dup,args.seed)
     tl=DataLoader(tr,batch_size=args.batch_size,shuffle=True,num_workers=0,collate_fn=collate_train,drop_last=True);vl=DataLoader(MagnetogramDataset(val),batch_size=args.batch_size,shuffle=False,num_workers=0,collate_fn=collate_eval)
     device=torch.device('cuda' if torch.cuda.is_available() else 'cpu');model=FlareCNN(width=args.width,dropout=args.dropout).to(device);opt=torch.optim.AdamW(model.parameters(),lr=args.lr,weight_decay=1e-4)
-    y=train.label_m1plus_24h.astype(int);base_pos=int(y.sum());base_neg=int((1-y).sum());fixed_pos_weight=torch.tensor(base_neg/max(1,base_pos),device=device,dtype=torch.float32);crit=FocalBCE(fixed_pos_weight,args.gamma)
+    y=train.label_m1plus_24h.astype(int);base_pos=int(y.sum());base_neg=int((1-y).sum())
+    fixed_pos_weight_value=base_neg/max(1,base_pos) if args.class_weighting=='balanced' else 1.0
+    fixed_pos_weight=torch.tensor(fixed_pos_weight_value,device=device,dtype=torch.float32);crit=FocalBCE(fixed_pos_weight,args.gamma)
     best=-1e9;best_state=None;history=[];step=0;iterator=iter(tl)
     while step<args.steps:
         try:x,yy=next(iterator)
@@ -102,7 +132,7 @@ def main():
             rec={'step':step,'loss':float(loss.item()),'threshold':thr,'validation':vm};history.append(rec);print(json.dumps(rec),flush=True)
     if best_state:model.load_state_dict(best_state)
     vp=predict(model,vl,device);thr,vm=threshold(vp);vp.to_csv(out/'validation_predictions.csv',index=False);vboot=region_bootstrap(vp,args.validation_bootstrap,args.seed,thr) if args.validation_bootstrap else None
-    added=(len(pd.read_csv(syn)) if syn else dup);report={'arm':args.arm,'seed':args.seed,'locked_test':not args.evaluate_test,'architecture':{'width':args.width,'dropout':args.dropout,'loss':'focal','gamma':args.gamma,'lr':args.lr},'parameters':parameter_count(model),'fixed_steps':args.steps,'fixed_real_only_pos_weight':float(fixed_pos_weight.item()),'real_train_rows':len(train),'real_positive_rows':base_pos,'added_positive_rows':added,'total_train_items':len(tr),'validation_threshold':thr,'validation':vm,'validation_region_bootstrap':vboot,'history':history,'test_sampling':{'per_group':args.test_per_group,'pos_cap':args.test_pos_cap,'seed':args.seed+2} if test is not None else None}
+    added=(len(pd.read_csv(syn)) if syn else dup);report={'arm':args.arm,'seed':args.seed,'locked_test':not args.evaluate_test,'architecture':{'width':args.width,'dropout':args.dropout,'loss':'focal','gamma':args.gamma,'lr':args.lr},'parameters':parameter_count(model),'fixed_steps':args.steps,'class_weighting':args.class_weighting,'fixed_pos_weight':float(fixed_pos_weight.item()),'real_train_rows':len(train),'real_positive_rows':base_pos,'added_positive_rows':added,'total_train_items':len(tr),'validation_threshold':thr,'validation':vm,'validation_region_bootstrap':vboot,'history':history,'test_sampling':{'per_group':args.test_per_group,'pos_cap':args.test_pos_cap,'seed':args.seed+2} if test is not None else None}
     if test is not None:
         tel=DataLoader(MagnetogramDataset(test),batch_size=args.batch_size,shuffle=False,num_workers=0,collate_fn=collate_eval);tp=predict(model,tel,device);tp.to_csv(out/'test_predictions.csv',index=False);report['test_items']=len(tp);report['test_groups']=int(tp.region_group_id.nunique());report['test']=all_metrics(tp.y,tp.p,thr);report['test_region_bootstrap']=region_bootstrap(tp,args.test_bootstrap,args.seed+2,thr)
     torch.save({'state_dict':model.state_dict(),'threshold':thr,'config':report['architecture'],'seed':args.seed},out/'model.pt');(out/'metrics.json').write_text(json.dumps(report,indent=2,allow_nan=True)+'\n');print(json.dumps(report,indent=2,allow_nan=True),flush=True)

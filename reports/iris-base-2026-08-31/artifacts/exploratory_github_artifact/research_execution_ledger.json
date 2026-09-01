@@ -1,0 +1,30 @@
+{
+  "status": "NON-HUMAN EXECUTION COMPLETE",
+  "completed_nonhuman_gates": [
+    "immutable historical evidence",
+    "frozen connected-region rolling-origin outer folds",
+    "nested chronological inner validation",
+    "generic morphology-generator fidelity",
+    "synthetic novelty",
+    "train-only fold-specific independent PIL manipulation selection",
+    "HJ constraint null/no-op decision based on independent cycle-aware train-only metric",
+    "matched duplicate-positive control",
+    "equal added-positive exposure",
+    "destructive controls",
+    "two-seed four-fold outer evaluation",
+    "connected-region paired bootstrap",
+    "fidelity-to-utility analysis"
+  ],
+  "v1_test_role": "exploratory only; not used for v2 tuning or selection",
+  "prospective_blind_validation": {
+    "infrastructure_status": "READY",
+    "rule": "Any future post-freeze magnetogram/flare block must remain unopened until code, coefficients, thresholds and analysis plan are frozen; this workflow does not ingest such a future block."
+  },
+  "human_or_external_gates_not_claimed": [
+    "Adult Sponsor approval",
+    "manual student audit",
+    "IRIS archival-data eligibility/approval"
+  ],
+  "paper_pitch_excluded": true,
+  "assembly_note": "Three strata are immutable completed outputs from the original downstream run. Four interrupted strata use the same frozen selections, splits, models, seeds, exposure and analysis after Cartesian recovery. Fold 4 seed 31415 is retained from the malformed-matrix run because all seven prespecified arms executed validly there; no outcome-based selection occurred."
+}

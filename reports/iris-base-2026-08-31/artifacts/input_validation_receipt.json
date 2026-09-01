@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "checks": [
+    "continuation_inputs"
+  ],
+  "errors": []
+}

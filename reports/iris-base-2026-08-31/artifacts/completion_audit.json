@@ -6,7 +6,7 @@
       "requirement": "At least 40 pages of research/report content",
       "status": "PASS",
       "evidence": "report.pdf",
-      "measured_value": "88 A4 pages"
+      "measured_value": "61 dense A4 pages; forced blank figure pages removed"
     },
     {
       "requirement": "Document the acquired data and provenance",
@@ -31,6 +31,12 @@
       "status": "PARTIAL",
       "evidence": "physics_screening_metrics.json, physics_v2_selftest.json",
       "measured_value": "self-test PASS; three 100-step exploratory screens; full 1200-step arms remain open"
+    },
+    {
+      "requirement": "Reconcile the exact primary R/Rw/D/L0/L2/L3 matrix",
+      "status": "PASS",
+      "evidence": "V2_DOWNSTREAM_MATRIX_FREEZE_2026-08-27.md, reconciliation_note_2026-09-01.md, validate_primary_matrix.py",
+      "measured_value": "Rw definition recovered; exploratory morphology artifact rejected; structural validator tests PASS"
     },
     {
       "requirement": "Run downstream forecasting",

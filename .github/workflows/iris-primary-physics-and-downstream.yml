@@ -1,0 +1,335 @@
+name: IRIS Exact Primary Physics Gate and Six-Arm Matrix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  EVIDENCE_RUN: '32937498427'
+  SEED: '2026'
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  physics-base:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Restore frozen evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_bundle evidence
+          gh run download "$EVIDENCE_RUN" -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Run positive-only BASE convergence
+        run: |
+          set -euo pipefail
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/base --out-dir physics/base \
+            --condition base --seed "$SEED" --per-group 4 \
+            --batch-size 16 --physics-batch-size 16 --base-channels 16 \
+            --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 \
+            --download-workers 16 --threads 2 --checkpoint-every 200
+          checkpoint=$(find physics/base -name generator.pt -print -quit)
+          test -n "$checkpoint"
+          python iris-model/sample_generator.py \
+            --checkpoint "$checkpoint" --evidence-dir evidence \
+            --out-dir physics/base/samples --per-group 2 --max-groups 125 \
+            --batch-size 8 --sampling-steps 50 --seed "$SEED"
+          manifest=$(find physics/base/samples -name synthetic_manifest.csv -print -quit)
+          test -n "$manifest"
+          test "$(python -c "import pandas as p; print(len(p.read_csv('$manifest')))" )" = 250
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir evidence --cache-dir cache/eval-base \
+            --synthetic-manifest "$manifest" --out-dir physics/base/audit \
+            --real-per-group 2 --seed "$SEED"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: physics-base
+          path: physics/base
+          retention-days: 30
+
+  physics-constrained:
+    needs: physics-base
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - condition: hj
+            lambda_hj: '0.05'
+            lambda_pil: '0.0'
+          - condition: hj_pil
+            lambda_hj: '0.05'
+            lambda_pil: '0.10'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Restore frozen evidence and shared BASE
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_bundle evidence base_artifact
+          gh run download "$EVIDENCE_RUN" -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+      - uses: actions/download-artifact@v4
+        with:
+          name: physics-base
+          path: base_artifact
+      - name: Fine-tune the constrained arm from the identical BASE checkpoint
+        run: |
+          set -euo pipefail
+          checkpoint=$(find base_artifact -name generator.pt -print -quit)
+          test -n "$checkpoint"
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/${{ matrix.condition }} \
+            --out-dir physics/${{ matrix.condition }} --condition ${{ matrix.condition }} \
+            --seed "$SEED" --init-checkpoint "$checkpoint" --per-group 4 \
+            --batch-size 16 --physics-batch-size 16 --base-channels 16 \
+            --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 \
+            --lambda-hj ${{ matrix.lambda_hj }} --lambda-pil ${{ matrix.lambda_pil }} \
+            --download-workers 16 --threads 2 --checkpoint-every 200
+          checkpoint=$(find physics/${{ matrix.condition }} -name generator.pt -print -quit)
+          test -n "$checkpoint"
+          python iris-model/sample_generator.py \
+            --checkpoint "$checkpoint" --evidence-dir evidence \
+            --out-dir physics/${{ matrix.condition }}/samples --per-group 2 \
+            --max-groups 125 --batch-size 8 --sampling-steps 50 --seed "$SEED"
+          manifest=$(find physics/${{ matrix.condition }}/samples -name synthetic_manifest.csv -print -quit)
+          test -n "$manifest"
+          test "$(python -c "import pandas as p; print(len(p.read_csv('$manifest')))" )" = 250
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir evidence --cache-dir cache/eval-${{ matrix.condition }} \
+            --synthetic-manifest "$manifest" --out-dir physics/${{ matrix.condition }}/audit \
+            --real-per-group 2 --seed "$SEED"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: physics-${{ matrix.condition }}
+          path: physics/${{ matrix.condition }}
+          retention-days: 30
+
+  physics-gate:
+    needs: [physics-base, physics-constrained]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: physics-*
+          path: physics_artifacts
+      - name: Apply the train-only physics gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('physics_artifacts')
+
+          def load(name):
+              hits = sorted((root / name).rglob('v2_manipulation_metrics.json'))
+              if len(hits) != 1:
+                  raise SystemExit(f'{name}: expected one independent audit, found {hits}')
+              return json.loads(hits[0].read_text())
+
+          base = load('physics-base')
+          hj = load('physics-hj')
+          hj_pil = load('physics-hj_pil')
+          geometry_base = float(base['hard_geometry_standardized_energy_distance'])
+          pil_base = float(base['hard_pil_standardized_energy_distance'])
+
+          def audit(name, current, require_both):
+              geometry = float(current['hard_geometry_standardized_energy_distance'])
+              pil = float(current['hard_pil_standardized_energy_distance'])
+              geometry_improvement = (geometry_base - geometry) / geometry_base
+              pil_improvement = (pil_base - pil) / pil_base
+              result = {
+                  'arm': name,
+                  'generic_gate_pass': bool(current['generic_fidelity_gate_pass']),
+                  'generic_distance_ratio': current['generic_distance_to_real_baseline_ratio'],
+                  'geometry_distance': geometry,
+                  'pil_distance': pil,
+                  'geometry_improvement_vs_base': geometry_improvement,
+                  'pil_improvement_vs_base': pil_improvement,
+              }
+              result['pass'] = bool(
+                  result['generic_gate_pass']
+                  and geometry_improvement >= 0.20
+                  and (pil_improvement >= 0.20 if require_both else pil / pil_base <= 1.50)
+              )
+              return result
+
+          report = {
+              'phase': 'TRAIN_ONLY_CONVERGED_BASE_PHYSICS_GATE',
+              'forecast_metrics_accessed': False,
+              'base': {
+                  'generic_gate_pass': bool(base['generic_fidelity_gate_pass']),
+                  'generic_distance_ratio': base['generic_distance_to_real_baseline_ratio'],
+                  'geometry_distance': geometry_base,
+                  'pil_distance': pil_base,
+              },
+              'arms': [audit('L2/HJ', hj, False), audit('L3/HJ+PIL', hj_pil, True)],
+          }
+          report['status'] = 'PASS' if report['base']['generic_gate_pass'] and all(x['pass'] for x in report['arms']) else 'FAIL'
+          Path('physics_gate.json').write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          if report['status'] != 'PASS':
+              raise SystemExit('train-only physics gate failed; primary test remains locked')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-primary-physics-gate
+          path: physics_gate.json
+          retention-days: 30
+
+  downstream:
+    needs: physics-gate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - science: R
+            implementation: real
+            weighting: none
+          - science: Rw
+            implementation: real_weighted
+            weighting: balanced
+          - science: D
+            implementation: duplicate
+            weighting: none
+          - science: L0
+            implementation: base
+            weighting: none
+            artifact: physics-base
+          - science: L2
+            implementation: hj
+            weighting: none
+            artifact: physics-hj
+          - science: L3
+            implementation: hj_pil
+            weighting: none
+            artifact: physics-hj_pil
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Restore frozen evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_bundle evidence
+          gh run download "$EVIDENCE_RUN" -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+      - name: Restore the selected generator manifest when needed
+        if: matrix.artifact != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: generator_artifact
+      - name: Run one locked downstream arm
+        shell: bash
+        run: |
+          set -euo pipefail
+          common=(--evidence-dir evidence --cache-dir cache/${{ matrix.science }} --out-dir primary/${{ matrix.implementation }} \
+            --seed "$SEED" --train-per-group 4 --val-per-group 6 --pos-cap 2 \
+            --test-per-group 6 --test-pos-cap 2 --width 48 --dropout 0.2 \
+            --gamma 1.5 --lr 0.0003 --batch-size 32 --steps 1200 \
+            --eval-every 300 --download-workers 8 --validation-bootstrap 1000 \
+            --test-bootstrap 5000 --evaluate-test --class-weighting ${{ matrix.weighting }})
+          case '${{ matrix.science }}' in
+            R|Rw) python iris-model/train_matched_augmentation.py "${common[@]}" --arm '${{ matrix.implementation }}' ;;
+            D) python iris-model/train_matched_augmentation.py "${common[@]}" --arm duplicate --augmentation-count 250 ;;
+            L0|L2|L3)
+              manifest=$(find generator_artifact -name synthetic_manifest.csv -print -quit)
+              test -n "$manifest"
+              test "$(python -c "import pandas as p; print(len(p.read_csv('$manifest')))" )" = 250
+              python iris-model/train_matched_augmentation.py "${common[@]}" --arm synthetic \
+                --synthetic-manifest "$manifest" --augmentation-count 250 ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: primary-${{ matrix.science }}
+          path: primary/${{ matrix.implementation }}
+          retention-days: 30
+
+  downstream-summary:
+    needs: downstream
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install analysis dependencies
+        run: pip install numpy pandas scikit-learn
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: primary-*
+          path: collected
+      - name: Validate and compare the exact six science arms
+        run: |
+          set -euo pipefail
+          python reports/iris-base-2026-08-31/scripts/validate_primary_matrix.py --artifact-dir collected
+          python iris-model/compare_augmentation_locked_test.py \
+            --root collected --out-dir comparison --bootstrap 5000
+          cp V2_DOWNSTREAM_MATRIX_FREEZE_2026-08-27.md comparison/
+          sha256sum comparison/* > comparison/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-primary-six-arm-result
+          path: |
+            collected
+            comparison
+          retention-days: 30

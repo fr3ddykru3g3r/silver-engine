@@ -197,9 +197,14 @@ FITS_SCOPE = 'all'
 ACQUIRE_FITS = '1'  # use '0' only after the all-scope preflight passes
 ```
 
-The runner enforces matched synthetic exposure and trains the six frozen primary
-arms: `R`, `Rw`, `D`, `L0`, `L2`, and `L3`. It writes per-arm metrics and test
-predictions plus:
+The authoritative arm definitions are in
+`V2_DOWNSTREAM_MATRIX_FREEZE_2026-08-27.md`. The runner enforces matched
+synthetic exposure and trains the six frozen primary arms: `R`, `Rw`, `D`,
+`L0`, `L2`, and `L3`. Here `R` is real-only/unweighted, `Rw` is the same
+real-only set with `N_negative/N_positive` balanced positive weighting, `D` is
+duplicated real positives, and `L0/L2/L3` map to BASE/HJ/HJ+PIL synthetic
+positives. The `pil`-only arm is auxiliary and cannot replace `L3`. The runner
+writes per-arm metrics and test predictions plus:
 
 ```text
 runs/downstream/primary_metrics.csv
@@ -210,6 +215,17 @@ Thresholds are selected from validation TSS and the test partition is evaluated
 once. Do not change thresholds, seeds, preprocessing, arm definitions, or
 exclusions after test results are visible. A null or negative `L2/L3 - D`
 result is a valid scientific result and must be reported as such.
+
+Before accepting a downstream artifact, run the dependency-free structural
+check from the bundle:
+
+```bash
+python reports/iris-base-2026-08-31/scripts/validate_primary_matrix.py \
+  --artifact-dir runs/downstream
+```
+
+It rejects morphology-only summaries, incomplete arm sets, mismatched test
+identities, and unequal positive exposure.
 
 ## Important
 
