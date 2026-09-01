@@ -108,6 +108,8 @@ def main():
     ap.add_argument('--lambda-generic',type=float,default=0.0,
                     help='Optional train-only generic descriptor stabilization during fine-tuning.')
     ap.add_argument('--lambda-hj',type=float,default=0.05); ap.add_argument('--lambda-pil',type=float,default=0.1)
+    ap.add_argument('--physics-gradient-ratio',type=float,default=0.0,
+                    help='Optional trust-region cap: weighted physics-gradient norm as a fraction of denoising-gradient norm.')
     ap.add_argument('--physics-warmup-steps',type=int,default=200); ap.add_argument('--diffusion-steps',type=int,default=100)
     ap.add_argument('--base-channels',type=int,default=16); ap.add_argument('--physics-max-t-frac',type=float,default=0.25)
     ap.add_argument('--download-workers',type=int,default=16); ap.add_argument('--generator-dropout',type=float,default=0.0)
@@ -117,8 +119,8 @@ def main():
     ap.add_argument('--threads',type=int,default=2,help='PyTorch intra-op CPU threads.')
     ap.add_argument('--checkpoint-every',type=int,default=100,help='Write an auditable model/history checkpoint every N steps.')
     args=ap.parse_args(); seed_all(args.seed)
-    if args.lr <= 0 or args.lambda_generic < 0 or args.ema_decay < 0 or args.ema_decay >= 1:
-        raise ValueError('Invalid learning rate, generic weight, or EMA decay')
+    if args.lr <= 0 or args.lambda_generic < 0 or args.physics_gradient_ratio < 0 or args.ema_decay < 0 or args.ema_decay >= 1:
+        raise ValueError('Invalid learning rate, generic weight, physics gradient ratio, or EMA decay')
     if args.ema_warmup_steps < 0:
         raise ValueError('EMA warmup must be non-negative')
     if args.threads <= 0:
@@ -210,14 +212,31 @@ def main():
                 if args.condition in ('hj','hj_pil'): lhj=population_distribution_loss_v2(pfake,praw,plat)
                 if args.condition in ('pil','hj_pil'): lpil=pil_distribution_loss_v2(pfake,praw,pixel_mm=2.0)
             step+=1; ramp=min(1.,step/max(1,args.physics_warmup_steps))
-            total=denoise+ramp*(args.lambda_generic*lgeneric+args.lambda_hj*lhj+args.lambda_pil*lpil)
-            opt.zero_grad(set_to_none=True); total.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(),1.0); opt.step()
+            physics_total=ramp*(args.lambda_generic*lgeneric+args.lambda_hj*lhj+args.lambda_pil*lpil)
+            total=denoise+physics_total
+            physics_gradient_scale=1.0
+            params=tuple(p for p in model.parameters() if p.requires_grad)
+            if args.physics_gradient_ratio > 0 and physics_total.requires_grad:
+                denoise_grads=torch.autograd.grad(denoise,params,allow_unused=True)
+                physics_grads=torch.autograd.grad(physics_total,params,allow_unused=True)
+                denoise_norm_sq=sum((g.detach().square().sum() for g in denoise_grads if g is not None), torch.zeros((),device=denoise.device))
+                physics_norm_sq=sum((g.detach().square().sum() for g in physics_grads if g is not None), torch.zeros((),device=denoise.device))
+                denoise_norm=torch.sqrt(denoise_norm_sq)
+                physics_norm=torch.sqrt(physics_norm_sq)
+                if float(physics_norm.detach()) > 0:
+                    physics_gradient_scale=min(1.0, float((args.physics_gradient_ratio*denoise_norm/physics_norm).detach()))
+                opt.zero_grad(set_to_none=True)
+                for p,gd,gp in zip(params,denoise_grads,physics_grads):
+                    p.grad=(torch.zeros_like(p) if gd is None else gd)+(torch.zeros_like(p) if gp is None else physics_gradient_scale*gp)
+            else:
+                opt.zero_grad(set_to_none=True); total.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(),1.0); opt.step()
             if args.ema_warmup_steps and step <= args.ema_warmup_steps:
                 ema.load_state_dict(model.state_dict())
             else:
                 ema_update(ema,model,args.ema_decay)
             if scheduler is not None: scheduler.step()
-            rec={'step':step,'loss':float(total.item()),'denoise':float(denoise.item()),'generic':float(lgeneric.item()),'hj':float(lhj.item()),'pil':float(lpil.item()),'ramp':float(ramp),'learning_rate':float(opt.param_groups[0]['lr']),'ema_warmup_active':bool(args.ema_warmup_steps and step <= args.ema_warmup_steps)}; history.append(rec)
+            rec={'step':step,'loss':float(total.item()),'denoise':float(denoise.item()),'generic':float(lgeneric.item()),'hj':float(lhj.item()),'pil':float(lpil.item()),'ramp':float(ramp),'physics_gradient_scale':float(physics_gradient_scale),'learning_rate':float(opt.param_groups[0]['lr']),'ema_warmup_active':bool(args.ema_warmup_steps and step <= args.ema_warmup_steps)}; history.append(rec)
             if step%args.checkpoint_every==0:
                 write_periodic_checkpoint(step)
             if step%100==0: print(json.dumps(rec),flush=True)
@@ -227,7 +246,7 @@ def main():
     torch.save(ck,out/'generator.pt')
     selected.to_csv(out/'training_subset.csv.gz',index=False,compression='gzip')
     (out/'training_history.json').write_text(json.dumps(history,indent=2)+'\n')
-    summary={'positive_only':True,'train_rows':len(selected),'train_groups':int(selected.region_group_id.nunique()),'steps':step,'condition':args.condition,'lambda_generic':args.lambda_generic,'lambda_hj':args.lambda_hj,'lambda_pil':args.lambda_pil,'ema_decay':args.ema_decay,'ema_warmup_steps':args.ema_warmup_steps,'lr_schedule':args.lr_schedule,'device':str(device),'threads':args.threads,'prepared_cache':str(tensor_cache),'init_checkpoint':init_meta}
+    summary={'positive_only':True,'train_rows':len(selected),'train_groups':int(selected.region_group_id.nunique()),'steps':step,'condition':args.condition,'lambda_generic':args.lambda_generic,'lambda_hj':args.lambda_hj,'lambda_pil':args.lambda_pil,'physics_gradient_ratio':args.physics_gradient_ratio,'ema_decay':args.ema_decay,'ema_warmup_steps':args.ema_warmup_steps,'lr_schedule':args.lr_schedule,'device':str(device),'threads':args.threads,'prepared_cache':str(tensor_cache),'init_checkpoint':init_meta}
     (out/'run_config.json').write_text(json.dumps(summary,indent=2)+'\n'); print(json.dumps(summary,indent=2),flush=True)
 
 if __name__=='__main__': main()

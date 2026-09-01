@@ -1,0 +1,140 @@
+name: IRIS Physics Checkpoint Trajectory Screen
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Completed physics run whose periodic checkpoints should be screened
+        required: true
+        default: '33479159121'
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  EVIDENCE_RUN: '32937498427'
+  SEED: '2026'
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  trajectory:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - condition: hj
+            step: '200'
+          - condition: hj
+            step: '400'
+          - condition: hj_pil
+            step: '200'
+          - condition: hj_pil
+            step: '400'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Restore frozen evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_bundle evidence
+          gh run download "$EVIDENCE_RUN" -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+      - name: Restore the selected constrained artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p generator_artifact
+          gh run download '${{ inputs.source_run }}' -n 'physics-${{ matrix.condition }}' -D generator_artifact
+          checkpoint=$(find generator_artifact -name 'generator_step_${{ matrix.step }}.pt' -print -quit)
+          test -n "$checkpoint"
+          printf '%s\n' "$checkpoint" > selected_checkpoint.txt
+      - name: Evaluate the selected checkpoint
+        run: |
+          set -euo pipefail
+          checkpoint=$(cat selected_checkpoint.txt)
+          out="trajectory/${{ matrix.condition }}/step-${{ matrix.step }}"
+          python iris-model/sample_generator.py \
+            --checkpoint "$checkpoint" --evidence-dir evidence \
+            --out-dir "$out/samples" --per-group 2 --max-groups 125 \
+            --batch-size 8 --sampling-steps 50 --seed "$SEED"
+          manifest=$(find "$out/samples" -name synthetic_manifest.csv -print -quit)
+          test -n "$manifest"
+          test "$(python -c "import pandas as p; print(len(p.read_csv('$manifest')))")" = 250
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir evidence --cache-dir "cache/eval-${{ matrix.condition }}-${{ matrix.step }}" \
+            --synthetic-manifest "$manifest" --out-dir "$out/audit" \
+            --real-per-group 2 --seed "$SEED"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trajectory-${{ matrix.condition }}-step-${{ matrix.step }}
+          path: trajectory/${{ matrix.condition }}/step-${{ matrix.step }}
+          retention-days: 30
+
+  summary:
+    needs: trajectory
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install analysis dependencies
+        run: pip install numpy pandas scikit-learn
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: trajectory-*
+          path: collected
+          merge-multiple: true
+      - name: Write trajectory summary
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = []
+          for p in sorted(Path('collected').rglob('v2_manipulation_metrics.json')):
+              d = json.loads(p.read_text())
+              rel = p.relative_to('collected').parts
+              rows.append({
+                  'path': str(p),
+                  'condition': rel[0] if rel else None,
+                  'step': next((x.removeprefix('step-') for x in rel if x.startswith('step-')), None),
+                  'generic_gate_pass': d.get('generic_fidelity_gate_pass'),
+                  'generic_distance_ratio': d.get('generic_distance_to_real_baseline_ratio'),
+                  'geometry_distance': d.get('hard_geometry_standardized_energy_distance'),
+                  'pil_distance': d.get('hard_pil_standardized_energy_distance'),
+              })
+          Path('trajectory_summary.json').write_text(json.dumps(rows, indent=2) + '\n')
+          print(json.dumps(rows, indent=2))
+          if not rows:
+              raise SystemExit('no trajectory metrics found')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-physics-trajectory-screen
+          path: |
+            collected
+            trajectory_summary.json
+          retention-days: 30
