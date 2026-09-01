@@ -14,7 +14,7 @@ permissions:
 env:
   EVIDENCE_RUN: '32937498427'
   FIT_ARCHIVE: 'IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip'
-  RUN_REVISION: '2'
+  RUN_REVISION: '3'
   PYTHONUNBUFFERED: '1'
 
 jobs:
@@ -57,7 +57,16 @@ jobs:
           python iris-model/acquire_complete_fits.py \
             --evidence-dir evidence --output-dir fits_cache/fits \
             --seed 2026 --workers 8
-          test "$(find fits_cache/fits -type f -name '*.fits' | wc -l | tr -d ' ')" = 10486
+          python - <<'PY'
+          import json
+          report = json.load(open('fits_cache/fits/complete_fits_acquisition_report.json'))
+          assert report['status'] == 'PASS', report
+          assert report['planned_samples'] == 10486, report
+          assert report['valid_samples'] == 10486, report
+          assert report['missing_count'] == 0, report
+          assert report['invalid_count'] == 0, report
+          print('complete downstream FITS receipt PASS')
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: iris-complete-downstream-fits
