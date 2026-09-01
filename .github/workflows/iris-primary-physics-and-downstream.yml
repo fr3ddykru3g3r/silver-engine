@@ -1,6 +1,10 @@
 name: IRIS Exact Primary Physics Gate and Six-Arm Matrix
 
 on:
+  push:
+    branches: [codex/iris-base-report-2026-08-31]
+    paths:
+      - '.github/workflows/iris-primary-physics-and-downstream.yml'
   workflow_dispatch:
 
 permissions:
