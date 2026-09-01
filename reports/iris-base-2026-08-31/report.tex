@@ -16,6 +16,7 @@
 \usepackage{float}
 \usepackage{listings}
 \usepackage{url}
+\usepackage{etoolbox}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{ink}{HTML}{17202A}
@@ -38,6 +39,15 @@
 \cfoot{\thepage}
 \lstset{basicstyle=\ttfamily\scriptsize,breaklines=true,frame=single,backgroundcolor=\color{lightgray},columns=fullflexible}
 \raggedbottom
+
+% Keep chapters in the narrative flow. The default report class clears a full
+% page before every chapter, which created artificial lower-page whitespace in
+% this evidence-heavy document.
+\makeatletter
+\patchcmd{\chapter}{\clearpage}{}{}{}
+\patchcmd{\@makechapterhead}{\vspace*{50\p@}}{\vspace*{10\p@}}{}{}
+\patchcmd{\@makeschapterhead}{\vspace*{50\p@}}{\vspace*{10\p@}}{}{}
+\makeatother
 
 \input{tables/generated_values.tex}
 
@@ -73,7 +83,7 @@ conditional diffusion generation, distributional fidelity, and negative results\
 \vspace{4mm}
 {\large 31 August 2026\par}
 \vspace{16mm}
-\noindent\fcolorbox{red}{red!4}{\parbox{0.86\textwidth}{\centering\small\textbf{Interpretive status.} This is a BASE train-only image-generation and audit report with a separately labeled 100-step HJ/PIL physics screen. The BASE run passed a deliberately broad calibration gate, but its corrected generic distance was \AuditDistanceRatio{} times the real split-half reference. It does not establish forecasting utility, causal magnetic structure, or physical realism. Confirmatory 1,200-step physics arms and downstream forecasting were not executed.}}\par
+\noindent\fcolorbox{red}{red!4}{\parbox{0.86\textwidth}{\centering\small\textbf{Interpretive status.} This report contains the original BASE audit, the 100-step exploratory HJ/PIL screen, and a completed remote 1,200-step train-only continuation. The fresh remote BASE, HJ, and HJ+PIL arms all failed the generic fidelity gate, so the downstream forecasting matrix was correctly locked. No forecasting utility, causal magnetic-structure, or physical-realism claim is supported.}}\par
 \vspace{16mm}
 {\small Complete report package: figures, tables, machine-readable metadata, source code,\\
 OBJ visualization meshes, checkpoints, acquisition receipts, and the combined archive.\par}
@@ -82,7 +92,7 @@ OBJ visualization meshes, checkpoints, acquisition receipts, and the combined ar
 \chapter*{Executive summary}
 \addcontentsline{toc}{chapter}{Executive summary}
 
-This report documents the completed IRIS BASE experiment as an auditable research object. The objective was narrower than proving a useful flare forecaster: first obtain a verified set of historical HMI/SHARP line-of-sight magnetograms, preserve a chronology-safe data split, train the declared BASE conditional diffusion generator, draw synthetic positive-conditioned samples, and evaluate them with an independent descriptor audit. The initial experiment was deliberately stopped at that boundary. It therefore provides a meaningful generator diagnosis, not a final end-to-end forecasting result. Afterward, a compute-bounded 100-step positive-only HJ/PIL factorial screen was run from the frozen BASE EMA checkpoint; that follow-up is reported separately and does not upgrade the BASE result into a physics-transfer claim.
+This report documents the IRIS BASE experiment and its completed remote continuation as an auditable research object. The objective was narrower than proving a useful flare forecaster: first obtain a verified set of historical HMI/SHARP line-of-sight magnetograms, preserve a chronology-safe data split, train the declared BASE conditional diffusion generator, draw synthetic positive-conditioned samples, and evaluate them with an independent descriptor audit. A later compute-bounded 100-step positive-only HJ/PIL factorial screen was run from the frozen BASE EMA checkpoint, followed by a remote 1,200-step BASE/HJ/HJ+PIL train-only gate. That continuation completed its model and audit jobs but failed the generic fidelity requirement, so the exact downstream forecasting matrix remained locked. The final verified result is therefore a negative train-only gate result, not an end-to-end forecasting result.
 
 The data pipeline began from \ManifestCount{} SHARP metadata rows covering \MOneEvents{} M1-or-larger GOES events in the collection interval and \GroupCount{} connected physical-region groups. Exact JSOC TAI timestamps were converted to UTC with the project’s Astropy-based repair. The repair changed \TaiLabelChanges{} primary labels and produced no group-partition changes. After censoring unresolved future-event windows, \PrimaryCount{} primary rows remained eligible for the frozen chronology. The training, validation, and test partitions contain \TrainRows{}, \ValidationRows{}, and \TestRows{} rows respectively, with no connected group crossing a boundary.
 
@@ -90,7 +100,7 @@ The acquisition gate passed: \PlannedCount{} payloads were planned and \Acquired
 
 The independent audit gives a mixed result. The predeclared broad gate is \AuditGate{} because the synthetic-to-real median ratios for the unsigned-flux proxy, active-area fraction, and coarse diversity are \AuditFluxRatio{}, \AuditAreaRatio{}, and \AuditDiversityRatio{}, while the absolute saturation fraction is \AuditSatFraction{}. However, the corrected five-feature generic distance is \AuditDistanceRatio{} times the real split-half p90 reference. The original six-feature calculation produced \AuditOriginalDistanceRatio{} times the reference because the real saturation feature had effectively zero dispersion; that failure was diagnosed, reported, and corrected by excluding saturation from the multivariate distance while retaining its explicit absolute threshold. This is a metric-stability result, not evidence that the generator is high fidelity.
 
-The strongest conclusion is therefore negative and useful: the current BASE checkpoint has learned enough broad amplitude and occupancy statistics to clear a lenient quality floor, but it has not demonstrated distributional closeness sufficient to justify physics transfer or forecasting augmentation. The follow-up screen confirms that the HJ, PIL, and HJ+PIL losses are executable and differentiable, but all three 100-step samples fail the broad generic gate; they are early diagnostics, not converged physics arms. The report records the completed additional analysis, all major outputs, limitations, and the exact next experiments required before any utility claim.
+The strongest conclusion is therefore negative and useful: the original BASE checkpoint cleared a lenient broad gate, but the fresh remote BASE continuation failed it at a generic distance ratio of 112.144. The remote HJ and HJ+PIL arms improved their targeted geometry and PIL distances by 71.22\%/98.65\% and 69.22\%/97.87\%, respectively, yet still failed their generic gates at ratios 9.417 and 10.502. The report records the completed additional analysis, the gate receipt, the downstream lock, all major limitations, and the exact next experiments required before any utility claim.
 
 \tableofcontents
 \listoffigures
@@ -102,7 +112,7 @@ The strongest conclusion is therefore negative and useful: the current BASE chec
 
 The preceding project request was operational: acquire all available data for the current bundle, execute the model without stalling, produce the outputs, and then consolidate the scientific record. A report that only says “the job completed” would be insufficient. A credible record must make it possible to distinguish (i) what was downloaded and verified, (ii) what was actually used for training and auditing, (iii) what the generator produced, (iv) which metrics passed, (v) which metrics exposed a weakness, and (vi) which questions remain unanswered.
 
-This document is written as a full experimental report rather than a promotional summary. The repository documents included with the bundle are treated as protocol specifications and provenance records. They are not silently treated as evidence for results that were not executed. In particular, the protocol’s full physics-to-utility and rolling-fold requirements remain future gates. The initial notebook execution set the equivalent of \texttt{RUN\_BASE = '1'} and kept physics and downstream stages disabled; a later local screen ran only 100-step train-only HJ/PIL fine-tunes and no downstream stage.
+This document is written as a full experimental report rather than a promotional summary. The repository documents included with the bundle are treated as protocol specifications and provenance records. They are not silently treated as evidence for results that were not executed. In particular, the protocol’s full physics-to-utility and rolling-fold requirements remain future gates. The initial notebook execution set the equivalent of \texttt{RUN\_BASE = '1'} and kept physics and downstream stages disabled; a later local screen ran only 100-step train-only HJ/PIL fine-tunes; the remote continuation then ran the declared 1,200-step BASE/HJ/HJ+PIL train-only gate and, after its failure, did not run downstream.
 
 \section{Primary research question}
 
@@ -116,15 +126,15 @@ The word ``BASE'' matters. It denotes the unconstrained arm used as the referenc
 
 \section{Predeclared claim boundaries}
 
-The report supports five claims. First, the specified historical FITS acquisition completed with a machine-readable PASS receipt. Second, the declared local BASE resume completed at step 1,200 and produced checkpoints, samples, training history, and audit files. Third, the independent broad gate passed under the corrected evaluator. Fourth, the audit exposes a substantial residual mismatch, so the BASE run is not sufficient to unlock a scientific conclusion about physics transfer. Fifth, the physics implementation self-test passed and the three 100-step exploratory arms executed with active intended losses, but all three failed the broad generic gate at that early budget.
+The report supports six bounded claims. First, the specified historical FITS acquisition completed with a machine-readable PASS receipt. Second, the declared local BASE resume completed at step 1,200 and produced checkpoints, samples, training history, and audit files. Third, the original BASE audit passed its broad gate under the corrected evaluator. Fourth, the audit exposes a substantial residual mismatch, so that BASE result is not sufficient to unlock a scientific conclusion about physics transfer. Fifth, the physics implementation self-test passed and the three 100-step exploratory arms executed with active intended losses, but all three failed the broad generic gate at that early budget. Sixth, the remote 1,200-step BASE/HJ/HJ+PIL continuation completed its train-only jobs, failed the generic gate, and correctly prevented downstream evaluation.
 
-The report does not support a claim of improved TSS, AUROC, AUPRC, HSS2, calibration, or any other forecasting metric. It does not support a claim that synthetic fields are physically possible coronal configurations. It does not support a claim that the model learned causal flare precursors. It does not support a claim that a single seed or a single checkpoint is converged. The 100-step physics screen is an early training diagnostic, not the frozen 1,200-step confirmatory arm required by the protocol.
+The report does not support a claim of improved TSS, AUROC, AUPRC, HSS2, calibration, or any other forecasting metric: the downstream matrix was skipped after the train-only gate failed. It does not support a claim that synthetic fields are physically possible coronal configurations. It does not support a claim that the model learned causal flare precursors. It does not support a claim that a single seed or a single checkpoint is converged. The 100-step physics screen is an early training diagnostic; the remote 1,200-step continuation is a completed negative gate, not a forecast result.
 
 The later GitHub morphology-transfer summary was separately downloaded and reconciled. It is useful exploratory evidence, but its arms are \texttt{base}, \texttt{pil}, \texttt{pil\_blur}, \texttt{geometry\_flip}, and \texttt{block\_shuffle}; it is not the locked primary matrix. The full-source protocol defines the exact primary mapping as \texttt{R}=\texttt{real} unweighted, \texttt{Rw}=\texttt{real\_weighted} with balanced positive weighting, \texttt{D}=\texttt{duplicate}, \texttt{L0}=\texttt{base}, \texttt{L2}=\texttt{hj}, and \texttt{L3}=\texttt{hj\_pil}. A dependency-free validator is included to reject the exploratory artifact and to enforce shared test identities and matched positive exposure before primary metrics are accepted.
 
 \section{What was treated as an instruction versus a request}
 
-The user’s request was to complete and document the run, produce a reusable package, and pursue the next analyses. The attached project documents specify the intended data rules, independent audit definitions, and stop conditions. Their role was to constrain the analysis, not to manufacture missing outcomes. For example, the project’s readiness document says that a high forecast score alone would never satisfy the gate; that statement is compatible with this report’s emphasis on data integrity and manipulation checks. The short physics screen below exercises the implementation, but the documents’ full physics manipulation, rolling replication, human audit, and prospective blind-validation requirements remain open.
+The user’s request was to complete and document the run, produce a reusable package, and pursue the next analyses. The attached project documents specify the intended data rules, independent audit definitions, and stop conditions. Their role was to constrain the analysis, not to manufacture missing outcomes. For example, the project’s readiness document says that a high forecast score alone would never satisfy the gate; that statement is compatible with this report’s emphasis on data integrity and manipulation checks. The short physics screen below exercises the implementation, and the remote continuation records the completed 1,200-step train-only gate. The documents’ full physics manipulation, rolling replication, human audit, and prospective blind-validation requirements remain open because the generic gate failed before utility evaluation.
 
 The continuation review also identified a nomenclature mismatch between an older seven-arm implementation and the requested primary matrix. The older morphology controls remain auxiliary. The validator and the frozen protocol file in the package make the distinction explicit: \texttt{Rw} is not a new data source, but a real-only control whose positive-class weight is computed once from the real training subset; \texttt{L0}, \texttt{L2}, and \texttt{L3} are the three synthetic additions that enter the primary comparison. This prevents a morphology-bootstrap result from being relabeled as a physics-transfer result.
 
@@ -254,7 +264,7 @@ where the cosine schedule supplies $\beta_t$, $\alpha_t=1-\beta_t$, and $\bar\al
   \mathcal{L}_{\mathrm{denoise}} = \mathbb{E}_{x_0,t,\epsilon}\left[\|\epsilon-\epsilon_\theta(x_t,t,y,\ell)\|_2^2\right].
 \end{equation}
 
-The BASE arm adds the generic calibration proxy with coefficient $\lambda_g=0.08$. The physics coefficients were retained in the checkpoint metadata for protocol consistency but their BASE contributions are zero because the condition is BASE and the physics arms were not run. The training history records the combined loss, denoising component, generic component, and the cosine learning rate.
+The original BASE arm adds the generic calibration proxy with coefficient $\lambda_g=0.08$. The physics coefficients were retained in its checkpoint metadata for protocol consistency but its BASE contributions are zero because that condition is BASE; the separate remote HJ and HJ+PIL arms are reported in the continuation section. The training history records the combined loss, denoising component, generic component, and the cosine learning rate.
 
 \section{Differentiable physics proxies}
 
@@ -522,7 +532,7 @@ This robustness run closes one narrow question: whether a fresh sampler seed can
 
 \section{Directions already executed}
 
-The report’s data audit, independent feature statistics, 3D exports, ensemble spread, metric correction, alternate sampling seed, v2 physics self-test, and 100-step HJ/PIL screen were all executed as part of the paper build. They are not speculative recommendations. Their scripts and machine-readable outputs are included in the package. The short screens do not close the full physics-to-utility gate.
+The report’s data audit, independent feature statistics, 3D exports, ensemble spread, metric correction, alternate sampling seed, v2 physics self-test, 100-step HJ/PIL screen, and remote 1,200-step train-only continuation were all executed as part of the paper build. They are not speculative recommendations. Their scripts and machine-readable outputs are included in the package. The remote gate failed before utility evaluation, so the full physics-to-utility result remains open.
 
 \section{Physics-constrained generator arms}
 
@@ -532,12 +542,36 @@ Before training, the v2 physics self-test passed. It produced zero quiet-field s
 
 The resulting 128-sample audits used the fixed 248-field real reference from the primary BASE audit, 64 identical conditioning groups, and 50-step DDIM sampling. The corrected generic distance ratios were 20.855 for HJ, 21.521 for PIL, and 20.081 for HJ+PIL, all above the broad 8.0 ceiling. The HJ hard-geometry distance was 0.573 and its hard-PIL distance was 1.652; the PIL arm’s corresponding values were 0.619 and 4.128; the combined arm’s were 0.576 and 3.729. The targeted loss was active in each arm, but the early checkpoint did not pass the generic gate. The complete machine-readable table is \texttt{tables/physics\_screening.csv}.
 
-These screens produce two useful results. First, the implementation path is executable, differentiable, cacheable, and output-isolated. Second, a short physics fine-tune can move a targeted descriptor without producing an acceptable overall generator. The HJ result is not a proof of physical improvement, because the hard geometry distance was not compared with a predeclared improvement margin and the generic gate failed. The PIL and combined results are likewise not evidence of transfer. The full 1,200-step arms remain required before any coefficient selection or downstream evaluation.
+These screens produce two useful results. First, the implementation path is executable, differentiable, cacheable, and output-isolated. Second, a short physics fine-tune can move a targeted descriptor without producing an acceptable overall generator. The HJ result is not a proof of physical improvement, because the hard geometry distance was not compared with a predeclared improvement margin and the generic gate failed. The PIL and combined results are likewise not evidence of transfer. The full 1,200-step arms were subsequently run remotely; their exact negative gate is reported in the next section.
 
 \FigurePage{fig:physics-screen}{physics_screening_comparison}{0.92}{Exploratory 100-step HJ/PIL physics-arm screen. The generic gate ratio remains above the broad threshold for every short screen; hard geometry and strong-PIL distances are shown as independent diagnostics.}
 \FigurePage{fig:physics-loss}{physics_screening_losses}{0.92}{Final loss components for the 100-step physics screens. Nonzero HJ and PIL components confirm that the intended differentiable constraints were active.}
 
 \IfFileExists{tables/physics_screening.tex}{\begin{table}[p]\centering\resizebox{\textwidth}{!}{\input{tables/physics_screening.tex}}\caption{Screening-arm metrics. The table is exploratory and is not a downstream utility result.}\label{tab:physics-screening}\end{table}}{\textit{Physics-screening table not generated.}}
+
+\section{Remote 1,200-step train-only continuation}
+
+To complete the next declared gate without heating the workstation, the optimized workflow was moved to GitHub Actions. Run \texttt{33469232832} restored the frozen evidence, reused the validated BASE FITS cache, trained a fresh positive-only BASE arm for 1,200 steps, initialized L2/HJ and L3/HJ+PIL from its identical checkpoint, and ran the independent train-only audits. All three model jobs completed successfully. The machine-readable receipt is \texttt{artifacts/remote\_physics\_gate\_33469232832.json}; the run and artifact inventory are recorded in \texttt{artifacts/remote\_primary\_run\_33469232832.md}.
+
+The result is a strict negative gate. The fresh remote BASE arm failed the generic fidelity gate at ratio 112.144, with hard-geometry distance 2.0618 and hard-PIL distance 52.0751. L2/HJ reduced those targeted distances to 0.5934 and 0.7041, corresponding to 71.22\% and 98.65\% improvement, but its generic ratio remained 9.417 and its generic gate failed. L3/HJ+PIL reduced them to 0.6347 and 1.1102, corresponding to 69.22\% and 97.87\% improvement, but its generic ratio remained 10.502 and its generic gate also failed.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Completed remote train-only gate. Targeted distances improved, but the broad generic gate failed for every fresh arm.}
+\label{tab:remote-physics-gate}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Arm & Generic ratio & Geometry distance & PIL distance & Geometry improvement & PIL improvement & Gate \\
+\midrule
+BASE & 112.1441 & 2.0618 & 52.0751 & -- & -- & FAIL \\
+L2/HJ & 9.4172 & 0.5934 & 0.7041 & 71.22\% & 98.65\% & FAIL \\
+L3/HJ+PIL & 10.5017 & 0.6347 & 1.1102 & 69.22\% & 97.87\% & FAIL \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Because the generic gate failed, the workflow did not train or evaluate the exact primary forecasting matrix \texttt{R}/\texttt{Rw}/\texttt{D}/\texttt{L0}/\texttt{L2}/\texttt{L3}. No forecast metrics were accessed. This is not a stalled run: it is the protocol’s intended fail-closed outcome, and it identifies the next work as improving or replicating the generator under a frozen train-only admission test before any utility claim.
 
 \section{Selective destruction controls}
 
@@ -565,7 +599,7 @@ The offline acquisition-helper, FITS-cache, TAI-to-UTC, historical-repair, and d
 
 \section{Data expansion}
 
-The current cache contains \AcquiredCount{} FITS payloads, while the eligible primary manifest contains \PrimaryCount{} rows. Future full-scope work should acquire validation and test FITS only after the BASE and physics gates are frozen, and should keep those files in separate immutable directories. The full cache should not be confused with the selected training subset used here. A manifest-level acquisition receipt should record scope, missing counts, invalid counts, and checksums for every stage.
+The local BASE cache contains \AcquiredCount{} FITS payloads, while the eligible primary manifest contains \PrimaryCount{} rows. A separate remote acquisition run, 33470782803, then validated the complete downstream plan: 10,486/10,486 required FITS records, with zero missing and zero invalid, in the retained artifact \texttt{iris-complete-downstream-fits} (3,972,017,708 bytes). That complete cache was not silently substituted into the failed physics gate; the physics run’s reproducibility boundary remains the declared 5,273-file BASE seed. The full cache should not be confused with the selected training subset used here. A manifest-level acquisition receipt should record scope, missing counts, invalid counts, and checksums for every stage.
 
 \chapter{Discussion}
 
@@ -581,7 +615,7 @@ The project’s mechanistic question requires negative results to be legible. If
 
 \section{No forecasting conclusion}
 
-The input labels and chronological splits are designed for forecasting, but no forecaster was trained in this execution. The generated arrays were not inserted into an evaluation fold, and no TSS or other forecast utility metric was produced. It would be scientifically incorrect to infer a forecasting result from the generator audit. Any future report must retain this boundary in its abstract, figures, and README.
+The input labels and chronological splits are designed for forecasting, but no forecaster was trained in this execution. The remote train-only physics gate failed, so the generated arrays were not inserted into an evaluation fold and no TSS or other forecast utility metric was produced. It would be scientifically incorrect to infer a forecasting result from the generator audit or from the targeted-distance improvements. Any future report must retain this boundary in its abstract, figures, and README.
 
 \section{No causal magnetic-structure conclusion}
 
@@ -611,21 +645,21 @@ The main result is tied to a single completed checkpoint. The alternate sampling
 
 \section{Protocol completeness}
 
-The project’s 90-percent readiness document still lists full physics manipulation, rolling replication, prospective freeze, human audits, and archival eligibility as incomplete. The v2 self-test and 100-step screening arms are now executed evidence, but they do not satisfy the full physics manipulation gate or authorize downstream evaluation. These are not “missing pages” in this report; they are explicitly bounded scientific gates. The report is comprehensive about the runs that occurred, not a substitute for the remaining confirmatory experiments.
+The project’s 90-percent readiness document still lists full physics manipulation, rolling replication, prospective freeze, human audits, and archival eligibility as incomplete. The v2 self-test, 100-step screening arms, and remote 1,200-step BASE/HJ/HJ+PIL train-only continuation are now executed evidence, but the remote continuation failed the generic gate and therefore did not authorize downstream evaluation. These are not “missing pages” in this report; they are explicitly bounded scientific gates. The report is comprehensive about the runs that occurred, not a substitute for the remaining confirmatory experiments.
 
 \section{Continuation gate and artifact reconciliation}
 
 The full FITS cache, evidence manifest, and captured BASE checkpoint are present in the continuation archive and are checked by \texttt{scripts/validate\_primary\_matrix.py}. The validator is deliberately fail-closed. It refuses an artifact that contains only morphology arms, refuses an incomplete six-arm set, rejects unequal test identities, rejects unequal added-positive counts for \texttt{D}/\texttt{L0}/\texttt{L2}/\texttt{L3}, and rejects any explicit use of test metrics for selection. It is a structural admission check, not a replacement for the independent physics evaluator.
 
-The correct next sequence is therefore: restore the verified inputs; run a converged BASE train-only audit; fine-tune the HJ and HJ+PIL arms from the same BASE checkpoint; select or reject coefficients using only train/validation physics evidence; and only after that gate passes, run the exact primary matrix \texttt{R}/\texttt{Rw}/\texttt{D}/\texttt{L0}/\texttt{L2}/\texttt{L3}. The exploratory morphology summary is retained as a negative control for protocol discipline, not counted as completion of that sequence.
+The correct next sequence is therefore: preserve the negative gate; improve or replicate the generator under a predeclared train-only protocol; select or reject coefficients using only train/validation physics evidence; and only after a fresh gate passes, run the exact primary matrix \texttt{R}/\texttt{Rw}/\texttt{D}/\texttt{L0}/\texttt{L2}/\texttt{L3}. The exploratory morphology summary is retained as a negative control for protocol discipline, not counted as completion of that sequence.
 
 \chapter{Conclusion}
 
-The IRIS BASE run has been acquired, verified, executed, sampled, audited, visualized, and packaged. The data path passed for \AcquiredCount{} FITS records. The model reached step \BaseSteps{} from a step-400 resume and generated \SyntheticCount{} positive-conditioned arrays. The broad generic gate passed with flux, area, diversity, and saturation checks inside their declared floors.
+The IRIS BASE run has been acquired, verified, executed, sampled, audited, visualized, and packaged. The original data path passed for \AcquiredCount{} FITS records. The local model reached step \BaseSteps{} from a step-400 resume and generated \SyntheticCount{} positive-conditioned arrays. The original broad generic gate passed with flux, area, diversity, and saturation checks inside their declared floors. A fresh remote 1,200-step BASE/HJ/HJ+PIL continuation then completed its train-only audits but failed the generic admission gate.
 
-The more important result is the limitation: the corrected generic distance is \AuditDistanceRatio{} times the real split-half p90 reference, and the original six-dimensional metric was unstable because of near-zero saturation dispersion. Hard geometry and hard strong-PIL distributions remain displaced. The correct scientific conclusion is that BASE is an operational baseline with partial scalar calibration but substantial residual distribution mismatch. It should be used as the reference arm for the next train-only physics manipulation study, not as evidence of forecast improvement or a finished physical simulator.
+The more important result is the limitation: the original corrected generic distance is \AuditDistanceRatio{} times the real split-half p90 reference, while the fresh remote BASE ratio was 112.144. The original six-dimensional metric was unstable because of near-zero saturation dispersion, and the remote constrained arms still failed the generic gate despite large targeted-distance improvements. The correct scientific conclusion is that BASE is an operational baseline with substantial residual distribution mismatch. It should be improved or replicated under the frozen train-only gate, not used as evidence of forecast improvement or a finished physical simulator.
 
-The package is reproducible at the level of the captured source, evidence, cache, checkpoints, outputs, figures, tables, and hashes. The requested GitHub branch and release asset are now remotely verified: commit \texttt{25fe07971e607ddac8fef459cb6b886e2bc3f41d} is present on branch \texttt{codex/iris-base-report-2026-08-31}, and the full archive is present in release \texttt{iris-2026-08-31} with its recorded byte count and SHA-256. The raw FITS archive is too large for an ordinary Git commit, so it is preserved as the verified release asset while the report, manifests, checksums, and code are committed directly.
+The package is reproducible at the level of the captured source, evidence, BASE cache, checkpoints, outputs, figures, tables, and hashes. The remote physics artifacts and complete downstream FITS artifact are retained with their workflow runs; the exact final commit, archive byte count, and SHA-256 are recorded in the external \texttt{IRIS\_ARCHIVE\_AUDIT\_2026-09-01.json} receipt and checked by the fail-closed preservation verifier. The raw FITS archive is too large for an ordinary Git commit, so it is preserved through the release/action artifacts while the report, manifests, checksums, and code are committed directly.
 
 \appendix
 \chapter{Complete numerical tables}
@@ -833,9 +867,9 @@ Requirement & Status & Evidence or remaining boundary \\
 40+ page report & PASS & Compiled PDF is 61 dense A4 pages after removing forced blank figure pages. \\
 Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenance receipts included. \\
 Outputs, graphs, and 3D & PASS & 27 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
-Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
+Future-direction experiments & PARTIAL & Self-test passed, three 100-step screens ran, and remote 1,200-step BASE/HJ/HJ+PIL arms completed; the generic gate failed before downstream utility. \\
 Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
-GitHub preservation & PASS & Branch commit and release asset verified remotely; full archive size is 2,125,488,303 bytes and SHA-256 is \texttt{5315c4184caf6e96c100b4d304c777e17a14d86625f3c8465ac32b88b13e985e}. \\
+GitHub preservation & PASS & Branch commit and release asset are verified remotely; exact commit, byte count, and SHA-256 are recorded in the external archive-audit receipt. \\
 Local deletion & NOT STARTED & Remote preservation is verified; deletion remains withheld pending an explicit, bounded IRIS-only cleanup action. \\
 \bottomrule
 \end{longtable}

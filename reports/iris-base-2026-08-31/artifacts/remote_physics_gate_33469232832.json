@@ -1,0 +1,35 @@
+{
+  "run_id": 33469232832,
+  "run_url": "https://github.com/fr3ddykru3g3r/silver-engine/actions/runs/33469232832",
+  "phase": "TRAIN_ONLY_CONVERGED_BASE_PHYSICS_GATE",
+  "forecast_metrics_accessed": false,
+  "base": {
+    "generic_gate_pass": false,
+    "generic_distance_ratio": 112.14414306054654,
+    "geometry_distance": 2.0618364810943604,
+    "pil_distance": 52.07514953613281
+  },
+  "arms": [
+    {
+      "arm": "L2/HJ",
+      "generic_gate_pass": false,
+      "generic_distance_ratio": 9.417223218909157,
+      "geometry_distance": 0.5934457778930664,
+      "pil_distance": 0.7040653228759766,
+      "geometry_improvement_vs_base": 0.7121761190402047,
+      "pil_improvement_vs_base": 0.986479821389904,
+      "pass": false
+    },
+    {
+      "arm": "L3/HJ+PIL",
+      "generic_gate_pass": false,
+      "generic_distance_ratio": 10.501655196598769,
+      "geometry_distance": 0.634678840637207,
+      "pil_distance": 1.110212802886963,
+      "geometry_improvement_vs_base": 0.6921778974924633,
+      "pil_improvement_vs_base": 0.9786805642849545,
+      "pass": false
+    }
+  ],
+  "status": "FAIL"
+}

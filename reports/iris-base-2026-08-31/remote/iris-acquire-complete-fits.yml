@@ -1,0 +1,65 @@
+name: IRIS Complete Downstream FITS Acquisition
+
+on:
+  push:
+    branches: [codex/iris-base-report-2026-08-31]
+    paths:
+      - '.github/workflows/iris-acquire-complete-fits.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  EVIDENCE_RUN: '32937498427'
+  FIT_ARCHIVE: 'IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip'
+  RUN_REVISION: '2'
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  acquire:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 600
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install acquisition runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install 'numpy>=2.0' 'pandas>=2.2' 'requests>=2.32' 'astropy>=6.1'
+      - name: Restore and repair frozen evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_bundle evidence
+          gh run download "$EVIDENCE_RUN" -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+      - name: Seed from the preserved BASE FITS cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p fits_cache
+          gh release download iris-2026-08-31 --repo fr3ddykru3g3r/silver-engine \
+            --pattern "$FIT_ARCHIVE" --dir fits_cache_bundle
+          unzip -q "fits_cache_bundle/$FIT_ARCHIVE" 'fits/*.fits' -d fits_cache
+      - name: Acquire only missing downstream records
+        run: |
+          set -euo pipefail
+          python iris-model/acquire_complete_fits.py \
+            --evidence-dir evidence --output-dir fits_cache/fits \
+            --seed 2026 --workers 8
+          test "$(find fits_cache/fits -type f -name '*.fits' | wc -l | tr -d ' ')" = 10486
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-complete-downstream-fits
+          path: fits_cache/fits
+          retention-days: 30

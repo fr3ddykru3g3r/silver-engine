@@ -1,0 +1,14 @@
+{
+  "run_id": 33470782803,
+  "run_url": "https://github.com/fr3ddykru3g3r/silver-engine/actions/runs/33470782803",
+  "branch": "codex/iris-base-report-2026-08-31",
+  "revision": "7cc676fe5d92c8d67d0c6da1ee87da077bcef0e4",
+  "artifact": "iris-complete-downstream-fits",
+  "artifact_bytes": 3972017708,
+  "planned_unique_records": 10486,
+  "valid_records": 10486,
+  "missing_records": 0,
+  "invalid_records": 0,
+  "status": "PASS",
+  "purpose": "complete downstream FITS cache; separate from the 5273-file BASE seed used by the physics gate"
+}

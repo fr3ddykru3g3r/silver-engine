@@ -44,8 +44,17 @@ cannot replace `L3`.
 
 ## Gate status
 
-The full FITS/evidence/checkpoint inputs are locally present and can be
-validated without reacquisition. The long confirmatory physics gate and the
-locked downstream matrix still require an off-laptop execution environment.
-No new generator, CNN, forecasting, or test result is fabricated in this
-reconciliation note.
+The long confirmatory train-only physics gate was executed off-laptop in
+Actions run `33469232832`. Fresh BASE, L2/HJ, and L3/HJ+PIL 1,200-step arms
+completed their independent audits. The gate failed because the fresh BASE
+generic ratio was `112.144`, L2/HJ was `9.417`, and L3/HJ+PIL was `10.502`,
+all above the generic ceiling. Targeted geometry/PIL distances improved, but
+that does not override the generic admission rule. The exact receipt is
+`artifacts/remote_physics_gate_33469232832.json`.
+
+The exact downstream matrix was therefore correctly skipped. No CNN,
+forecasting, TSS, or test result is fabricated in this reconciliation note.
+The complete downstream FITS plan was nevertheless acquired and strictly
+validated in Actions run `33470782803` as artifact
+`iris-complete-downstream-fits`: 10,486/10,486 required records, zero missing,
+zero invalid.

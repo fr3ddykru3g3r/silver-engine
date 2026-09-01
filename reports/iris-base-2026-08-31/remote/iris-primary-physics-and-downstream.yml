@@ -14,7 +14,7 @@ permissions:
 env:
   EVIDENCE_RUN: '32937498427'
   SEED: '2026'
-  RUN_REVISION: '5-resume-exact-base-config'
+  RUN_REVISION: '4'
   FIT_ARCHIVE: 'IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip'
   PYTHONUNBUFFERED: '1'
 
@@ -53,12 +53,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p fits_bundle fits_source resume_bundle
+          mkdir -p fits_bundle fits_source
           gh release download iris-2026-08-31 --repo fr3ddykru3g3r/silver-engine \
             --pattern "$FIT_ARCHIVE" --dir fits_bundle
           unzip -q "fits_bundle/$FIT_ARCHIVE" 'fits/*.fits' -d fits_source
-          unzip -q "fits_bundle/$FIT_ARCHIVE" \
-            'work/runs/base/outputs/base/generator_step_400.pt' -d resume_bundle
           fits_count=$(find fits_source/fits -type f -name '*.fits' | wc -l | tr -d ' ')
           test "$fits_count" = 5273
           python - <<'PY'
@@ -75,11 +73,12 @@ jobs:
       - name: Run positive-only BASE convergence
         run: |
           set -euo pipefail
-          python iris_local_resume_generator.py \
-            --source-dir . --evidence-dir evidence --fits-source fits_source/fits \
-            --checkpoint resume_bundle/work/runs/base/outputs/base/generator_step_400.pt \
-            --out-dir physics/base --target-steps 1200 --threads 2 \
-            --checkpoint-every 200 --prepared-cache cache/base_prepared
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/base --out-dir physics/base \
+            --condition base --seed "$SEED" --per-group 4 \
+            --batch-size 16 --physics-batch-size 16 --base-channels 16 \
+            --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 \
+            --download-workers 16 --threads 2 --checkpoint-every 200
           checkpoint=$(find physics/base -name generator.pt -print -quit)
           test -n "$checkpoint"
           python iris-model/sample_generator.py \
@@ -173,13 +172,10 @@ jobs:
             --evidence-dir evidence --cache-dir cache/${{ matrix.condition }} \
             --out-dir physics/${{ matrix.condition }} --condition ${{ matrix.condition }} \
             --seed "$SEED" --init-checkpoint "$checkpoint" --per-group 4 \
-            --batch-size 16 --physics-batch-size 16 --base-channels 24 \
+            --batch-size 16 --physics-batch-size 16 --base-channels 16 \
             --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 \
             --lambda-hj ${{ matrix.lambda_hj }} --lambda-pil ${{ matrix.lambda_pil }} \
-            --lambda-generic 0.08 --lr 0.0001 --lr-schedule cosine \
-            --ema-decay 0.995 --ema-warmup-steps 100 \
-            --download-workers 16 --threads 2 --checkpoint-every 200 \
-            --prepared-cache cache/${{ matrix.condition }}_prepared
+            --download-workers 16 --threads 2 --checkpoint-every 200
           checkpoint=$(find physics/${{ matrix.condition }} -name generator.pt -print -quit)
           test -n "$checkpoint"
           python iris-model/sample_generator.py \

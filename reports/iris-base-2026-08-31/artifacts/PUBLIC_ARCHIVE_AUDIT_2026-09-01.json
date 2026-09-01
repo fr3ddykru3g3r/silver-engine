@@ -5,20 +5,35 @@
   "publication_branch": "codex/iris-base-report-2026-08-31",
   "report": {
     "pdf": "report.pdf",
-    "pdf_pages": 88,
-    "pdf_bytes": 2711972,
-    "pdf_sha256": "f4864e138342014f8b96df1ffcf1beec9b39e8eacb322f37bc3a904d6e148ce8",
+    "pdf_pages": 53,
+    "pdf_bytes": 2704215,
+    "pdf_sha256": "972027bde652efba4c73193cb40027fcd5266eab5de15978f42e8cce2079afd2",
     "report_zip": "IRIS_BASE_REPORT_PACKAGE_2026-08-31.zip",
-    "report_zip_bytes": 17854591,
-    "report_zip_sha256": "6748c8adc776feaa3db36b689b53886363313badde3fc566f38d1efd4339c8ad"
+    "report_zip_bytes": 12883643,
+    "report_zip_sha256": "c9a82af04a279490b2eb6e7ce3845aadcecebf795d08c5207aac4e723c8b4f59"
   },
   "full_bundle": {
     "zip": "IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip",
-    "zip_bytes": 2125490043,
-    "zip_sha256": "ae00440eca3ddbf07a64fdf246c17c3af93d0b36ee7848ab42c30c0c1625fd8b",
-    "zip_entries": 7448,
+    "zip_bytes": 2125608164,
+    "zip_sha256": "673cf5304be2d81b535670daa78a3ce6573e605f01b1e9e43a895d2d00b97324",
+    "zip_entries": 7465,
     "verified_fits_entries": 5273,
     "zip_test": "PASS"
+  },
+  "remote_continuation": {
+    "physics_run_id": 33469232832,
+    "physics_status": "FAIL",
+    "forecast_metrics_accessed": false,
+    "downstream_matrix": "SKIPPED_BY_FAIL_CLOSED_GATE",
+    "base_generic_distance_ratio": 112.14414306054654,
+    "l2_hj_generic_distance_ratio": 9.417223218909157,
+    "l3_hj_pil_generic_distance_ratio": 10.501655196598769,
+    "complete_fits_run_id": 33470782803,
+    "complete_fits_artifact": "iris-complete-downstream-fits",
+    "complete_fits_artifact_bytes": 3972017708,
+    "complete_fits_valid_records": 10486,
+    "complete_fits_missing_records": 0,
+    "complete_fits_invalid_records": 0
   },
   "remote_verification_policy": "Verify the release asset name, byte count, and SHA-256 before deleting any local IRIS data."
 }

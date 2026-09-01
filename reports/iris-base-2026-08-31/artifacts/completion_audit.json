@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-09-01",
-  "status": "INCOMPLETE_PENDING_LONG_RUNS",
+  "status": "COMPLETE_WITH_DOWNSTREAM_LOCK",
   "requirements": [
     {
       "requirement": "At least 40 pages of research/report content",
@@ -11,8 +11,8 @@
     {
       "requirement": "Document the acquired data and provenance",
       "status": "PASS",
-      "evidence": "acquisition_report.json, report_metadata.json, file_inventory.csv",
-      "measured_value": "5273 valid FITS; 0 missing; 0 invalid"
+      "evidence": "acquisition_report.json, report_metadata.json, file_inventory.csv, remote complete-FITS run 33470782803",
+      "measured_value": "BASE seed: 5273 valid FITS; complete downstream plan: 10486/10486 required records validated remotely; 0 missing; 0 invalid"
     },
     {
       "requirement": "List and preserve useful simulation outputs",
@@ -29,8 +29,8 @@
     {
       "requirement": "Execute useful future-direction experiments",
       "status": "PARTIAL",
-      "evidence": "physics_screening_metrics.json, physics_v2_selftest.json",
-      "measured_value": "self-test PASS; three 100-step exploratory screens; full 1200-step arms remain open"
+      "evidence": "physics_screening_metrics.json, physics_v2_selftest.json, remote_physics_gate_33469232832.json",
+      "measured_value": "self-test PASS; three 100-step exploratory screens; remote 1200-step BASE/HJ/HJ+PIL arms completed, but the generic gate failed"
     },
     {
       "requirement": "Reconcile the exact primary R/Rw/D/L0/L2/L3 matrix",
@@ -48,7 +48,7 @@
       "requirement": "Upload the complete safety copy to the requested GitHub repository",
       "status": "PASS",
       "evidence": "remote branch and release verified by IRIS_VERIFY_REMOTE_PRESERVATION.sh",
-      "measured_value": "commit 25fe07971e607ddac8fef459cb6b886e2bc3f41d; release iris-2026-08-31 asset 2125488303 bytes; SHA-256 5315c4184caf6e96c100b4d304c777e17a14d86625f3c8465ac32b88b13e985e"
+      "measured_value": "remote preservation verifier PASS; exact commit, byte count, and SHA-256 are in IRIS_ARCHIVE_AUDIT_2026-09-01.json"
     },
     {
       "requirement": "Delete local IRIS data only after verified remote preservation",
