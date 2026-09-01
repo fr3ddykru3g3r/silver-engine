@@ -6,16 +6,16 @@
   "report": {
     "pdf": "report.pdf",
     "pdf_pages": 88,
-    "pdf_bytes": 2711770,
-    "pdf_sha256": "bfc2f9e7329c61117c7ec312d5bdacf04c7dd05de389f4c029a291cb28b16da1",
+    "pdf_bytes": 2711972,
+    "pdf_sha256": "f4864e138342014f8b96df1ffcf1beec9b39e8eacb322f37bc3a904d6e148ce8",
     "report_zip": "IRIS_BASE_REPORT_PACKAGE_2026-08-31.zip",
-    "report_zip_bytes": 17852851,
-    "report_zip_sha256": "b3dc219ca03a984e26ec442008fb2c07f4c7d2ea6436b38883e068d20fba54fd"
+    "report_zip_bytes": 17854591,
+    "report_zip_sha256": "6748c8adc776feaa3db36b689b53886363313badde3fc566f38d1efd4339c8ad"
   },
   "full_bundle": {
     "zip": "IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip",
-    "zip_bytes": 2125488303,
-    "zip_sha256": "5315c4184caf6e96c100b4d304c777e17a14d86625f3c8465ac32b88b13e985e",
+    "zip_bytes": 2125490043,
+    "zip_sha256": "ae00440eca3ddbf07a64fdf246c17c3af93d0b36ee7848ab42c30c0c1625fd8b",
     "zip_entries": 7448,
     "verified_fits_entries": 5273,
     "zip_test": "PASS"

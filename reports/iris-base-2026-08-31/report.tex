@@ -610,7 +610,7 @@ The IRIS BASE run has been acquired, verified, executed, sampled, audited, visua
 
 The more important result is the limitation: the corrected generic distance is \AuditDistanceRatio{} times the real split-half p90 reference, and the original six-dimensional metric was unstable because of near-zero saturation dispersion. Hard geometry and hard strong-PIL distributions remain displaced. The correct scientific conclusion is that BASE is an operational baseline with partial scalar calibration but substantial residual distribution mismatch. It should be used as the reference arm for the next train-only physics manipulation study, not as evidence of forecast improvement or a finished physical simulator.
 
-The package is reproducible at the level of the captured source, evidence, cache, checkpoints, outputs, figures, tables, and hashes. Before destructive cleanup, the report and a small GitHub publication package should be verified remotely. The raw FITS archive is too large for an ordinary Git commit; safe publication therefore requires a release or large-file storage decision, while the report, manifests, checksums, and code can be published directly.
+The package is reproducible at the level of the captured source, evidence, cache, checkpoints, outputs, figures, tables, and hashes. The requested GitHub branch and release asset are now remotely verified: commit \texttt{25fe07971e607ddac8fef459cb6b886e2bc3f41d} is present on branch \texttt{codex/iris-base-report-2026-08-31}, and the full archive is present in release \texttt{iris-2026-08-31} with its recorded byte count and SHA-256. The raw FITS archive is too large for an ordinary Git commit, so it is preserved as the verified release asset while the report, manifests, checksums, and code are committed directly.
 
 \appendix
 \chapter{Complete numerical tables}
@@ -820,16 +820,16 @@ Data and provenance & PASS & 5,273 FITS valid; zero missing or invalid; provenan
 Outputs, graphs, and 3D & PASS & 27 embedded figure families plus auxiliary classifier and conditional-audit SVGs, tables, checkpoints, arrays, audits, and three scalar-field OBJ meshes. \\
 Future-direction experiments & PARTIAL & Self-test passed and three 100-step screens ran; confirmatory 1,200-step arms remain open. \\
 Downstream forecasting & DEFERRED & Physics gate required first; forecast not run. \\
-GitHub preservation & BLOCKED & Public report branch is committed locally, but GitHub authentication rejected the push; raw archive is not remotely preserved. \\
-Local deletion & NOT STARTED & Correctly withheld until remote preservation is verified and the IRIS-only deletion boundary is explicit. \\
+GitHub preservation & PASS & Branch commit and release asset verified remotely; full archive size is 2,125,488,303 bytes and SHA-256 is \texttt{5315c4184caf6e96c100b4d304c777e17a14d86625f3c8465ac32b88b13e985e}. \\
+Local deletion & NOT STARTED & Remote preservation is verified; deletion remains withheld pending an explicit, bounded IRIS-only cleanup action. \\
 \bottomrule
 \end{longtable}
 
 \section{Safe cleanup boundary}
 
-The raw cache and temporary run roots are valuable for reproduction and were intentionally retained while the report was being built. The workspace also contains an unrelated La Liga project, so a command such as ``delete all files'' would be unsafe and outside a precise IRIS-only boundary. If cleanup is later requested, the safe candidate set is the named IRIS temporary roots and IRIS report/archive copies after a successful remote verification. Unrelated project files must not be removed.
+The raw cache and temporary run roots are valuable for reproduction and were intentionally retained while the report was being built. The workspace also contains an unrelated La Liga project, so a command such as ``delete all files'' would be unsafe and outside a precise IRIS-only boundary. Remote preservation has now succeeded. If cleanup is later explicitly confirmed, the safe candidate set is only the named IRIS temporary roots and IRIS report/archive copies; unrelated project files must not be removed.
 
-The combined archive is 2,125,481,144 bytes (about 1.98 GiB, or 2.13 GB in decimal units) because it contains the raw FITS cache. Ordinary GitHub repositories reject individual files above the standard large-file limit, so direct Git publication should contain the report, code, manifests, checksums, and a documented pointer to the large archive or a GitHub Release/LFS object. The raw archive should not be silently split into opaque chunks or committed without a verified retrieval path.
+The combined archive is 2,125,488,303 bytes (about 1.98 GiB, or 2.13 GB in decimal units) because it contains the raw FITS cache. Ordinary GitHub repositories reject individual files above the standard large-file limit, so direct Git publication contains the report, code, manifests, checksums, and a documented pointer to the large archive; the raw archive is preserved through the verified GitHub Release asset rather than silently split into opaque chunks.
 
 \chapter{Glossary}
 

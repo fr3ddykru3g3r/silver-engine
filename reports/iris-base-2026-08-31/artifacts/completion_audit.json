@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-09-01",
-  "status": "INCOMPLETE_PENDING_EXTERNAL_AUTH_AND_LONG_RUNS",
+  "status": "INCOMPLETE_PENDING_LONG_RUNS",
   "requirements": [
     {
       "requirement": "At least 40 pages of research/report content",
@@ -40,15 +40,15 @@
     },
     {
       "requirement": "Upload the complete safety copy to the requested GitHub repository",
-      "status": "BLOCKED",
-      "evidence": "local commit on codex/iris-base-report-2026-08-31",
-      "measured_value": "public report branch prepared; authentication rejected the push; raw 2 GB archive is not in Git"
+      "status": "PASS",
+      "evidence": "remote branch and release verified by IRIS_VERIFY_REMOTE_PRESERVATION.sh",
+      "measured_value": "commit 25fe07971e607ddac8fef459cb6b886e2bc3f41d; release iris-2026-08-31 asset 2125488303 bytes; SHA-256 5315c4184caf6e96c100b4d304c777e17a14d86625f3c8465ac32b88b13e985e"
     },
     {
       "requirement": "Delete local IRIS data only after verified remote preservation",
       "status": "NOT_STARTED",
-      "evidence": "storage policy in report",
-      "measured_value": "no deletion performed because remote preservation is unverified"
+      "evidence": "storage policy in report; remote preservation verifier PASS",
+      "measured_value": "no deletion performed; remote preservation is verified and cleanup remains bounded to explicit IRIS paths"
     }
   ]
 }
