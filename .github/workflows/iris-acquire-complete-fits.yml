@@ -1,6 +1,10 @@
 name: IRIS Complete Downstream FITS Acquisition
 
 on:
+  push:
+    branches: [codex/iris-base-report-2026-08-31]
+    paths:
+      - '.github/workflows/iris-acquire-complete-fits.yml'
   workflow_dispatch:
 
 permissions:
@@ -10,6 +14,7 @@ permissions:
 env:
   EVIDENCE_RUN: '32937498427'
   FIT_ARCHIVE: 'IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip'
+  RUN_REVISION: '2'
   PYTHONUNBUFFERED: '1'
 
 jobs:
