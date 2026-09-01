@@ -217,7 +217,10 @@ def main():
             physics_gradient_scale=1.0
             params=tuple(p for p in model.parameters() if p.requires_grad)
             if args.physics_gradient_ratio > 0 and physics_total.requires_grad:
-                denoise_grads=torch.autograd.grad(denoise,params,allow_unused=True)
+                # Both losses share the same forward graph. Retain it after
+                # the first gradient query so the physics gradient can be
+                # measured before the combined capped update is assembled.
+                denoise_grads=torch.autograd.grad(denoise,params,allow_unused=True,retain_graph=True)
                 physics_grads=torch.autograd.grad(physics_total,params,allow_unused=True)
                 denoise_norm_sq=sum((g.detach().square().sum() for g in denoise_grads if g is not None), torch.zeros((),device=denoise.device))
                 physics_norm_sq=sum((g.detach().square().sum() for g in physics_grads if g is not None), torch.zeros((),device=denoise.device))
