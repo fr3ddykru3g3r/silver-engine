@@ -14,13 +14,17 @@ permissions:
 env:
   EVIDENCE_RUN: '32937498427'
   SEED: '2026'
-  RUN_REVISION: '3'
+  RUN_REVISION: '4'
+  FIT_ARCHIVE: 'IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31.zip'
   PYTHONUNBUFFERED: '1'
 
 jobs:
   physics-base:
     runs-on: ubuntu-24.04
     timeout-minutes: 330
+    env:
+      IRIS_FITS_SOURCE: 'fits_source/fits'
+      IRIS_REQUIRE_LOCAL_FITS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,6 +48,28 @@ jobs:
           tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
           python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
           test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Restore the already-acquired FITS cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p fits_bundle fits_source
+          gh release download iris-2026-08-31 --repo fr3ddykru3g3r/silver-engine \
+            --pattern "$FIT_ARCHIVE" --dir fits_bundle
+          unzip -q "fits_bundle/$FIT_ARCHIVE" 'fits/*.fits' -d fits_source
+          fits_count=$(find fits_source/fits -type f -name '*.fits' | wc -l | tr -d ' ')
+          test "$fits_count" = 5273
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'iris-model')
+          from fit_cache import verify_local_cache
+          verify_local_cache(
+              'evidence', 'fits_source/fits',
+              run_base=True, run_physics=False, run_downstream=False,
+              seed=2026, strict=False,
+              write_report='fits_source/base_cache_report.json',
+          )
+          PY
       - name: Run positive-only BASE convergence
         run: |
           set -euo pipefail
@@ -86,6 +112,9 @@ jobs:
             lambda_pil: '0.10'
     runs-on: ubuntu-24.04
     timeout-minutes: 330
+    env:
+      IRIS_FITS_SOURCE: 'fits_source/fits'
+      IRIS_REQUIRE_LOCAL_FITS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,6 +137,28 @@ jobs:
           gh run download "$EVIDENCE_RUN" -n iris-historical-evidence-integrity -D evidence_bundle
           tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
           python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+      - name: Restore the already-acquired FITS cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p fits_bundle fits_source
+          gh release download iris-2026-08-31 --repo fr3ddykru3g3r/silver-engine \
+            --pattern "$FIT_ARCHIVE" --dir fits_bundle
+          unzip -q "fits_bundle/$FIT_ARCHIVE" 'fits/*.fits' -d fits_source
+          fits_count=$(find fits_source/fits -type f -name '*.fits' | wc -l | tr -d ' ')
+          test "$fits_count" = 5273
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'iris-model')
+          from fit_cache import verify_local_cache
+          verify_local_cache(
+              'evidence', 'fits_source/fits',
+              run_base=False, run_physics=True, run_downstream=False,
+              seed=2026, strict=False,
+              write_report='fits_source/physics_cache_report.json',
+          )
+          PY
       - uses: actions/download-artifact@v4
         with:
           name: physics-base
