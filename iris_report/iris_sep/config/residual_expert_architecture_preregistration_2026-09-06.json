@@ -1,0 +1,81 @@
+{
+  "status": "PREREGISTERED_BEFORE_RESIDUAL_EXPERT_SCORE",
+  "scope": "DEVELOPMENT_ONLY_ARCHITECTURE_DIAGNOSTIC",
+  "date": "2026-09-06",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "motivation": {
+    "empirical": "Raw full-context feature concatenation underperformed while modality-separated late fusion improved ranking and matched-detection FAR. The current compact neural architecture uses softmax competition between modality embeddings, which can suppress the strong solar representation when context branches receive gate mass.",
+    "systems_principles": [
+      "SPECIALIZE_BEFORE_FUSION",
+      "ANCHOR_STRONG_BASE_MODEL",
+      "CONTEXT_AS_BOUNDED_RESIDUAL_NOT_REPLACEMENT",
+      "PROBABILISTIC_ENSEMBLE_OVER_SINGLE_BEST_GUESS",
+      "QUALITY_GATES_USE_AVAILABILITY_NOT_HIGH_DIMENSIONAL_RAW_FEATURES",
+      "KEEP_VALIDITY_ENVELOPE_SEPARATE_FROM_FORECAST_SCORE"
+    ],
+    "external_design_inspiration": [
+      "WeatherNext_2_function_space_probabilistic_ensembles",
+      "WeatherNext_3_direct_observation_ingestion_and_specialized_outputs",
+      "GraphCast_encoder_processor_decoder_structure",
+      "NeuralGCM_explicit_physics_ML_role_separation",
+      "GenCast_ensemble_tail_risk_emphasis"
+    ]
+  },
+  "architecture": {
+    "name": "IRIS_RESIDUAL_EXPERT_V1",
+    "experts": {
+      "solar_anchor": "5-seed median XGBoost on BASE_SOLAR causal features",
+      "xrs_context": "5-seed median XGBoost on XRS-only causal features",
+      "proton_context": "5-seed median XGBoost on proton-only causal features"
+    },
+    "fusion_equation": "logit(p)=logit(p_solar)+b+w_xrs*r_xrs*clip(logit(p_xrs)-logit(pi),-4,4)+w_proton*r_proton*clip(logit(p_proton)-logit(pi),-4,4)",
+    "constraints": {
+      "solar_coefficient": 1.0,
+      "context_weights": "nonnegative via softplus",
+      "context_residual_logit_limit": 4.0,
+      "xrs_reliability": "fraction of finite XRS features in the issue row",
+      "proton_reliability": "fraction of finite proton features in the issue row",
+      "fully_missing_context_contribution": 0.0,
+      "l2_weight": 0.05,
+      "initial_context_weight": 0.50
+    },
+    "fusion_fit_role": "calibration",
+    "threshold_fit_role": "threshold",
+    "seed_aggregation": "median specialist probability before fusion"
+  },
+  "xgboost_specialists": {
+    "seeds": [7, 13, 26, 42, 73],
+    "n_estimators": 500,
+    "learning_rate": 0.03,
+    "max_depth": 3,
+    "min_child_weight": 5,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.0,
+    "scale_pos_weight": "fit prevalence inverse odds",
+    "tree_method": "hist"
+  },
+  "cohort": {
+    "feature_table_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "event_catalogue_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+    "roles": ["fit", "calibration", "threshold", "score", "monitor"],
+    "monitor_start": "2023-07-31T00:00:00Z",
+    "score_and_monitor_already_inspected": true,
+    "purge_hours": 24
+  },
+  "decision_policies": ["MAX_TSS", "POD80_MIN_FAR"],
+  "comparators": [
+    "BASE_SOLAR",
+    "LATE_FUSION_SOLAR_XRS_PROTON"
+  ],
+  "metrics": ["TSS", "HSS", "POD", "FPR", "FAR", "BRIER", "BRIER_SKILL", "ECE", "AUPRC", "AUROC"],
+  "matched_detection_pod": [0.6, 0.7, 0.8, 0.9],
+  "paired_bootstrap": {
+    "replicates": 10000,
+    "unit": "complete SEP episode / predeclared quiet block"
+  },
+  "selection_rule": "Do not tune this architecture after seeing score/monitor output. Promote it over current late fusion only if it improves or preserves ranking/calibration while improving operational TSS/FAR robustness across both score and monitor; otherwise retain current late fusion and preserve this as a negative result.",
+  "claim_rule": "This is already-inspected development evidence only. It cannot establish external superiority or final generalization."
+}
