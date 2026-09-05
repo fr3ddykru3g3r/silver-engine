@@ -40,6 +40,38 @@ Then we run the same SEP forecaster with each version and ask the question that 
 
 A physics reconstruction only survives if it performs better than the simpler methods on the same hidden-data cases.
 
+## What is built now
+
+The experiment is now implemented in code.
+
+The forecast-side runner trains a simple reference forecaster on normal train-only data, freezes it, and only then pretends that some score-time measurements disappeared. It compares:
+
+- leaving the measurement missing;
+- filling it with a value learned from the training data;
+- carrying forward the last earlier real value.
+
+The physics-side runner works on magnetic maps. Its first physics model is intentionally easy to explain:
+
+> **Take the last real magnetic map, move it sideways as the Sun carries the magnetic pattern around, and let the pattern spread a little.**
+
+Mathematically this is a small advection-and-diffusion model. It is **not** a full simulation of the Sun and it is **not** MHD.
+
+We test that physics model by hiding real later magnetic maps and asking whether it predicts them better than the simplest alternative: just reusing the last real map unchanged.
+
+The code also enforces several rules automatically:
+
+- a measurement that never existed in an older instrument era cannot be turned into fake "observed" data;
+- a hidden value cannot leak back into the model through the input array;
+- a hidden magnetic map can use only an earlier real map, never a later map;
+- two missing maps in a row do not use one synthetic map to create the next one;
+- if there is no earlier real magnetic map, the physics method abstains;
+- locked-test roles are rejected before fitting or scoring;
+- the forecaster is not retrained after the artificial outage.
+
+The complete source build currently passes **81 automated tests** plus compile checks on the pinned source-test environment.
+
+What has **not** happened yet is the real-data scientific experiment. The verified train-only NEW-crossing package and the verified train-only magnetic-map package are not stored in ordinary Git, so the real comparison has not been fabricated from substitute or locked data.
+
 ## What we measure
 
 For the missing solar measurement itself, we measure how close each reconstruction is to the real hidden value.
