@@ -6,6 +6,7 @@ on:
       - codex/iris-sep-continuation-20260905
     paths:
       - 'iris_report/iris_sep/src/**'
+      - 'iris_report/iris_sep/config/missingness_recovery_contract_v1.json'
       - 'iris_report/iris_sep/tools/run_compact_nonfinite_replay.py'
       - 'iris_report/iris_sep/tests/test_pilot_replay.py'
       - 'iris_report/iris_sep/tests/test_pilot_admission_v2.py'
@@ -16,6 +17,7 @@ on:
       - 'iris_report/iris_sep/tests/test_compact_nonfinite_replay_tool.py'
       - 'iris_report/iris_sep/tests/test_missingness_recovery.py'
       - 'iris_report/iris_sep/tests/test_missingness_audit.py'
+      - 'iris_report/iris_sep/tests/test_missingness_contract.py'
       - '.github/workflows/iris-sep-source-only.yml'
   workflow_dispatch:
 
@@ -66,7 +68,8 @@ jobs:
             iris_report.iris_sep.tests.test_compact_layer_replay \
             iris_report.iris_sep.tests.test_compact_nonfinite_replay_tool \
             iris_report.iris_sep.tests.test_missingness_recovery \
-            iris_report.iris_sep.tests.test_missingness_audit -v
+            iris_report.iris_sep.tests.test_missingness_audit \
+            iris_report.iris_sep.tests.test_missingness_contract -v
 
       - name: Compile changed source and tests
         run: |
@@ -80,4 +83,5 @@ jobs:
             iris_report/iris_sep/tests/test_compact_layer_replay.py \
             iris_report/iris_sep/tests/test_compact_nonfinite_replay_tool.py \
             iris_report/iris_sep/tests/test_missingness_recovery.py \
-            iris_report/iris_sep/tests/test_missingness_audit.py
+            iris_report/iris_sep/tests/test_missingness_audit.py \
+            iris_report/iris_sep/tests/test_missingness_contract.py
