@@ -1,0 +1,76 @@
+{
+  "status": "PRE_RESULT_PREREGISTRATION_FOR_NEW_DIAGNOSTIC",
+  "scope": "DEVELOPMENT_ONLY_ALREADY_INSPECTED_2023_2025_MONITOR_NOT_FINAL_EVIDENCE",
+  "created_after_public_new_crossing_run": 33981123987,
+  "parent_head": "02756e40be0c7ea353f94942918891888612654a",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "prior_monitor_results_have_been_seen": true,
+  "prior_findings_motivating_this_test": {
+    "XGBOOST_BASE_SOLAR_TSS": 0.20377512856474989,
+    "XGBOOST_BASE_PLUS_XRS_TSS": 0.2366760168302945,
+    "XGBOOST_BASE_PLUS_PROTON_TSS": 0.06632772323515668,
+    "XGBOOST_FULL_CONTEXT_TSS": 0.05651005142590004,
+    "FULL_CONTEXT_MINUS_BASE_SOLAR_BOOTSTRAP_95_CI": [-0.17934002869440457, -0.11684735366148628],
+    "interpretation": "Naive feature concatenation causes strong context interference; XRS retains a possible positive signal while proton context improves ranking but destabilizes thresholded decisions."
+  },
+  "hypotheses": [
+    "Restricting fit support to the SDO/HMI era reduces source-regime mismatch on recent forecasts.",
+    "Late fusion of separately learned solar and XRS probabilities reduces destructive modality interference relative to feature concatenation.",
+    "Adding a separately learned proton probability to late fusion either adds robust information or is rejected without further proton architecture search."
+  ],
+  "data_contract": {
+    "SEP_PRISM_commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+    "feature_table_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "event_catalogue_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+    "already_active_issue_times_excluded": true,
+    "future_columns_excluded": true,
+    "CLEAR_OSEP_GSEP_catalogue_labels_excluded_from_learned_models": true
+  },
+  "training_scopes": {
+    "ALL_HISTORY": "all eligible development rows before the fixed monitor start",
+    "SDO_HMI_ERA": "eligible rows at or after 2010-05-01 and before the fixed monitor start"
+  },
+  "fixed_monitor": {
+    "start_inclusive": "2023-07-31T00:00:00Z",
+    "end_inclusive_from_source": "2025-09-10T00:00:00Z",
+    "use": "development monitor only; cannot become fresh final evidence"
+  },
+  "within_scope_split": {
+    "method": "hardened contiguous event and seven-day quiet units",
+    "positive_unit_quotas": "70/10/10/10 fit/calibration/threshold/inner_score",
+    "purge_hours": 24,
+    "roles_chronological": true,
+    "episode_disjoint": true
+  },
+  "model_contract": {
+    "xgboost_hyperparameters": "identical to run_public_new_crossing_benchmark.py",
+    "xgboost_seeds": [7, 13, 26, 42, 73],
+    "seed_aggregation": "median probability",
+    "direct_model_calibration": "logit intercept on calibration role",
+    "stacker": "L2 logistic regression C=1.0 on calibration-role component logits only",
+    "threshold_selection": "maximum TSS on threshold role with lowest-threshold tie break",
+    "arms_per_training_scope": [
+      "BASE_SOLAR",
+      "BASE_PLUS_XRS",
+      "BASE_PLUS_PROTON",
+      "LATE_FUSION_SOLAR_XRS",
+      "LATE_FUSION_SOLAR_XRS_PROTON"
+    ],
+    "no_hyperparameter_sweep": true
+  },
+  "evaluation": {
+    "primary": "TSS",
+    "secondary": ["FAR", "POD", "FPR", "HSS", "AUPRC", "AUROC", "BRIER", "ECE"],
+    "matched_detection_primary_POD": 0.8,
+    "paired_bootstrap_replicates": 10000,
+    "paired_bootstrap_unit": "complete event or quiet unit"
+  },
+  "decision_rule": "A mechanism is promising only if it improves TSS on the within-scope inner score and does not materially worsen matched-detection FAR; the already-inspected 2023-2025 monitor is corroborative development evidence only. No final superiority claim is allowed from this experiment.",
+  "forbidden": [
+    "locked-test access",
+    "post-result hyperparameter changes inside this experiment",
+    "calling the monitor fresh evidence",
+    "award or operational superiority claims"
+  ]
+}
