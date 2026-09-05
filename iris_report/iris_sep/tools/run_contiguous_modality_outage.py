@@ -30,6 +30,7 @@ MODALITIES = ("XRS", "PROTON", "XRS_AND_PROTON")
 ARMS = transfer.ARMS
 START_FRACTIONS = (0.10, 0.30, 0.50, 0.70, 0.90)
 SEED = 20260906
+HOUR_NS = 3600 * 10**9
 
 
 def finite_or_none(value):
@@ -45,27 +46,48 @@ def save_json(path: Path, value) -> None:
     path.write_text(json.dumps(finite_or_none(value), indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
 
 
-def deterministic_block_starts(n_rows: int, length: int) -> list[int]:
+def deterministic_block_starts(score_times: pd.Series, length: int) -> list[int]:
+    """Choose label-blind quantile starts among truly contiguous hourly runs.
+
+    Score identities legitimately contain gaps from target eligibility/purging.
+    A candidate start is admissible only when the complete requested outage
+    occupies consecutive one-hour issue times. The 10/30/50/70/90% placements
+    are then taken over this admissible-start range exactly as preregistered.
+    """
+    times = pd.Series(score_times).reset_index(drop=True)
+    n_rows = len(times)
     if length <= 0 or n_rows <= length:
         raise ValueError("outage length incompatible with score rows")
-    max_start = n_rows - length
-    starts = [int(round(f * max_start)) for f in START_FRACTIONS]
+    ns = times.astype("int64").to_numpy(dtype=np.int64)
+    admissible = []
+    for start in range(0, n_rows - length + 1):
+        segment = ns[start:start + length]
+        if len(segment) == length and (length == 1 or np.all(np.diff(segment) == HOUR_NS)):
+            admissible.append(start)
+    if len(admissible) < len(START_FRACTIONS):
+        raise ValueError(f"too few admissible contiguous {length}-hour starts: {len(admissible)}")
+    positions = [int(round(f * (len(admissible) - 1))) for f in START_FRACTIONS]
+    starts = [int(admissible[p]) for p in positions]
     if len(set(starts)) != len(starts):
-        raise ValueError("deterministic block starts collide")
+        raise ValueError("deterministic admissible block starts collide")
     ordered = sorted(starts)
     if any(b < a + length for a, b in zip(ordered, ordered[1:])):
         raise ValueError("deterministic outage blocks overlap")
     return starts
 
 
-def scenario_holdout(observed, score_rows, feature_indices, length):
+def scenario_holdout(observed, score_rows, score_times, feature_indices, length):
     score_idx = np.flatnonzero(score_rows)
-    starts_local = deterministic_block_starts(len(score_idx), length)
+    starts_local = deterministic_block_starts(score_times, length)
     holdout = np.zeros_like(observed, dtype=bool)
     blocks = []
+    times = pd.Series(score_times).reset_index(drop=True)
     for local_start in starts_local:
         local_end = local_start + length
         rows = score_idx[local_start:local_end]
+        selected_times = times.iloc[local_start:local_end]
+        if length > 1 and not (selected_times.diff().dropna() == pd.Timedelta(hours=1)).all():
+            raise ValueError("selected outage block is not truly hourly-contiguous")
         block = np.zeros_like(observed, dtype=bool)
         block[np.ix_(rows, feature_indices)] = observed[np.ix_(rows, feature_indices)]
         if not block.any():
@@ -76,6 +98,8 @@ def scenario_holdout(observed, score_rows, feature_indices, length):
             "score_local_end_exclusive": int(local_end),
             "global_row_start": int(rows[0]),
             "global_row_end": int(rows[-1]),
+            "issue_start": selected_times.iloc[0].isoformat(),
+            "issue_end": selected_times.iloc[-1].isoformat(),
             "hidden_cells": int(block.sum()),
         })
     return holdout, blocks
@@ -91,9 +115,6 @@ def run(features: Path, events: Path, output: Path):
     score = roles == "score"
     if not score.any(): raise ValueError("score role empty")
     score_times = frame.loc[score, "window_end"].reset_index(drop=True)
-    diffs = score_times.diff().dropna()
-    if len(diffs) == 0 or not (diffs == pd.Timedelta(hours=1)).all():
-        raise ValueError("contiguous modality benchmark requires exact 1-hour score cadence")
 
     feature_names = list(base) + list(xrs) + list(proton)
     raw_values = frame.loc[:, feature_names].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=np.float64)
@@ -122,6 +143,7 @@ def run(features: Path, events: Path, output: Path):
         "target": v1.TARGET,
         "preregistration": PREREG,
         "preregistration_sha256": transfer.digest(prereg_path),
+        "implementation_note": "Score role contains legitimate eligibility/purge gaps; preregistered placements are applied over admissible starts whose entire requested duration has exact one-hour cadence.",
         "locked_test_accessed": False,
         "monitor_used": False,
         "score_block_prior_inspection_disclosed": True,
@@ -152,7 +174,7 @@ def run(features: Path, events: Path, output: Path):
     for modality in MODALITIES:
         cols = modality_indices[modality]
         for duration in DURATIONS:
-            holdout, blocks = scenario_holdout(observed, score, cols, duration)
+            holdout, blocks = scenario_holdout(observed, score, score_times, cols, duration)
             experimental = observed & ~holdout
             no_fill = raw_values.copy(); no_fill[holdout] = np.nan
             median = recover_train_median(raw_values, observed, structural, holdout, fit_rows=fit_rows)
