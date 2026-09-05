@@ -6,13 +6,83 @@ the project checkpoint is on that branch, not on `main`.
 Read these in order:
 
 1. `architecture/PUBLICATION_REVIEW_2026-09-05.md` — corrections to earlier claims.
-2. `architecture/SOL_CONTINUATION_UPDATE_2026-09-05.md` — latest source-only continuation, negative results and exact next action.
-3. `architecture/CONTINUATION_STATUS.md` — prior history, evidence and blockers.
-4. `FUTURE_PLAN.md` — milestones and stop/go decisions.
-5. `SOL_HANDOFF.md` — executable continuation instructions.
-6. `config/benchmark_contract_v2.json` and `config/evaluation_policy_v1.json`.
-7. `evidence_checkpoint/INDEX.json` — selected small receipts copied byte-for-byte
+2. `architecture/MISSING_DATA_PHYSICS_STRATEGY_2026-09-05.md` — latest engineering plan for causal missing-data recovery and conditional physics escalation.
+3. `architecture/SOL_CONTINUATION_UPDATE_2026-09-05.md` — prior source-only continuation, negative results and exact next action.
+4. `architecture/CONTINUATION_STATUS.md` — prior history, evidence and blockers.
+5. `FUTURE_PLAN.md` — milestones and stop/go decisions.
+6. `SOL_HANDOFF.md` — executable continuation instructions.
+7. `config/benchmark_contract_v2.json`, `config/evaluation_policy_v1.json`, and `config/missingness_recovery_contract_v1.json`.
+8. `evidence_checkpoint/INDEX.json` — selected small receipts copied byte-for-byte
    from local experiments; hashes and original paths are recorded.
+
+## Missing-data + physics continuation — 2026-09-05
+
+This continuation began by verifying the live remote branch head as
+`fd75074caa8a4fbeceb6fc946ec562d8ee0abb0f` and PR #3 as open/unmerged. Work
+continued only on `codex/iris-sep-continuation-20260905`; `main` was not changed.
+
+The engineering decision is **not** to make a full MHD simulation the default
+missing-data imputer. A simulated state is a model hypothesis, not recovered
+sensor truth. Instead IRIS now has a preregistered train-only experiment asking
+whether a causally generated physics-constrained reconstruction preserves
+NEW-SEP forecast utility under deliberately hidden data better than simpler
+causal recovery or mask-aware abstention. Physics must earn downstream value
+before it may enter the frozen final model.
+
+New source and contracts:
+
+- `src/iris_sep/missingness_recovery.py`: reconstruction provenance, future-data
+  rejection, deterministic random/block missingness masks, held-out-only error
+  and uncertainty metrics, exact reconstruction hashing, train-observed-only
+  median fitting/fill, and causal forward fill that leaves leading gaps
+  unresolved instead of borrowing future truth.
+- `tests/test_missingness_recovery.py`: source regressions for causality,
+  provenance, hidden-truth isolation, zero-support features, gap construction,
+  reconstruction metrics and exact payload binding.
+- `config/missingness_recovery_contract_v1.json`: preregistered recovery arms,
+  missingness scenarios, survival gate and full-MHD admission requirements.
+- `architecture/MISSING_DATA_PHYSICS_STRATEGY_2026-09-05.md`: phased engineering
+  plan from no-reconstruction/statistical controls through one reduced-physics
+  reconstruction and only conditionally to assimilation/full MHD.
+
+GitHub Actions source-only verification ran on tested source head
+`e4cdd1919a63ee24fc6a1df6067c9de5d545ad01` (run `33976404485`, job
+`101333762196`) under Ubuntu 24.04.4, Python 3.13.5, NumPy 2.3.5, PyTorch
+2.10.0+cpu and scikit-learn 1.8.0. It executed **39 tests in 0.360 seconds** with
+zero failures/errors and then passed `py_compile`. Exact source-only evidence is
+recorded in `receipts/missingness_physics_source_only_v1_2026-09-05.json`.
+
+The new missingness/physics contract is **PREREGISTERED_SOURCE_ONLY_NOT_YET_EXECUTED**.
+No physics reconstruction experiment, reduced-physics solver, assimilation run,
+full-MHD run, new SEP model training or final NEW-crossing comparison has been
+performed. No locked identity/outcome was accessed; no mixed train/test table
+was downloaded; no used monitor/inner score block was recycled as fresh
+evidence; the publisher request was not resent; no external message was sent;
+and no deletion was performed.
+
+The old `iris-model/` synthetic-magnetogram work remains separate history. It
+uses a conditional diffusion generator with selected Hale/Joy and PIL
+distribution constraints; it is not a full MHD solver and must not be described
+as accurate solar-flare simulation. The current IRIS-SEP target and frozen
+benchmark remain unchanged.
+
+**Exact next action for this track:** once the verified training-only
+NEW-crossing cohort and source-latency/geometry manifest exist, run Phase 1
+before choosing any physics solver: quantify missingness by modality, feature,
+source era and quarter; longest contiguous gaps; event/quiet support; publication
+latency; structural versus accidental missingness; and association between
+missingness and outcomes. Freeze eligible reconstruction modalities and
+cadence-specific gap durations. Then run, on identical inner chronological
+issue identities, mask-aware/no-reconstruction, causal forward-fill,
+train-fit median/simple-statistical and faithfully reproducible causal-KNN
+controls. Only after those results may exactly one reduced-physics reconstruction
+arm be selected. Full MHD is conditional on a measured residual gap after the
+reduced-physics test.
+
+The compact nonfinite causal replay from the prior continuation is still an
+independent unresolved task and remains **NOT_RUN** without the preserved
+hash-matching local artifacts. Do not weaken its provenance gate to accelerate
+this new work.
 
 ## Latest source-only follow-up — 2026-09-05
 
