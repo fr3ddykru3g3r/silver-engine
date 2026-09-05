@@ -42,7 +42,10 @@ def run(seed_root:Path,late_csv:Path,output:Path):
     for s in SEEDS:
         matches=list(Path(seed_root).rglob(f"seed_{s}.npz"))
         if len(matches)!=1: raise ValueError(f"expected one npz for seed {s}, got {matches}")
-        z=np.load(matches[0])
+        # The object arrays are only string identifiers written by our own seed runner
+        # (role/unit/time); model probabilities and labels remain numeric. The artifacts
+        # are GitHub Actions outputs from the pinned seed jobs, not untrusted uploads.
+        z=np.load(matches[0], allow_pickle=True)
         cur={k:z[k] for k in z.files}
         if ref is None: ref=cur
         else:
