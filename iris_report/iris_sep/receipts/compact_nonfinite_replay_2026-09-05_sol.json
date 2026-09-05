@@ -1,0 +1,31 @@
+{
+  "receipt_type": "IRIS_SEP_COMPACT_NONFINITE_CONTROLLED_REPLAY",
+  "date": "2026-09-05",
+  "scope": "TRAIN_ONLY_LEGACY_TARGET_DIAGNOSTIC",
+  "status": "NOT_RUN_MISSING_LOCAL_ARTIFACTS",
+  "fold": 3,
+  "arm": "compact",
+  "seed": 7,
+  "expected_source_sha256": "ab2bef52a80ebce5c27d2312f031b410843b3fa8e6b351d07a02f3e0ded010ef",
+  "expected_retained_failure_logits_sha256": "68daf463bb3092b22fab09fe65480e5b46a136cf0fe71e9413ebeeb01eeed7d7",
+  "expected_prediction_rows": 2120,
+  "required_paths_absent_in_execution_environment": [
+    "iris_report/iris_sep/data_processed/sepnet_v1_development_v3.csv",
+    "iris_report/iris_sep/artifacts/train_inner_diagnostic_v4/folds.json",
+    "iris_report/iris_sep/artifacts/train_inner_diagnostic_v4/fold_3/compact/seed_7.npz",
+    "iris_report/iris_sep/artifacts/train_inner_diagnostic_v4/fold_3/compact/model_7/best.pt",
+    "iris_report/iris_sep/artifacts/train_inner_diagnostic_v4/fold_3/compact/model_7/preprocessing.json",
+    "iris_report/iris_sep/artifacts/train_inner_diagnostic_v4/fold_3/compact/model_7/receipt.json"
+  ],
+  "locked_test_accessed": false,
+  "outer_monitor_scored": false,
+  "mixed_training_test_table_downloaded": false,
+  "replacement_data_downloaded": false,
+  "causal_conclusion": null,
+  "demonstrated_source_hazards_not_promoted_to_cause": [
+    "A synthetic source-only test demonstrates that a value can remain finite after float64 standardization and overflow only during the subsequent float32 cast.",
+    "A synthetic all-modalities-missing replay remains finite, so all-missing input alone is not intrinsically sufficient to create a nonfinite logit in the architecture."
+  ],
+  "next_proof_step": "Run tools/run_compact_nonfinite_replay.py in the preserved artifact workspace. Accept a first-nonfinite-stage conclusion only if the pinned source and retained seed-7 logits match their hashes and the checkpoint replay reproduces the saved logits exactly.",
+  "note": "Missing artifacts are an execution-environment blocker, not a scientific failure. Helper mutation, preprocessing overflow, and distribution shift remain unproven causes of the retained fold-3 failure."
+}
