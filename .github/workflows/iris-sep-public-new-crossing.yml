@@ -36,16 +36,18 @@ jobs:
           python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
 
       - name: Acquire only the pinned public SEP-PRISM files
-        env:
-          GIT_LFS_SKIP_SMUDGE: '1'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y git-lfs
           git lfs install
-          git clone --depth 1 --no-checkout https://github.com/yuyian/SEP-Prediction-V2.git /tmp/sep-prism
+          GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 --no-checkout https://github.com/yuyian/SEP-Prediction-V2.git /tmp/sep-prism
           cd /tmp/sep-prism
-          git checkout e138dcd72c1952a00e11e1a0b025337f9e7c93fb -- Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
-          git lfs pull --include='Data/rolling_combinded_seq_24hours.csv,GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' --exclude=''
+          test "$(git rev-parse HEAD)" = 'e138dcd72c1952a00e11e1a0b025337f9e7c93fb'
+          git checkout HEAD -- Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          git lfs fetch origin e138dcd72c1952a00e11e1a0b025337f9e7c93fb \
+            --include='Data/rolling_combinded_seq_24hours.csv,GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --exclude=''
+          git lfs checkout Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
           sha256sum Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
           test "$(sha256sum Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
           test "$(sha256sum GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
