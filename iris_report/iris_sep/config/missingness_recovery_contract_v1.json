@@ -1,0 +1,70 @@
+{
+  "contract_id": "IRIS_SEP_MISSINGNESS_RECOVERY_V1",
+  "status": "PREREGISTERED_SOURCE_ONLY_NOT_YET_EXECUTED",
+  "scope": "TRAIN_ONLY_MISSINGNESS_AND_RECONSTRUCTION_RESEARCH",
+  "final_target_unchanged": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_access": false,
+  "purpose": "Test whether causal reconstruction of forecast-time missing inputs preserves downstream SEP forecast utility better than simple causal recovery or abstention, without treating reconstructed values as observations.",
+  "principles": {
+    "reconstruction_is_not_observation": true,
+    "future_information_forbidden": true,
+    "fit_role": "train",
+    "evaluation_role": "train_only_chronological_inner_folds",
+    "selection_on_locked_test_forbidden": true,
+    "physics_method_must_beat_nonphysics_baselines_to_survive": true,
+    "failed_physics_arms_must_be_retained": true
+  },
+  "recovery_arms_in_order": [
+    "NO_RECONSTRUCTION_MASK_AWARE_MODEL",
+    "CAUSAL_FORWARD_FILL_WHERE_DEFINED",
+    "TRAIN_FIT_MEDIAN_OR_SIMPLE_CAUSAL_STATISTICAL",
+    "PUBLISHED_SEPNET_STYLE_CAUSAL_KNN_WHERE_REPRODUCIBLE",
+    "PHYSICS_CONSTRAINED_RECONSTRUCTION",
+    "PHYSICS_ASSIMILATED_RECONSTRUCTION_IF_FEASIBLE"
+  ],
+  "missingness_scenarios": {
+    "natural": "preserve observed historical source missingness with masks",
+    "synthetic_random": "deterministic random held-out values within train-only score blocks",
+    "synthetic_block": "contiguous outage-style gaps of predeclared durations appropriate to each source cadence",
+    "modality_dropout": "remove complete forecast-time modalities to test fallback, degradation and abstention"
+  },
+  "reconstruction_primary_metrics": [
+    "held_out_mae",
+    "held_out_rmse",
+    "held_out_bias",
+    "held_out_interval_coverage"
+  ],
+  "downstream_primary_metrics": [
+    "TSS",
+    "FAR_AT_MATCHED_DETECTION",
+    "BRIER",
+    "ECE",
+    "RETAINED_FORECAST_COVERAGE",
+    "ABSTENTION_RATE"
+  ],
+  "survival_gate": {
+    "physics_arm_requires": [
+      "causal provenance audit passes",
+      "no future information",
+      "reconstruction uncertainty is exposed",
+      "downstream performance is compared on identical masked issue identities",
+      "no material calibration degradation versus the best surviving nonphysics recovery arm",
+      "lower forecast degradation than the best surviving nonphysics recovery arm on predeclared missingness scenarios"
+    ],
+    "failure_action": "Do not include the physics reconstruction in the frozen final model; retain the negative result."
+  },
+  "full_mhd_policy": {
+    "automatic_inclusion": false,
+    "role": "candidate external physics reconstruction or feature provider only",
+    "reason": "A full MHD state is model output, not recovered sensor truth, and must demonstrate downstream value before inclusion.",
+    "minimum_requirements": [
+      "forecast-time boundary conditions available",
+      "reproducible open implementation and version",
+      "runtime feasible for the declared research setting",
+      "state-to-feature mapping frozen before score evaluation",
+      "uncertainty or ensemble spread exposed",
+      "comparison against simpler physics and nonphysics recovery baselines"
+    ]
+  },
+  "claim_boundary": "No claim of accurate solar-flare simulation, operational certification, named-company superiority, economic savings, breakthrough, award outcome or final NEW-crossing improvement follows from this contract alone."
+}
