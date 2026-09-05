@@ -7,7 +7,11 @@ on:
     paths:
       - 'iris_report/iris_sep/src/**'
       - 'iris_report/iris_sep/config/missingness_recovery_contract_v1.json'
+      - 'iris_report/iris_sep/config/missingness_experiment_package_v1.json'
+      - 'iris_report/iris_sep/config/magnetic_map_gap_package_v1.json'
       - 'iris_report/iris_sep/tools/run_compact_nonfinite_replay.py'
+      - 'iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py'
+      - 'iris_report/iris_sep/tools/run_simple_physics_gap_benchmark.py'
       - 'iris_report/iris_sep/tests/test_pilot_replay.py'
       - 'iris_report/iris_sep/tests/test_pilot_admission_v2.py'
       - 'iris_report/iris_sep/tests/test_validity_envelope_benchmark.py'
@@ -18,6 +22,12 @@ on:
       - 'iris_report/iris_sep/tests/test_missingness_recovery.py'
       - 'iris_report/iris_sep/tests/test_missingness_audit.py'
       - 'iris_report/iris_sep/tests/test_missingness_contract.py'
+      - 'iris_report/iris_sep/tests/test_simple_physics.py'
+      - 'iris_report/iris_sep/tests/test_missingness_experiment.py'
+      - 'iris_report/iris_sep/tests/test_fixed_forecast_benchmark.py'
+      - 'iris_report/iris_sep/tests/test_missingness_forecast_tool.py'
+      - 'iris_report/iris_sep/tests/test_physics_gap_experiment.py'
+      - 'iris_report/iris_sep/tests/test_simple_physics_gap_tool.py'
       - '.github/workflows/iris-sep-source-only.yml'
   workflow_dispatch:
 
@@ -69,7 +79,13 @@ jobs:
             iris_report.iris_sep.tests.test_compact_nonfinite_replay_tool \
             iris_report.iris_sep.tests.test_missingness_recovery \
             iris_report.iris_sep.tests.test_missingness_audit \
-            iris_report.iris_sep.tests.test_missingness_contract -v
+            iris_report.iris_sep.tests.test_missingness_contract \
+            iris_report.iris_sep.tests.test_simple_physics \
+            iris_report.iris_sep.tests.test_missingness_experiment \
+            iris_report.iris_sep.tests.test_fixed_forecast_benchmark \
+            iris_report.iris_sep.tests.test_missingness_forecast_tool \
+            iris_report.iris_sep.tests.test_physics_gap_experiment \
+            iris_report.iris_sep.tests.test_simple_physics_gap_tool -v
 
       - name: Compile changed source and tests
         run: |
@@ -78,10 +94,22 @@ jobs:
             iris_report/iris_sep/src/iris_sep/modeling/compact_layer_replay.py \
             iris_report/iris_sep/src/iris_sep/missingness_recovery.py \
             iris_report/iris_sep/src/iris_sep/missingness_audit.py \
+            iris_report/iris_sep/src/iris_sep/missingness_experiment.py \
+            iris_report/iris_sep/src/iris_sep/simple_physics.py \
+            iris_report/iris_sep/src/iris_sep/physics_gap_experiment.py \
+            iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py \
             iris_report/iris_sep/tools/run_compact_nonfinite_replay.py \
+            iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py \
+            iris_report/iris_sep/tools/run_simple_physics_gap_benchmark.py \
             iris_report/iris_sep/tests/test_inference_bundle.py \
             iris_report/iris_sep/tests/test_compact_layer_replay.py \
             iris_report/iris_sep/tests/test_compact_nonfinite_replay_tool.py \
             iris_report/iris_sep/tests/test_missingness_recovery.py \
             iris_report/iris_sep/tests/test_missingness_audit.py \
-            iris_report/iris_sep/tests/test_missingness_contract.py
+            iris_report/iris_sep/tests/test_missingness_contract.py \
+            iris_report/iris_sep/tests/test_simple_physics.py \
+            iris_report/iris_sep/tests/test_missingness_experiment.py \
+            iris_report/iris_sep/tests/test_fixed_forecast_benchmark.py \
+            iris_report/iris_sep/tests/test_missingness_forecast_tool.py \
+            iris_report/iris_sep/tests/test_physics_gap_experiment.py \
+            iris_report/iris_sep/tests/test_simple_physics_gap_tool.py
