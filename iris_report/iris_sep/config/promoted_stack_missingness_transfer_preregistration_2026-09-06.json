@@ -1,0 +1,43 @@
+{
+  "status": "PREREGISTERED_BEFORE_PROMOTED_STACK_OUTAGE_RESULTS",
+  "scope": "DEVELOPMENT_ONLY_PROMOTED_CROSSFIT_STACK_MISSINGNESS_TRANSFER",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "motivation_disclosure": "A prior fixed-logistic missingness diagnostic was inspected. It showed causal forward-fill preserved that weak reference better than no-fill and train-fit median, but the reference itself had POD=0 at its frozen threshold. This transfer therefore retains ALL THREE prior recovery arms and ALL THREE prior outage fractions; it is not a fresh recovery-method selection experiment.",
+  "promoted_architecture": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+  "architecture_source": "tools/run_crossfit_evidence_stack_diagnostic.py",
+  "architecture_is_frozen": true,
+  "training": {
+    "specialists": ["solar", "xrs", "proton"],
+    "specialist_model": "5-seed XGBoost median ensemble with the exact promoted hyperparameters",
+    "meta_model": "PositiveEvidenceStack fitted only to chronological OOF predictions inside outer fit",
+    "calibration": "single intercept fitted on clean calibration role only",
+    "decision_policies": ["MAX_TSS", "POD80_MIN_FAR"],
+    "threshold_role": "clean threshold role only",
+    "retraining_after_outage": false,
+    "recalibration_after_outage": false,
+    "rethresholding_after_outage": false
+  },
+  "outage": {
+    "role": "score",
+    "fractions": [0.05, 0.20, 0.40],
+    "seed": 20260906,
+    "eligible_cells": "finite observed causal predictor cells only",
+    "preexisting_unavailable_cells": "never selected for artificial holdout",
+    "recovery_arms": ["MASK_AWARE_NO_FILL", "TRAIN_FIT_MEDIAN", "CAUSAL_FORWARD_FILL"],
+    "causal_forward_fill": "uses only earlier real/recoverable values and does not cross a preexisting unavailable barrier as defined by the frozen recovery primitive"
+  },
+  "evaluation": {
+    "primary": "paired change in TSS at each frozen clean decision policy",
+    "secondary": ["Brier", "ECE", "matched-detection FAR", "probability absolute drift"],
+    "bootstrap": {
+      "replicates": 10000,
+      "unit": "complete NEW-crossing SEP episode or quiet block",
+      "paired": true,
+      "seed": 20260906
+    },
+    "selection_rule": "No arm or fraction may be omitted based on outcome. Report all 3x3 combinations.",
+    "locked_test_access": false,
+    "monitor_use": false
+  },
+  "claim_boundary": "Development-only robustness transfer on an already-inspected score block. Cannot establish final superiority, locked-test robustness, operational certification, physics advantage, economic savings, award outcome or breakthrough."
+}
