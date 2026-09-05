@@ -14,6 +14,83 @@ Read these in order:
 7. `evidence_checkpoint/INDEX.json` — selected small receipts copied byte-for-byte
    from local experiments; hashes and original paths are recorded.
 
+## Latest source-only follow-up — 2026-09-05
+
+This follow-up resumed from the verified live remote head
+`0aa786edca5942db324263b993770301e2a36088` on PR #3. The PR was open and
+unmerged. No work was performed on `main`.
+
+A new branch-scoped GitHub Actions source-only verification ran on tested source
+head `b7d86e520d33cf55c74f7c8d88a1fed8904740e4` (run `33975465640`, job
+`101331265966`) under Python 3.13.5, NumPy 2.3.5, PyTorch 2.10.0+cpu and
+scikit-learn 1.8.0. It executed 27 unittests in 0.196 seconds with zero failures
+or errors, then passed `py_compile` for the changed inference/replay source and
+tests. Exact results are in
+`receipts/sol_continuation_source_only_v3_2026-09-05.json`.
+
+The current source-only command is:
+
+```sh
+python -m unittest \
+  iris_report.iris_sep.tests.test_pilot_replay \
+  iris_report.iris_sep.tests.test_pilot_admission_v2 \
+  iris_report.iris_sep.tests.test_validity_envelope_benchmark \
+  iris_report.iris_sep.tests.test_compound_validity_benchmark \
+  iris_report.iris_sep.tests.test_inference_bundle \
+  iris_report.iris_sep.tests.test_compact_layer_replay \
+  iris_report.iris_sep.tests.test_compact_nonfinite_replay_tool -v
+```
+
+The original compact-model failure is still **not causally diagnosed**. The
+retained evidence remains fold 3 / arm `compact` / seed 7 with 1,062 finite
+logits out of 2,120. The exact artifact replay is **NOT_RUN** because a clean
+source checkout does not contain the gitignored preserved train-only CSV,
+`folds.json`, seed-7 logit artifact, checkpoint, preprocessing file and model
+receipt. No replacement data or mixed training/test table was downloaded.
+
+The replay tool was hardened so a future first-nonfinite-stage conclusion is
+permitted only after all of the following pass: the published diagnostic
+preregistration SHA-256 matches; every helper/trainer/model/evaluation source
+hash frozen by that preregistration matches; the pinned train-only source and
+retained failure-logit hashes match; the model receipt binds seed, exact
+fit/stop/predict indices, checkpoint and preprocessing; preprocessing feature
+order matches the preregistration; and the saved logits reproduce exactly.
+Feature support, train-fitted scaling/cast behavior, masks, checkpoint parameter
+finiteness, branch outputs, gates, shared tensors and logits are then inspected
+layer by layer. Helper mutation, preprocessing overflow and distribution shift
+remain hypotheses, not established causes.
+
+Admission V2's immutable inference bundle remains the integrated offline replay
+boundary. The bounded adversarial suite was expanded to exercise admission-era,
+model/schema, evidence-receipt, derived-probability and empty-array mutations in
+addition to prior array/source/calibration/threshold attacks. The separately
+retained bundle SHA-256 is explicitly the trust anchor for dynamic inference
+content; the embedded static inference binding prevents reusing the same
+scientific receipt with a changed policy/calibration/threshold/model/schema.
+This is software-integrity evidence, not publisher authentication or operational
+certification.
+
+Full artifact verification is still **NOT_RUN** in a clean GitHub source
+checkout because the required preserved datasets, checkpoints, notebooks and
+artifact dependency layout are intentionally outside ordinary Git. Missing
+artifacts are an environment blocker, not a scientific failure.
+
+No locked test identity or outcome was accessed, no outer monitor or inspected
+inner score block was reused as fresh evidence, no new model was trained, the
+publisher request was not resent, no external message was sent, and no deletion
+was performed. Existing failed experiments remain preserved.
+
+**Exact next action:** in the preserved artifact workspace, restore the exact
+preregistered implementation revisions if necessary and run
+`tools/run_compact_nonfinite_replay.py` against the pinned fold-3 seed-7
+artifacts. Accept a numerical failure location only after every provenance gate
+and exact saved-logit reproduction pass. Final model work remains blocked on a
+verified training-only NEW-crossing cohort, source latency/licensing, complete
+episode semantics, comparator fidelity and an independent frozen evaluation
+path. Once those exist, freeze the exact bounded train-only chronological batch
+before climatology, eligible persistence, elastic net, XGBoost, reproduced
+SEPNET, compact baseline, proton context and then XRS.
+
 ## SOL continuation checkpoint — 2026-09-05
 
 PR #3 was verified open and unmerged before this continuation. Its starting head
@@ -106,7 +183,8 @@ incompatible with that directory.
   iris_report.iris_sep.tests.test_validity_envelope_benchmark \
   iris_report.iris_sep.tests.test_compound_validity_benchmark \
   iris_report.iris_sep.tests.test_inference_bundle \
-  iris_report.iris_sep.tests.test_compact_layer_replay -v
+  iris_report.iris_sep.tests.test_compact_layer_replay \
+  iris_report.iris_sep.tests.test_compact_nonfinite_replay_tool -v
 ```
 
 Full local artifact verification additionally requires the preserved development
