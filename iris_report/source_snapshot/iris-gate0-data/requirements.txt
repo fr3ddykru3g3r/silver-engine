@@ -1,0 +1,7 @@
+pandas>=2.2
+numpy>=2.0
+requests>=2.32
+drms>=0.9
+astropy>=6.1
+scipy>=1.14
+matplotlib>=3.9

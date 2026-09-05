@@ -1,0 +1,9 @@
+{
+  "status": "SENT_USER_REPORTED",
+  "evidence_basis": "User continuation instruction supplied in this session",
+  "sent_at": null,
+  "message_id": null,
+  "reply_supplied": false,
+  "resend_authorized": false,
+  "locked_test_accessed": false
+}

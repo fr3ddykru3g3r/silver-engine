@@ -1,0 +1,544 @@
+{
+  "scope": "SYNTHETIC_FIXTURE_ONLY",
+  "rows": [
+    {
+      "case": "available",
+      "expected_status": "VALID",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "VALID",
+        "p_new_sep_10mev_10pfu_within_24h": 0.3,
+        "all_clear_probability": 0.7,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": "MONITOR",
+        "abstention_reasons": [],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "missing_evidence",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "EVIDENCE_RECEIPT_FAILURE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": null,
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "mutated_evidence",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "EVIDENCE_RECEIPT_FAILURE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "9415cb23075a6e9cbb5368074b62d398b81d2840de1ae93123d7ff5116573495",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "schema_mismatch",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "SCHEMA_FAILURE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "missing_critical_input",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [
+          "magnetic"
+        ],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "CRITICAL_INPUT_MISSING"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "missing_feed_record",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {},
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "INPUT_AVAILABILITY_FAILURE",
+          "INPUT_TOO_STALE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "missing_uncertainty",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {},
+        "operator_state": null,
+        "abstention_reasons": [
+          "UNCERTAINTY_FAILURE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "model_mismatch",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "MODEL_OR_POLICY_VERSION_MISMATCH"
+        ],
+        "model_version": "other",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "stale_feed",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T08:00:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 240.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "INPUT_TOO_STALE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "future_publication",
+      "expected_status": "ABSTAIN",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "ABSTAIN",
+        "p_new_sep_10mev_10pfu_within_24h": null,
+        "all_clear_probability": null,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "particle_context": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": null,
+        "abstention_reasons": [
+          "INPUT_AVAILABILITY_FAILURE",
+          "INPUT_TOO_STALE"
+        ],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    },
+    {
+      "case": "optional_missing",
+      "expected_status": "DEGRADED",
+      "forecast": {
+        "issued_at_utc": "2026-01-01T12:00:00Z",
+        "horizon_hours": 24,
+        "forecast_status": "DEGRADED",
+        "p_new_sep_10mev_10pfu_within_24h": 0.3,
+        "all_clear_probability": 0.7,
+        "calibration_id": "fixture-calibration",
+        "operating_policy_id": "fixture-policy",
+        "input_schema_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "data_freshness": {
+          "magnetic": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          },
+          "eruption": {
+            "observed_at_utc": "2026-01-01T11:55:00Z",
+            "published_at_utc": "2026-01-01T11:58:00Z",
+            "age_minutes": 5.0
+          }
+        },
+        "missing_modalities": [
+          "particle_context"
+        ],
+        "uncertainty": {
+          "between_seed_spread": 0.03,
+          "calibration_uncertainty": 0.04,
+          "input_quality": 1.0
+        },
+        "operator_state": "MONITOR",
+        "abstention_reasons": [],
+        "model_version": "fixture-model",
+        "evidence_receipt_sha256": "854bbe6dafa8d55f6e7cbf69842e1fecc8adb56837bcb319ea07573b16936bdd",
+        "spacecraft_control": false,
+        "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+        "secondary_outputs": {
+          "p_sep_100mev_1pfu": null,
+          "peak_flux_quantiles_pfu": null,
+          "onset_time_quantiles_utc": null,
+          "validation_status": "DISABLED_PENDING_INDEPENDENT_VALIDATION"
+        },
+        "replay_scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FORECAST_EVIDENCE"
+      }
+    }
+  ]
+}

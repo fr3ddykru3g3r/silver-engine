@@ -1,0 +1,3208 @@
+{
+  "scope": "SOURCE_ONLY_NO_ARTIFACT_BACKUP",
+  "files": [
+    {
+      "path": "iris_report/iris_sep/README.md",
+      "bytes": 7772,
+      "sha256": "5c8ef9563c4b5687bb177f985ca297775f78e0c4aa1a2aac583c6edeccc9d8e6"
+    },
+    {
+      "path": "iris_report/iris_sep/.gitignore",
+      "bytes": 387,
+      "sha256": "5e2ab17a6fd572399c49ad49696056a43b327a0a0add26f5601d825ab5c92e77"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/pretraining_hardening_2026-09-04.json",
+      "bytes": 1460,
+      "sha256": "40c578047cd63eb9c99418121b249548cb903324a5dcbf614d3aeb41700af2ff"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_v1_development_v4_dual_target_manifest.json",
+      "bytes": 5926,
+      "sha256": "086c9bce67fc365cb058a616c9bf3247bc38699166cc33b6fc6b94a3470d3589"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/integration_review_2026-09-04.json",
+      "bytes": 2205,
+      "sha256": "1c7e3aaa404212d88c10224050e15d0670a3c9dad09802d44af05e31c0f17c13"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/v2_clear_training_access_status_2026-09-05.json",
+      "bytes": 1762,
+      "sha256": "f615e9ae7bed3b33abe7ed1a14ce3d81d466f051cf14c16fee7885e69264353e"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/continuation_verification_2026-09-05.json",
+      "bytes": 1018,
+      "sha256": "ada777f2d9f6e82f5ce3c9002b871797070353c66f536ec71e7945917a70c748"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_v1_development_v2_manifest.json",
+      "bytes": 2337,
+      "sha256": "a471f47106bd8d874d73a5f95ec97f04f2f9b108f237273e9c96630110d8cb6a"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sep_prism_header_inspection_2026-09-04.json",
+      "bytes": 1138,
+      "sha256": "094d026381cd6ec8977da75478385328808a88746cc3a32dba83137cf11e4f96"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/colab_live_checkpoint_2026-09-04.json",
+      "bytes": 1291,
+      "sha256": "91319814773eed0e66ca108b88e5c820cc67e72fa1a18da0f303fa49a2bb4a10"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_v1_development_v6_dual_target_manifest.json",
+      "bytes": 5561,
+      "sha256": "72f92f18936e237e9817fc4b425f2ebfec0096356b7a91efd65fbcf6852f4052"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/benchmark_contract_v2_freeze_2026-09-04.json",
+      "bytes": 493,
+      "sha256": "e813c307751769191614a1e78721bb15c746103d6af1033cb898888b3082d518"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/benchmark_contract_freeze.json",
+      "bytes": 242,
+      "sha256": "7cb4eab764c333f20ea06a5dc2d3c6382f4452efbe6cff9c55b3c56520ce3a29"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/corrected_comparator_v5_selection.json",
+      "bytes": 1345,
+      "sha256": "e78d580117136c5064267a4db063b0dcba78b267b11fae939a4ecc3daa49f017"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/development_split_selection_2026-09-04.json",
+      "bytes": 1848,
+      "sha256": "421e91e785a47edea64810dc263f13ff718b340a6a5df5a15bfbe226b501338c"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/colab_development_package_2026-09-04.json",
+      "bytes": 1372,
+      "sha256": "80386019be38ddf4f5ce199fb17a5526638d463a28b2e0606a00bbdad871a833"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/local_neural_selection_2026-09-05.json",
+      "bytes": 3068,
+      "sha256": "6fe742e4c3c343880d719792cb0148d0db363c3bfddb1d0ab255e10be024fe5c"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/schema_aligned_model_freeze_2026-09-04.json",
+      "bytes": 1320,
+      "sha256": "5d5feef90bc061ba6dcde35e212a5abbae2fd001cbd8a716178b8bf38a055a79"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/local_baseline_selection_2026-09-04.json",
+      "bytes": 2442,
+      "sha256": "474dc48fba726e433dd833cf1e1797cb00b4dcfedc72264caa44d2cdb82988ff"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/publisher_request_user_report_2026-09-05.json",
+      "bytes": 246,
+      "sha256": "a1d45a5c8de31a74a9d10896eb219a8629c8767aa9bd6150e276098eeb501859"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/source_sync_comparison_2026-09-05.json",
+      "bytes": 3278,
+      "sha256": "23767f9469e909677bf82bb4636c6aeb2815d6af93d685c0fa2b91c5f801b6e0"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/continuation_verification_2026-09-05.log",
+      "bytes": 15906,
+      "sha256": "cbbf90dc25b66147728cdb0c90b6866cc84ceade2029189c70e918ddf2ddefac"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_v1_development_v3_manifest.json",
+      "bytes": 2486,
+      "sha256": "18c10d4fc76a2ce5e03b9a271951003f274435aa00180fcb90e4f2947eedaebb"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_v1_development_v5_dual_target_manifest.json",
+      "bytes": 5452,
+      "sha256": "47181cbe27864d9f26b80daf4d882cf78ba3127d8f561122927cdd985767b122"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_v1_development_manifest.json",
+      "bytes": 2219,
+      "sha256": "1c4642bbda02892cac59b4d5038b7194e3e32e245044a9149dcc0778eec12cff"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/sepnet_reproduction_status_2026-09-05.json",
+      "bytes": 1684,
+      "sha256": "66dd9f31e575b1be5fe0105a80a5637f68bd844a1a787f96176e35cdcfc2c179"
+    },
+    {
+      "path": "iris_report/iris_sep/receipts/product_contract_freeze_2026-09-04.json",
+      "bytes": 1083,
+      "sha256": "c4cf3deacb11732cef78681e81246d9c336cd34625bbea016393a9b5400a1375"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/run_local_baselines.py",
+      "bytes": 10881,
+      "sha256": "fba928ab56cd23c2779e730a4e69831cc1eeed4f8402ab6bdcef513c9908d0e3"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/train_corrected_sepnet_o_v1.py",
+      "bytes": 17622,
+      "sha256": "42590933ddb35936f2cfbd6a919f714cf1f7bc7017bf2ab63a5002b2d4af39c7"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/build_baseline_ensembles.py",
+      "bytes": 5358,
+      "sha256": "d9c4e7609b107b9defcd688794248fcc096a897a6d2d2afe536f045aa0922fe5"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/run_local_xgboost.py",
+      "bytes": 8939,
+      "sha256": "4527f84ddc502ef48688ef0af73e73e466a3517009984ec4ca9e1b4aea86ed77"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/train_corrected_sepnet_o_v5.py",
+      "bytes": 22759,
+      "sha256": "0708f48521357a8e9445752fd1c61040829ed190820ef4cab67b9d97be0d423e"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/train_corrected_sepnet_o_v4.py",
+      "bytes": 22023,
+      "sha256": "973a806e3f450e70422c204c0ac1ac1ad8b748814c10600c29e8572a7a114514"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/compare_development_models.py",
+      "bytes": 5318,
+      "sha256": "d8a6f41194e55f030b221d33ef3f1c539d19aa2a337353b8de432f5a1f0bc390"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/prepare_sepnet_v1_dual_target_development_v5.py",
+      "bytes": 10347,
+      "sha256": "5621fcbd13d2ff527a626227f24c4f4f2cacbf9c599e7f594fee97bb493a6ac4"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__init__.py",
+      "bytes": 39,
+      "sha256": "6babdff59ff7ce202aaf0fd4a8b3a38dea088a295884fd4ec4274df025565776"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/build_development_hybrid.py",
+      "bytes": 19029,
+      "sha256": "cbe8d77be23193284cdd7f8a0c9ea94dfafdfc931e2f6078b2344577bdd69a31"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/build_fixture_replays.py",
+      "bytes": 3183,
+      "sha256": "c0867d6f8e08f856cd18e1a9ad65096210c1ff3ee4fd0c542cb4d90c17f12f67"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/train_tabular_multibranch.py",
+      "bytes": 20647,
+      "sha256": "706d738e9cbfd99d29d8d42b5f8f88d7ccd397ec27dc51158f3704401817a98d"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/prepare_sepnet_v1_dual_target_development_v6.py",
+      "bytes": 10974,
+      "sha256": "b2bc98dc9c0262e19129f31145f49c739952b732578011a6bc24eba4655b6ac9"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/prepare_sepnet_v1_development.py",
+      "bytes": 8676,
+      "sha256": "b9d851f8d78b1f5278b9c2975dad99d99510d15a78df9f9d7d5a59019c82f619"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/train_corrected_sepnet_o_v3.py",
+      "bytes": 21560,
+      "sha256": "5cc6bb92dc4b373d3495c0f6d99780a2979f2711d56837ee01c571fa0ca88e5d"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/prepare_sepnet_v1_dual_target_development.py",
+      "bytes": 9856,
+      "sha256": "7a98514659887038523b09f5a5ab7ed1c190f8254770d50a96a4b59dd54ec5b2"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/seal_training_split.py",
+      "bytes": 4653,
+      "sha256": "3410f3745c141628dcc9e0338a392afb9242b96cfcf6c078e3a7426ca4667116"
+    },
+    {
+      "path": "iris_report/iris_sep/config/benchmark_contract_v2.json",
+      "bytes": 3268,
+      "sha256": "ae2b17add2cda2129e3af8c3d64dda216af447dbb0e889b0af051fc8d2e4f3e2"
+    },
+    {
+      "path": "iris_report/iris_sep/config/product_contract_v1.json",
+      "bytes": 2353,
+      "sha256": "6b2577aed36d45e6fcf35e34375423c59e96f6acf34cb2b27573c0f5d8c82bee"
+    },
+    {
+      "path": "iris_report/iris_sep/config/benchmark_contract.json",
+      "bytes": 2705,
+      "sha256": "0490fca6f6293a7473dda6b57e665b7d4f5f607bff3ee3faf3417476db621af8"
+    },
+    {
+      "path": "iris_report/iris_sep/config/evaluation_policy_v1.json",
+      "bytes": 1456,
+      "sha256": "137b6c4ba6f8f1f83d216a4d64abc8645be1786f4fae0450726210eb0d26c5de"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_corrected_sepnet_o_v3.py",
+      "bytes": 5559,
+      "sha256": "bf912aadb9cf678b769801286b30c665ad97da50b15eda01c977900c9af987c8"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_prepare_sepnet_v1_dual_target.py",
+      "bytes": 3293,
+      "sha256": "8c71aee30cf390c88e296ae7c17b179059c4262859ffc786fd0af95cd77f2777"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_contracts.py",
+      "bytes": 1758,
+      "sha256": "8eec1b07c1af64133f19f551bafa934be02c6327ba315be54ba5b02050cf6ce2"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/verify_contract.py",
+      "bytes": 1583,
+      "sha256": "157446f413422d86b515a50c51df8529bf3e51d9efe219a0b5f1d1d2d9fbffaa"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_pilot_replay.py",
+      "bytes": 3894,
+      "sha256": "8795c9809b08ee68333f157fac1dde59a3d8645e44968750e327000946b81fe4"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/verify_corrected_sepnet_v5.py",
+      "bytes": 4605,
+      "sha256": "56157eba6419c7879483263733d390157a1ae25d809ac7151445f5e997d8143b"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_prepare_sepnet_v1_dual_target_v5.py",
+      "bytes": 4617,
+      "sha256": "7cfdab6830b2d513641106341a474d3eb89e600f26beda485d2c45f49b3af152"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_tabular_model_static.py",
+      "bytes": 808,
+      "sha256": "f34382fa54c5ce059a104f632c777a5337842943e080d276cc15033ec65e9783"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_prepare_sepnet_v1_dual_target_v6.py",
+      "bytes": 7762,
+      "sha256": "a00bee71cbb46c7760c1d8c279fb6fc8860b460d15f331d2fbe975cd475057ff"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_seal_training_split.py",
+      "bytes": 2145,
+      "sha256": "8b942d5ecf4c4588d7be5a4342f605ff5bfdafe5ea8fea2a6b37b91d07b69e09"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_corrected_sepnet_o_v5.py",
+      "bytes": 6979,
+      "sha256": "ec328a288ec3afd7d798a2c34ab8597d56d9b8b54be3f30edd5e50349287e4b7"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_tabular_model_runtime.py",
+      "bytes": 4974,
+      "sha256": "ce496d1fc88aa7ca18f1fee29556d6a3d6aa417ee87512e3acb50cb9a8bac348"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_corrected_sepnet_o_v1.py",
+      "bytes": 3393,
+      "sha256": "6b2ccdb752acb93c0b0a3b00ad4fcf9e608c17346d91b459d007c51dfe275c73"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/verify_local.py",
+      "bytes": 16734,
+      "sha256": "69ac318f0a8f2f20929dcb785ace94ff1f905cbf3cd3db13c8abab6db1410b08"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/test_corrected_sepnet_o_v4.py",
+      "bytes": 6088,
+      "sha256": "3681397b974a89c62da104f0d06e9a3bf3756ba8968179e10c3ac006c406d507"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/ADR-001-sepval-benchmark-freeze.md",
+      "bytes": 1668,
+      "sha256": "215284c91c3e86588dbe9d388059bb6beb7be760b76f2ecf63c01f2be4ce7159"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/WINNER_READY_GATE.md",
+      "bytes": 2507,
+      "sha256": "4bbf6b3204d682783c09d7faaf2e6d86cd85e1449c8eb8b2c9cdc7c352e18e1e"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/ADR-004-daily-benchmark-cadence-amendment.md",
+      "bytes": 1805,
+      "sha256": "0d6d7b14365f7c4a7cec6194b71b2707c92a1d7ab4a3b544a161eca6d2bd899c"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/CONTINUATION_STATUS.md",
+      "bytes": 5466,
+      "sha256": "f89efca864556bcdd334bc83d6e2f4ef9fb2a1c83ce69ac5ea8850ee08e003b3"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/ARCHITECTURE_READINESS_AUDIT.md",
+      "bytes": 4587,
+      "sha256": "0093777a00870681d933ceb6432613c0e197d344ee9f665eaf11ac111b816285"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/ADR-005-primary-scope-checklist-amendment.md",
+      "bytes": 1072,
+      "sha256": "448f931d0e4a46d3d4906be5f8f4158134db58e8d2187acb0234a53be4aea7be"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/JUDGE_STRATEGY.md",
+      "bytes": 5451,
+      "sha256": "77c24793ba87fabdea34b6ce2fc095afacbe4d199405f311fc7e9efd391fd3c7"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/ADR-002-primary-first-operator-pilot.md",
+      "bytes": 2666,
+      "sha256": "e595182c553d122d8697faccd810dd414e12081f26d58da6929a4da9d2b830c6"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/CONTINUATION_AUDIT_DISPOSITION_2026-09-05.md",
+      "bytes": 3518,
+      "sha256": "d6da35577b88a7cb09e74deb4437f2acc4cefd45e47ae8660639fe6b4745511f"
+    },
+    {
+      "path": "iris_report/iris_sep/architecture/ADR-003-schema-aligned-tabular-primary.md",
+      "bytes": 2435,
+      "sha256": "3358010f7e5c573b77b7b35d86b0a4c4548f3da8539a95a67837f7f2c75073e1"
+    },
+    {
+      "path": "iris_report/iris_sep/provenance/SEP_PRISM_TRAINING_ONLY_REQUEST.md",
+      "bytes": 1985,
+      "sha256": "0a57f2d431b34430e15fa51ec366a4ca2bc27aac13920f6db203c8031c6276f3"
+    },
+    {
+      "path": "iris_report/iris_sep/colab/build_iris_sep_development_notebook.py",
+      "bytes": 7524,
+      "sha256": "7718c3af238db402741f3084986ecbe38653d5c1842e8fac3d0c3190a6a68ddf"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/__init__.py",
+      "bytes": 195,
+      "sha256": "6e5d9990bacb7b2b6ffe3a73a3267bc906a793bba4b4c8e3b845b24147474f9b"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/contracts.py",
+      "bytes": 4509,
+      "sha256": "15bafc1a6d60aa1973fd87f4ddda0f75b20fd046a8f3e177345e25664bd99089"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/pilot_replay.py",
+      "bytes": 3782,
+      "sha256": "07506af899438f5df257c785291ad9ea638c82fa7062ad72ba53c26cbc55a3d0"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/modeling/__init__.py",
+      "bytes": 86,
+      "sha256": "c85ea46fb6e6b670c451966697bad37bc2b95ce71da999e95ba311c0b2a4beb1"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/modeling/tabular_multibranch.py",
+      "bytes": 8565,
+      "sha256": "3fa70d7467f6e4014e0e6453398bb1eb16fa46ad5946366ad85f4d96c797523c"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a_continuation_20260905/README.md",
+      "bytes": 8182,
+      "sha256": "4848a303af3d225af07ae470278256678a0c7836b00f250fc243b1888781e857"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sepnets_prism_v2_lfs_pointers.txt",
+      "bytes": 746,
+      "sha256": "b9f6c37bb84f6f4bcc527038726dbf6af1dfc6f96d418f30587a630a6e3f0af1"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/RECEIPT.md",
+      "bytes": 4914,
+      "sha256": "d541f709aac69926d460c944bc79c0e8ecd98109617738cbab8942f29243258d"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/zenodo_21297635_record.json",
+      "bytes": 8435,
+      "sha256": "72e96eba21e8a1edc561a768e80e5005c917f0218a95d6108e93545074b56601"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/zenodo_15555244_sepval_record.json",
+      "bytes": 7881,
+      "sha256": "0debfc45eaac3c6094bdf27e832e3a0de6ad4caedd63228f09f04160ec9df19d"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/SHA256SUMS.txt",
+      "bytes": 1395,
+      "sha256": "ee99e72a01893682420ef83aeecf7729231ac9524974ebd5700cb5e6615c6807"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/provenance_manifest.json",
+      "bytes": 27265,
+      "sha256": "e6db14d2f939f2241dc24ed45e7a495b0bdd922334862a0ebeeb3b2081c1b9d4"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_e_continuation_20260905/RED_TEAM_REPORT.md",
+      "bytes": 13108,
+      "sha256": "261f9f0e199ea35861a7834a07619641d30f351630fd65ce08fbebf1472b94d0"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/environment_manifest.json",
+      "bytes": 1738,
+      "sha256": "17bee0b38be82e2b5a882d26bbe01ccfef3f50110050015d7040f6d1f505fd51"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/source_receipt.json",
+      "bytes": 6844,
+      "sha256": "2c012aaf0b51275cca57b29602c6fa290af226a41b64a6fb6cb3201549cb5499"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/baseline_interface.py",
+      "bytes": 7155,
+      "sha256": "f075e0d20b060a8629c6f3cc1f21227aca276c0a29cb3c337dd71c1b6bba99d6"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/baseline_contract.json",
+      "bytes": 11760,
+      "sha256": "f68cf8438da45613d71cb0e5256971e745b3bf1c308f1b7b77ea34095cd3fd7f"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/README.md",
+      "bytes": 13616,
+      "sha256": "f5161ea74ebbaa0d5c2bade5b35b90edc7ec34d6b4180e754e186cefee8afecb"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/test_baseline_interface.py",
+      "bytes": 3414,
+      "sha256": "078e3d6a62095ca1beb9328d9f1c9e69c00e1882434dfa8596bb6722c69401f9"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/test_contract_unittest.py",
+      "bytes": 4141,
+      "sha256": "f58c84714d9afb55ea5a4b94d96cc5f0129212a419956cb8554a06f64ccc6b5f"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/__init__.py",
+      "bytes": 92,
+      "sha256": "5e4f4561f1eb3b7e369861869ef0e6130274ea1ae72c8665d4889c875f335af6"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/README.md",
+      "bytes": 943,
+      "sha256": "3faca08f376e705f284cdffb70f6b50ca1d1166d19e06b2a496a93ed955c352c"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/colab_runtime_test.py",
+      "bytes": 937,
+      "sha256": "6f6b9a520c33b362f4ff21c7e4ce747b4f288abaed89fcc4be94e8202cc6f712"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/luna_model.py",
+      "bytes": 12500,
+      "sha256": "5a17f674f79a64079e3592a933e5d0d2861f60edb51402634be49f162020a5e5"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/test_model.py",
+      "bytes": 9319,
+      "sha256": "10d8873a98d0e2515f0c400e870cbda5f0bb5c83c82fbe48b0f5777a47f1bb61"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/smoke_test.py",
+      "bytes": 5893,
+      "sha256": "213d8a8eb9881b3cc57d5a6e52b833804897b2f9445cd692a4ebd82d8aa2ff81"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/checkpoint.py",
+      "bytes": 9594,
+      "sha256": "de4a2434f702ea0d8bc786f3c2f2571e66cc84801ef589e3f99356a464be819e"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/verify_static.py",
+      "bytes": 6084,
+      "sha256": "9e3a6b5ece0091508f74e049bee68121637e2a636c440e08676d308305575432"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/test_unittest.py",
+      "bytes": 4142,
+      "sha256": "627e4596dbbea181f81b7b10c76183a3ede8dbe97133879c1801b3533c7a6a0e"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/__init__.py",
+      "bytes": 995,
+      "sha256": "59626cf383af540f6a3588990e3ec72ee2ce61b6cb6a2b8df3e408b524a28c53"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/model.py",
+      "bytes": 33320,
+      "sha256": "c1bae3c784874761e80b8da92a0b2e49f4782fb032648d6383a6fee29d1e955e"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/README.md",
+      "bytes": 4554,
+      "sha256": "d79bd0507739400ac7d8b946055c07d6c4b8f371b8757ba4ab112a42abbef912"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/test_identity_bridge.py",
+      "bytes": 6399,
+      "sha256": "34ed9d0e59297ba13fd8b9cb4b918bf06adf4d4bfe739b89179efaac5cc9075d"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/__init__.py",
+      "bytes": 937,
+      "sha256": "364e44df3885909fc93f25aa97bde447dcd6b4e2293ac4e258a194a6ac2ed5cb"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/current_bridge_decision.json",
+      "bytes": 882,
+      "sha256": "e22b8fa0ee87a4856bb14411bb92c53cbdd2324d5cb601d2acf6f8459c99e8c9"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/test_aia_pretraining.py",
+      "bytes": 4280,
+      "sha256": "5698f63fc8c77beece7f330954367f061e606b33b766ea514b738139c04e229e"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/aia_pretraining_receipt.template.json",
+      "bytes": 681,
+      "sha256": "98e00dede07c6fbe01302366654a64d521092160401279616897c1e605a14756"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/README.md",
+      "bytes": 1799,
+      "sha256": "9e2f7dc8808548e77a10c444dc886b0453623fa01dd4c291433074973dbd1c80"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/bridge_receipt.template.json",
+      "bytes": 875,
+      "sha256": "6aec1ee0d2b0d5c5edc4b3c7d1a64b78ec193288cda8f6ffbd55f2de4599b32c"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/aia_pretraining.py",
+      "bytes": 20493,
+      "sha256": "2dfdc6797836caf66a21fcdc287497a7ff1a5ed9175523df12bbd84c85c924d0"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/identity_bridge.py",
+      "bytes": 29554,
+      "sha256": "0a11cf50f7261ef9fab4ff3cd99c87a9d9fff2ff4433f1b7fb67598e73bde059"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/test_eval_ops_unittest.py",
+      "bytes": 5327,
+      "sha256": "4b85711313c43d11c4fd16bd057df6d1e1b7519458deb2b30b2fb92dcdd8344b"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/evaluation.py",
+      "bytes": 9699,
+      "sha256": "3fde3e6c0b68a9b0004a20f9d86c8a277ef571c1e062e83ef2284bf19af680e4"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/operator.py",
+      "bytes": 5993,
+      "sha256": "bd221642ccee056bc710ffedb331a103e913696e7adc35068d6cae2cea7e9cc8"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/__init__.py",
+      "bytes": 63,
+      "sha256": "c2cfe13c6284e4c27d3246524395b157a10a9518a644f33348915e405e98c670"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/README.md",
+      "bytes": 773,
+      "sha256": "b2f02517a36ef9d34d84dc0780630d660934f522b5bdf6795a79d92e1c2b4418"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b_continuation_20260905/source_receipt.json",
+      "bytes": 4803,
+      "sha256": "588d084784b8a41474e36cb337dc085e4b45dbeacb7e95bb4b15c9435881c262"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b_continuation_20260905/preregistered_inner_fold_batch.md",
+      "bytes": 5822,
+      "sha256": "9c1aeca29090f0ba01b39093eec40872e62d51dfe994248106beb291a76b09a8"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b_continuation_20260905/README.md",
+      "bytes": 12966,
+      "sha256": "8d825cf6579cb0d533cbf0f4a734b0ee9c35484839b4ba45d7c4bf11590f1746"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/__init__.py",
+      "bytes": 68,
+      "sha256": "4fd418ea55308b2e8eb4b3553754784b1d6f9830db70aa004237e999e45588d8"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/README.md",
+      "bytes": 883,
+      "sha256": "8af95c5ac5b401a1e24132ee0638457cff8a36bde73df1b612518daadee19892"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/test_pipeline_unittest.py",
+      "bytes": 5946,
+      "sha256": "2171955f1b439e6dfbc604256ce4bbfd72fe40a6e44a14c221ef95776b4c58c9"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/transforms.py",
+      "bytes": 4649,
+      "sha256": "b940662231ea964ba57413a7eeac21b7a5ee77f8024ecdc7a43f4fd645e5f7f7"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/manifests.py",
+      "bytes": 1872,
+      "sha256": "0c118e75ab19883b1b8a5ea9fc3fde04de13614c70cae260e8e1c31e643edf9d"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/cohort.py",
+      "bytes": 10830,
+      "sha256": "422ea0f8a94c4166544d0de04a05be03181f1ff573c5e8e55c64f4fcb90b1a82"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__init__.py",
+      "bytes": 1188,
+      "sha256": "71e803a0715e1f12990a00396f81f9cc98e84a6689214c1b946711bd23fde32b"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/schemas.py",
+      "bytes": 6391,
+      "sha256": "c04c30da9463809fa5caea770dcaff806a8b405d4b89a3ff6410aea462b774c6"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/errors.py",
+      "bytes": 342,
+      "sha256": "e822fc5df5567646704281f004233ce9fa3a0defebbecab7e0fdd42a0e86bca4"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/schemas/identity_bridge.schema.json",
+      "bytes": 1153,
+      "sha256": "cc6f96f3d6d149ad4707f90f64e57852e3beecdebe7889684aeb25c38ff02669"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/schemas/aia_pretraining.schema.json",
+      "bytes": 1172,
+      "sha256": "f4e2f7837bfabf9c557465e478cdea4f1bb245631b22b370acf0ae280a98f97a"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/tests/test_model_contract.py",
+      "bytes": 4410,
+      "sha256": "81376034bc5139981f4381fccc49639909760f9608a517ae6bdfcf62ded4737c"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/tests/test_static_contract.py",
+      "bytes": 659,
+      "sha256": "35511167a535e954617ae345fe862d0c0feb8ae267bb3ddfc01613c2c0d0bd24"
+    },
+    {
+      "path": "iris_report/iris_sep/replays/synthetic_continuation_20260905/fixture_replays.svg",
+      "bytes": 2680,
+      "sha256": "5f085fd1a55288fb5cd0026e55cf673ff0f6cb44b3c9ddd1ded023db0f07cf8b"
+    },
+    {
+      "path": "iris_report/iris_sep/replays/synthetic_continuation_20260905/fixture_replays.json",
+      "bytes": 20404,
+      "sha256": "10bccd460b8fd78bb80c69d3cf16e26a8ce0a34a37c6537aeda1f470169b48d9"
+    },
+    {
+      "path": "iris_report/iris_sep/replays/synthetic_continuation_20260905/receipt.json",
+      "bytes": 798,
+      "sha256": "036e3d39a2f6e68a6924bf373d6596b17f3195aa940719d46f61f52b1e80f38a"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/test_train_generator_v3_resumability.py",
+      "bytes": 2270,
+      "sha256": "636f14fbe3c9775687b6f92a8b5b09990327906c4de9d217f1b9a77105062052"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/test_downstream_protocol.py",
+      "bytes": 1806,
+      "sha256": "be5708c41c9cfb2ed7042cafedf0f8adaaec3d142bf5afc16f28ef2084525667"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/freeze_prospective_batch.py",
+      "bytes": 4144,
+      "sha256": "b8143917170461ee8a3c58332c6611fcd229d2583adfe9b80222ef6a6a9b2dcd"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/metrics.py",
+      "bytes": 2665,
+      "sha256": "b2f2f3bcaf3d28103989a2f5f3ed476f8e7da20b541b4e59887322e39f43146e"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/requirements.txt",
+      "bytes": 149,
+      "sha256": "8175a6f157a3ae35f6e70362f6af3816e00a3c121e2945aafbabd5dc6f8201eb"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/sample_generator.py",
+      "bytes": 3791,
+      "sha256": "74f73097a2c8706744126016d564771997c2f97577ce900435831d79f07a78bf"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/evaluate_generator_v2_fixed.py",
+      "bytes": 4301,
+      "sha256": "f33839d83061effc2ba874fed173ef34c8225c263a1433aae4b274048a8b167e"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/preprocess.py",
+      "bytes": 4105,
+      "sha256": "cbfa3d87a11dc30f41876934d411c2194ef13ea6f5939f3400432efcc28fbf0d"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_augmented_forecaster.py",
+      "bytes": 7402,
+      "sha256": "5fdca4d0ab4b935518b68c2ae1ed6431ad4885cdff76053344419f814ac43e17"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/build_rolling_folds.py",
+      "bytes": 3065,
+      "sha256": "41cacd8258e0b553be5a18f9847e22d82ac0b21cda8f3df64a40eddee66678dc"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/evaluate_generator_v2.py",
+      "bytes": 11813,
+      "sha256": "1c5af3609f6e7adbf2f37b0dd076f19f2764de3271e0732416e0ddec43ca1f8e"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/physics_v2_selftest.py",
+      "bytes": 3964,
+      "sha256": "98b12d7f8e62fd99b838dfe4f4e8cb630262375657ed9e6c8c0f21ffc7314457"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_forecaster.py",
+      "bytes": 6163,
+      "sha256": "58c7e9ee112cbd01dd8855ecb0caa6c7fb9e68f7949c3b9d8b0268a2089e8004"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/README.md",
+      "bytes": 5587,
+      "sha256": "6f61088f15ce03be9aae73271fd5b5dcc26f2d0c94f355073815ce211a09fd9f"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/test_flare_system.py",
+      "bytes": 3491,
+      "sha256": "29edc284448bdf285b30b256f89b8221ffd0869b41cca839f1508a779396ea87"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/physics.py",
+      "bytes": 3536,
+      "sha256": "306fad3582041809da3eb3b814cccc0794659835be928d1c032d7c033b905386"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/compare_augmentation_locked_test.py",
+      "bytes": 3244,
+      "sha256": "306b0b13dab713c6e45506b50ef9ce5cc355bed681d1c5601cc0e72f39cd5d09"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/generator.py",
+      "bytes": 6726,
+      "sha256": "9a8469c6bcd272ee4f49404004fc03fbc173acbfe40038bca108994ec8ae7215"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/make_physics_destruction_controls.py",
+      "bytes": 3441,
+      "sha256": "9fb113bc9bf0f2f8867015033b538d6f96112ae02dec9b300acbf06a6d17a426"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/make_rolling_folds.py",
+      "bytes": 2717,
+      "sha256": "00355c553115024acf098a4ae0e2d178676d0b5d152ed4d40f74a275ecf5a131"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_matched_augmentation.py",
+      "bytes": 11671,
+      "sha256": "d9e227cc37f780250e6c7a3f1ad4ba513e2923eaab59fdb480b74f4217f46ce7"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/make_v2_rolling_folds.py",
+      "bytes": 5475,
+      "sha256": "d4946aa50484b94e94b3d5a4d436a69e90ada2a9d298a75dbdec4678c865916e"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/acquire_benchmark_fits.py",
+      "bytes": 2002,
+      "sha256": "4e9482e231e1bf4828bc09bad19433942e70a799983f64c888045b4ccfe4851a"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/forecaster.py",
+      "bytes": 2149,
+      "sha256": "403363148b60e71f8f3730d1a01776cb1a07af286ac764f17e9afffadc4fab3f"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/fit_cache.py",
+      "bytes": 11000,
+      "sha256": "baff3a2a77422a119fcc0aa54b0b871d0969c2638efa302150680d87e6a45d69"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/make_v2_fold_evidence.py",
+      "bytes": 4829,
+      "sha256": "efa38a548474680e31ce20d78b59881d9e9aa2e488edd2ae80bbcbf9558c13a7"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/freeze_prospective_predictions.py",
+      "bytes": 1985,
+      "sha256": "0ea5cd06324d7792ee475a1400460533b1b19d4b31a477e9172894e0fb38939c"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_generator.py",
+      "bytes": 9650,
+      "sha256": "a1dabe02690ce87d7c603a16d81a1b1e15d6bc0ba1a451845b7922b28550bb5c"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/run_flare_benchmark.py",
+      "bytes": 100,
+      "sha256": "3d29bc43000c132da22309c4a39c9d84c75ea4ecdef7e09c5fa690a1ea3b6092"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/physics_v2.py",
+      "bytes": 7496,
+      "sha256": "52c5c75255b48fe7fe95ad6e497a233e8c4be8b0d865c80a1e9acd2deb1e40f6"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/audit_aarp_dataverse.py",
+      "bytes": 2806,
+      "sha256": "c038b22e346a4eb3f866426a2aacd5f6181df3ff17c809a9073df2a032fcb977"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/evaluate_generator.py",
+      "bytes": 4354,
+      "sha256": "4da906f0c8cc109eebfbb4d29ef2a96c2b44c43cf3d38e015e363baf753d2111"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/compare_augmentation.py",
+      "bytes": 3201,
+      "sha256": "dd5e7d1dcc3c9edb3a34a006f812eece44dc3c601f1c4ac4e1cec0cba3f57339"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_generator_v2.py",
+      "bytes": 16057,
+      "sha256": "debe22aac8d25e0d2ba4c8283d667f8bd81b66e85f4bdfccd3062bb033107e0d"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_generator_positive_v2.py",
+      "bytes": 14198,
+      "sha256": "9977acc7877e7250c0b7f19102beaa971e72b73da031dbbcc52d3d131a722126"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/compare_v2_rolling_transfer.py",
+      "bytes": 5040,
+      "sha256": "0ad98975fffc5a896e36343b817abb8c31011fa5c6a78c3dc426f2583ce50e6d"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/generic_fidelity.py",
+      "bytes": 1379,
+      "sha256": "2e9c21387ca0f53c3930694794472cf0b9a85ae69b183a97b69fe6571db3f26e"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/train_generator_v3.py",
+      "bytes": 15062,
+      "sha256": "87d741f4354016ad03a8a01c503a46099c4e5b64bec11507166d83d24639aca6"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/data.py",
+      "bytes": 8488,
+      "sha256": "cbe73976a93dea9458687f4a8392d6063dff6d717674111f72eeaa2f2e41cf0e"
+    },
+    {
+      "path": "iris_report/source_snapshot/common/jsoc_time.py",
+      "bytes": 2790,
+      "sha256": "ba2f6f00647785852647e7b57c61bb10914deda9ec286a5788828ce3cd653f66"
+    },
+    {
+      "path": "iris_report/source_snapshot/common/test_jsoc_time.py",
+      "bytes": 1507,
+      "sha256": "f8329c0f60017dff32f86f66882e439c26de92e5f04e3f9760fe981725c3e03a"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/build_manifest.py",
+      "bytes": 10480,
+      "sha256": "06fc642c08356ebcaa030c9ab3c7091d60b12c43e4e91ba94e28085824468c6a"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/requirements.txt",
+      "bytes": 89,
+      "sha256": "4ba7a661d0547e660f05f8076076bb745d313315d9caa3b675b836fa6a1cbe77"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/smoke_download.py",
+      "bytes": 2480,
+      "sha256": "6fce6e8fd0f86af0256297e21b07e0886931a612473254f8a555bc1357cc87ef"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/fetch_gate0.py",
+      "bytes": 6486,
+      "sha256": "f610c3c463ca5906923748a87c17e140d605708b08fd55348d3ced05713da417"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/query_sharp.py",
+      "bytes": 6331,
+      "sha256": "5f3ba3c85073a58aa8982c19a98cf0281285c71fc5f2afa17c02db6d41f37ba0"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/repair_historical_tai_manifest.py",
+      "bytes": 16728,
+      "sha256": "ed889d374f584d57e7194b06c84b389098264580c98460a11b1103dc7b111b8c"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/test_repair_historical_tai_manifest.py",
+      "bytes": 2986,
+      "sha256": "48c9e27ab3c2f6851ad165d058e4b5d0bfaf6336b8ee6f630e140a87b4cbf4dd"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/test_fit_cache.py",
+      "bytes": 2443,
+      "sha256": "512e80d965904889f0beaa42331c231b83e3abeba799fac422391233dce97931"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/FITS_ACQUISITION.md",
+      "bytes": 1949,
+      "sha256": "06f531bcd0b5946a309012616798acf1c864d2e7fd960e8b0975e42b3e5c709c"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/test_acquire_sharp_fits.py",
+      "bytes": 858,
+      "sha256": "d8890a0507ef690c4c0e5ecf28fbf93de9c70c4f846f792dd89a1b3ad0d963bd"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/iris_colab_runner.py",
+      "bytes": 16680,
+      "sha256": "1f584e8954e490a171f31ea11b0d2c2bda9595f0f7c6e6dc1c78a1a4be1906ed"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/COLAB_START_HERE.md",
+      "bytes": 1527,
+      "sha256": "c1c902c3faf3dc1f9192e6b152a9cdd97f285f70bdb4e171ff15d8d96f48002f"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/acquire_sharp_fits.py",
+      "bytes": 15463,
+      "sha256": "3635fdacb903864a8e03065d41b2534b4a404b0eeca3df74285dc2c23ddaa441"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/build_notebook.py",
+      "bytes": 13362,
+      "sha256": "5954e455f37d3128e80f9088ef6a3f1db6fd7532cfcaf76d27ed43c00d451a98"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-positive-physics-recovery.yml",
+      "bytes": 9000,
+      "sha256": "1679cd77a897cbe92c250e043aeb5fdb96b4b21b1faaa8fccaf92e8ababd24f3"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-downstream-augmentation-pilot.yml",
+      "bytes": 3592,
+      "sha256": "5e64ebad68a19e6d8cc7c1ccf9d46b89ad86cbf92cb3bd28f60115fd3e354577"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-downstream-compare.yml",
+      "bytes": 2259,
+      "sha256": "6bd09c1b89be01b9d2c7f58a687a0172ac8cd25773c72ff77b5166c897b353da"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-model-smoke.yml",
+      "bytes": 1996,
+      "sha256": "bd2c1c5cb2ec8f490a93f28ea1b3a8e17cad3601dc803e827d0979c6f606d96e"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-positive-hj-lambda-sweep.yml",
+      "bytes": 5687,
+      "sha256": "f6d72d5cd9f09a085e87ae433e2a4012747b5b51f4b51955e4e4e0a5f83fae05"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-physics-selftest.yml",
+      "bytes": 1165,
+      "sha256": "f6adbc8162a4611963a21bb72ff315b2c2ac683dea23260d4a6e296eff60b5ea"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-build-rolling-folds.yml",
+      "bytes": 1410,
+      "sha256": "2dc01f95102f308aca566ae1abca23e8fd9035bd4b0e73af7a375853a43e3e7c"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-positive-lambda-sweep.yml",
+      "bytes": 5937,
+      "sha256": "cf922a44202231e7e827ad7761b480385b77fdaaf065fe6f0021d8ebf8635edc"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-build-nested-folds.yml",
+      "bytes": 2635,
+      "sha256": "dc0e09406a709228358a71d94935428cd6fc7d673d98d7f18900ecff8c754124"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-build-outer-folds.yml",
+      "bytes": 2309,
+      "sha256": "70c672da8eb69554a013ffd3f8400a4a8d765b4239bd5ea14fa1ca055fe06920"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-physics-smoke.yml",
+      "bytes": 2400,
+      "sha256": "89336df7c68547e1bbeb3043a4444bca1f1c550d22e68a7e74dd2219b3890339"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-converged-base-physics-gate.yml",
+      "bytes": 7510,
+      "sha256": "41af5df40ea796568486a5ff11f010dc46ceb227bdf1f8c64821a8fe03ae098f"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-rolling-folds.yml",
+      "bytes": 1285,
+      "sha256": "7c3e0c40913f711d5e491aace2a3f10eec12d3171ea5328bea322986cfb011dd"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-exact-6000-base.yml",
+      "bytes": 4250,
+      "sha256": "537f4cefa27318ca117e84c87b057d426de4602a85cc2bacad152653513b20e6"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-pil-manipulation-pilot.yml",
+      "bytes": 5089,
+      "sha256": "07e9591cb999f006b92f00b9a381cea56f7772b18c338c30ebac521775c56db8"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-base-convergence-reassess.yml",
+      "bytes": 4930,
+      "sha256": "28db326e42ed3d6ebb961de7f057b78add7c56ff53f787e229d45a8a8f1278d4"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-gate0-collect.yml",
+      "bytes": 1496,
+      "sha256": "30d60d3e6f7bdf05a06173f809617e0c5f154389c1e313299e98d7a8ce64f179"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-efficient-physics-gate.yml",
+      "bytes": 9266,
+      "sha256": "dd65f2d9ce4c9bc4b02bf671def8856a96dac4ec600320849da01ae1374c2031"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v3-fidelity-pilot.yml",
+      "bytes": 4809,
+      "sha256": "311b449180268a811fb9f18d41f04debc3e96ae4bf2bfbb9f05c53b41d573be1"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-full-rolling-transfer.yml",
+      "bytes": 20708,
+      "sha256": "355e8d4ea0281282f683c49da7e3fac2670faebbf904753c289d3b19820c2c8e"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-generator-historical-pilot.yml",
+      "bytes": 3584,
+      "sha256": "37c99ce9516008d535aa8045a6e15f63432fead3488d8ff6e91e4359d6012d1f"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-augmentation-locked-test.yml",
+      "bytes": 5235,
+      "sha256": "913389fafecbb87be8fca0f91d6437e712813f201c045a207fa77adb7be24b87"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-physics-lambda-sweep.yml",
+      "bytes": 9722,
+      "sha256": "36b6a05edaf5eec64247c2cf7a7da87ac4e06f48d405f3a74c152c1556b24f9a"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-base-convergence.yml",
+      "bytes": 5236,
+      "sha256": "017a1b31d17846b111840fb4e2b21bd9820f8a5b7b3366419103c000b9c84a16"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-stable-base-recovery.yml",
+      "bytes": 4030,
+      "sha256": "8b38fc3fa1eac69ccd037b878018d9ef3920f36eaf74e666a12c453f7acb348d"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/jsoc-debug.yml",
+      "bytes": 746,
+      "sha256": "99419d4526ef47beb5663818263a913111f209d978798c01ee14fb8b381b2a58"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-rolling-real-duplicate.yml",
+      "bytes": 6953,
+      "sha256": "b236b70431a4257af7e2764b050a94bfd522a4218f0bbec0558101b2084c3d4b"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-positive-physics-2000.yml",
+      "bytes": 8660,
+      "sha256": "e5788a6fb00389f7b3d436498bcf0bfc5ec5f9622d6b96e6d4c029b946cc8c9c"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/workflows/iris-v2-reaudit-3280-base.yml",
+      "bytes": 3829,
+      "sha256": "696901ae87ebbe748b5890f0abf2f7853fe35d97f50c419c684b29d0e456e186"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-gate0-data/compliance/IRIS_ARCHIVAL_ASTRONOMY_CLARIFICATION_REQUEST.md",
+      "bytes": 2135,
+      "sha256": "c48bdb685ebb6c3411154accb9e2fa6f169dd76d4f087ba8b957f24aff8c2674"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/aarp.py",
+      "bytes": 5703,
+      "sha256": "590e450e3cba0ea18cecedc6b567f3fe46ad30bc10fb5803a309a2f04a160c44"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/runner.py",
+      "bytes": 18876,
+      "sha256": "4caee3cc1c47fa6c0fade9918a429e32b721c7162b9304c9f2c5bebb09e3e24c"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/evaluation.py",
+      "bytes": 8694,
+      "sha256": "de5f6fec2179498a18e3ad2ad7a3aec5064c028792520779ce3ec5e5c4663381"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__init__.py",
+      "bytes": 427,
+      "sha256": "d2ec04e7514cd10c081d19301ab1e5a6a25c78d6709b0fec9e4e6f63937c9149"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/model.py",
+      "bytes": 4699,
+      "sha256": "80c09ec117d7257785c89a3721c9b7f6211565fc1e24f538ca4778224bdd0851"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/data.py",
+      "bytes": 18028,
+      "sha256": "6c700d2dea91e73c62df7cfbe70d210292c765b8acfe2bf3e7331d1c946811fd"
+    }
+  ],
+  "total_bytes": 1320529,
+  "excluded": [
+    {
+      "path": "iris_report/iris_sep/.DS_Store",
+      "bytes": 8196,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/.DS_Store",
+      "bytes": 14340,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/data_processed/sepnet_v1_development_v5_dual_target.csv",
+      "bytes": 9455879,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/data_processed/sepnet_v1_development_v2.csv",
+      "bytes": 7878006,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/data_processed/sepnet_v1_development.csv",
+      "bytes": 7870750,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/data_processed/sepnet_v1_development_v3.csv",
+      "bytes": 7867516,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/data_processed/sepnet_v1_development_v4_dual_target.csv",
+      "bytes": 9455879,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/data_processed/sepnet_v1_development_v6_dual_target.csv",
+      "bytes": 9455879,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/colab/IRIS_SEP_Development_Training_2026-09-04.ipynb",
+      "bytes": 48363,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/data_external/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/.DS_Store",
+      "bytes": 10244,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/src/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 375,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/__pycache__/contracts.cpython-314.pyc",
+      "bytes": 9342,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/__pycache__/pilot_replay.cpython-314.pyc",
+      "bytes": 6130,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/modeling/__pycache__/tabular_multibranch.cpython-314.pyc",
+      "bytes": 17312,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/src/iris_sep/modeling/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 247,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/CLEAR_Benchmark_Dataset_V2_0_Documentation.pdf",
+      "bytes": 219455,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/SEPVAL2023_RulesofParticipation_v4.pdf",
+      "bytes": 2352857,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/__pycache__/test_pipeline_unittest.cpython-314.pyc",
+      "bytes": 11588,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 286,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__pycache__/schemas.cpython-314.pyc",
+      "bytes": 12682,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__pycache__/errors.cpython-314.pyc",
+      "bytes": 987,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__pycache__/manifests.cpython-314.pyc",
+      "bytes": 3940,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__pycache__/transforms.cpython-314.pyc",
+      "bytes": 10939,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 1273,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_g_data_pipeline/iris_sep_pipeline/__pycache__/cohort.cpython-314.pyc",
+      "bytes": 17564,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/__pycache__/operator.cpython-314.pyc",
+      "bytes": 9290,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/__pycache__/test_eval_ops_unittest.cpython-314.pyc",
+      "bytes": 8822,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/__pycache__/evaluation.cpython-314.pyc",
+      "bytes": 20121,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_i_eval_ops/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 276,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/__pycache__/aia_pretraining.cpython-314.pyc",
+      "bytes": 25792,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/__pycache__/test_identity_bridge.cpython-314.pyc",
+      "bytes": 11349,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/__pycache__/identity_bridge.cpython-314.pyc",
+      "bytes": 34181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 905,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_d/__pycache__/test_aia_pretraining.cpython-314.pyc",
+      "bytes": 8679,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/__pycache__/model.cpython-314.pyc",
+      "bytes": 48667,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_c/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 969,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/__pycache__/colab_runtime_test.cpython-314.pyc",
+      "bytes": 2187,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 296,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/__pycache__/luna_model.cpython-314.pyc",
+      "bytes": 21259,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/__pycache__/test_contract_unittest.cpython-314.pyc",
+      "bytes": 9045,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/tests/__pycache__/test_model_contract.cpython-314.pyc",
+      "bytes": 9347,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_h_model_hardening/tests/__pycache__/test_static_contract.cpython-314.pyc",
+      "bytes": 1930,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/__pycache__/test_baseline_interface.cpython-314.pyc",
+      "bytes": 6307,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_b/__pycache__/baseline_interface.cpython-314.pyc",
+      "bytes": 10099,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/LICENSE",
+      "bytes": 1074,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/opsep.py",
+      "bytes": 155657,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/setup.py",
+      "bytes": 1863,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/idsep.py",
+      "bytes": 33209,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/README.rst",
+      "bytes": 23069,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/model_example.json",
+      "bytes": 2987,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/sepnets_v1/Data-Construct.R",
+      "bytes": 18789,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/sepnets_v1/README.md",
+      "bytes": 3762,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/sepnets_v1/multitask_model.py",
+      "bytes": 14364,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/sepnets_v1/__pycache__/multitask_model.cpython-314.pyc",
+      "bytes": 21097,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/__pycache__/setup.cpython-314.pyc",
+      "bytes": 2140,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/__pycache__/idsep.cpython-314.pyc",
+      "bytes": 32165,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/workstreams/luna_a/sources/fetchsep_v2/__pycache__/opsep.cpython-314.pyc",
+      "bytes": 153017,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/data_external/sepnet_v1/rolling_combinded_training.csv",
+      "bytes": 8765416,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_corrected_sepnet_o_v3.cpython-314.pyc",
+      "bytes": 13413,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_tabular_model_static.cpython-314.pyc",
+      "bytes": 1978,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/verify_contract.cpython-314.pyc",
+      "bytes": 2662,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_corrected_sepnet_o_v4.cpython-314.pyc",
+      "bytes": 14023,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_corrected_sepnet_o_v5.cpython-314.pyc",
+      "bytes": 15630,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_pilot_replay.cpython-314.pyc",
+      "bytes": 6339,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_prepare_sepnet_v1_dual_target.cpython-314.pyc",
+      "bytes": 7834,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_contracts.cpython-314.pyc",
+      "bytes": 4291,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/verify_local.cpython-314.pyc",
+      "bytes": 22639,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_prepare_sepnet_v1_dual_target_v6.cpython-314.pyc",
+      "bytes": 18365,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_seal_training_split.cpython-314.pyc",
+      "bytes": 4580,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/verify_corrected_sepnet_v5.cpython-314.pyc",
+      "bytes": 7407,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_tabular_model_runtime.cpython-314.pyc",
+      "bytes": 10701,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_prepare_sepnet_v1_dual_target_v5.cpython-314.pyc",
+      "bytes": 9744,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tests/__pycache__/test_corrected_sepnet_o_v1.cpython-314.pyc",
+      "bytes": 9342,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/train_corrected_sepnet_o_v5.cpython-314.pyc",
+      "bytes": 42239,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/prepare_sepnet_v1_development.cpython-314.pyc",
+      "bytes": 15332,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/build_fixture_replays.cpython-314.pyc",
+      "bytes": 5429,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/compare_development_models.cpython-314.pyc",
+      "bytes": 7583,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/train_corrected_sepnet_o_v3.cpython-314.pyc",
+      "bytes": 41079,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/seal_training_split.cpython-314.pyc",
+      "bytes": 8796,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/prepare_sepnet_v1_dual_target_development_v6.cpython-314.pyc",
+      "bytes": 18458,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/run_local_xgboost.cpython-314.pyc",
+      "bytes": 14243,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/prepare_sepnet_v1_dual_target_development.cpython-314.pyc",
+      "bytes": 14903,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/train_corrected_sepnet_o_v4.cpython-314.pyc",
+      "bytes": 41224,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/train_corrected_sepnet_o_v1.cpython-314.pyc",
+      "bytes": 34568,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/train_tabular_multibranch.cpython-314.pyc",
+      "bytes": 33058,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/build_baseline_ensembles.cpython-314.pyc",
+      "bytes": 7835,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/build_development_hybrid.cpython-314.pyc",
+      "bytes": 24081,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 230,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/run_local_baselines.cpython-314.pyc",
+      "bytes": 16242,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/tools/__pycache__/prepare_sepnet_v1_dual_target_development_v5.cpython-314.pyc",
+      "bytes": 16592,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baseline_ensembles_v1/development_ensemble_predictions.csv",
+      "bytes": 3209564,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baseline_ensembles_v1/receipt.json",
+      "bytes": 5782,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/development_predictions.csv",
+      "bytes": 1804602,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/receipt.json",
+      "bytes": 7255,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/development_predictions.csv",
+      "bytes": 1804602,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/run_config.json",
+      "bytes": 484,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/general_episode_mapping.csv",
+      "bytes": 1170908,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/receipt.json",
+      "bytes": 7748,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/training_weights.npz",
+      "bytes": 19192,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/development_predictions.csv",
+      "bytes": 1804602,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/run_config.json",
+      "bytes": 572,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/general_episode_mapping.csv",
+      "bytes": 1170908,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/receipt.json",
+      "bytes": 7748,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/training_weights.npz",
+      "bytes": 19192,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/development_predictions.csv",
+      "bytes": 1806727,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/receipt.json",
+      "bytes": 7284,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/development_predictions.csv",
+      "bytes": 1805344,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/run_config.json",
+      "bytes": 572,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/general_episode_mapping.csv",
+      "bytes": 1170908,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/receipt.json",
+      "bytes": 8153,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/training_weights.npz",
+      "bytes": 19192,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/development_predictions.csv",
+      "bytes": 1804602,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/run_config.json",
+      "bytes": 220,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/receipt.json",
+      "bytes": 7253,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_hybrid_v2/development_hybrid_predictions.csv",
+      "bytes": 2065125,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_hybrid_v2/exploratory_grid_selection_biased.csv",
+      "bytes": 817,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_hybrid_v2/receipt.json",
+      "bytes": 7943,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/development_predictions.csv",
+      "bytes": 1735580,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/preprocessing.json",
+      "bytes": 10797,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/receipt.json",
+      "bytes": 12366,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/development_predictions.csv",
+      "bytes": 8073411,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/xgboost_seed_26.json",
+      "bytes": 88746,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/xgboost_seed_13.json",
+      "bytes": 142034,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/xgboost_seed_73.json",
+      "bytes": 186507,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/xgboost_seed_42.json",
+      "bytes": 115957,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/receipt.json",
+      "bytes": 14753,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_xgboost_v1/xgboost_seed_7.json",
+      "bytes": 83609,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_comparison_v2/receipt.json",
+      "bytes": 1720,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/elastic_net_seed_73.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/elastic_net_seed_26.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/development_predictions.csv",
+      "bytes": 16553520,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/elastic_net_seed_13.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/elastic_net_seed_7.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/elastic_net_seed_42.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v1/receipt.json",
+      "bytes": 24364,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/development_predictions.csv",
+      "bytes": 1712620,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/preprocessing.json",
+      "bytes": 10797,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/receipt.json",
+      "bytes": 10469,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/development_predictions.csv",
+      "bytes": 1805930,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/run_config.json",
+      "bytes": 567,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/general_episode_mapping.csv",
+      "bytes": 1170908,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/receipt.json",
+      "bytes": 7799,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/training_weights.npz",
+      "bytes": 20830,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/development_predictions.csv",
+      "bytes": 1805930,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/run_config.json",
+      "bytes": 479,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/general_episode_mapping.csv",
+      "bytes": 1170908,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/receipt.json",
+      "bytes": 7797,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/training_weights.npz",
+      "bytes": 20830,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_hybrid_v1/development_hybrid_predictions.csv",
+      "bytes": 2065125,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_hybrid_v1/exploratory_grid_selection_biased.csv",
+      "bytes": 817,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_hybrid_v1/receipt.json",
+      "bytes": 7846,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/development_comparison_v1/receipt.json",
+      "bytes": 1733,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/development_predictions.csv",
+      "bytes": 1806727,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/run_config.json",
+      "bytes": 215,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/receipt.json",
+      "bytes": 7285,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/development_predictions.csv",
+      "bytes": 1806031,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/run_config.json",
+      "bytes": 567,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/preprocessing.pkl",
+      "bytes": 6896802,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/observed_feature_mask.npz",
+      "bytes": 7127,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/general_episode_mapping.csv",
+      "bytes": 1170908,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/receipt.json",
+      "bytes": 8201,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/training_weights.npz",
+      "bytes": 20830,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/preprocessing_receipt.json",
+      "bytes": 6731,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/development_predictions.csv",
+      "bytes": 1713347,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/preprocessing.json",
+      "bytes": 10797,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/receipt.json",
+      "bytes": 10462,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/elastic_net_seed_73.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/elastic_net_seed_26.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/development_predictions.csv",
+      "bytes": 16626304,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/elastic_net_seed_13.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/elastic_net_seed_7.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/elastic_net_seed_42.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v4/receipt.json",
+      "bytes": 25739,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/elastic_net_seed_73.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/elastic_net_seed_26.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/development_predictions.csv",
+      "bytes": 16626304,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/elastic_net_seed_13.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/elastic_net_seed_7.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/elastic_net_seed_42.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v3/receipt.json",
+      "bytes": 25739,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/elastic_net_seed_73.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/elastic_net_seed_26.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/development_predictions.csv",
+      "bytes": 16626304,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/elastic_net_seed_13.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/elastic_net_seed_7.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/elastic_net_seed_42.joblib",
+      "bytes": 10913,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_baselines_v2/receipt.json",
+      "bytes": 25734,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_26/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_26/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_26/history.json",
+      "bytes": 210,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_73/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_73/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_73/history.json",
+      "bytes": 211,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_42/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_42/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_42/history.json",
+      "bytes": 211,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_13/last.pt",
+      "bytes": 166400,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_13/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_13/history.json",
+      "bytes": 211,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_7/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_7/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_timing_v1/seed_7/history.json",
+      "bytes": 211,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v5/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v2/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v3/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced_v4/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_26/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_26/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_26/history.json",
+      "bytes": 2709,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_73/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_73/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_73/history.json",
+      "bytes": 3659,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_42/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_42/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_42/history.json",
+      "bytes": 2714,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_13/last.pt",
+      "bytes": 166400,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_13/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_13/history.json",
+      "bytes": 2614,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_7/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_7/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v1/seed_7/history.json",
+      "bytes": 3239,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_26/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_26/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_26/history.json",
+      "bytes": 2709,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_73/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_73/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_73/history.json",
+      "bytes": 3659,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_42/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_42/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_42/history.json",
+      "bytes": 2714,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_13/last.pt",
+      "bytes": 166400,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_13/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_13/history.json",
+      "bytes": 2614,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_7/last.pt",
+      "bytes": 166336,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_7/best.pt",
+      "bytes": 50181,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/local_tabular_v2/seed_7/history.json",
+      "bytes": 3239,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v2/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v5/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_episode_balanced/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v4/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful_v3/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_26/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_26/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_73/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_73/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_42/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_42/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_13/last.pt",
+      "bytes": 855019,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_13/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_7/last.pt",
+      "bytes": 854955,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/iris_sep/artifacts/corrected_sepnet_o_v1_faithful/seed_7/best.pt",
+      "bytes": 279833,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/source_snapshot/.github/.DS_Store",
+      "bytes": 6148,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/IRIS_Colab_Training_2026-08-28.ipynb",
+      "bytes": 6524,
+      "reason": "non_source_or_notebook"
+    },
+    {
+      "path": "iris_report/source_snapshot/colab/__pycache__/test_fit_cache.cpython-314.pyc",
+      "bytes": 11371,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/common/__pycache__/jsoc_time.cpython-314.pyc",
+      "bytes": 4435,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/compare_v2_rolling_transfer.cpython-314.pyc",
+      "bytes": 11382,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_generator_v2.cpython-314.pyc",
+      "bytes": 27264,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/test_train_generator_v3_resumability.cpython-314.pyc",
+      "bytes": 4542,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/evaluate_generator_v2.cpython-314.pyc",
+      "bytes": 25374,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/build_rolling_folds.cpython-314.pyc",
+      "bytes": 7698,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/data.cpython-314.pyc",
+      "bytes": 17956,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/acquire_benchmark_fits.cpython-314.pyc",
+      "bytes": 4191,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_generator.cpython-314.pyc",
+      "bytes": 20337,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/make_v2_rolling_folds.cpython-314.pyc",
+      "bytes": 10515,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/preprocess.cpython-314.pyc",
+      "bytes": 9624,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/evaluate_generator_v2_fixed.cpython-314.pyc",
+      "bytes": 5620,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/run_flare_benchmark.cpython-314.pyc",
+      "bytes": 283,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/make_rolling_folds.cpython-314.pyc",
+      "bytes": 6758,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/freeze_prospective_batch.cpython-314.pyc",
+      "bytes": 8495,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/fit_cache.cpython-314.pyc",
+      "bytes": 19560,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/compare_augmentation.cpython-314.pyc",
+      "bytes": 7638,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_forecaster.cpython-314.pyc",
+      "bytes": 12904,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_generator_v3.cpython-314.pyc",
+      "bytes": 26394,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/generator.cpython-314.pyc",
+      "bytes": 18154,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/physics_v2.cpython-314.pyc",
+      "bytes": 13760,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/sample_generator.cpython-314.pyc",
+      "bytes": 8045,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/test_downstream_protocol.cpython-314.pyc",
+      "bytes": 2975,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/physics.cpython-314.pyc",
+      "bytes": 8388,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/evaluate_generator.cpython-314.pyc",
+      "bytes": 12155,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/test_flare_system.cpython-314.pyc",
+      "bytes": 6737,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/compare_augmentation_locked_test.cpython-314.pyc",
+      "bytes": 7943,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_augmented_forecaster.cpython-314.pyc",
+      "bytes": 17905,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/freeze_prospective_predictions.cpython-314.pyc",
+      "bytes": 4389,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_matched_augmentation.cpython-314.pyc",
+      "bytes": 27884,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/make_physics_destruction_controls.cpython-314.pyc",
+      "bytes": 7220,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/forecaster.cpython-314.pyc",
+      "bytes": 5230,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/generic_fidelity.cpython-314.pyc",
+      "bytes": 3855,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/train_generator_positive_v2.cpython-314.pyc",
+      "bytes": 26856,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/make_v2_fold_evidence.cpython-314.pyc",
+      "bytes": 9465,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/physics_v2_selftest.cpython-314.pyc",
+      "bytes": 7455,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/__pycache__/metrics.cpython-314.pyc",
+      "bytes": 7811,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__pycache__/data.cpython-314.pyc",
+      "bytes": 33966,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__pycache__/runner.cpython-314.pyc",
+      "bytes": 29011,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__pycache__/model.cpython-314.pyc",
+      "bytes": 10598,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__pycache__/aarp.cpython-314.pyc",
+      "bytes": 10757,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__pycache__/evaluation.cpython-314.pyc",
+      "bytes": 18509,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    },
+    {
+      "path": "iris_report/source_snapshot/iris-model/flare_system/__pycache__/__init__.cpython-314.pyc",
+      "bytes": 585,
+      "reason": "scientific_artifact_cache_or_third_party_snapshot"
+    }
+  ]
+}

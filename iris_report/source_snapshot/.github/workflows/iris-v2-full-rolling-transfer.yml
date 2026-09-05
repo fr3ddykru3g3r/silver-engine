@@ -1,0 +1,336 @@
+name: IRIS v2 Full Physics-Transfer Rolling Benchmark
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-full-rolling-transfer.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  physics-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    outputs:
+      pil_lambda: ${{ steps.pick.outputs.pil_lambda }}
+      hj_lambda: ${{ steps.pick.outputs.hj_lambda }}
+      pil_tag: ${{ steps.pick.outputs.pil_tag }}
+      hj_tag: ${{ steps.pick.outputs.hj_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - name: Wait for train-only PIL and HJ sweeps
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run watch 32998730393 --exit-status
+          gh run watch 33001484453 --exit-status
+      - name: Download train-only selection artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p selection/pil selection/hj
+          gh run download 32998730393 -n iris-v2-positive-lambda-summary -D selection/pil
+          gh run download 33001484453 -n iris-v2-positive-hj-lambda-summary -D selection/hj
+      - name: Freeze selected physics lambdas
+        id: pick
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/choice.env
+          import json,pathlib
+          p=json.loads(pathlib.Path('selection/pil/positive_lambda_sweep_summary.json').read_text())
+          h=json.loads(pathlib.Path('selection/hj/positive_hj_lambda_sweep_summary.json').read_text())
+          if p.get('status')!='PASS': raise SystemExit('PIL train-only physical/generic fidelity gate failed; downstream synthetic testing blocked')
+          if h.get('status')!='PASS': raise SystemExit('HJ train-only physical/generic fidelity gate failed; downstream synthetic testing blocked')
+          pt=p['chosen_smallest_passing_lambda_tag']; ht=h['chosen_smallest_passing_lambda_tag']
+          def val(tag,prefix): return float(tag.replace(prefix,''))/100.0
+          print(f'pil_tag={pt}'); print(f'pil_lambda={val(pt,"pil"):.2f}')
+          print(f'hj_tag={ht}'); print(f'hj_lambda={val(ht,"hj"):.2f}')
+          PY
+          cat /tmp/choice.env
+          cat /tmp/choice.env >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-frozen-physics-selection
+          path: selection
+          retention-days: 30
+
+  generator:
+    needs: physics-gate
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        fold: [1,2,3,4]
+        seed: [2026,31415]
+        arm: [base,pil,hj,hj_pil]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen nested folds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p nested
+          gh run download 32998667328 -n iris-v2-frozen-nested-folds -D nested
+          test -f nested/fold_${{ matrix.fold }}/data/derived/training_manifest.csv.gz
+      - name: Train frozen positive-only generator arm
+        shell: bash
+        run: |
+          set -euo pipefail
+          LHJ=0.0; LPIL=0.0
+          case '${{ matrix.arm }}' in
+            hj) LHJ='${{ needs.physics-gate.outputs.hj_lambda }}' ;;
+            pil) LPIL='${{ needs.physics-gate.outputs.pil_lambda }}' ;;
+            hj_pil) LHJ='${{ needs.physics-gate.outputs.hj_lambda }}'; LPIL='${{ needs.physics-gate.outputs.pil_lambda }}' ;;
+          esac
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir nested/fold_${{ matrix.fold }} \
+            --cache-dir cache/f${{ matrix.fold }}/s${{ matrix.seed }}/${{ matrix.arm }} \
+            --out-dir bundle/outputs --condition '${{ matrix.arm }}' --seed '${{ matrix.seed }}' \
+            --lambda-hj "$LHJ" --lambda-pil "$LPIL" --per-group 4 --batch-size 16 --physics-batch-size 16 \
+            --base-channels 16 --diffusion-steps 100 --max-steps 1600 --physics-warmup-steps 200 --download-workers 16
+      - name: Sample all positive training regions
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint bundle/outputs/generator.pt --evidence-dir nested/fold_${{ matrix.fold }} \
+            --out-dir bundle/samples --per-group 4 --batch-size 8 --sampling-steps 50 --seed '${{ matrix.seed }}'
+      - name: Independent physical manipulation check
+        run: |
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir nested/fold_${{ matrix.fold }} --cache-dir cache_eval/f${{ matrix.fold }}/s${{ matrix.seed }}/${{ matrix.arm }} \
+            --synthetic-manifest bundle/samples/synthetic_manifest.csv --out-dir bundle/eval --real-per-group 2 --seed '${{ matrix.seed }}'
+      - name: Create and validate destructive controls
+        if: matrix.arm == 'hj_pil'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python iris-model/make_physics_destruction_controls.py --manifest bundle/samples/synthetic_manifest.csv --out-dir bundle/controls --seed '${{ matrix.seed }}'
+          for C in pil_blur geometry_flip block_shuffle; do
+            python iris-model/evaluate_generator_v2_fixed.py \
+              --evidence-dir nested/fold_${{ matrix.fold }} --cache-dir cache_control/${C} \
+              --synthetic-manifest bundle/controls/${C}/synthetic_manifest.csv --out-dir bundle/control_eval/${C} --real-per-group 2 --seed '${{ matrix.seed }}'
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-gen-f${{ matrix.fold }}-s${{ matrix.seed }}-${{ matrix.arm }}
+          path: bundle
+          retention-days: 30
+
+  downstream:
+    needs: [physics-gate,generator]
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        fold: [1,2,3,4]
+        seed: [2026,31415]
+        arm: [real,rw,duplicate,base,pil,hj,hj_pil,pil_blur,geometry_flip,block_shuffle]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen nested folds and generator artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p nested gens
+          gh run download 32998667328 -n iris-v2-frozen-nested-folds -D nested
+          gh run download '${{ github.run_id }}' -p 'iris-v2-gen-f${{ matrix.fold }}-s${{ matrix.seed }}-*' -D gens
+      - name: Resolve matched augmentation source
+        id: src
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARM='${{ matrix.arm }}'
+          BASE=$(find gens -path '*-base/bundle/samples/synthetic_manifest.csv' -o -path '*-base/samples/synthetic_manifest.csv' | head -1)
+          if [ -z "$BASE" ]; then BASE=$(find gens -path '*-base/*/synthetic_manifest.csv' | head -1); fi
+          N=$(python -c "import pandas as pd; print(len(pd.read_csv('$BASE')))" )
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          if [ "$ARM" = real ]; then echo 'mode=real' >> "$GITHUB_OUTPUT"; echo 'manifest=' >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$ARM" = rw ]; then echo 'mode=real_weighted' >> "$GITHUB_OUTPUT"; echo 'manifest=' >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$ARM" = duplicate ]; then echo 'mode=duplicate' >> "$GITHUB_OUTPUT"; echo 'manifest=' >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$ARM" = pil_blur ] || [ "$ARM" = geometry_flip ] || [ "$ARM" = block_shuffle ]; then
+            M=$(find gens -path "*-hj_pil/*/controls/${ARM}/synthetic_manifest.csv" | head -1)
+          else
+            M=$(find gens -path "*-${ARM}/*/samples/synthetic_manifest.csv" | head -1)
+            if [ -z "$M" ]; then M=$(find gens -path "*-${ARM}/*/synthetic_manifest.csv" | head -1); fi
+          fi
+          test -n "$M"; test -f "$M"
+          echo 'mode=synthetic' >> "$GITHUB_OUTPUT"; echo "manifest=$M" >> "$GITHUB_OUTPUT"
+      - name: Train identical downstream forecaster and evaluate outer fold
+        shell: bash
+        run: |
+          set -euo pipefail
+          MODE='${{ steps.src.outputs.mode }}'
+          WEIGHT=none
+          COUNT='${{ steps.src.outputs.n }}'
+          if [ "$MODE" = real ] || [ "$MODE" = real_weighted ]; then COUNT=0; fi
+          if [ "$MODE" = real_weighted ]; then WEIGHT=balanced; fi
+          EXTRA=()
+          if [ "$MODE" = synthetic ]; then EXTRA=(--synthetic-manifest '${{ steps.src.outputs.manifest }}'); fi
+          python iris-model/train_matched_augmentation.py \
+            --evidence-dir nested/fold_${{ matrix.fold }} \
+            --cache-dir cache/f${{ matrix.fold }}/s${{ matrix.seed }}/${{ matrix.arm }} \
+            --out-dir result --arm "$MODE" --class-weighting "$WEIGHT" "${EXTRA[@]}" \
+            --augmentation-count "$COUNT" --seed '${{ matrix.seed }}' \
+            --train-per-group 4 --val-per-group 6 --pos-cap 2 --test-per-group 6 --test-pos-cap 2 \
+            --width 48 --dropout 0.2 --gamma 1.5 --lr 3e-4 --batch-size 32 --steps 1200 --eval-every 300 \
+            --validation-bootstrap 1000 --test-bootstrap 5000 --download-workers 16 --evaluate-test
+          python - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('result/metrics.json'); j=json.loads(p.read_text()); j['science_arm']='${{ matrix.arm }}'; j['fold']=${{ matrix.fold }}; j['replicate_seed']=${{ matrix.seed }}; p.write_text(json.dumps(j,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-transfer-f${{ matrix.fold }}-s${{ matrix.seed }}-${{ matrix.arm }}
+          path: result
+          retention-days: 30
+
+  summarize:
+    needs: downstream
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy scipy scikit-learn
+      - name: Download all transfer and physics artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p transfer generators selection
+          gh run download '${{ github.run_id }}' -p 'iris-v2-transfer-*' -D transfer
+          gh run download '${{ github.run_id }}' -p 'iris-v2-gen-*' -D generators
+          gh run download '${{ github.run_id }}' -n iris-v2-frozen-physics-selection -D selection
+      - name: Build final Phase-II evidence ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,json,re,pandas as pd,numpy as np
+          from scipy.stats import spearmanr
+          root=pathlib.Path('transfer'); metric_rows=[]; prediction_rows=[]
+          pat=re.compile(r'iris-v2-transfer-f(\d+)-s(\d+)-(.+)')
+          for d in root.iterdir():
+            m=pat.fullmatch(d.name)
+            if not m: continue
+            fold,seed,arm=int(m.group(1)),int(m.group(2)),m.group(3)
+            mf=list(d.rglob('metrics.json')); pf=list(d.rglob('test_predictions.csv'))
+            if len(mf)!=1 or len(pf)!=1: raise RuntimeError((d,mf,pf))
+            j=json.loads(mf[0].read_text()); metric_rows.append({'fold':fold,'seed':seed,'arm':arm,'threshold':j['validation_threshold'],**{f'test_{k}':v for k,v in j['test'].items()}})
+            q=pd.read_csv(pf[0]); q['fold']=fold;q['seed']=seed;q['arm']=arm;prediction_rows.append(q)
+          met=pd.DataFrame(metric_rows).sort_values(['fold','seed','arm']); met.to_csv('v2_transfer_metrics.csv',index=False)
+          pred=pd.concat(prediction_rows,ignore_index=True); pred.to_csv('v2_transfer_predictions.csv.gz',index=False,compression='gzip')
+          # Physical fidelity table from independent hard evaluator.
+          phys=[]; gpat=re.compile(r'iris-v2-gen-f(\d+)-s(\d+)-(base|pil|hj|hj_pil)')
+          for d in pathlib.Path('generators').iterdir():
+            mm=gpat.fullmatch(d.name)
+            if not mm: continue
+            fold,seed,arm=int(mm.group(1)),int(mm.group(2)),mm.group(3)
+            fs=[x for x in d.rglob('v2_manipulation_metrics.json') if 'control_eval' not in str(x)]
+            if not fs: continue
+            j=json.loads(fs[0].read_text()); phys.append({'fold':fold,'seed':seed,'arm':arm,'pil_distance':j['hard_pil_standardized_energy_distance'],'geometry_distance':j['hard_geometry_standardized_energy_distance'],'generic_distance_ratio':j['generic_distance_to_real_baseline_ratio'],'generic_gate':j['generic_fidelity_gate_pass'],'flux_ratio':j['synthetic_to_real_flux_median_ratio'],'active_area_ratio':j['synthetic_to_real_active_area_median_ratio'],'diversity_ratio':j['synthetic_to_real_diversity_ratio']})
+            for c in ['pil_blur','geometry_flip','block_shuffle']:
+              ff=list(d.rglob(f'control_eval/{c}/v2_manipulation_metrics.json'))
+              if ff:
+                z=json.loads(ff[0].read_text()); phys.append({'fold':fold,'seed':seed,'arm':c,'pil_distance':z['hard_pil_standardized_energy_distance'],'geometry_distance':z['hard_geometry_standardized_energy_distance'],'generic_distance_ratio':z['generic_distance_to_real_baseline_ratio'],'generic_gate':z['generic_fidelity_gate_pass'],'flux_ratio':z['synthetic_to_real_flux_median_ratio'],'active_area_ratio':z['synthetic_to_real_active_area_median_ratio'],'diversity_ratio':z['synthetic_to_real_diversity_ratio']})
+          phy=pd.DataFrame(phys); phy.to_csv('v2_physical_fidelity.csv',index=False)
+          # Exact paired connected-region bootstrap for every science arm vs duplicate and real.
+          rng=np.random.default_rng(260826); comp=[]
+          def tss(y,p,t):
+            y=np.asarray(y).astype(int); pp=np.asarray(p)>=float(t); pos=y==1; neg=y==0
+            return (pp[pos].mean() if pos.any() else np.nan)-(pp[neg].mean() if neg.any() else np.nan)
+          for (fold,seed),g in pred.groupby(['fold','seed']):
+            th=met[(met.fold==fold)&(met.seed==seed)].set_index('arm').threshold.to_dict()
+            for arm in sorted(set(g.arm)-{'real','rw','duplicate'}):
+              for ref in ['duplicate','real']:
+                a=g[g.arm==arm][['sample_id','region_group_id','y','p']]; b=g[g.arm==ref][['sample_id','p']]
+                z=a.merge(b,on='sample_id',suffixes=('_arm','_ref'))
+                groups=z.region_group_id.astype(str).unique(); point=tss(z.y,z.p_arm,th[arm])-tss(z.y,z.p_ref,th[ref]); vals=[]
+                for _ in range(3000):
+                  gs=rng.choice(groups,len(groups),replace=True); zz=pd.concat([z[z.region_group_id.astype(str)==x] for x in gs],ignore_index=True)
+                  vals.append(tss(zz.y,zz.p_arm,th[arm])-tss(zz.y,zz.p_ref,th[ref]))
+                v=np.asarray(vals,float); comp.append({'fold':fold,'seed':seed,'arm':arm,'reference':ref,'delta_tss':point,'ci025':np.nanpercentile(v,2.5),'ci975':np.nanpercentile(v,97.5),'p_two_sided':float(2*min(np.nanmean(v<=0),np.nanmean(v>=0)))})
+            if 'rw' in set(g.arm):
+              arm='rw'; ref='real'
+              a=g[g.arm==arm][['sample_id','region_group_id','y','p']]; b=g[g.arm==ref][['sample_id','p']]
+              z=a.merge(b,on='sample_id',suffixes=('_arm','_ref'))
+              groups=z.region_group_id.astype(str).unique(); point=tss(z.y,z.p_arm,th[arm])-tss(z.y,z.p_ref,th[ref]); vals=[]
+              for _ in range(3000):
+                gs=rng.choice(groups,len(groups),replace=True); zz=pd.concat([z[z.region_group_id.astype(str)==x] for x in gs],ignore_index=True)
+                vals.append(tss(zz.y,zz.p_arm,th[arm])-tss(zz.y,zz.p_ref,th[ref]))
+              v=np.asarray(vals,float); comp.append({'fold':fold,'seed':seed,'arm':arm,'reference':ref,'delta_tss':point,'ci025':np.nanpercentile(v,2.5),'ci975':np.nanpercentile(v,97.5),'p_two_sided':float(2*min(np.nanmean(v<=0),np.nanmean(v>=0)))})
+          cmp=pd.DataFrame(comp); cmp.to_csv('v2_paired_region_bootstrap.csv',index=False)
+          # Replication summary and destructive-control contrasts.
+          primary=cmp[cmp.reference=='duplicate']; rep=primary.groupby('arm').agg(n=('delta_tss','size'),positive=('delta_tss',lambda x:int((x>0).sum())),mean_delta_tss=('delta_tss','mean'),median_delta_tss=('delta_tss','median')).reset_index(); rep['positive_fraction']=rep.positive/rep.n; rep.to_csv('v2_replication_summary.csv',index=False)
+          # Fidelity -> utility: lower distance is better, use negative distance as fidelity.
+          u=met.merge(met[met.arm=='duplicate'][['fold','seed','test_tss']].rename(columns={'test_tss':'dup_tss'}),on=['fold','seed']); u['utility_vs_duplicate']=u.test_tss-u.dup_tss
+          fp=phy[phy.arm.isin(['base','pil','hj','hj_pil'])].merge(u[['fold','seed','arm','utility_vs_duplicate']],on=['fold','seed','arm'])
+          fp['pil_fidelity']=-fp.pil_distance; fp['geometry_fidelity']=-fp.geometry_distance
+          cor={}
+          for k in ['pil_fidelity','geometry_fidelity']:
+            r,p=spearmanr(fp[k],fp.utility_vs_duplicate,nan_policy='omit'); cor[k]={'spearman_r':float(r),'p':float(p),'n':int(fp[[k,'utility_vs_duplicate']].dropna().shape[0])}
+          fp.to_csv('v2_fidelity_utility_points.csv',index=False)
+          # Physics manipulation relative to matched base within fold/seed.
+          pm=[]
+          for (fold,seed),gg in phy.groupby(['fold','seed']):
+            if 'base' not in set(gg.arm): continue
+            b=gg[gg.arm=='base'].iloc[0]
+            for arm in ['pil','hj','hj_pil']:
+              if arm not in set(gg.arm): continue
+              a=gg[gg.arm==arm].iloc[0]; pm.append({'fold':fold,'seed':seed,'arm':arm,'pil_distance_improvement_vs_base':(b.pil_distance-a.pil_distance)/b.pil_distance,'geometry_distance_improvement_vs_base':(b.geometry_distance-a.geometry_distance)/b.geometry_distance,'generic_gate':bool(a.generic_gate)})
+          pmt=pd.DataFrame(pm); pmt.to_csv('v2_manipulation_replication.csv',index=False)
+          # Pre-paper experimental gate. Administrative/manual/prospective gates stay separate and cannot be fabricated.
+          best=rep.sort_values(['positive_fraction','mean_delta_tss'],ascending=False).iloc[0].to_dict() if len(rep) else {}
+          pil_ok=bool(len(pmt[pmt.arm.isin(['pil','hj_pil'])]) and (pmt[pmt.arm.isin(['pil','hj_pil'])].pil_distance_improvement_vs_base>0.20).mean()>=0.75)
+          hj_ok=bool(len(pmt[pmt.arm.isin(['hj','hj_pil'])]) and (pmt[pmt.arm.isin(['hj','hj_pil'])].geometry_distance_improvement_vs_base>0.20).mean()>=0.75)
+          transfer_ok=bool(best and best.get('positive_fraction',0)>=0.75 and best.get('mean_delta_tss',-1)>0)
+          report={'phase':'Phase-II frozen nested rolling-origin experiment','outer_test_folds':4,'replicate_seeds':2,'physics_arms':['base','pil','hj','hj_pil'],'controls':['real','rw','duplicate','pil_blur','geometry_flip','block_shuffle'],'best_transfer_arm_summary':best,'pil_manipulation_replicated':pil_ok,'hj_manipulation_replicated':hj_ok,'transfer_positive_in_75pct_or_more':transfer_ok,'fidelity_utility_correlations':cor,'experimental_core_gate_pass':bool(pil_ok and hj_ok and transfer_ok),'remaining_noncomputational_gates':['prospective current-data freeze/outcomes','two-student manual audits','written IRIS archival-data eligibility clarification'],'test_tuning_prohibited':True}
+          pathlib.Path('IRIS_V2_PHASE2_RESULTS_LEDGER.json').write_text(json.dumps(report,indent=2,allow_nan=True)+'\n'); print(json.dumps(report,indent=2,allow_nan=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-phase2-results-ledger
+          path: |
+            v2_transfer_metrics.csv
+            v2_transfer_predictions.csv.gz
+            v2_physical_fidelity.csv
+            v2_paired_region_bootstrap.csv
+            v2_replication_summary.csv
+            v2_fidelity_utility_points.csv
+            v2_manipulation_replication.csv
+            IRIS_V2_PHASE2_RESULTS_LEDGER.json
+          retention-days: 30

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<rect width="960" height="540" fill="#f5f3ec"/>
+<g font-family="sans-serif" fill="#172b34">
+<text x="30" y="36" font-size="23">IRIS-SEP · Synthetic failure replay</text>
+<text x="30" y="63" font-size="15">Engineering fixtures only · No observed SEP events or benchmark results</text>
+<text x="30" y="100" font-size="15">available</text>
+<text x="265" y="100" fill="#27715a" font-size="15">VALID</text>
+<text x="385" y="100" font-size="12">fixture inputs accepted</text>
+<text x="30" y="135" font-size="15">missing_evidence</text>
+<text x="265" y="135" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="135" font-size="12">EVIDENCE_RECEIPT_FAILURE</text>
+<text x="30" y="170" font-size="15">mutated_evidence</text>
+<text x="265" y="170" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="170" font-size="12">EVIDENCE_RECEIPT_FAILURE</text>
+<text x="30" y="205" font-size="15">schema_mismatch</text>
+<text x="265" y="205" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="205" font-size="12">SCHEMA_FAILURE</text>
+<text x="30" y="240" font-size="15">missing_critical_input</text>
+<text x="265" y="240" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="240" font-size="12">CRITICAL_INPUT_MISSING</text>
+<text x="30" y="275" font-size="15">missing_feed_record</text>
+<text x="265" y="275" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="275" font-size="12">INPUT_AVAILABILITY_FAILURE, INPUT_TOO_STALE</text>
+<text x="30" y="310" font-size="15">missing_uncertainty</text>
+<text x="265" y="310" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="310" font-size="12">UNCERTAINTY_FAILURE</text>
+<text x="30" y="345" font-size="15">model_mismatch</text>
+<text x="265" y="345" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="345" font-size="12">MODEL_OR_POLICY_VERSION_MISMATCH</text>
+<text x="30" y="380" font-size="15">stale_feed</text>
+<text x="265" y="380" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="380" font-size="12">INPUT_TOO_STALE</text>
+<text x="30" y="415" font-size="15">future_publication</text>
+<text x="265" y="415" fill="#9d3838" font-size="15">ABSTAIN</text>
+<text x="385" y="415" font-size="12">INPUT_AVAILABILITY_FAILURE, INPUT_TOO_STALE</text>
+<text x="30" y="450" font-size="15">optional_missing</text>
+<text x="265" y="450" fill="#906500" font-size="15">DEGRADED</text>
+<text x="385" y="450" font-size="12">fixture inputs accepted</text>
+<text x="30" y="515" font-size="12">Every abstention suppresses probability and advisory state. No spacecraft control.</text></g></svg>
