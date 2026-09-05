@@ -4,7 +4,7 @@
   "scope": "TRAIN_ONLY_MISSINGNESS_AND_RECONSTRUCTION_RESEARCH",
   "final_target_unchanged": "new_sep_10mev_10pfu_within_24h",
   "locked_test_access": false,
-  "purpose": "Test whether causal reconstruction of forecast-time missing inputs preserves downstream SEP forecast utility better than simple causal recovery or abstention, without treating reconstructed values as observations.",
+  "purpose": "Test whether causal reconstruction of forecast-time transient missing inputs preserves downstream SEP forecast utility better than simple causal recovery or abstention, without treating reconstructed values as observations or fabricating structurally unavailable historical measurements.",
   "principles": {
     "reconstruction_is_not_observation": true,
     "future_information_forbidden": true,
@@ -12,21 +12,28 @@
     "evaluation_role": "train_only_chronological_inner_folds",
     "selection_on_locked_test_forbidden": true,
     "physics_method_must_beat_nonphysics_baselines_to_survive": true,
-    "failed_physics_arms_must_be_retained": true
+    "failed_physics_arms_must_be_retained": true,
+    "structural_unavailability_is_not_imputed_as_observed_data": true,
+    "structural_vs_transient_classification_requires_authoritative_source_manifest": true
+  },
+  "missingness_classes": {
+    "STRUCTURAL_UNAVAILABLE": "Feature/modality was not authoritatively available in the source/instrument regime. Never treat reconstruction as a recovered observation; handle through source-era modeling, missing masks, fallback or abstention.",
+    "TRANSIENT_MISSING": "Feature/modality is supported in the source regime but is absent/stale for a particular issue. Eligible for the preregistered reconstruction comparison if forecast-time provenance is available.",
+    "OBSERVED": "Authoritative forecast-time measurement is available and passes source/freshness checks."
   },
   "recovery_arms_in_order": [
     "NO_RECONSTRUCTION_MASK_AWARE_MODEL",
     "CAUSAL_FORWARD_FILL_WHERE_DEFINED",
     "TRAIN_FIT_MEDIAN_OR_SIMPLE_CAUSAL_STATISTICAL",
     "PUBLISHED_SEPNET_STYLE_CAUSAL_KNN_WHERE_REPRODUCIBLE",
-    "PHYSICS_CONSTRAINED_RECONSTRUCTION",
-    "PHYSICS_ASSIMILATED_RECONSTRUCTION_IF_FEASIBLE"
+    "PHYSICS_CONSTRAINED_RECONSTRUCTION_FOR_TRANSIENT_GAPS_ONLY",
+    "PHYSICS_ASSIMILATED_RECONSTRUCTION_FOR_TRANSIENT_GAPS_ONLY_IF_FEASIBLE"
   ],
   "missingness_scenarios": {
-    "natural": "preserve observed historical source missingness with masks",
-    "synthetic_random": "deterministic random held-out values within train-only score blocks",
-    "synthetic_block": "contiguous outage-style gaps of predeclared durations appropriate to each source cadence",
-    "modality_dropout": "remove complete forecast-time modalities to test fallback, degradation and abstention"
+    "natural": "preserve observed historical source missingness with masks and separate authoritative structural unavailability from transient gaps",
+    "synthetic_random": "deterministic random held-out values inside structurally supported train-only cells",
+    "synthetic_block": "contiguous outage-style gaps of predeclared durations inside structurally supported source eras and appropriate to each source cadence",
+    "modality_dropout": "remove complete forecast-time modalities inside supported source eras to test fallback, degradation and abstention"
   },
   "reconstruction_primary_metrics": [
     "held_out_mae",
@@ -44,6 +51,7 @@
   ],
   "survival_gate": {
     "physics_arm_requires": [
+      "gap is transient inside an authoritatively supported source regime",
       "causal provenance audit passes",
       "no future information",
       "reconstruction uncertainty is exposed",
@@ -55,10 +63,11 @@
   },
   "full_mhd_policy": {
     "automatic_inclusion": false,
-    "role": "candidate external physics reconstruction or feature provider only",
-    "reason": "A full MHD state is model output, not recovered sensor truth, and must demonstrate downstream value before inclusion.",
+    "role": "candidate external physics reconstruction or feature provider for supported transient gaps only",
+    "reason": "A full MHD state is model output, not recovered sensor truth. It cannot retroactively create an unavailable historical instrument measurement and must demonstrate downstream value before inclusion.",
     "minimum_requirements": [
       "forecast-time boundary conditions available",
+      "source regime authoritatively supports the reconstructed quantity",
       "reproducible open implementation and version",
       "runtime feasible for the declared research setting",
       "state-to-feature mapping frozen before score evaluation",
