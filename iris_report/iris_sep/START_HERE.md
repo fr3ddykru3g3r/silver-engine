@@ -15,10 +15,14 @@ Read these in order:
 
 ## Reproduction levels
 
-Source-only checks (requires NumPy and the repo root on the Python path):
+Source-only checks require NumPy and the repo root on the Python path. Verify
+that the interpreter matches compiled dependencies first. On the original
+laptop `/private/tmp/iris_sep_pydeps` contains CPython 3.14 binaries, so use
+`/opt/homebrew/bin/python3`; Apple `/usr/bin/python3` is CPython 3.9 and is
+incompatible with that directory.
 
 ```sh
-python3 -m unittest iris_report.iris_sep.tests.test_pilot_replay iris_report.iris_sep.tests.test_pilot_admission_v2 iris_report.iris_sep.tests.test_validity_envelope_benchmark iris_report.iris_sep.tests.test_compound_validity_benchmark -v
+/opt/homebrew/bin/python3 -m unittest iris_report.iris_sep.tests.test_pilot_replay iris_report.iris_sep.tests.test_pilot_admission_v2 iris_report.iris_sep.tests.test_validity_envelope_benchmark iris_report.iris_sep.tests.test_compound_validity_benchmark -v
 ```
 
 Full local artifact verification additionally requires the preserved development

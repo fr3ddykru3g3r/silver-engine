@@ -28,8 +28,8 @@
     },
     {
       "path": "iris_report/iris_sep/START_HERE.md",
-      "bytes": 2614,
-      "sha256": "3d9f56a58cb778de1a37807e8a8d47f9b2766185d5e66370524974cf2f5d0ce8"
+      "bytes": 2897,
+      "sha256": "89ee9092c568f2189e62e395aa4d6fb092975fc3db5c83755105c224bbba79f0"
     },
     {
       "path": "iris_report/iris_sep/architecture/ADR-001-sepval-benchmark-freeze.md",
@@ -1322,7 +1322,7 @@
       "sha256": "d9e227cc37f780250e6c7a3f1ad4ba513e2923eaab59fdb480b74f4217f46ce7"
     }
   ],
-  "total_bytes": 1521354,
+  "total_bytes": 1521637,
   "excluded": [
     {
       "path": "iris_report/iris_sep/.DS_Store",
