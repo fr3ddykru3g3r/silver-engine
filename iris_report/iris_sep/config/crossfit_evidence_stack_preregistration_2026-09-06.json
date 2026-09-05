@@ -1,0 +1,44 @@
+{
+  "status": "PREREGISTERED_BEFORE_CROSSFIT_STACK_SCORE",
+  "scope": "DEVELOPMENT_ONLY_ARCHITECTURE_DIAGNOSTIC",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "architecture": {
+    "name": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+    "experts": ["BASE_SOLAR_XGBOOST", "XRS_ONLY_XGBOOST", "PROTON_ONLY_XGBOOST"],
+    "expert_seed_aggregation": "median over seeds [7,13,26,42,73]",
+    "inner_crossfit": {
+      "scope": "outer fit role only",
+      "chronology": "expanding window",
+      "fold_count": 4,
+      "positive_unit_boundaries": [0.40, 0.55, 0.70, 0.85, 1.00],
+      "purge_hours": 24,
+      "unit": "complete SEP episode / predeclared quiet block",
+      "purpose": "Generate out-of-fold specialist predictions for meta-fusion without using calibration, threshold, score or monitor labels."
+    },
+    "meta_features": "For each specialist, centered evidence = clip(logit(p_expert)-logit(fold_train_prevalence), -6, 6). XRS/proton evidence is multiplied by finite-feature coverage reliability.",
+    "meta_model": {
+      "equation": "z=b+w_solar*e_solar+w_xrs*e_xrs+w_proton*e_proton",
+      "weights": "all nonnegative via softplus",
+      "l2_weight": 0.02,
+      "initial_weight": 0.5,
+      "optimizer": "L-BFGS-B",
+      "max_iter": 2000
+    },
+    "final_fit": "Refit each specialist on the complete outer fit role. Apply frozen meta weights to full-fit-prevalence-centered expert evidence.",
+    "calibration": "Fit one logit intercept on calibration role only after meta weights are frozen.",
+    "threshold": "Select MAX_TSS and POD80_MIN_FAR on threshold role only."
+  },
+  "comparators": ["BASE_SOLAR", "LATE_FUSION_SOLAR_XRS_PROTON"],
+  "metrics": ["TSS", "HSS", "POD", "FPR", "FAR", "BRIER", "BRIER_SKILL", "ECE", "AUPRC", "AUROC"],
+  "matched_detection_pod": [0.6, 0.7, 0.8, 0.9],
+  "paired_bootstrap": {"replicates": 10000, "unit": "complete SEP episode / predeclared quiet block"},
+  "motivation": {
+    "current_late_fusion_calibration_positives": 21,
+    "outer_fit_positives": 144,
+    "failure_learned_from_residual_v1": "Hard-wiring solar coefficient to one caused the context weights to collapse and materially underperformed the existing late-fusion model.",
+    "systems_principle": "Use cross-fitting to spend training labels on fusion while keeping calibration and threshold roles semantically pure."
+  },
+  "selection_rule": "No hyperparameter changes after score/monitor inspection. Promote only if cross-fitted stack improves robustness over existing late fusion without material ranking/calibration degradation; otherwise retain existing late fusion.",
+  "claim_rule": "Score and monitor are already-inspected development evidence. This experiment cannot establish final external superiority."
+}
