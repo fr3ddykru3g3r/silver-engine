@@ -36,22 +36,28 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
 
-      - name: Acquire only the pinned public SEP-PRISM files
+      - name: Compile frozen benchmark sources
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y git-lfs
-          git lfs install
-          GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 --no-checkout https://github.com/yuyian/SEP-Prediction-V2.git /tmp/sep-prism
-          cd /tmp/sep-prism
-          test "$(git rev-parse HEAD)" = 'e138dcd72c1952a00e11e1a0b025337f9e7c93fb'
-          git checkout HEAD -- Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
-          git lfs fetch origin e138dcd72c1952a00e11e1a0b025337f9e7c93fb \
-            --include='Data/rolling_combinded_seq_24hours.csv,GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
-            --exclude=''
-          git lfs checkout Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
-          sha256sum Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
-          test "$(sha256sum Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
-          test "$(sha256sum GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+          python -m py_compile \
+            iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py \
+            iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v2.py \
+            iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py \
+            iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py \
+            iris_report/iris_sep/src/iris_sep/missingness_experiment.py \
+            iris_report/iris_sep/src/iris_sep/missingness_recovery.py
+
+      - name: Acquire only the hash-pinned public SEP-PRISM files
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
 
       - name: Run frozen public NEW-crossing benchmark
         run: |
