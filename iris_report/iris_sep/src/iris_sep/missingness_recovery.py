@@ -1,8 +1,9 @@
 """Causal missing-data recovery primitives for IRIS-SEP research.
 
-This module does not impute operational data by itself. It provides two things:
+This module does not impute operational data by itself. It provides:
 (1) provenance checks that keep reconstructed values distinct from observations,
-and (2) deterministic held-out-gap metrics for comparing recovery strategies.
+(2) deterministic held-out-gap masks and metrics, and
+(3) deliberately simple causal baselines that a physics method must beat.
 
 A reconstruction must earn admission in train-only experiments before it can be
 considered for a frozen forecast model. Full MHD or any other physics model is
@@ -136,6 +137,80 @@ def contiguous_gap_mask(shape: tuple[int, ...], *, axis: int, start: int, length
     if mask.all():
         raise ValueError("benchmark must retain at least one observed value")
     return mask
+
+
+def fit_train_medians(train_values, observed_mask) -> np.ndarray:
+    """Fit one median per feature using observed train-role cells only.
+
+    Inputs are shaped ``[time_or_rows, features]``. Values at cells where the
+    observed mask is false are ignored even if finite, so deliberately hidden
+    truth cannot leak into the fitted baseline.
+    """
+
+    values = np.asarray(train_values, dtype=np.float64)
+    observed = np.asarray(observed_mask, dtype=bool)
+    if values.ndim != 2 or values.shape != observed.shape or values.shape[0] == 0:
+        raise ValueError("train_values and observed_mask must be matching non-empty 2D arrays")
+    medians = np.empty(values.shape[1], dtype=np.float64)
+    for feature in range(values.shape[1]):
+        usable = observed[:, feature]
+        if not usable.any():
+            raise ValueError(f"feature {feature} has zero observed train support")
+        feature_values = values[usable, feature]
+        if not np.isfinite(feature_values).all():
+            raise ValueError("observed train values must be finite")
+        medians[feature] = np.median(feature_values)
+    return medians
+
+
+def apply_train_median_fill(values, observed_mask, train_medians) -> np.ndarray:
+    """Fill unobserved cells from already fitted train medians."""
+
+    array = np.asarray(values, dtype=np.float64)
+    observed = np.asarray(observed_mask, dtype=bool)
+    medians = np.asarray(train_medians, dtype=np.float64)
+    if array.ndim != 2 or array.shape != observed.shape or medians.shape != (array.shape[1],):
+        raise ValueError("values/mask must be matching 2D arrays and medians one value per feature")
+    if not np.isfinite(medians).all() or not np.isfinite(array[observed]).all():
+        raise ValueError("observed values and fitted medians must be finite")
+    filled = array.copy()
+    for feature in range(array.shape[1]):
+        filled[~observed[:, feature], feature] = medians[feature]
+    return filled
+
+
+def causal_forward_fill(values, observed_mask) -> tuple[np.ndarray, np.ndarray]:
+    """Forward-fill each feature without ever reading future hidden truth.
+
+    Returns ``(filled, unresolved_mask)``. Leading gaps remain unresolved until
+    a real observation has occurred for that feature; their array values are
+    set to NaN rather than borrowed from a future row.
+    """
+
+    array = np.asarray(values, dtype=np.float64)
+    observed = np.asarray(observed_mask, dtype=bool)
+    if array.ndim != 2 or array.shape != observed.shape or array.shape[0] == 0:
+        raise ValueError("values and observed_mask must be matching non-empty 2D arrays")
+    if not np.isfinite(array[observed]).all():
+        raise ValueError("observed values must be finite")
+
+    filled = np.full(array.shape, np.nan, dtype=np.float64)
+    unresolved = np.zeros(array.shape, dtype=bool)
+    last = np.zeros(array.shape[1], dtype=np.float64)
+    available = np.zeros(array.shape[1], dtype=bool)
+
+    for row in range(array.shape[0]):
+        for feature in range(array.shape[1]):
+            if observed[row, feature]:
+                value = array[row, feature]
+                filled[row, feature] = value
+                last[feature] = value
+                available[feature] = True
+            elif available[feature]:
+                filled[row, feature] = last[feature]
+            else:
+                unresolved[row, feature] = True
+    return filled, unresolved
 
 
 def reconstruction_metrics(truth, reconstruction, missing_mask) -> dict[str, float | int]:
