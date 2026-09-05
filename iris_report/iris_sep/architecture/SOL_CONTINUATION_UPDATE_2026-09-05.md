@@ -4,6 +4,81 @@ This update continues PR #3 on `codex/iris-sep-continuation-20260905` and does
 not supersede the frozen benchmark/evaluation contracts. It records only the
 bounded source hardening completed after the publication checkpoint.
 
+## Follow-up: provenance-gated replay and expanded adversarial verification
+
+A later continuation began from verified live remote head
+`0aa786edca5942db324263b993770301e2a36088`; PR #3 remained open and unmerged.
+The principal finding was not a new model-performance result but a reproducibility
+gap in the standalone compact-failure replay: the original train-only diagnostic
+had frozen helper/trainer/model/evaluation source hashes in its preregistration,
+but the replay tool did not yet require those exact source revisions before
+interpreting a replay mismatch or first nonfinite stage.
+
+`tools/run_compact_nonfinite_replay.py` now fails closed unless the published
+frozen diagnostic preregistration SHA-256 matches and every preregistered source
+dependency hash matches. It additionally requires the retained model receipt to
+bind seed 7, train-only fit/stop roles, exact fit/stop/predict indices, checkpoint
+SHA-256 and preprocessing SHA-256; preprocessing feature order must match the
+preregistered feature list. Only after those checks, the pinned train-only source
+and retained failure-logit hashes, and exact saved-logit reproduction may the
+layer replay identify a first nonfinite tensor stage. This prevents later helper,
+model or preprocessing revisions from being silently substituted for the
+original execution graph.
+
+The exact fold-3 artifact replay remains **NOT_RUN** because the preserved
+train-only CSV, folds, seed-7 logits, checkpoint, preprocessing and model receipt
+are intentionally outside ordinary Git and were not present in the clean source
+checkout. The retained failure remains 1,062 finite logits out of 2,120. No
+causal attribution is made: helper mutation, float32 cast overflow and
+distribution shift remain hypotheses until a hash-matched replay proves or
+excludes them. Checkpoint parameter finiteness, feature support, train-fitted
+scaling/cast behavior, missing masks, branch tensors, gates, shared tensors and
+final logits are all audited by the controlled replay.
+
+The Admission-V2 inference bundle adversarial matrix was also expanded. In
+addition to existing array/source/calibration/threshold cases, tests now exercise
+admission support-boundary mutation, model-version and schema mutation, embedded
+evidence-receipt mutation, derived-probability mutation, and empty arrays. The
+red-team document now states its independence boundary precisely: it is an
+isolated bounded source/test workstream, not an external human or third-party
+security audit. The externally retained bundle SHA-256 remains the trust anchor
+for dynamic inference content, while the embedded static inference binding
+prevents reuse of the same scientific receipt with a changed
+policy/calibration/threshold/model/schema.
+
+A repository-run source-only workflow verified tested source head
+`b7d86e520d33cf55c74f7c8d88a1fed8904740e4`. GitHub Actions run `33975465640`
+(job `101331265966`) used Ubuntu 24.04, Python 3.13.5, NumPy 2.3.5, PyTorch
+2.10.0+cpu and scikit-learn 1.8.0. It ran 27 unittests in 0.196 seconds with zero
+failures/errors and passed `py_compile` for the changed source/test files. See
+`receipts/sol_continuation_source_only_v3_2026-09-05.json`.
+
+Full artifact verification remains **NOT_RUN**: the clean checkout does not
+contain the gitignored preserved datasets, model checkpoints, folds, notebooks,
+caches or complete artifact dependency layout required by `verify_local`. No
+replacement or mixed training/test table was downloaded to force it to run.
+
+No locked identity/outcome was accessed, no outer monitor or inspected inner
+score block was reused as fresh evidence, no new model was trained, the publisher
+request was not resent, no external message was sent, and no cleanup deletion was
+performed. No candidate deletion had both proof of non-reference and a verified
+hash-matching recovery copy.
+
+The exact next action is therefore unchanged in scientific substance but stricter
+in provenance: run the compact replay in the preserved artifact workspace only
+after restoring the preregistered implementation revisions if needed; accept a
+first-nonfinite-stage conclusion only after every provenance gate and exact
+saved-logit reproduction pass. Final model work remains blocked on verified
+training-only NEW-crossing data, source latency/licensing, complete episode
+semantics, faithful comparator reproduction and an independent frozen evaluation
+path. With those available, freeze the bounded train-only chronological batch
+before climatology, eligible persistence, elastic net, XGBoost, reproduced
+SEPNET, compact baseline, causal proton context and then XRS.
+
+No final NEW-crossing improvement, operational readiness, economic savings,
+breakthrough, award outcome, or superiority over a named space company is
+established by this follow-up.
+
 ## Remote and execution state
 
 At continuation start, PR #3 was open and unmerged at
