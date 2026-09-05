@@ -14,10 +14,10 @@
     "feature_table_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
     "event_catalogue_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
     "roles": ["fit", "calibration", "threshold", "score"],
-    "role_builder": "run_public_new_crossing_benchmark_v2.build_units",
+    "role_builder": "run_context_stability_diagnostic.build_scope_roles(scope=ALL_HISTORY)",
     "purge_hours": 24,
     "locked_test_accessed": false,
-    "score_role_note": "2023-2025 public development monitor already inspected; not fresh final evidence."
+    "score_role_note": "The 2023-2025 monitor is already inspected development evidence; it is not fresh final evidence."
   },
   "predictors": {
     "policy": "Use the exact causal numeric FULL_CONTEXT columns from the IRIS public benchmark; exclude all Future_* columns and retrospective OSEP/GSEP catalogue labels.",
@@ -28,8 +28,7 @@
     "lag_hours": 24,
     "lag_tolerance_hours": 3,
     "missing_lag_pad": 0.0,
-    "history_may_include_prior_rows_from_later_evaluation_roles": true,
-    "history_rule": "Input history must be strictly earlier than the target issue time; labels from non-fit roles are never used for fitting."
+    "history_rule": "Only strictly earlier input rows may populate the lag step; labels from non-fit roles are never used for fitting."
   },
   "preprocessing": {
     "x_scaler": "MinMaxScaler",
@@ -62,6 +61,7 @@
   "training": {
     "seeds": [7, 13, 26, 42, 73],
     "learning_rate": 0.00022,
+    "regression_branch_learning_rate_multiplier": 2.45,
     "weight_decay": 0.000065,
     "batch_size": 56,
     "max_epochs": 1200,
@@ -91,10 +91,7 @@
     "score_metrics": ["TSS", "HSS", "POD", "FPR", "FAR", "BRIER", "BRIER_SKILL", "ECE", "AUPRC", "AUROC"],
     "paired_bootstrap_replicates": 10000,
     "paired_bootstrap_unit": "complete SEP episode / predeclared quiet block",
-    "comparison_targets": [
-      "BASE_SOLAR_XGBOOST",
-      "LATE_FUSION_SOLAR_XRS_PROTON"
-    ]
+    "comparison_targets": ["BASE_SOLAR_XGBOOST", "LATE_FUSION_SOLAR_XRS_PROTON"]
   },
   "claim_rule": "Do not call this an exact reproduction of the paper's reported random-IID result. It is a same-cohort reproduction of the released SEPNET-PRISM architecture and fixed training recipe under the stricter IRIS chronological NEW-crossing benchmark. No external superiority claim unless the paired interval clears zero and the comparator provenance audit passes."
 }
