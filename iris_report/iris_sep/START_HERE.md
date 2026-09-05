@@ -38,6 +38,16 @@ The five new source/test modules also passed `python3 -m py_compile`. Exact
 runtime/results are recorded in
 `receipts/sol_continuation_source_only_v2_2026-09-05.json`.
 
+A later compact-replay hardening patch added an explicit audit of loaded
+checkpoint parameter tensors, zero-support feature counts, and regressions for a
+nonfinite checkpoint parameter plus nonbinary missing masks. Because shell DNS
+could not resolve `github.com`, the affected files were hydrated from the
+verified branch into an isolated source-only tree. Python 3.13.5 / NumPy 2.3.5 /
+PyTorch 2.10.0+cpu passed `py_compile` and 3 focused unittest executions with
+zero failures/errors. This focused post-patch check supplements, rather than
+replaces, the earlier 17-test run. See
+`receipts/compact_checkpoint_audit_patch_2026-09-05.json`.
+
 Full artifact verification was **NOT_RUN** in this execution environment because
 the preserved development datasets, folds, checkpoints and notebooks were not
 present. Do not download a replacement or mixed training/test table to make it
@@ -50,8 +60,10 @@ artifacts were absent. The actual first nonfinite layer and root cause remain
 unknown. A synthetic test demonstrates a possible float64-to-float32 cast
 overflow hazard, but that is not evidence that it caused the retained failure.
 Synthetic all-missing inputs remained finite. Helper mutation and distribution
-shift are likewise not established causes. See
-`receipts/compact_nonfinite_replay_2026-09-05_sol.json`.
+shift are likewise not established causes. The hardened replay now also records
+whether the loaded checkpoint itself already contains any nonfinite parameter
+values, so an input-side explanation is not inferred from the first bad layer
+output alone. See `receipts/compact_nonfinite_replay_2026-09-05_sol.json`.
 
 Admission V2 now has a canonical offline inference bundle in
 `src/iris_sep/inference_bundle.py`. It binds policy, source revisions,
@@ -71,11 +83,13 @@ could be backed by a verified hash-matching recovery copy; see
 **Exact next action:** in the preserved artifact workspace, run the controlled
 compact replay against the pinned train-only source and retained fold-3 seed-7
 artifacts. Accept a first-nonfinite-stage conclusion only if the saved logits are
-reproduced exactly. Do not change preprocessing or model behavior before that
-proof. In parallel, wait for verified training-only NEW-crossing data with
-latency, licensing, episode semantics, comparator fidelity and an independent
-frozen evaluation arrangement. Final model training remains blocked until those
-requirements are satisfied.
+reproduced exactly. Inspect the checkpoint-parameter audit alongside feature
+support, train-fitted scaling/cast behavior, missing masks, branch outputs, gate
+tensors and final logits before assigning causality. Do not change preprocessing
+or model behavior before that proof. In parallel, wait for verified training-only
+NEW-crossing data with latency, licensing, episode semantics, comparator fidelity
+and an independent frozen evaluation arrangement. Final model training remains
+blocked until those requirements are satisfied.
 
 ## Reproduction levels
 
