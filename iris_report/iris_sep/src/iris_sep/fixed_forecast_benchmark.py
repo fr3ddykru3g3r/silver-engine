@@ -183,7 +183,6 @@ def fit_fixed_reference_forecaster(
         StandardScaler(),
         LogisticRegression(
             C=1.0,
-            penalty="l2",
             solver="lbfgs",
             max_iter=5000,
             class_weight="balanced",
