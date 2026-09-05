@@ -15,6 +15,7 @@ on:
       - 'iris_report/iris_sep/tests/test_compact_layer_replay.py'
       - 'iris_report/iris_sep/tests/test_compact_nonfinite_replay_tool.py'
       - 'iris_report/iris_sep/tests/test_missingness_recovery.py'
+      - 'iris_report/iris_sep/tests/test_missingness_audit.py'
       - '.github/workflows/iris-sep-source-only.yml'
   workflow_dispatch:
 
@@ -64,7 +65,8 @@ jobs:
             iris_report.iris_sep.tests.test_inference_bundle \
             iris_report.iris_sep.tests.test_compact_layer_replay \
             iris_report.iris_sep.tests.test_compact_nonfinite_replay_tool \
-            iris_report.iris_sep.tests.test_missingness_recovery -v
+            iris_report.iris_sep.tests.test_missingness_recovery \
+            iris_report.iris_sep.tests.test_missingness_audit -v
 
       - name: Compile changed source and tests
         run: |
@@ -72,8 +74,10 @@ jobs:
             iris_report/iris_sep/src/iris_sep/inference_bundle.py \
             iris_report/iris_sep/src/iris_sep/modeling/compact_layer_replay.py \
             iris_report/iris_sep/src/iris_sep/missingness_recovery.py \
+            iris_report/iris_sep/src/iris_sep/missingness_audit.py \
             iris_report/iris_sep/tools/run_compact_nonfinite_replay.py \
             iris_report/iris_sep/tests/test_inference_bundle.py \
             iris_report/iris_sep/tests/test_compact_layer_replay.py \
             iris_report/iris_sep/tests/test_compact_nonfinite_replay_tool.py \
-            iris_report/iris_sep/tests/test_missingness_recovery.py
+            iris_report/iris_sep/tests/test_missingness_recovery.py \
+            iris_report/iris_sep/tests/test_missingness_audit.py
