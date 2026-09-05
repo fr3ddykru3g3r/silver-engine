@@ -1,0 +1,27 @@
+{
+  "builder_path": "colab/build_iris_sep_development_notebook.py",
+  "builder_sha256": "7718c3af238db402741f3084986ecbe38653d5c1842e8fac3d0c3190a6a68ddf",
+  "credential_scan": "PASS_NO_JSOC_OR_GOOGLE_ACCOUNT_EMAIL",
+  "execution_status": "READY_NOT_RUN",
+  "locked_or_test_url_scan": "PASS",
+  "locked_test_accessed": false,
+  "notebook_ast_validation": "PASS",
+  "notebook_cells": 9,
+  "notebook_path": "colab/IRIS_SEP_Development_Training_2026-09-04.ipynb",
+  "notebook_sha256": "dc9cdd55b4e84a048460ad853435bcad8b592f5c3aeb75371660af26ff07c9c4",
+  "scope": "PUBLISHER_TRAINING_SPLIT_LEGACY_TARGET_DEVELOPMENT_ONLY",
+  "source_hashes": {
+    "model": "3fa70d7467f6e4014e0e6453398bb1eb16fa46ad5946366ad85f4d96c797523c",
+    "trainer": "706d738e9cbfd99d29d8d42b5f8f88d7ccd397ec27dc51158f3704401817a98d"
+  },
+  "status": "PASS_PACKAGE_BUILD",
+  "upload_status": "UPLOADED_AND_BYTE_HASH_VERIFIED_WITH_GOOGLE_DRIVE_CONNECTOR",
+  "drive_upload": {
+    "file_id": "1F2QJnaHlWHTjpDB4pTPukx2ctkKyjnYY",
+    "folder_id": "1tQZQa8W72urTjhaDwNmZc4q_9NrlLZym",
+    "size_bytes": 48363,
+    "downloaded_sha256": "dc9cdd55b4e84a048460ad853435bcad8b592f5c3aeb75371660af26ff07c9c4",
+    "url": "https://drive.google.com/file/d/1F2QJnaHlWHTjpDB4pTPukx2ctkKyjnYY/view"
+  },
+  "claims_forbidden": ["SEPVAL_SCORE", "FINAL_NEW_CROSSING_SCORE", "BREAKTHROUGH", "OPERATIONAL_CERTIFICATION"]
+}

@@ -1,0 +1,140 @@
+name: IRIS v2 Converged-BASE Physics Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-converged-base-physics-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download integrity-locked evidence and converged BASE
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_bundle evidence base2000
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+          gh run download 32997814571 -n iris-v2-base-convergence-2000 -D base2000
+          test -f base2000/outputs/base/generator.pt
+      - name: Re-sample and re-audit converged BASE on matched positive regions
+        run: |
+          set -euo pipefail
+          python iris-model/sample_generator.py \
+            --checkpoint base2000/outputs/base/generator.pt --evidence-dir evidence \
+            --out-dir matched/base --per-group 2 --max-groups 64 --batch-size 8 --sampling-steps 50 --seed 2026
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir evidence --cache-dir cache_eval/base \
+            --synthetic-manifest matched/base/synthetic_manifest.csv --out-dir audit/base --real-per-group 2 --seed 2026
+          python - <<'PY'
+          import json
+          j=json.load(open('audit/base/v2_manipulation_metrics.json'))
+          print(json.dumps(j,indent=2))
+          if not j['generic_fidelity_gate_pass']:
+              raise SystemExit('Converged 2000-step BASE fails corrected generic fidelity gate; physics tuning blocked')
+          PY
+      - name: Fine-tune all train-only physics coefficients from identical converged BASE
+        shell: bash
+        run: |
+          set -euo pipefail
+          for SPEC in 'pil010 pil 0.0 0.10' 'pil050 pil 0.0 0.50' 'pil100 pil 0.0 1.00' 'hj010 hj 0.10 0.0' 'hj050 hj 0.50 0.0' 'hj100 hj 1.00 0.0'; do
+            set -- $SPEC; TAG=$1; COND=$2; LHJ=$3; LPIL=$4
+            echo "=== $TAG ==="
+            python iris-model/train_generator_positive_v2.py \
+              --evidence-dir evidence --cache-dir cache/train-positive --out-dir outputs/$TAG \
+              --condition "$COND" --seed 2026 --init-checkpoint base2000/outputs/base/generator.pt \
+              --lambda-hj "$LHJ" --lambda-pil "$LPIL" --per-group 4 --batch-size 16 --physics-batch-size 16 \
+              --base-channels 24 --diffusion-steps 100 --max-steps 400 --physics-warmup-steps 100 --lr 1e-4 --download-workers 16
+            python iris-model/sample_generator.py \
+              --checkpoint outputs/$TAG/generator.pt --evidence-dir evidence \
+              --out-dir matched/$TAG --per-group 2 --max-groups 64 --batch-size 8 --sampling-steps 50 --seed 2026
+            python iris-model/evaluate_generator_v2_fixed.py \
+              --evidence-dir evidence --cache-dir cache_eval/$TAG \
+              --synthetic-manifest matched/$TAG/synthetic_manifest.csv --out-dir audit/$TAG --real-per-group 2 --seed 2026
+          done
+      - name: Select coefficients using independent hard manipulation metrics only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv
+          tags=['base','pil010','pil050','pil100','hj010','hj050','hj100']
+          rows=[]
+          for tag in tags:
+              j=json.load(open(f'audit/{tag}/v2_manipulation_metrics.json'))
+              rows.append({
+                'tag':tag,
+                'pil_distance':j['hard_pil_standardized_energy_distance'],
+                'geometry_distance':j['hard_geometry_standardized_energy_distance'],
+                'generic_distance_ratio':j['generic_distance_to_real_baseline_ratio'],
+                'generic_gate':bool(j['generic_fidelity_gate_pass']),
+                'flux_ratio':j['synthetic_to_real_flux_median_ratio'],
+                'active_area_ratio':j['synthetic_to_real_active_area_median_ratio'],
+                'diversity_ratio':j['synthetic_to_real_diversity_ratio'],
+                'saturation':j['synthetic_saturation_fraction_abs_gt_2900G'],
+              })
+          base=rows[0]
+          for r in rows:
+              r['pil_improvement_vs_base']=(base['pil_distance']-r['pil_distance'])/base['pil_distance'] if base['pil_distance']>0 else -999
+              r['geometry_improvement_vs_base']=(base['geometry_distance']-r['geometry_distance'])/base['geometry_distance'] if base['geometry_distance']>0 else -999
+              r['pil_degradation_ratio']=r['pil_distance']/base['pil_distance'] if base['pil_distance']>0 else 999
+              r['geometry_degradation_ratio']=r['geometry_distance']/base['geometry_distance'] if base['geometry_distance']>0 else 999
+              if r['tag'].startswith('pil'):
+                  r['physics_gate']=bool(r['generic_gate'] and r['pil_improvement_vs_base']>=0.20 and r['geometry_degradation_ratio']<=1.50)
+              elif r['tag'].startswith('hj'):
+                  r['physics_gate']=bool(r['generic_gate'] and r['geometry_improvement_vs_base']>=0.20 and r['pil_degradation_ratio']<=1.50)
+              else:
+                  r['physics_gate']=bool(r['generic_gate'])
+          def choose(prefix):
+              cand=[r for r in rows if r['tag'].startswith(prefix) and r['physics_gate']]
+              return min(cand,key=lambda r:float(r['tag'].replace(prefix,'')))['tag'] if cand else None
+          pil=choose('pil'); hj=choose('hj')
+          report={
+            'phase':'TRAIN-ONLY converged-BASE coefficient selection; no forecast validation/test accessed',
+            'base_source_run':32997814571,
+            'base_source_artifact':'iris-v2-base-convergence-2000',
+            'fine_tune_steps':400,
+            'rows':rows,
+            'chosen_pil_tag':pil,
+            'chosen_hj_tag':hj,
+            'status':'PASS' if (base['generic_gate'] and pil and hj) else 'FAIL'
+          }
+          pathlib.Path('converged_base_physics_gate.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('converged_base_physics_gate.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          if report['status']!='PASS': raise SystemExit('Converged-BASE train-only physics manipulation gate failed')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-converged-base-physics-gate
+          path: |
+            converged_base_physics_gate.json
+            converged_base_physics_gate.csv
+            audit
+            outputs
+            matched/*/sampling_summary.json
+          retention-days: 30

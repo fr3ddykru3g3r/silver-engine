@@ -1,0 +1,68 @@
+{
+  "contract_id": "iris-sep-operator-research-pilot-v1",
+  "status": "FROZEN_BEFORE_MODEL_TRAINING",
+  "product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+  "forecast": {
+    "primary_output": "p_new_sep_10mev_10pfu_within_24h",
+    "horizon_hours": 24,
+    "calibrated_probability_required": true,
+    "all_clear_probability_definition": "1_minus_calibrated_primary_probability",
+    "secondary_outputs": {
+      "p_sep_100mev_1pfu": "DISABLED_PENDING_INDEPENDENT_VALIDATION",
+      "peak_flux_quantiles_pfu": "DISABLED_PENDING_EVENT_CONDITIONAL_VALIDATION",
+      "onset_time_quantiles_utc": "DISABLED_PENDING_CENSORED_SURVIVAL_VALIDATION"
+    }
+  },
+  "model_scope": {
+    "experts": ["magnetic", "eruption", "particle_context"],
+    "aia": "DISABLED_NO_AUTHORITATIVE_AARP_HMI_CROSSWALK",
+    "default_training_objective": "PRIMARY_ONLY",
+    "auxiliary_task_activation": "REQUIRES_VALIDITY_MASKS_AND_VALIDATION_ABLATION"
+  },
+  "forecast_status": ["VALID", "DEGRADED", "ABSTAIN"],
+  "operator_states": ["NORMAL", "MONITOR", "PREPARE", "PROTECT"],
+  "operator_policy": {
+    "threshold_source": "FROZEN_VALIDATION_THRESHOLD_RECEIPT_ONLY",
+    "test_refit": false,
+    "spacecraft_control": false,
+    "human_operator_required": true
+  },
+  "required_forecast_fields": [
+    "issued_at_utc",
+    "horizon_hours",
+    "forecast_status",
+    "p_new_sep_10mev_10pfu_within_24h",
+    "all_clear_probability",
+    "calibration_id",
+    "operating_policy_id",
+    "data_freshness",
+    "missing_modalities",
+    "uncertainty",
+    "operator_state",
+    "model_version",
+    "evidence_receipt_sha256"
+  ],
+  "abstention": {
+    "fail_closed": true,
+    "reasons": [
+      "SCHEMA_FAILURE",
+      "CRITICAL_INPUT_MISSING",
+      "INPUT_TOO_STALE",
+      "OUT_OF_DISTRIBUTION",
+      "MODEL_OR_POLICY_VERSION_MISMATCH",
+      "EVIDENCE_RECEIPT_FAILURE"
+    ],
+    "probability_when_abstaining": null,
+    "operator_state_when_abstaining": null
+  },
+  "uncertainty": {
+    "seed_count": 5,
+    "ensemble_aggregation": "MEDIAN_CALIBRATED_PROBABILITY",
+    "required_components": ["between_seed_spread", "calibration_uncertainty", "input_quality"]
+  },
+  "claim_policy": {
+    "award_or_superiority_claim_before_paired_gate": false,
+    "operational_certification_claim": false,
+    "negative_and_inconclusive_results_required": true
+  }
+}

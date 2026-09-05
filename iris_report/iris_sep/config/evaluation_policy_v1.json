@@ -1,0 +1,45 @@
+{
+  "policy_id": "iris-sep-evaluation-policy-v1",
+  "status": "FROZEN_BEFORE_LOCKED_TEST_ACCESS",
+  "primary_metric": "TSS",
+  "seed_probability_aggregation": "MEDIAN",
+  "calibration": {
+    "method": "LOGIT_INTERCEPT_ONLY",
+    "fit_role": "validation_calibration",
+    "test_refit": false
+  },
+  "operating_threshold": {
+    "fit_role": "validation_threshold",
+    "objective": "MAXIMIZE_TSS",
+    "tie_break": "LOWEST_THRESHOLD",
+    "test_refit": false
+  },
+  "matched_detection": {
+    "comparison_type": "LOCKED_TEST_CURVE_DIAGNOSTIC_NOT_DEPLOYED_THRESHOLD",
+    "primary_target_pod": 0.8,
+    "supporting_target_pod_grid": [0.6, 0.7, 0.8, 0.9],
+    "selection": "MINIMUM_FAR_AMONG_THRESHOLDS_WITH_POD_AT_LEAST_TARGET",
+    "unattainable": "FAIL_GATE"
+  },
+  "paired_bootstrap": {
+    "replicates": 10000,
+    "seed": 20260904,
+    "unit": "complete_sep_episode_or_predeclared_quiet_block",
+    "interval": "PERCENTILE_95",
+    "minimum_valid_replicates_fraction": 0.95
+  },
+  "non_degradation": {
+    "brier_score_absolute_margin": 0.01,
+    "ece_absolute_margin": 0.02,
+    "median_warning_lead_time_hours_margin": 1.0
+  },
+  "required_metrics": [
+    "TSS", "HSS", "POD", "FPR", "FAR", "BRIER", "BRIER_SKILL",
+    "ECE", "AUPRC", "AUROC"
+  ],
+  "claim_boundary": {
+    "curve_diagnostic_is_not_deployed_operating_performance": true,
+    "locked_test_threshold_selection": false,
+    "negative_or_inconclusive_result_must_be_reported": true
+  }
+}

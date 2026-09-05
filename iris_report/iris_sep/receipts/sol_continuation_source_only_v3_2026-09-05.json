@@ -1,0 +1,111 @@
+{
+  "receipt_type": "IRIS_SEP_SOL_CONTINUATION_SOURCE_ONLY_V3",
+  "date": "2026-09-05",
+  "branch": "codex/iris-sep-continuation-20260905",
+  "pull_request": 3,
+  "starting_remote_head_sha": "0aa786edca5942db324263b993770301e2a36088",
+  "source_tested_head_sha": "b7d86e520d33cf55c74f7c8d88a1fed8904740e4",
+  "github_actions": {
+    "workflow": ".github/workflows/iris-sep-source-only.yml",
+    "run_id": 33975465640,
+    "job_id": 101331265966,
+    "status": "completed",
+    "conclusion": "success",
+    "runner": "ubuntu-24.04",
+    "runtime": {
+      "python": "3.13.5",
+      "numpy": "2.3.5",
+      "torch": "2.10.0+cpu",
+      "scikit_learn": "1.8.0"
+    },
+    "source_only_unittest": {
+      "modules": [
+        "iris_report.iris_sep.tests.test_pilot_replay",
+        "iris_report.iris_sep.tests.test_pilot_admission_v2",
+        "iris_report.iris_sep.tests.test_validity_envelope_benchmark",
+        "iris_report.iris_sep.tests.test_compound_validity_benchmark",
+        "iris_report.iris_sep.tests.test_inference_bundle",
+        "iris_report.iris_sep.tests.test_compact_layer_replay",
+        "iris_report.iris_sep.tests.test_compact_nonfinite_replay_tool"
+      ],
+      "tests_run": 27,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_seconds": 0.196,
+      "status": "PASS"
+    },
+    "syntax_verification": {
+      "method": "python -m py_compile",
+      "status": "PASS",
+      "files": [
+        "iris_report/iris_sep/src/iris_sep/inference_bundle.py",
+        "iris_report/iris_sep/src/iris_sep/modeling/compact_layer_replay.py",
+        "iris_report/iris_sep/tools/run_compact_nonfinite_replay.py",
+        "iris_report/iris_sep/tests/test_inference_bundle.py",
+        "iris_report/iris_sep/tests/test_compact_layer_replay.py",
+        "iris_report/iris_sep/tests/test_compact_nonfinite_replay_tool.py"
+      ]
+    }
+  },
+  "new_source_hardening": {
+    "compact_replay_provenance_gate": {
+      "status": "IMPLEMENTED_AND_SOURCE_TESTED",
+      "requirements_before_causal_interpretation": [
+        "published frozen diagnostic preregistration SHA-256 matches",
+        "all source dependency SHA-256 values frozen in the preregistration match",
+        "pinned train-only source SHA-256 matches",
+        "retained seed-7 failure-logit artifact SHA-256 matches",
+        "model receipt binds seed, fit/stop roles, exact fit/stop/predict indices, checkpoint SHA-256 and preprocessing SHA-256",
+        "preprocessing feature order matches the preregistered feature order",
+        "saved logits reproduce exactly before a first-nonfinite-stage conclusion is allowed"
+      ]
+    },
+    "inference_bundle_adversarial_matrix": {
+      "status": "EXPANDED_AND_SOURCE_TESTED",
+      "new_cases": [
+        "admission support-boundary mutation",
+        "model-version mutation",
+        "input-schema mutation",
+        "embedded evidence-receipt mutation",
+        "derived calibrated-probability mutation",
+        "empty feature/output arrays"
+      ],
+      "trust_boundary": "The external bundle SHA-256 is the trust anchor for dynamic inference content. Replacing the bundle and deliberately establishing a new trusted external SHA creates a new artifact; the static evidence binding prevents reuse of the same scientific receipt with altered policy/calibration/threshold/model/schema."
+    }
+  },
+  "full_artifact_verification": {
+    "status": "NOT_RUN",
+    "reason": "The clean source-only checkout does not contain the gitignored preserved development datasets, checkpoints, folds, notebooks, caches or artifact dependency layout required by verify_local. No replacement or mixed training/test table was downloaded."
+  },
+  "compact_failure_replay": {
+    "status": "NOT_RUN_MISSING_PRESERVED_LOCAL_ARTIFACTS",
+    "fold": 3,
+    "arm": "compact",
+    "seed": 7,
+    "retained_failure_finite_logits": 1062,
+    "retained_failure_total_logits": 2120,
+    "causal_conclusion": null,
+    "note": "The original root cause remains unknown. Helper mutation, preprocessing overflow and distribution shift remain hypotheses until a hash-matched preserved-artifact replay proves otherwise."
+  },
+  "cleanup": {
+    "deletions_performed": 0,
+    "reason": "No candidate deletion was supported by both proof of non-reference and a verified hash-matching recovery copy. Existing failed experiments and pinned artifacts remain preserved."
+  },
+  "scientific_boundaries": {
+    "locked_test_accessed": false,
+    "locked_identity_accessed": false,
+    "locked_outcome_accessed": false,
+    "outer_monitor_rescored": false,
+    "new_model_training_run": false,
+    "mixed_training_test_table_downloaded": false,
+    "publisher_request_resent": false,
+    "external_message_sent": false,
+    "final_new_crossing_improvement_established": false,
+    "published_sepnet_equivalence_established": false,
+    "scientific_superiority_established": false,
+    "operational_readiness_established": false,
+    "economic_savings_established": false,
+    "breakthrough_claimed": false
+  },
+  "next_action": "In the preserved artifact workspace, restore the exact preregistered implementation revisions if needed and run tools/run_compact_nonfinite_replay.py against the pinned train-only source, folds, seed-7 logits, checkpoint, preprocessing and model receipt. Interpret a first-nonfinite stage only after every provenance gate and exact-logit reproduction pass. Final model work remains blocked on verified training-only NEW-crossing data, source latency/licensing, complete episode semantics, comparator fidelity and an independent frozen evaluation path."
+}

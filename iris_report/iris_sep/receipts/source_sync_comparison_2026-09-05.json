@@ -1,0 +1,118 @@
+{
+  "scope": "SOURCE_COMPARISON_ONLY",
+  "remote": "https://github.com/fr3ddykru3g3r/silver-engine",
+  "default_branch": "main",
+  "base_tree_sha": "cdf0b2a5bf37fe793f948158adc4cf007c5141f0",
+  "remote_tree_truncated": false,
+  "workspace_git_exists": false,
+  "remote_sep_path_exists": false,
+  "mapped_iris_model_comparison": {
+    "counts": {
+      "different": 14,
+      "identical": 18,
+      "remote_only": 10
+    },
+    "differences": [
+      {
+        "path": "iris-model/README.md",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/cdr.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/cdr_data.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/cdr_models.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/compare_augmentation.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/compare_augmentation_locked_test.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/compare_v2_rolling_transfer.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/data.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/eval_cdr_bilstm_locked.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/evaluate_cdr_locked_test.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/make_rolling_folds.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/make_v2_fold_evidence.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/make_v2_rolling_folds.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/requirements.txt",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/sample_generator.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/shap_cdr.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/summarize_reward_sensitivity.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/train_cdr.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/train_cdr_counterpart.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/train_cdr_supervised.py",
+        "state": "remote_only"
+      },
+      {
+        "path": "iris-model/train_generator_positive_v2.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/train_generator_v2.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/train_generator_v3.py",
+        "state": "different"
+      },
+      {
+        "path": "iris-model/train_matched_augmentation.py",
+        "state": "different"
+      }
+    ]
+  },
+  "decision": "Add SEP source and local historical snapshot under iris_report; preserve remote root iris-model unchanged. Exclude scientific datasets, binary models, notebook outputs and third-party snapshots.",
+  "historical_artifact_cleanup": "NOT_PERFORMED: pinned receipts require old versions; no verified external backup of all artifacts.",
+  "temporary_checkout": "/private/tmp/iris-sep-source-sync-20260905",
+  "locked_data_content_read_for_sync": false
+}

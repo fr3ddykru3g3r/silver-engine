@@ -1,0 +1,36 @@
+{
+  "contract_id": "IRIS_SEP_TRAIN_ONLY_MAGNETIC_MAP_PACKAGE_V1",
+  "status": "SOURCE_PACKAGE_CONTRACT_NOT_A_RESULT",
+  "purpose": "Minimal train-only package for testing whether a reduced magnetic surface-transport model reconstructs deliberately hidden transient map gaps better than last-map persistence.",
+  "metadata_required": {
+    "format": "IRIS_SEP_TRAIN_ONLY_MAGNETIC_MAP_PACKAGE_V1",
+    "scope": "TRAIN_ONLY_TRANSIENT_MAGNETIC_MAP_GAPS",
+    "locked_test_included": false,
+    "source_manifest_sha256": "lowercase sha256",
+    "geometry": {
+      "longitude_degrees_per_pixel": "positive finite source-geometry value",
+      "rotation_degrees_per_day": "finite signed rate appropriate to the declared map coordinates",
+      "diffusion_pixels2_per_day": "nonnegative train-only-frozen grid transport parameter",
+      "max_substep_hours": "positive finite numerical step ceiling",
+      "validated_horizon_hours": "positive finite horizon used only for the uncertainty proxy"
+    }
+  },
+  "npz_required_arrays": {
+    "maps": "float [rows, height, width]",
+    "map_observed": "bool [rows]",
+    "structural_unavailable": "bool [rows]; cannot overlap map_observed",
+    "roles": "string [rows]; artificial holdouts are allowed only where role == score",
+    "issue_ids": "unique nonempty string [rows]",
+    "issue_time_unix_seconds": "strictly increasing numeric [rows]"
+  },
+  "physics_model": {
+    "method_id": "ROTATE_SPREAD_2D_V1",
+    "plain_language": "Move the last real magnetic map sideways according to the declared solar-map rotation rate and let the magnetic pattern spread slightly.",
+    "equation_family": "2-D advection plus diffusion on the declared regular map grid",
+    "not_mhd": true,
+    "future_observations_forbidden": true,
+    "comparator": "last real map persistence"
+  },
+  "admission_rule": "Better hidden-map pixel error is necessary but not sufficient. Physics may enter the SEP forecast experiment only after a causal map-to-feature path exists and downstream forecast preservation is evaluated against simpler recovery methods.",
+  "claim_boundary": "This package contract does not establish accurate solar simulation, downstream SEP benefit, operational readiness, superiority, savings, breakthrough or award outcome."
+}

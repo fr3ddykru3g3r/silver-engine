@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "scope": "legacy_training_only_development",
+  "locked_test_accessed": false,
+  "superiority_established": false,
+  "published_sepnet_o_equivalence_established": false,
+  "row_weighted_receipt_sha256": "9583f89130965d85dadb99a7e4384afb9d8a16af853cac22a280fb5040ae7ee6",
+  "general_episode_weighted_receipt_sha256": "073940a174e1b82d8af92eea94942f5ee69cae168b2a116cb8e0dafd116b8995",
+  "adapter_sha256": "0708f48521357a8e9445752fd1c61040829ed190820ef4cab67b9d97be0d423e",
+  "repair_tests_sha256": "ec328a288ec3afd7d798a2c34ab8597d56d9b8b54be3f30edd5e50349287e4b7",
+  "artifact_verifier_sha256": "56157eba6419c7879483263733d390157a1ae25d809ac7151445f5e997d8143b",
+  "validation_monitor_tss": {
+    "row_weighted": 0.23672677815837195,
+    "general_episode_weighted": 0.0739849889179931
+  },
+  "decision": "Reject general-episode weighting as an improvement candidate on this development cohort.",
+  "limitations": [
+    "Validation monitor has already informed development; it is not independent final evidence.",
+    "Fixed partition construction used operational labels; training weights use only general labels and chronology.",
+    "Public comparator target and configuration equivalence remain unresolved.",
+    "Earlier artifacts are retained as audit history, not promoted as approved comparator evidence."
+  ]
+}

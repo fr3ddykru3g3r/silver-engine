@@ -1,0 +1,96 @@
+name: IRIS v2 Exact 6000-Step BASE Gate
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-exact-6000-base.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  exact-base:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train exact 6000-step BASE without forecast access
+        run: |
+          python iris-model/train_generator_v2.py \
+            --evidence-dir evidence --cache-dir cache/base-6000-exact \
+            --out-dir outputs --condition base --seed 2026 \
+            --per-group 1 --positive-slots 1 --batch-size 16 --physics-batch-size 12 \
+            --base-channels 24 --diffusion-steps 100 --max-steps 6000 \
+            --download-workers 16
+          python - <<'PY'
+          import torch
+          ck=torch.load('outputs/base/generator.pt',map_location='cpu',weights_only=False)
+          assert int(ck['steps']) == 6000, ck.get('steps')
+          print({'verified_exact_steps':ck['steps']})
+          PY
+      - name: Sample matched train-only audit set
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint outputs/base/generator.pt --evidence-dir evidence \
+            --out-dir matched/base --per-group 2 --max-groups 64 \
+            --batch-size 8 --sampling-steps 50 --seed 2026
+      - name: Corrected independent generic fidelity gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir evidence --cache-dir cache_eval/base6000 \
+            --synthetic-manifest matched/base/synthetic_manifest.csv \
+            --out-dir audit/base --real-per-group 2 --seed 2026
+          python - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('audit/base/v2_manipulation_metrics.json'); j=json.loads(p.read_text())
+          out={
+            'actual_training_steps':6000,
+            'generic_fidelity_gate_pass':bool(j['generic_fidelity_gate_pass']),
+            'generic_distance_to_real_baseline_ratio':j['generic_distance_to_real_baseline_ratio'],
+            'flux_ratio':j['synthetic_to_real_flux_median_ratio'],
+            'active_area_ratio':j['synthetic_to_real_active_area_median_ratio'],
+            'diversity_ratio':j['synthetic_to_real_diversity_ratio'],
+            'saturation':j['synthetic_saturation_fraction_abs_gt_2900G'],
+            'hard_pil_distance':j['hard_pil_standardized_energy_distance'],
+            'hard_geometry_distance':j['hard_geometry_standardized_energy_distance'],
+            'phase':'TRAIN-ONLY generic fidelity; no forecast validation/test accessed'
+          }
+          pathlib.Path('exact_6000_base_gate.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          if not out['generic_fidelity_gate_pass']:
+              raise SystemExit('Exact 6000-step BASE fails generic fidelity; generator/objective redesign required before physics transfer')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-v2-exact-6000-base
+          path: |
+            outputs/base
+            matched/base
+            audit/base
+            exact_6000_base_gate.json
+          retention-days: 30
