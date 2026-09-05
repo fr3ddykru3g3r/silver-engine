@@ -1,12 +1,12 @@
 """Controlled layer-by-layer replay for the compact tabular model.
 
 This module is diagnostic only. It reports the first tensor stage containing a
-nonfinite value and audits train-fitted scaling/missingness. It does not infer a
-scientific cause without the exact checkpoint and exact failing fold arrays.
+nonfinite value and audits train-fitted scaling, missingness, and checkpoint
+parameter finiteness. It does not infer an upstream scientific cause without the
+exact checkpoint and exact failing fold arrays.
 """
 from __future__ import annotations
 
-import math
 from typing import Any, Mapping
 
 import numpy as np
@@ -31,6 +31,31 @@ def _summary(value: Tensor) -> dict[str, Any]:
         row_finite = finite.reshape(detached.shape[0], -1).all(dim=1)
         bad_rows = torch.nonzero(~row_finite, as_tuple=False).flatten().tolist()[:20]
     return {"shape": list(detached.shape), "finite": finite_count, "total": total, "max_abs_finite": max_abs, "first_nonfinite_rows": bad_rows}
+
+
+def _parameter_audit(model: IRISSEPTabularModel) -> dict[str, Any]:
+    """Audit loaded checkpoint tensors without assigning a training-time cause."""
+    parameters: list[dict[str, Any]] = []
+    first_nonfinite = None
+    nonfinite_tensors = 0
+    nonfinite_values = 0
+    for name, parameter in model.named_parameters():
+        summary = _summary(parameter)
+        entry = {"parameter": name, **summary}
+        parameters.append(entry)
+        bad = summary["total"] - summary["finite"]
+        if bad:
+            nonfinite_tensors += 1
+            nonfinite_values += bad
+            if first_nonfinite is None:
+                first_nonfinite = name
+    return {
+        "parameter_tensors": len(parameters),
+        "nonfinite_parameter_tensors": nonfinite_tensors,
+        "nonfinite_parameter_values": nonfinite_values,
+        "first_nonfinite_parameter": first_nonfinite,
+        "parameters": parameters,
+    }
 
 
 def transform_from_preprocessing(raw_features: Mapping[str, Any], preprocessing: Mapping[str, Any]) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict[str, Any]]:
@@ -58,7 +83,7 @@ def transform_from_preprocessing(raw_features: Mapping[str, Any], preprocessing:
             width = int(meta.get("placeholder_width", 1))
             values[modality] = np.zeros((row_count, width), dtype=np.float32)
             masks[modality] = np.zeros((row_count, width), dtype=bool)
-            audit["modalities"][modality] = {"always_unavailable": True, "rows": row_count, "features": width, "observed_per_feature": [0] * width, "pre_cast_nonfinite": 0, "post_cast_nonfinite": 0, "max_abs_float64": 0.0, "max_abs_float32": 0.0}
+            audit["modalities"][modality] = {"always_unavailable": True, "rows": row_count, "features": width, "observed_per_feature": [0] * width, "zero_support_features": width, "pre_cast_nonfinite": 0, "post_cast_nonfinite": 0, "max_abs_float64": 0.0, "max_abs_float32": 0.0}
             continue
         raw = np.asarray(raw_features.get(modality), dtype=np.float64)
         columns = list(meta.get("columns", ()))
@@ -83,6 +108,7 @@ def transform_from_preprocessing(raw_features: Mapping[str, Any], preprocessing:
         post_nonfinite = int((~np.isfinite(transformed32)).sum())
         finite32 = transformed32[np.isfinite(transformed32)]
         max32 = float(np.max(np.abs(finite32))) if finite32.size else None
+        observed_counts = observed.sum(axis=0).astype(int)
         values[modality] = transformed32
         masks[modality] = observed
         audit["modalities"][modality] = {
@@ -90,8 +116,9 @@ def transform_from_preprocessing(raw_features: Mapping[str, Any], preprocessing:
             "rows": row_count,
             "features": raw.shape[1],
             "columns": columns,
-            "observed_per_feature": observed.sum(axis=0).astype(int).tolist(),
+            "observed_per_feature": observed_counts.tolist(),
             "missing_per_feature": (~observed).sum(axis=0).astype(int).tolist(),
+            "zero_support_features": int((observed_counts == 0).sum()),
             "minimum_train_scale": float(scale.min()),
             "maximum_train_scale": float(scale.max()),
             "pre_cast_nonfinite": pre_nonfinite,
@@ -113,6 +140,7 @@ def replay_model_layers(model: IRISSEPTabularModel, inputs: Mapping[str, BranchI
     branch_outputs: list[Tensor] = []
     availability: list[Tensor] = []
     feature_support: dict[str, Any] = {}
+    parameter_audit = _parameter_audit(model)
     try:
         for modality in MODALITIES:
             branch = model.branches[modality]
@@ -127,10 +155,12 @@ def replay_model_layers(model: IRISSEPTabularModel, inputs: Mapping[str, BranchI
                 raise ValueError(f"invalid {modality} replay shape")
             if not torch.isfinite(values).all():
                 raise ValueError("replay inputs must be finite; inspect transform audit first")
+            observed_counts = mask.sum(dim=0).detach().cpu().to(torch.int64)
             feature_support[modality] = {
                 "rows": int(values.shape[0]),
                 "features": int(values.shape[1]),
-                "observed_per_feature": mask.sum(dim=0).detach().cpu().to(torch.int64).tolist(),
+                "observed_per_feature": observed_counts.tolist(),
+                "zero_support_features": int((observed_counts == 0).sum().item()),
                 "all_missing_rows": int((~mask.any(dim=1)).sum().item()),
                 "max_abs_standardized_feature": float(values.abs().max().item()) if values.numel() else None,
             }
@@ -177,6 +207,7 @@ def replay_model_layers(model: IRISSEPTabularModel, inputs: Mapping[str, BranchI
         return {
             "status": "NONFINITE_REPRODUCED" if first is not None else "FINITE_REPLAY",
             "first_nonfinite_stage": first,
+            "checkpoint_parameter_audit": parameter_audit,
             "feature_support": feature_support,
             "all_missing_rows": int((~effective.any(dim=1)).sum().item()),
             "forward_replay_exact": bool(same),
