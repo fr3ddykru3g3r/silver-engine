@@ -1,0 +1,81 @@
+{
+  "status": "CURRENT_DEVELOPMENT_ARCHITECTURE",
+  "name": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+  "scope": "DEVELOPMENT_ONLY_NOT_FINAL_LOCKED_TEST_MODEL",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "components": {
+    "solar_specialist": "five_seed_median_xgboost_BASE_SOLAR",
+    "xrs_specialist": "five_seed_median_xgboost_XRS_ONLY",
+    "proton_specialist": "five_seed_median_xgboost_PROTON_ONLY",
+    "fusion": "PositiveEvidenceStack",
+    "fusion_training": "four_expanding_chronological_outer_fit_crossfit",
+    "calibration": "single_logit_intercept_calibration_role_only",
+    "decision": "threshold_role_only",
+    "operational_primary_policy": "POD80_MIN_FAR",
+    "validity": "existing_IRIS_validity_and_admission_envelope"
+  },
+  "frozen_development_hyperparameters": {
+    "specialist_seeds": [7, 13, 26, 42, 73],
+    "xgboost": {
+      "n_estimators": 500,
+      "learning_rate": 0.03,
+      "max_depth": 3,
+      "min_child_weight": 5,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "reg_lambda": 1.0,
+      "reg_alpha": 0.0,
+      "tree_method": "hist"
+    },
+    "fusion": {
+      "expert_count": 3,
+      "evidence_logit_clip": 6.0,
+      "nonnegative_weights": true,
+      "l2_weight": 0.02,
+      "initial_weight": 0.5
+    }
+  },
+  "development_fit": {
+    "learned_weights": {
+      "solar": 0.12688412257061135,
+      "xrs": 0.24466064642806973,
+      "proton": 0.1823426067106754
+    },
+    "meta_intercept": -4.635297221101146,
+    "post_stack_calibration_intercept": -0.2787745686366991,
+    "oof_rows": 4297,
+    "oof_positives": 87
+  },
+  "development_evidence": {
+    "run_id": 33985243824,
+    "git_head": "5d90a177462401d1486891e06c6fa6794ea4fbdb",
+    "artifact_digest": "sha256:ed04d5b34df094e2eb7f7db3f07b426619494b38987f1993c0faddca90d58f99",
+    "operational_pod80_tss": {
+      "older_score": 0.5119717680693291,
+      "monitor_2023_2025": 0.23585787751285647
+    },
+    "monitor_probability_metrics": {
+      "AUROC": 0.6825035063113605,
+      "AUPRC": 0.10580554498993841,
+      "BRIER": 0.03106594854977614,
+      "ECE": 0.010979622668640606
+    },
+    "matched_pod80_monitor_far": 0.9522673031026253,
+    "already_inspected_development_only": true
+  },
+  "rejected_architecture_evidence": [
+    {
+      "name": "IRIS_RESIDUAL_EXPERT_V1",
+      "reason": "hard solar anchor suppressed useful context and materially underperformed late fusion",
+      "run_id": 33984943106
+    },
+    {
+      "name": "IRIS_TWO_STATE_CROSSFIT_STACK_V1",
+      "reason": "improved ranking but degraded older operational POD80 threshold TSS and did not improve monitor TSS",
+      "run_id": 33985567816
+    }
+  ],
+  "architecture_stop_rule": "No further architecture expansion on the current daily aggregate dataset. Reconsider sequence/spatial encoders only after richer verified causal observations are available.",
+  "locked_test_accessed": false,
+  "claim_rule": "This file records the current development candidate only. It does not establish external superiority, operational readiness, or final locked-test performance."
+}
