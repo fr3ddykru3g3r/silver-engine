@@ -1,0 +1,70 @@
+{
+  "receipt_id": "IRIS_SEP_MISSINGNESS_PHYSICS_SOURCE_ONLY_V1_2026_09_05",
+  "created_utc": "2026-09-05T16:00:00Z",
+  "scope": "SOURCE_ONLY_MISSINGNESS_RECONSTRUCTION_SCAFFOLD_NOT_SCIENTIFIC_RESULT",
+  "repository": "fr3ddykru3g3r/silver-engine",
+  "branch": "codex/iris-sep-continuation-20260905",
+  "pull_request": 3,
+  "starting_verified_head": "fd75074caa8a4fbeceb6fc946ec562d8ee0abb0f",
+  "source_tested_head": "e4cdd1919a63ee24fc6a1df6067c9de5d545ad01",
+  "github_actions": {
+    "run_id": 33976404485,
+    "job_id": 101333762196,
+    "runner_os": "Ubuntu 24.04.4",
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "pytorch": "2.10.0+cpu",
+    "scikit_learn": "1.8.0",
+    "unittest_executions": 39,
+    "unittest_failures": 0,
+    "unittest_errors": 0,
+    "unittest_elapsed_seconds": 0.360,
+    "unittest_status": "PASS",
+    "py_compile_status": "PASS"
+  },
+  "implemented": [
+    "causal reconstruction provenance contract with forecast-time timestamps and future-information rejection",
+    "explicit distinction between reconstructed and observed values",
+    "deterministic random held-out missingness masks",
+    "contiguous outage-style missingness masks",
+    "held-out-only reconstruction MAE/RMSE/bias/max-error metrics",
+    "held-out uncertainty interval coverage metrics",
+    "exact reconstruction payload SHA-256 binding",
+    "train-observed-only median fitting and median fill",
+    "causal forward fill that leaves leading gaps unresolved rather than reading future truth",
+    "preregistered missingness recovery contract with simple baselines before physics",
+    "physics escalation ladder from no reconstruction to reduced physics to optional assimilation/full MHD"
+  ],
+  "new_or_updated_paths": [
+    "iris_report/iris_sep/src/iris_sep/missingness_recovery.py",
+    "iris_report/iris_sep/tests/test_missingness_recovery.py",
+    "iris_report/iris_sep/config/missingness_recovery_contract_v1.json",
+    "iris_report/iris_sep/architecture/MISSING_DATA_PHYSICS_STRATEGY_2026-09-05.md",
+    ".github/workflows/iris-sep-source-only.yml"
+  ],
+  "scientific_status": {
+    "missingness_recovery_contract": "PREREGISTERED_SOURCE_ONLY_NOT_YET_EXECUTED",
+    "physics_reconstruction_experiment": "NOT_RUN",
+    "full_mhd_experiment": "NOT_RUN",
+    "new_model_training": false,
+    "final_new_crossing_improvement_established": false,
+    "physics_reconstruction_advantage_established": false,
+    "accurate_solar_flare_simulation_established": false,
+    "operational_readiness_established": false,
+    "named_competitor_superiority_established": false,
+    "economic_savings_established": false,
+    "award_outcome_established": false
+  },
+  "data_and_evaluation_safety": {
+    "mixed_train_test_table_downloaded": false,
+    "locked_test_identity_accessed": false,
+    "locked_test_outcome_accessed": false,
+    "used_outer_monitor_reused_as_fresh_evidence": false,
+    "inspected_inner_score_blocks_reused_as_fresh_evidence": false,
+    "publisher_request_resent": false,
+    "external_message_sent": false,
+    "files_deleted": false
+  },
+  "engineering_decision": "Do not use full MHD as a default missing-data imputer. Treat all physics output as a separately identified reconstruction hypothesis. It may enter the frozen final model only after causal train-only held-out-gap experiments show better downstream SEP forecast robustness than the best surviving simpler recovery baseline without material calibration degradation.",
+  "exact_next_action": "When the verified training-only NEW-crossing cohort and source-latency/geometry manifest are available, run the preregistered Phase-1 missingness audit before choosing a physics solver: quantify missingness by modality/feature/source era/quarter, longest contiguous gaps, event-vs-quiet support, publication latency, structural-vs-accidental missingness and missingness-outcome association. Freeze eligible modalities and gap durations; then run no-reconstruction/mask-aware, causal forward-fill, train-fit median/simple-statistical and reproducible causal-KNN baselines on identical inner chronological issue identities. Only after that comparison may exactly one reduced-physics reconstruction arm be selected. Full MHD remains conditional on a measured residual gap after reduced physics."
+}
