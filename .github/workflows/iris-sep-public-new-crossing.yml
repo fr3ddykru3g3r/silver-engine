@@ -1,0 +1,98 @@
+name: IRIS-SEP public NEW-crossing benchmark
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py'
+      - 'iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py'
+      - 'iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py'
+      - 'iris_report/iris_sep/src/iris_sep/missingness_experiment.py'
+      - 'iris_report/iris_sep/src/iris_sep/missingness_recovery.py'
+      - '.github/workflows/iris-sep-public-new-crossing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out IRIS branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install bounded benchmark dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Acquire only the pinned public SEP-PRISM files
+        env:
+          GIT_LFS_SKIP_SMUDGE: '1'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y git-lfs
+          git lfs install
+          git clone --depth 1 --no-checkout https://github.com/yuyian/SEP-Prediction-V2.git /tmp/sep-prism
+          cd /tmp/sep-prism
+          git checkout e138dcd72c1952a00e11e1a0b025337f9e7c93fb -- Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          git lfs pull --include='Data/rolling_combinded_seq_24hours.csv,GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' --exclude=''
+          sha256sum Data/rolling_combinded_seq_24hours.csv GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run frozen public NEW-crossing benchmark
+        run: |
+          python -m iris_report.iris_sep.tools.run_public_new_crossing_benchmark \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-public-new-crossing
+
+      - name: Run deliberate missing-data experiments
+        run: |
+          for FRACTION in 0.05 0.20 0.40; do
+            TAG=$(echo "$FRACTION" | tr '.' '_')
+            python -m iris_report.iris_sep.tools.run_missingness_forecast_benchmark \
+              --package /tmp/iris-public-new-crossing/missingness_package.npz \
+              --metadata /tmp/iris-public-new-crossing/missingness_metadata.json \
+              --output "/tmp/iris-public-new-crossing/missingness_${TAG}" \
+              --missing-fraction "$FRACTION" \
+              --seed 20260905
+          done
+
+      - name: Record runtime and source head
+        run: |
+          python - <<'PY'
+          import json, platform
+          import numpy, pandas, sklearn, xgboost
+          from pathlib import Path
+          receipt = {
+              'scope': 'TRAIN_ONLY_PUBLIC_NEW_CROSSING_DIAGNOSTIC_NOT_FINAL',
+              'git_head': '${{ github.sha }}',
+              'sep_prism_commit': 'e138dcd72c1952a00e11e1a0b025337f9e7c93fb',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'locked_test_accessed': False,
+          }
+          Path('/tmp/iris-public-new-crossing/runtime.json').write_text(json.dumps(receipt, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable diagnostic artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-public-new-crossing-${{ github.sha }}
+          path: /tmp/iris-public-new-crossing
+          if-no-files-found: error
+          retention-days: 30
