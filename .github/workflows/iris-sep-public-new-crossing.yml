@@ -7,7 +7,7 @@ on:
     paths:
       - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py'
       - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v2.py'
-      - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v3.py'
+      - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v4.py'
       - 'iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py'
       - 'iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py'
       - 'iris_report/iris_sep/src/iris_sep/missingness_experiment.py'
@@ -42,7 +42,7 @@ jobs:
           python -m py_compile \
             iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py \
             iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v2.py \
-            iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v3.py \
+            iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v4.py \
             iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py \
             iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py \
             iris_report/iris_sep/src/iris_sep/missingness_experiment.py \
@@ -63,7 +63,7 @@ jobs:
 
       - name: Run frozen public NEW-crossing benchmark
         run: |
-          python -m iris_report.iris_sep.tools.run_public_new_crossing_benchmark_v3 \
+          python -m iris_report.iris_sep.tools.run_public_new_crossing_benchmark_v4 \
             --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
             --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
             --output /tmp/iris-public-new-crossing
