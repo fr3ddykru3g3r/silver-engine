@@ -1,0 +1,19 @@
+{
+  "status": "BLOCKED_AUTOMATIC_APPROVAL_REVIEW",
+  "pushed": false,
+  "pull_request_created": false,
+  "commit": "69e8382db60f8a831a56bc2e8da398cc14006af2",
+  "branch": "codex/iris-sep-continuation-20260905",
+  "destination": "https://github.com/fr3ddykru3g3r/silver-engine",
+  "verified_authenticated_login": "fr3ddykru3g3r",
+  "local_checkout": "/private/tmp/iris-sep-source-sync-20260905",
+  "files": 232,
+  "total_bytes": 1448787,
+  "scope": "iris_report/iris_sep and iris_report/source_snapshot only; additions only",
+  "scan": "No email, private-key, GitHub-token, AWS-key or OpenAI-key pattern hits; not proof of absence of all sensitive content",
+  "reason": "Automatic review requires trusted user approval of exact payload and destination despite pasted request. Do not bypass.",
+  "pr_body": "/private/tmp/iris-sep-source-sync-pr-body.md",
+  "large_artifacts_uploaded": false,
+  "historical_artifacts_deleted": false,
+  "workspace_git_recreated": false
+}

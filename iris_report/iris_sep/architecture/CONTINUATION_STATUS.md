@@ -1,5 +1,12 @@
 # IRIS-SEP continuation status
 
+For the current GitHub plan and SOL instructions, start with `START_HERE.md`.
+`architecture/PUBLICATION_REVIEW_2026-09-05.md` supersedes stronger claims below.
+The prior upload rejection at the end of this history was followed by explicit
+user authorization to publish. Check the PR/head and publication receipt for
+current synchronization state rather than treating that historical rejection as
+an active authorization blocker.
+
 The research objective is a daily forecast of a new >10 MeV, >=10 pfu SEP
 threshold crossing within the following 24 hours. The final claim requires
 the frozen paired benchmark gate, including lower false-alarm ratio at matched
@@ -90,9 +97,59 @@ Sealed cohort/prediction validation and an evidence registry also remain require
 before independent evaluation or real pilot admission. The used monitor remains
 selection evidence. No locked test was accessed and the frozen policy is intact.
 
+### Train-only performance diagnosis
+
+A four-fold expanding chronological comparison now exists under
+`artifacts/train_inner_diagnostic_v4/`. It used only the pinned outer train role.
+Across 2,441 disjoint score windows, fixed XGBoost had pooled TSS 0.287,
+elastic net 0.276, and signed-log compact IRIS 0.258. Paired unit-bootstrap
+intervals for both challengers versus XGBoost included zero. The original
+compact model produced nonfinite logits on the latest fold and is incomplete;
+the signed-log transformation fixed execution but not skill. XGBoost's fold
+TSS ranged from 0.013 to 0.432, exposing severe temporal instability.
+
+The training audit found extreme SHARP missingness and uneven quarterly event
+support. These results redirect work toward a verified NEW-crossing cohort,
+forecast-time proton/XRS context, source-era handling, and minimum fold-support
+rules. See `architecture/TRAIN_ONLY_PERFORMANCE_DIAGNOSIS_2026-09-05.md`.
+
+### Substantial operator contribution checkpoint
+
+The research contribution is now explicitly two-gated: forecast improvement on
+the frozen NEW-crossing cohort and an operational-validity envelope that
+suppresses unsupported decisions. The latter is implemented in
+`src/iris_sep/pilot_admission_v2.py` and computes feature-magnitude and output
+finiteness inside its admission boundary. It also checks supported issue era and
+allowed source revisions before calling the receipt-bound replay layer.
+
+The authoritative compound synthetic benchmark is
+`artifacts/compound_validity_benchmark_v3/`. It ran 10,000 deterministic trials
+covering 299 unique combinations of twelve fault types, with zero status errors,
+zero unsafe-valid outputs, and zero failures across twelve fault-to-recovery
+sequences. This is software-safety evidence, not SEP skill, real outage evidence,
+economic benefit, or named-competitor superiority. The earlier V1 and V2 runs
+are retained as development history.
+
+`architecture/SUBSTANTIAL_CONTRIBUTION_STRATEGY.md`,
+`paper/RESEARCH_PAPER_DRAFT.md`, and `video/VIDEO_NARRATIVE_V1.md` now align the
+research, operator decision, evidence boundaries, and presentation. The latest
+full local gate passed 92 unittest executions plus static, contract, checkpoint,
+and persisted-artifact checks. No locked test was accessed.
+
 GitHub synchronization uses a separate shallow, blob-filtered checkout and a
 `codex/` branch. No `.git` is recreated in this workspace. Git contains source
 and small audit receipts; full verification requires hash-matching local
 artifacts and notebooks. Retain historical files referenced by receipts and
 failed experiments; no large artifact upload or destructive cleanup is allowed
 without verified preservation. The GitHub PR is not merged automatically.
+
+### GitHub submission blocker
+
+Source-only commit `69e8382db60f8a831a56bc2e8da398cc14006af2` is prepared
+on `codex/iris-sep-continuation-20260905` in the separate temporary checkout.
+Automatic approval review rejected the push twice, including after destination
+ownership and exact-payload scan checks. Nothing was pushed and no PR exists.
+The next action requires explicit approval of the 232-file, 1.45 MB upload to
+`fr3ddykru3g3r/silver-engine`. See
+`receipts/source_sync_submission_status_2026-09-05.json` and the prepared PR body
+at `/private/tmp/iris-sep-source-sync-pr-body.md`. Do not bypass the rejection.

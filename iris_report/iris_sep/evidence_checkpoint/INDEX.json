@@ -1,0 +1,47 @@
+{
+  "scope": "SMALL_RECEIPTS_ONLY_NOT_COMPLETE_ARTIFACT_BACKUP",
+  "files": [
+    {
+      "original_path": "artifacts/train_inner_diagnostic_v4/analysis_receipt.json",
+      "published_path": "evidence_checkpoint/train_inner_diagnostic_v4/analysis_receipt.json",
+      "bytes": 5243,
+      "sha256": "485012173600e6ebc70cb53737a472cf521ad80478d5e7b2dd62e9e34c26fc59"
+    },
+    {
+      "original_path": "artifacts/train_inner_diagnostic_v4/preregistration.json",
+      "published_path": "evidence_checkpoint/train_inner_diagnostic_v4/preregistration.json",
+      "bytes": 4008,
+      "sha256": "f8099ec7efb2da16672ab7e4cf69beb05c92bdb5b5e7e04ec6e5bac82de3eee8"
+    },
+    {
+      "original_path": "artifacts/train_inner_diagnostic_v4/fold_support.json",
+      "published_path": "evidence_checkpoint/train_inner_diagnostic_v4/fold_support.json",
+      "bytes": 3210,
+      "sha256": "088f41b3a5868ca62072976f7f9b860c3da3fe9017ae0ec8b701ba4af8445e8e"
+    },
+    {
+      "original_path": "artifacts/compound_validity_benchmark_v3/result.json",
+      "published_path": "evidence_checkpoint/compound_validity_benchmark_v3/result.json",
+      "bytes": 33878,
+      "sha256": "04463de4984839fc19f6ef3da9e9868fc3b96a87255acaec9c23a2387a3c0c8f"
+    },
+    {
+      "original_path": "artifacts/compound_validity_benchmark_v3/receipt.json",
+      "published_path": "evidence_checkpoint/compound_validity_benchmark_v3/receipt.json",
+      "bytes": 210,
+      "sha256": "6cdb1deeb5b04e9c6ae9ff41f6859dc00b083cb539656d8d1e0ee9e584cf8cc6"
+    },
+    {
+      "original_path": "artifacts/validity_envelope_benchmark_v1/result.json",
+      "published_path": "evidence_checkpoint/validity_envelope_benchmark_v1/result.json",
+      "bytes": 10529,
+      "sha256": "c3a24aab1a0059408848358bfca4dd67f47aea9ba7043da2cc545bda7a60d477"
+    },
+    {
+      "original_path": "artifacts/validity_envelope_benchmark_v1/receipt.json",
+      "published_path": "evidence_checkpoint/validity_envelope_benchmark_v1/receipt.json",
+      "bytes": 258,
+      "sha256": "4a2d06516bee880bdeeed1d247f577b147fb6c77e65d9dfe29b60dcb3a9e5c9c"
+    }
+  ]
+}
