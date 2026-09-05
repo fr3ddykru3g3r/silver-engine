@@ -13,8 +13,8 @@
     },
     {
       "path": "iris_report/iris_sep/PUBLICATION_PENDING.md",
-      "bytes": 1280,
-      "sha256": "3ba8faf32b3f4e1d9d35064db68969e9dba3fcfcfd1589d14a1155e0d5fb1a28"
+      "bytes": 1184,
+      "sha256": "7ce2ae0a3e7e506ec296529270c3707da27c09040ee74b1083acd7fa32bf5bff"
     },
     {
       "path": "iris_report/iris_sep/README.md",
@@ -68,8 +68,8 @@
     },
     {
       "path": "iris_report/iris_sep/architecture/CONTINUATION_STATUS.md",
-      "bytes": 8792,
-      "sha256": "0605d2991ae71c90882e54fda7f3c465f08771142084222a313eb942bdf6fa86"
+      "bytes": 8891,
+      "sha256": "b1c1cccd4095561f607db1b1d48490a307a99208f5326ba248a866f760e88c75"
     },
     {
       "path": "iris_report/iris_sep/architecture/JUDGE_STRATEGY.md",
@@ -293,8 +293,8 @@
     },
     {
       "path": "iris_report/iris_sep/receipts/source_sync_submission_status_2026-09-05.json",
-      "bytes": 968,
-      "sha256": "6e4ba291e028c470ea9baf666f9587b854fe21d80d618309c5dc9bfbc492b812"
+      "bytes": 1131,
+      "sha256": "331db005d2b86a5c2f1129a06aae49770ad17b785da430ceff85bf7e3504ed3e"
     },
     {
       "path": "iris_report/iris_sep/receipts/v2_clear_training_access_status_2026-09-05.json",
@@ -1322,7 +1322,7 @@
       "sha256": "d9e227cc37f780250e6c7a3f1ad4ba513e2923eaab59fdb480b74f4217f46ce7"
     }
   ],
-  "total_bytes": 1521188,
+  "total_bytes": 1521354,
   "excluded": [
     {
       "path": "iris_report/iris_sep/.DS_Store",

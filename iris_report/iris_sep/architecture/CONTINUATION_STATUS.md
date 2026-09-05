@@ -1,6 +1,8 @@
 # IRIS-SEP continuation status
 
 For the current GitHub plan and SOL instructions, start with `START_HERE.md`.
+The source checkpoint is published in PR #3:
+https://github.com/fr3ddykru3g3r/silver-engine/pull/3
 `architecture/PUBLICATION_REVIEW_2026-09-05.md` supersedes stronger claims below.
 The prior upload rejection at the end of this history was followed by explicit
 user authorization to publish. Check the PR/head and publication receipt for
