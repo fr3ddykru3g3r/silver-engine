@@ -5,9 +5,12 @@ import numpy as np
 
 from iris_report.iris_sep.src.iris_sep.missingness_recovery import (
     ReconstructionProvenance,
+    apply_train_median_fill,
     audit_forecast_time_reconstruction,
+    causal_forward_fill,
     contiguous_gap_mask,
     deterministic_random_gap_mask,
+    fit_train_medians,
     interval_coverage_metrics,
     reconstruction_metrics,
     reconstruction_payload_sha256,
@@ -88,6 +91,49 @@ class MissingnessRecoveryTests(unittest.TestCase):
         self.assertTrue(mask[2:5].all())
         self.assertFalse(mask[:2].any())
         self.assertFalse(mask[5:].any())
+
+    def test_train_medians_ignore_deliberately_hidden_truth(self):
+        values = np.array([
+            [1.0, 10.0],
+            [9999.0, 20.0],
+            [3.0, 9999.0],
+        ])
+        observed = np.array([
+            [True, True],
+            [False, True],
+            [True, False],
+        ])
+        medians = fit_train_medians(values, observed)
+        np.testing.assert_allclose(medians, [2.0, 15.0])
+        filled = apply_train_median_fill(values, observed, medians)
+        np.testing.assert_allclose(filled, [[1.0, 10.0], [2.0, 20.0], [3.0, 15.0]])
+
+    def test_train_median_rejects_zero_support_feature(self):
+        with self.assertRaises(ValueError):
+            fit_train_medians([[1.0, 9.0], [2.0, 8.0]], [[True, False], [True, False]])
+
+    def test_forward_fill_never_uses_future_hidden_truth(self):
+        values = np.array([
+            [9999.0, 5.0],
+            [1.0, 9999.0],
+            [7777.0, 9999.0],
+            [4.0, 8.0],
+        ])
+        observed = np.array([
+            [False, True],
+            [True, False],
+            [False, False],
+            [True, True],
+        ])
+        filled, unresolved = causal_forward_fill(values, observed)
+        self.assertTrue(unresolved[0, 0])
+        self.assertTrue(np.isnan(filled[0, 0]))
+        self.assertEqual(filled[1, 1], 5.0)
+        self.assertEqual(filled[2, 0], 1.0)
+        self.assertEqual(filled[2, 1], 5.0)
+        self.assertEqual(filled[3, 0], 4.0)
+        self.assertEqual(filled[3, 1], 8.0)
+        self.assertFalse(unresolved[1:].any())
 
     def test_reconstruction_metrics_score_only_hidden_cells(self):
         truth = np.array([1.0, 2.0, 3.0, 4.0])
