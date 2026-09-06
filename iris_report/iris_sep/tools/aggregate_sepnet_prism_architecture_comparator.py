@@ -33,6 +33,10 @@ def evaluate(y,p,t,roles,role,prevalence):
         "rows":int(m.sum()),"positives":int(y[m].sum())
     }
 
+def normalized_utc_times(values):
+    """Normalize timestamps semantically, independent of pandas backing unit."""
+    return pd.DatetimeIndex(pd.to_datetime(values, utc=True, errors="raise")).as_unit("ns")
+
 def run(seed_root:Path,late_csv:Path,output:Path):
     output=Path(output)
     if output.exists(): raise ValueError("output must be new")
@@ -70,9 +74,9 @@ def run(seed_root:Path,late_csv:Path,output:Path):
     if len(late)!=len(y): raise ValueError("late-fusion row count mismatch")
     if not np.array_equal(late["label"].to_numpy(dtype=int),y): raise ValueError("late label mismatch")
     if not np.array_equal(late["role"].astype(str).to_numpy(),roles): raise ValueError("late role mismatch")
-    lt=pd.to_datetime(late["issue_time"],utc=True).astype("int64").to_numpy()
-    rt=pd.to_datetime(pd.Series(times),utc=True).astype("int64").to_numpy()
-    if not np.array_equal(lt,rt): raise ValueError("late issue-time mismatch")
+    lt=normalized_utc_times(late["issue_time"])
+    rt=normalized_utc_times(times)
+    if not lt.equals(rt): raise ValueError("late issue-time mismatch")
     if not np.array_equal(late["unit_id"].fillna("").astype(str).to_numpy(),units): raise ValueError("late unit mismatch")
 
     probs={"SEPNET_PRISM_RELEASED_ARCHITECTURE":prism}
@@ -125,6 +129,7 @@ def run(seed_root:Path,late_csv:Path,output:Path):
         "locked_test_accessed":False,
         "monitor_prior_inspection_disclosed":True,
         "unfavorable_seeds_dropped":False,
+        "timestamp_alignment_storage_unit_independent":True,
         "published_claim":"released architecture / fixed recipe under IRIS chronology; not exact paper random-IID reproduction"
     })
 
