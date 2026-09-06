@@ -1,0 +1,139 @@
+name: IRIS v2 Rolling Real vs Duplicate Benchmark
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-rolling-real-duplicate.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  benchmark:
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        fold: [1,2,3,4]
+        seed: [2026,31415,271828]
+        arm: [real,rw,duplicate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen nested folds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p nested
+          gh run download 32998667328 -n iris-v2-frozen-nested-folds -D nested
+          test -f nested/fold_${{ matrix.fold }}/data/derived/training_manifest.csv.gz
+      - name: Compute exposure-matched augmentation count
+        id: exposure
+        run: |
+          N=$(python - <<'PY'
+          import pandas as pd
+          p='nested/fold_${{ matrix.fold }}/data/derived/training_manifest.csv.gz'
+          x=pd.read_csv(p)
+          z=x[(x['partition'].astype(str)=='train') & (x['label_m1plus_24h']==1)]
+          print(int(z['region_group_id'].astype(str).nunique())*4)
+          PY
+          )
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          echo "augmentation count=$N"
+      - name: Train and evaluate frozen arm
+        run: |
+          set -euo pipefail
+          MODE=real; WEIGHT=none; NADD=0
+          case '${{ matrix.arm }}' in
+            rw) MODE=real_weighted; WEIGHT=balanced ;;
+            duplicate) MODE=duplicate; NADD='${{ steps.exposure.outputs.n }}' ;;
+          esac
+          python iris-model/train_matched_augmentation.py \
+            --evidence-dir nested/fold_${{ matrix.fold }} \
+            --cache-dir cache/f${{ matrix.fold }}/s${{ matrix.seed }}/${{ matrix.arm }} \
+            --out-dir out/fold_${{ matrix.fold }}/seed_${{ matrix.seed }}/${{ matrix.arm }} \
+            --arm "$MODE" --class-weighting "$WEIGHT" --augmentation-count "$NADD" \
+            --seed ${{ matrix.seed }} --train-per-group 4 --val-per-group 6 --pos-cap 2 \
+            --test-per-group 6 --test-pos-cap 2 --width 48 --dropout 0.2 --gamma 1.5 \
+            --lr 3e-4 --batch-size 32 --steps 1200 --eval-every 300 \
+            --validation-bootstrap 1000 --test-bootstrap 5000 --download-workers 16 --evaluate-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-rd-f${{ matrix.fold }}-s${{ matrix.seed }}-${{ matrix.arm }}
+          path: out/fold_${{ matrix.fold }}/seed_${{ matrix.seed }}/${{ matrix.arm }}
+          retention-days: 30
+
+  summarize:
+    needs: benchmark
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-rd-*
+          path: collected
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy scikit-learn
+      - name: Aggregate paired rolling results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,json,pandas as pd,numpy as np
+          root=pathlib.Path('collected'); rows=[]; preds=[]
+          for d in sorted(root.glob('iris-v2-rd-f*-s*-*')):
+            parts=d.name.split('-'); fold=int(parts[3][1:]); seed=int(parts[4][1:]); arm=parts[5]
+            m=list(d.rglob('metrics.json')); p=list(d.rglob('test_predictions.csv'))
+            if len(m)!=1 or len(p)!=1: raise RuntimeError((d,m,p))
+            j=json.loads(m[0].read_text()); rows.append({'fold':fold,'seed':seed,'arm':arm,'threshold':j['validation_threshold'],**{f'test_{k}':v for k,v in j['test'].items()}})
+            q=pd.read_csv(p[0]); q['fold']=fold;q['seed']=seed;q['arm']=arm;preds.append(q)
+          tab=pd.DataFrame(rows).sort_values(['fold','seed','arm']); tab.to_csv('rolling_real_duplicate_metrics.csv',index=False)
+          allp=pd.concat(preds,ignore_index=True); allp.to_csv('rolling_real_duplicate_predictions.csv.gz',index=False,compression='gzip')
+          # Paired region bootstrap for Rw/duplicate against R within each fold/seed.
+          out=[]; rng=np.random.default_rng(260826)
+          for (fold,seed),g in allp.groupby(['fold','seed']):
+            a=g[g.arm=='real']
+            ma=tab[(tab.fold==fold)&(tab.seed==seed)&(tab.arm=='real')].iloc[0]
+            def tss(y,p,t):
+              y=np.asarray(y); pred=np.asarray(p)>=t; pos=y==1; neg=~pos
+              return (pred[pos].mean() if pos.any() else np.nan)-(pred[neg].mean() if neg.any() else np.nan)
+            tr=float(ma.threshold)
+            for arm in ['rw','duplicate']:
+              b=g[g.arm==arm]
+              if b.empty: continue
+              mb=tab[(tab.fold==fold)&(tab.seed==seed)&(tab.arm==arm)].iloc[0]
+              z=a[['sample_id','region_group_id','y','p']].merge(b[['sample_id','p']],on='sample_id',suffixes=('_real',f'_{arm}'))
+              groups=z.region_group_id.astype(str).unique(); vals=[]; td=float(mb.threshold)
+              point=tss(z.y,z[f'p_{arm}'],td)-tss(z.y,z.p_real,tr)
+              for _ in range(5000):
+                gs=rng.choice(groups,len(groups),replace=True); zz=pd.concat([z[z.region_group_id.astype(str)==x] for x in gs],ignore_index=True)
+                vals.append(tss(zz.y,zz[f'p_{arm}'],td)-tss(zz.y,zz.p_real,tr))
+              vals=np.asarray(vals,float); out.append({'fold':fold,'seed':seed,'arm':arm,'delta_tss_arm_minus_real':point,'ci025':np.nanpercentile(vals,2.5),'ci975':np.nanpercentile(vals,97.5)})
+          pd.DataFrame(out).to_csv('rolling_real_weighted_duplicate_paired_bootstrap.csv',index=False)
+          summary={'phase':'frozen nested rolling-origin benchmark','folds':4,'seeds':3,'arms':['real','rw','duplicate'],'no_model_selection_on_outer_tests':True,'mean_test_tss_by_arm':tab.groupby('arm').test_tss.mean().to_dict(),'mean_delta_tss_by_arm':pd.DataFrame(out).groupby('arm').delta_tss_arm_minus_real.mean().to_dict()}
+          pathlib.Path('rolling_real_weighted_duplicate_summary.json').write_text(json.dumps(summary,indent=2)+'\n'); print(json.dumps(summary,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-rolling-real-duplicate-summary
+          path: |
+            rolling_real_duplicate_metrics.csv
+            rolling_real_duplicate_predictions.csv.gz
+            rolling_real_weighted_duplicate_paired_bootstrap.csv
+            rolling_real_weighted_duplicate_summary.json
+          retention-days: 30

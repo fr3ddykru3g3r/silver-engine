@@ -1,0 +1,98 @@
+name: IRIS-SEP published comparator aggregate-only replay
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - '.github/workflows/iris-sep-published-architecture-aggregate-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out corrected aggregator
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install aggregation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Compile corrected aggregator
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/aggregate_sepnet_prism_architecture_comparator.py
+
+      - name: Download immutable five-seed artifacts from original comparator run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/comparator-seeds
+          for seed in 7 13 26 42 73; do
+            gh run download 33983619816 \
+              --repo '${{ github.repository }}' \
+              --name "sepnet-prism-seed-${seed}-2562445014adfd9a18771e98fba284d4eebb824c" \
+              --dir "/tmp/comparator-seeds/seed-${seed}"
+          done
+          find /tmp/comparator-seeds -type f -print | sort
+
+      - name: Download frozen IRIS late-fusion predictions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/context-stability
+          gh run download 33981729019 \
+            --repo '${{ github.repository }}' \
+            --name 'iris-sep-context-stability-88711650ac88430e540770af294d0b583f554f9e' \
+            --dir /tmp/context-stability
+          test -f /tmp/context-stability/predictions.csv
+
+      - name: Run paired same-row aggregation
+        run: |
+          python -m iris_report.iris_sep.tools.aggregate_sepnet_prism_architecture_comparator \
+            --seed-root /tmp/comparator-seeds \
+            --late-fusion-predictions /tmp/context-stability/predictions.csv \
+            --output /tmp/sepnet-prism-comparator
+
+      - name: Bind source and upstream artifacts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/sepnet-prism-comparator/audit_binding.json')
+          p.write_text(json.dumps({
+            'aggregator_git_head':'${{ github.sha }}',
+            'upstream_training_run_id':33983619816,
+            'upstream_training_head':'2562445014adfd9a18771e98fba284d4eebb824c',
+            'upstream_seed_artifact_digests':{
+              '7':'sha256:616939ae5b1ee9be1eb9e1e1d44c0194cd3793ed3622d43e83338a99585c051d',
+              '13':'sha256:6119b88288cb38c2bec7848d3a293912649dbf46e353b4bff312c52069540065',
+              '26':'sha256:c2ab058b6179f18fe38296ca146467e801efd6deada41f505b9c6f30114be6cc',
+              '42':'sha256:9298153359bfc41622f21cc6d1d1a9afe02b2b3a4333d4bdc1ff27160540df50',
+              '73':'sha256:33bf63ee88abce25ef2dafcea821695dac30a03db73aeb23a6361a4a4e9075a4'
+            },
+            'iris_prediction_run_id':33981729019,
+            'locked_test_accessed':False,
+            'aggregation_only_no_model_refit':True
+          },indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload paired comparator result
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-published-architecture-aggregate-${{ github.sha }}
+          path: /tmp/sepnet-prism-comparator
+          if-no-files-found: error
+          retention-days: 30

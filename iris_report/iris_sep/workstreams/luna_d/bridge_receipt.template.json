@@ -1,0 +1,28 @@
+{
+  "receipt_type": "IRIS_SEP_AARP_HMI_IDENTITY_BRIDGE",
+  "schema_version": "iris-sep-luna-d-identity-bridge-v1",
+  "workstream": "luna_d",
+  "generated_at_utc": null,
+  "parent_contract_id": "iris-sep-sepval-v1",
+  "status": "NOT_RUN",
+  "fusion_allowed": false,
+  "decision": {
+    "accepted_mappings": [],
+    "rejections": [],
+    "test_outcomes_accessed": false
+  },
+  "provenance_basis": {
+    "accepted_mapping_method": "authoritative_crosswalk",
+    "accepted_mapping_provenance_required": true,
+    "authority_row_and_artifact_hash_required": true
+  },
+  "scientific_boundaries": {
+    "date_only_join": "REJECTED",
+    "nearest_timestamp_join": "REJECTED",
+    "numeric_aarp_harp_equality": "REJECTED",
+    "unmatched_rows": "external_only",
+    "aia_pretraining_sep_labels": "forbidden",
+    "locked_test_outcomes_accessed": false
+  },
+  "receipt_sha256": null
+}

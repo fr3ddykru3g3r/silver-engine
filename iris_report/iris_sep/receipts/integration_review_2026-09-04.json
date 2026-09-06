@@ -1,0 +1,32 @@
+{
+  "receipt_type": "IRIS_SEP_LOCAL_INTEGRATION_REVIEW",
+  "generated_at_utc": "2026-09-04T05:47:41Z",
+  "status": "PASS_WITH_GPU_RUNTIME_PENDING",
+  "execution_policy": {
+    "local_first": true,
+    "computer_use_allowed": false,
+    "colab_scope": "measured GPU, memory, runtime, or data-locality constraint only"
+  },
+  "artifacts": {
+    "benchmark_contract": {"path": "config/benchmark_contract.json", "sha256": "0490fca6f6293a7473dda6b57e665b7d4f5f607bff3ee3faf3417476db621af8"},
+    "luna_a_provenance_manifest": {"path": "workstreams/luna_a/provenance_manifest.json", "sha256": "e6db14d2f939f2241dc24ed45e7a495b0bdd922334862a0ebeeb3b2081c1b9d4"},
+    "luna_b_baseline_contract": {"path": "workstreams/luna_b/baseline_contract.json", "sha256": "f68cf8438da45613d71cb0e5256971e745b3bf1c308f1b7b77ea34095cd3fd7f"},
+    "luna_b_source_receipt": {"path": "workstreams/luna_b/source_receipt.json", "sha256": "2c012aaf0b51275cca57b29602c6fa290af226a41b64a6fb6cb3201549cb5499"},
+    "luna_c_model": {"path": "workstreams/luna_c/model.py", "sha256": "c1bae3c784874761e80b8da92a0b2e49f4782fb032648d6383a6fee29d1e955e"},
+    "luna_c_checkpoint": {"path": "workstreams/luna_c/checkpoint.py", "sha256": "de4a2434f702ea0d8bc786f3c2f2571e66cc84801ef589e3f99356a464be819e"},
+    "luna_d_bridge_decision": {"path": "workstreams/luna_d/current_bridge_decision.json", "sha256": "e22b8fa0ee87a4856bb14411bb92c53cbdd2324d5cb601d2acf6f8459c99e8c9"},
+    "luna_d_identity_bridge": {"path": "workstreams/luna_d/identity_bridge.py", "sha256": "0a11cf50f7261ef9fab4ff3cd99c87a9d9fff2ff4433f1b7fb67598e73bde059"},
+    "luna_d_aia_pretraining": {"path": "workstreams/luna_d/aia_pretraining.py", "sha256": "2dfdc6797836caf66a21fcdc287497a7ff1a5ed9175523df12bbd84c85c924d0"}
+  },
+  "verification": {
+    "benchmark_contract": "PASS",
+    "baseline_interface_tests": "7/7 PASS",
+    "existing_flare_contract_tests": "4/4 PASS",
+    "aarp_hmi_and_aia_tests": "14/14 PASS",
+    "luna_c_static_gate": "PASS",
+    "luna_c_pytorch_runtime": "PENDING_LOCAL_PYTORCH_OR_COLAB_T4",
+    "luna_a_sha256_entries": "14/14 PASS",
+    "locked_sep_test_accessed": false
+  },
+  "claim_status": "NO_BENCHMARK_RESULT_AND_NO_BREAKTHROUGH_CLAIM"
+}

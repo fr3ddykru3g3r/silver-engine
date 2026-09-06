@@ -1,0 +1,500 @@
+{
+  "manifest_schema": "iris-sep-luna-a-provenance-v1",
+  "workstream": "Luna A - data and provenance",
+  "retrieved_at_utc": "2026-09-04T05:23:43Z",
+  "scope": "Public metadata and small, non-outcome artifacts for SEP-PRISM/CLEAR, SEPVAL, FetchSEP, and the SEPNET comparison source.",
+  "scientific_lock_boundary": {
+    "status": "preserved",
+    "statement": "No SEPVAL row-level event/non-event files, rolling test table, or forecast outcomes were opened or copied into this workstream. Public release metadata and protocol documentation were inspected only.",
+    "deferred_until_benchmark_contract_freeze": [
+      "SEPVAL event/non-event identities and labels",
+      "CLEAR operational event-list rows and threshold outcomes",
+      "SEPNET rolling_combinded_testing.csv contents",
+      "any locked evaluation predictions or metrics"
+    ]
+  },
+  "records": [
+    {
+      "record_id": "sep_prism_zenodo_v1",
+      "role": "primary_data_foundation_metadata",
+      "source_urls": {
+        "doi": "https://doi.org/10.5281/zenodo.21297635",
+        "record": "https://zenodo.org/records/21297635",
+        "api_record": "https://zenodo.org/api/records/21297635",
+        "companion_paper": "https://arxiv.org/abs/2607.16160",
+        "clear_fetchsep": "https://github.com/ktindiana/fetchsep"
+      },
+      "source_version": {
+        "zenodo_record_id": 21297635,
+        "doi": "10.5281/zenodo.21297635",
+        "concept_doi": "10.5281/zenodo.21297634",
+        "version": "v1",
+        "publication_date": "2026-07-17",
+        "record_modified": "2026-07-20T12:27:55.766366+00:00"
+      },
+      "license": {
+        "id": "CC-BY-4.0",
+        "status": "explicit in Zenodo API metadata",
+        "note": "Use requires attribution to the listed creators and the DOI. Do not infer rights for upstream source products from this record alone."
+      },
+      "coverage_and_schema": {
+        "coverage_utc": "1986-02-03 through 2025-09-10 for analyzed rolling-window tables",
+        "primary_table_path": "Analyzed Data/rolling_combinded_seq_24hours.csv",
+        "primary_table_reported_rows": 14464,
+        "primary_table_reported_columns": 274,
+        "primary_table_reported_size": "approximately 33 MB",
+        "windowing": "fixed rolling 24-hour historical windows paired with the subsequent 24-hour target window; exact epoch anchor and project partition mapping are not specified in the record metadata",
+        "labels": {
+          "operational": "Future_OSEP_label = 1",
+          "general": "Future_GSEP_label = 1",
+          "reported_operational_positive_windows": 650,
+          "reported_general_positive_windows": 2122
+        },
+        "predictor_families": [
+          "SMHARP active-region magnetograms (SHARP extended to 1996 through SMARP)",
+          "flares",
+          "CDAWDONKI and CDAW CME catalog features",
+          "GOES XRS-B soft X-ray data",
+          "GOES >10 MeV proton-flux history"
+        ],
+        "important_unit_note": "The 650 value is a count of labeled rolling windows, not a count of distinct physical SEP events."
+      },
+      "archive_files": [
+        {
+          "path": "SEP-PRISM.zip",
+          "size_bytes": 4881194881,
+          "reported_size": "4.9 GB",
+          "md5": "772fcfb2c0a92c487924a4d48fc5021f",
+          "acquisition_status": "not_downloaded",
+          "reason": "Large archive; the record exposes metadata but no independently downloadable 33 MB primary table endpoint."
+        },
+        {
+          "path": "Analyzed Data/rolling_combinded_seq_24hours.csv",
+          "reported_size": "approximately 33 MB nested inside SEP-PRISM.zip",
+          "acquisition_status": "not_downloaded",
+          "reason": "Do not retrieve the 4.9 GB container merely to extract a small table; acquire through an approved small-artifact or Colab path after the benchmark contract is frozen."
+        },
+        {
+          "path": "Analyzed Data/rolling_combinded_seq_1hours.csv",
+          "reported_size": "approximately 803 MB nested inside SEP-PRISM.zip",
+          "acquisition_status": "not_downloaded",
+          "reason": "Not needed for initial provenance and exceeds the small-artifact scope."
+        },
+        {
+          "path": "Processed Data/SMHARP.csv",
+          "reported_size": "approximately 1.9 GB nested inside SEP-PRISM.zip",
+          "acquisition_status": "not_downloaded",
+          "reason": "Large processed source; not needed for initial provenance."
+        }
+      ],
+      "downloaded_metadata_artifact": {
+        "relative_path": "zenodo_21297635_record.json",
+        "source_url": "https://zenodo.org/api/records/21297635",
+        "sha256": "72e96eba21e8a1edc561a768e80e5005c917f0218a95d6108e93545074b56601",
+        "note": "Exact API response retrieved at retrieved_at_utc; hash is an immutable receipt for this retrieval, not a substitute for hashing the nested ML table."
+      }
+    },
+    {
+      "record_id": "clear_benchmark_v2",
+      "role": "authoritative_event_catalog_and_definition_metadata",
+      "source_urls": {
+        "landing_page": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/",
+        "benchmark_page": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/benchmark.php",
+        "documentation_pdf": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/clear_data/documentation/CLEAR_Benchmark_Dataset_V2_0_Documentation.pdf",
+        "operational_list": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/clear_data/core_lists/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv",
+        "energy_bin_list": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/clear_data/core_lists/GOES_differential_energy_bin_calibrated_PRIMARY.2010-08-02.2017-09-20_sep_events.csv",
+        "sep_list_package": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/clear_data/packages/CLEARBenchmarkDataset_v2.0_SEPonly_20260311.zip",
+        "fetchsep_repository": "https://github.com/ktindiana/fetchsep",
+        "fetchsep_release": "https://github.com/ktindiana/fetchsep/releases/tag/CLEAR_Benchmark_v2.0"
+      },
+      "source_version": {
+        "clear_version": "v2.0",
+        "documentation_date": "2026-03-11",
+        "hosting": "NASA CCMC; product of the CLEAR Space Weather Center of Excellence at University of Michigan and NASA JSC SRAG",
+        "generator": "FetchSEP idsep/opsep at CLEAR_Benchmark_v2.0 (commit recorded below)"
+      },
+      "license": {
+        "status": "not stated on the NASA CCMC benchmark page or downloaded documentation as retrieved",
+        "note": "Do not infer a license for CLEAR files; retain source attribution and verify redistribution terms before packaging rows."
+      },
+      "event_definition_and_schema_notes": {
+        "operational_list": {
+          "native_flux": "GOES integral primary flux as provided by NOAA; background-identified fluxes are set to zero",
+          "coverage": "GOES-06 through GOES-19, January 1986 through September 2025",
+          "reported_event_periods_by_definition": {
+            ">10 MeV at 10 pfu": 263,
+            ">10 MeV above background": 532,
+            ">100 MeV at 1 pfu": 88,
+            ">100 MeV above background": 162,
+            ">30 MeV at 1 pfu": 257,
+            ">30 MeV above background": 353,
+            ">50 MeV at 1 pfu": 160,
+            ">50 MeV above background": 290
+          }
+        },
+        "energy_bin_calibrated_list": "GOES differential fluxes background-subtracted and cross-calibrated using Sandberg et al. (2014) and Bruno (2017); intended for scientific/dosimetry use, not the operational primary list.",
+        "row_fields_documented": [
+          "experiment and native flux type",
+          "analyzed period start/end",
+          "relative flux time-series and SEP Scoreboard JSON paths",
+          "threshold-specific SEP start/end, duration, onset peak/time, maximum flux/time, rise time, fluence and quality flags",
+          "flare, active-region, radio, CDAW CME, DONKI CME, ACE, GLE, PRF and association fields"
+        ],
+        "time_semantics": {
+          "threshold_start": ">10 MeV at 10 pfu start requires three consecutive points above threshold",
+          "threshold_end": "last point below threshold or end of analyzed period if interrupted",
+          "onset_peak": "automatically identified experimental product; may be absent when the fitting quality is insufficient",
+          "quality_flags": "I interrupted, G large gap, T timing affected by gap, E already-enhanced environment, S likely erroneous spike"
+        },
+        "caution": "CLEAR page documentation distinguishes threshold event periods from above-background event periods; do not use the 532 overall event-period count as the operational >10 MeV/10 pfu target count."
+      },
+      "downloaded_documentation_artifact": {
+        "relative_path": "CLEAR_Benchmark_Dataset_V2_0_Documentation.pdf",
+        "source_url": "https://ccmc.gsfc.nasa.gov/swxcoe/clear/clear_data/documentation/CLEAR_Benchmark_Dataset_V2_0_Documentation.pdf",
+        "content_length_bytes": 219455,
+        "sha256": "f40da3a4b2892c5ea464b305557be6d82f1843751cb0567fa5f3d30adda3f055",
+        "retrieved_content_type": "application/pdf",
+        "server_last_modified": "2026-04-15T23:08:51Z"
+      },
+      "row_acquisition_status": "withheld",
+      "row_acquisition_reason": "The core CLEAR CSVs contain event outcomes and are reserved for the locked benchmark path; only documentation and public file metadata were acquired in this workstream."
+    },
+    {
+      "record_id": "sepval_2023_v2",
+      "role": "locked_historical_comparison_benchmark_metadata",
+      "source_urls": {
+        "doi": "https://doi.org/10.5281/zenodo.15555244",
+        "record": "https://zenodo.org/records/15555244",
+        "api_record": "https://zenodo.org/api/records/15555244",
+        "rules_pdf": "https://zenodo.org/api/records/15555244/files/SEPVAL2023_RulesofParticipation_v4.pdf/content",
+        "workshop_page": "https://ccmc.gsfc.nasa.gov/community-workshops/ccmc-sepval-2023/",
+        "challenge_page": "https://ccmc.gsfc.nasa.gov/challenges/sep/"
+      },
+      "source_version": {
+        "zenodo_record_id": 15555244,
+        "doi": "10.5281/zenodo.15555244",
+        "concept_doi": "10.5281/zenodo.15020584",
+        "version": "SEPVAL2023v2",
+        "publication_date": "2025-05-30",
+        "creator": "Whitman, Kathryn"
+      },
+      "license": {
+        "id": "CC-BY-4.0",
+        "status": "explicit in Zenodo API metadata"
+      },
+      "protocol_and_schema_notes": {
+        "rules_pdf_version": "SEPVAL Challenge Events and Rules of Participation, v4",
+        "rules_pdf_statement": "The rules document describes 30 SEP events selected between 2011-2023 and 33 non-event periods selected between 2012-2023; both sets span Solar Cycles 24 and 25 and include difficult flare/CME-associated quiet periods.",
+        "inputs_and_triggers": "Flare X-ray information, active region, M2M/CDAW/CACTUS CME parameters, DONKI links, and proton-response context are supplied with the challenge lists.",
+        "regular_cadence_issue_window": "Start 24 hours before flare peak and continue until SEP peak, or until 14 hours after flare peak for a non-event.",
+        "causal_rule": "Use only inputs/triggers available before the observed quantity; flare peak and CME start/eruption times are the relevant trigger times.",
+        "issue_time_rule": "Estimate issue time from the last input used plus model processing time; for M2M CME parameters use the latest last-SOHO/last-STEREO image timestamp plus 15 minutes before adding computation time.",
+        "output_format": "CCMC SEP Scoreboard JSON; include last-input and trigger timestamps, input identities, and a training-inclusion Boolean.",
+        "event_fields": [
+          ">10, >100, >30 and >50 MeV start and peak times",
+          "flare and active-region fields",
+          "CME parameters and catalog links",
+          "quiet-period proton response description"
+        ]
+      },
+      "known_source_discrepancy": {
+        "status": "unresolved and must be resolved from the frozen raw files before evaluation",
+        "zenodo_description_and_sepnets_paper_claim": "33 SEP events and 30 non-event/quiet periods",
+        "rules_pdf_claim": "30 SEP events and 33 non-event periods",
+        "action": "Do not assume either count; freeze exact file hashes, row counts, and event identity mapping in the benchmark contract after the primary agent authorizes label access."
+      },
+      "files_metadata_only": [
+        {
+          "path": "GOES_SEPVAL2023_prep20250114_withinterp.zip",
+          "size_bytes": 143059716,
+          "md5": "5673fc6cb28ae81f1d82c4ce8f720675",
+          "status": "withheld_large_and_contains_observations"
+        },
+        {
+          "path": "SEPVAL2023_RulesofParticipation_v4.pdf",
+          "size_bytes": 2352857,
+          "md5": "27b5ee47f426247099add06ff831756d",
+          "status": "downloaded_small_protocol_artifact"
+        },
+        {
+          "path": "SEPVAL2023_RulesofParticipation_v4.pptx",
+          "size_bytes": 4191381,
+          "md5": "987fb29d2e4b81af79c2c4076ebd85a6",
+          "status": "not_downloaded"
+        },
+        {
+          "path": "SEPValidationChallengePhaseIII_NonEvents_v4.xlsx",
+          "size_bytes": 14703,
+          "md5": "55cea168b4a18732c5991adcbe6203a2",
+          "status": "withheld_locked_identities_and_outcomes"
+        },
+        {
+          "path": "SEPValidationChallengePhaseIII_NonEvents_v4.csv",
+          "size_bytes": 16062,
+          "md5": "e7705c86b2171e8c8238827b05cc1469",
+          "status": "withheld_locked_identities_and_outcomes"
+        },
+        {
+          "path": "SEPValidationChallengePhaseIII_SEPevents_v5.xlsx",
+          "size_bytes": 18040,
+          "md5": "cf0ac584ad135ce0afe250ce72f27e20",
+          "status": "withheld_locked_identities_and_outcomes"
+        },
+        {
+          "path": "SEPValidationChallengePhaseIII_SEPevents_v5.csv",
+          "size_bytes": 24098,
+          "md5": "36f48ec9069759aaf927e321d298833f",
+          "status": "withheld_locked_identities_and_outcomes"
+        }
+      ],
+      "downloaded_metadata_artifacts": [
+        {
+          "relative_path": "zenodo_15555244_sepval_record.json",
+          "source_url": "https://zenodo.org/api/records/15555244",
+          "sha256": "0debfc45eaac3c6094bdf27e832e3a0de6ad4caedd63228f09f04160ec9df19d"
+        },
+        {
+          "relative_path": "SEPVAL2023_RulesofParticipation_v4.pdf",
+          "source_url": "https://zenodo.org/api/records/15555244/files/SEPVAL2023_RulesofParticipation_v4.pdf/content",
+          "size_bytes": 2352857,
+          "md5": "27b5ee47f426247099add06ff831756d",
+          "sha256": "72454fbfba16fa87abdf2b911e79c9887ab5aca9276a81e045a8751521406515"
+        }
+      ]
+    },
+    {
+      "record_id": "fetchsep_clear_v2",
+      "role": "authoritative_event_detection_and_output_schema_source",
+      "source_urls": {
+        "repository": "https://github.com/ktindiana/fetchsep",
+        "release": "https://github.com/ktindiana/fetchsep/releases/tag/CLEAR_Benchmark_v2.0",
+        "pinned_raw_root": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/",
+        "documentation": "https://fetchsep.readthedocs.io/"
+      },
+      "source_version": {
+        "tag": "CLEAR_Benchmark_v2.0",
+        "commit": "db4ffe391941a4fefc4aa8b272c456397ecf34b0",
+        "commit_date": "2026-03-12T13:13:50-05:00",
+        "commit_subject": "Fix bug in paths output to SEP lists",
+        "package_version_in_setup_py": "0.3.1",
+        "main_branch_at_retrieval": "5dfd463e3702f6a260e609a2bde5ef845480ba17"
+      },
+      "license": {
+        "id": "MIT",
+        "status": "explicit in repository LICENSE",
+        "attribution": "Kathryn Whitman, copyright 2023"
+      },
+      "algorithm_and_schema_notes": {
+        "idsep": "Estimates mean background and sigma over a time series; points above mean + 3 sigma are treated as enhancements by default, with configurable windows.",
+        "opsep": "Analyzes individual events and applies operational definitions >10 MeV at 10 pfu and >100 MeV at 1 pfu by default; supports additional thresholds and background-derived thresholds.",
+        "time_type": "Python datetime/pandas timestamps; public examples and CLEAR lists use ISO-like UTC timestamps.",
+        "output": "CSV event summaries plus CCMC SEP Scoreboard JSON; JSON can include issue time, model metadata, triggers, prediction windows, energy channel, species, location, peak intensity/time, event length, threshold crossings, all-clear, and profile paths.",
+        "quality_note": "The CLEAR documentation marks onset peak as an experimental, automatically identified field; treat onset target quality separately from operational threshold labels."
+      },
+      "downloaded_source_artifacts": [
+        {
+          "relative_path": "sources/fetchsep_v2/setup.py",
+          "source_url": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/setup.py",
+          "size_bytes": 1863,
+          "sha256": "2c1dfb810cd8dd306db444ad81852e94268c006efa1147422da74638e259078f"
+        },
+        {
+          "relative_path": "sources/fetchsep_v2/README.rst",
+          "source_url": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/README.rst",
+          "size_bytes": 23069,
+          "sha256": "bb5e9298f1af65ab6855d36f52396287b3a44a86524b3b582e1b87d98a73b2a9"
+        },
+        {
+          "relative_path": "sources/fetchsep_v2/LICENSE",
+          "source_url": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/LICENSE",
+          "size_bytes": 1074,
+          "sha256": "08f8de86fb884701741f8be955b764208b24bcc71649fcbf8b20f24c70825034"
+        },
+        {
+          "relative_path": "sources/fetchsep_v2/opsep.py",
+          "source_url": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/fetchsep/opsep/opsep.py",
+          "size_bytes": 155657,
+          "sha256": "fe2557c4cc75efeb748febe7834226442c19f90e0ef1da71164abe710995f5d4"
+        },
+        {
+          "relative_path": "sources/fetchsep_v2/idsep.py",
+          "source_url": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/fetchsep/idsep/idsep.py",
+          "size_bytes": 33209,
+          "sha256": "d94817a3947d468a6bee925cd15dabc11644dfbd81cba6d4adda17b2a59a7b03"
+        },
+        {
+          "relative_path": "sources/fetchsep_v2/model_example.json",
+          "source_url": "https://raw.githubusercontent.com/ktindiana/fetchsep/db4ffe391941a4fefc4aa8b272c456397ecf34b0/fetchsep/json/templates/model_example.json",
+          "size_bytes": 2987,
+          "sha256": "aa21f4e09146baaa184b9858f9a2666f7caac2d5494464be6eb050a6b365d8fe",
+          "note": "Template schema only; example values are not project labels or evaluation outcomes."
+        }
+      ]
+    },
+    {
+      "record_id": "sepnet_v1_comparison_source",
+      "role": "required_published_comparison_code_and_input_metadata",
+      "source_urls": {
+        "repository": "https://github.com/yuyian/SEP-Prediction",
+        "release": "https://github.com/yuyian/SEP-Prediction/releases/tag/v1.0",
+        "paper": "https://doi.org/10.1029/2026JH001247",
+        "arxiv": "https://arxiv.org/abs/2512.12786",
+        "pinned_raw_root": "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/"
+      },
+      "source_version": {
+        "tag": "v1.0",
+        "commit": "f9cff73adfa41c4fbffc73a8693c529d39e80995",
+        "commit_date": "2025-12-12T07:44:29-05:00",
+        "repository_head_at_retrieval": "d0eb54e46b7dd6c760325e123d2ad86f9420fbff"
+      },
+      "license": {
+        "status": "no LICENSE file or explicit license declaration observed in the v1.0 repository root",
+        "note": "The paper says code and data are available and may be built upon, but this is not a substitute for a formal repository license. Preserve attribution and do not redistribute without checking rights."
+      },
+      "comparison_contract_notes": {
+        "documented_inputs": [
+          "flare features",
+          "CME features",
+          "SHARP magnetic parameters",
+          "SEPVAL event/non-event files"
+        ],
+        "documented_outputs": "SEPNET multitask model and classical baseline notebooks; exact reproduction requires matching preprocessing, split definitions, normalization, and threshold calibration from the pinned source.",
+        "paper_boundary": "The paper describes SEPVAL as 33 SEP and 30 non-SEP periods, which conflicts with the v4 rules PDF; retain both claims as provenance notes until raw-file freeze."
+      },
+      "tree_metadata_without_row_access": [
+        {
+          "path": "data/SEPValidationChallengePhaseIII_NonEvents_v4.csv",
+          "size_bytes": 16062,
+          "git_blob_sha1": "b795c6b7e407d5ec9597c03c0cd551e9a0fdbb02",
+          "status": "withheld_locked_identities_and_outcomes"
+        },
+        {
+          "path": "data/SEPValidationChallengePhaseIII_SEPevents_v5.csv",
+          "size_bytes": 21644,
+          "git_blob_sha1": "ea18caa33c6176ef16f1640689d452c4ade4484a",
+          "status": "withheld_locked_identities_and_outcomes"
+        },
+        {
+          "path": "data/rolling_combinded_testing.csv",
+          "size_bytes": 75532,
+          "git_blob_sha1": "458495c85055cfc80b17c287b63c173b32d9b057",
+          "status": "withheld_locked_outcomes"
+        },
+        {
+          "path": "data/rolling_combinded_training.csv",
+          "size_bytes": 8765416,
+          "git_blob_sha1": "c15511d9409f523807d2a701183b776ea3917cc9",
+          "status": "metadata_only; inspect after contract freeze if needed"
+        },
+        {
+          "path": "data/rolling_combinded.csv",
+          "size_bytes": 8838032,
+          "git_blob_sha1": "82cf23dc789e70d8185dd6c69bb6b3bd7692f77b",
+          "status": "metadata_only; provenance source"
+        },
+        {
+          "path": "data/df_CME.csv",
+          "size_bytes": 1320269,
+          "git_blob_sha1": "3174aab2433c89d68db2658e5b1dae9b07cf7f1d",
+          "status": "metadata_only; provenance source"
+        },
+        {
+          "path": "data/df_flare.csv",
+          "size_bytes": 7836849,
+          "git_blob_sha1": "58e358277aa0d0712ee9a4b0971db5ca0936b23f",
+          "status": "metadata_only; provenance source"
+        },
+        {
+          "path": "data/df_SEP.csv",
+          "size_bytes": 1880098,
+          "git_blob_sha1": "dc1ea7a18c2b06034a144f656d76f4dcd5e85674",
+          "status": "metadata_only; provenance source"
+        }
+      ],
+      "downloaded_source_artifacts": [
+        {
+          "relative_path": "sources/sepnets_v1/multitask_model.py",
+          "source_url": "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/multitask_model.py",
+          "size_bytes": 14364,
+          "sha256": "087a110719d499f88570ae356fbd128dd7c7435a644195b2e8ce2187404db7b4"
+        },
+        {
+          "relative_path": "sources/sepnets_v1/Data-Construct.R",
+          "source_url": "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/Data-Construct.R",
+          "size_bytes": 18789,
+          "sha256": "ef2c3c9a58939e2c8df3bda9f54a3050132619339e52b39c0885597354806369"
+        },
+        {
+          "relative_path": "sources/sepnets_v1/README.md",
+          "source_url": "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/README.md",
+          "size_bytes": 3762,
+          "sha256": "11739f6133885f9e898f1e686cb23bcb5e6e81b382fffafa53fa4274da57c008"
+        }
+      ]
+    }
+  ],
+  "alternate_acquisition_leads": [
+    {
+      "source": "https://github.com/yuyian/SEP-Prediction-V2",
+      "pinned_commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+      "status": "filtered Git tree and LFS pointer metadata only; no data blob checked out",
+      "primary_table": {
+        "path": "Data/rolling_combinded_seq_24hours.csv",
+        "lfs_oid_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+        "size_bytes": 34861986
+      },
+      "clear_operational_list_pointer": {
+        "path": "GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv",
+        "lfs_oid_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+        "size_bytes": 1632454
+      },
+      "pointer_receipt": {
+        "relative_path": "sepnets_prism_v2_lfs_pointers.txt",
+        "sha256": "b9f6c37bb84f6f4bcc527038726dbf6af1dfc6f96d418f30587a630a6e3f0af1"
+      },
+      "use": "Candidate route to retrieve the roughly 35 MB model-ready table without downloading the 4.9 GB Zenodo container; verify repository/data licensing and exact provenance before adoption."
+    }
+  ],
+  "open_issues_for_primary_agent": [
+    {
+      "issue": "SEPVAL event-count disagreement",
+      "severity": "high",
+      "evidence": "SEPVAL Zenodo metadata and the SEPNET paper state 33 SEP/30 quiet; the authoritative v4 rules PDF states 30 SEP/33 quiet.",
+      "required_action": "Freeze exact raw file hashes and row counts after benchmark contract approval; do not use prose counts to build a split."
+    },
+    {
+      "issue": "SEP-PRISM table hash unavailable",
+      "severity": "medium",
+      "evidence": "Zenodo v1 exposes only the 4,881,194,881-byte SEP-PRISM.zip with an MD5; the 14,464 x 274 table is nested and not separately exposed in the record API.",
+      "required_action": "Acquire the 33 MB analyzed table through an approved path, then hash the exact extracted file and record archive-to-file provenance."
+    },
+    {
+      "issue": "CLEAR redistribution terms not explicit",
+      "severity": "medium",
+      "evidence": "NASA CCMC CLEAR page and v2 documentation do not state a machine-readable license in the retrieved sources.",
+      "required_action": "Keep attribution and source URLs in the package; verify redistribution permission before including CLEAR rows in a public ZIP."
+    },
+    {
+      "issue": "SEPNET repository license not explicit",
+      "severity": "medium",
+      "evidence": "Pinned v1.0 repository root has no LICENSE file or license declaration observed.",
+      "required_action": "Use as a comparison reference with attribution; request/verify reuse terms before redistributing source or data."
+    },
+    {
+      "issue": "Forecast issue-time reproducibility",
+      "severity": "medium",
+      "evidence": "SEPVAL rules require last-input timestamps plus processing latency and include trigger/input identities in JSON.",
+      "required_action": "Make issue-time and source-publication latency explicit in the frozen IRIS benchmark contract and receipts."
+    }
+  ],
+  "verification_summary": {
+    "downloaded_files_hashed": 13,
+    "metadata_only_files_hashed": 1,
+    "zenodo_sep_prism_archive_downloaded": false,
+    "sepval_event_rows_accessed": false,
+    "clear_event_rows_accessed": false,
+    "sepnets_testing_rows_accessed": false,
+    "user_jsoc_email_present": false,
+    "notes": "All downloaded artifacts are confined to this Luna A workstream directory."
+  }
+}

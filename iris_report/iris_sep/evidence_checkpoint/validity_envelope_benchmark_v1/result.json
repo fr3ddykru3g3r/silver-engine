@@ -1,0 +1,512 @@
+{
+  "scope": "SYNTHETIC_SOFTWARE_VALIDITY_BENCHMARK_NOT_SEP_SKILL",
+  "seed": 20260905,
+  "trials": 10000,
+  "fault_types": [
+    "none",
+    "stale",
+    "future_publication",
+    "critical_missing",
+    "optional_missing",
+    "schema",
+    "evidence",
+    "model_binding",
+    "uncertainty"
+  ],
+  "iris_status_accuracy": 1.0,
+  "iris_unsafe_valid_outputs": 0,
+  "iris_unsafe_valid_rate_on_injected_invalid_inputs": 0.0,
+  "unguarded_serializer_unsafe_valid_outputs": 7830,
+  "unguarded_serializer_unsafe_valid_rate_on_injected_invalid_inputs": 1.0,
+  "counts": {
+    "none": {
+      "trials": 1087,
+      "correct": 1087,
+      "unsafe_valid": 0
+    },
+    "stale": {
+      "trials": 1097,
+      "correct": 1097,
+      "unsafe_valid": 0
+    },
+    "future_publication": {
+      "trials": 1118,
+      "correct": 1118,
+      "unsafe_valid": 0
+    },
+    "critical_missing": {
+      "trials": 1137,
+      "correct": 1137,
+      "unsafe_valid": 0
+    },
+    "optional_missing": {
+      "trials": 1083,
+      "correct": 1083,
+      "unsafe_valid": 0
+    },
+    "schema": {
+      "trials": 1104,
+      "correct": 1104,
+      "unsafe_valid": 0
+    },
+    "evidence": {
+      "trials": 1138,
+      "correct": 1138,
+      "unsafe_valid": 0
+    },
+    "model_binding": {
+      "trials": 1137,
+      "correct": 1137,
+      "unsafe_valid": 0
+    },
+    "uncertainty": {
+      "trials": 1099,
+      "correct": 1099,
+      "unsafe_valid": 0
+    }
+  },
+  "sample_receipts": [
+    {
+      "trial": 0,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 1,
+      "fault": "optional_missing",
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "trial": 2,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 3,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 4,
+      "fault": "none",
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "trial": 5,
+      "fault": "model_binding",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH"
+      ]
+    },
+    {
+      "trial": 6,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 7,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 8,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 9,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 10,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 11,
+      "fault": "optional_missing",
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "trial": 12,
+      "fault": "none",
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "trial": 13,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 14,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 15,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 16,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 17,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 18,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 19,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 20,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 21,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 22,
+      "fault": "stale",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 23,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 24,
+      "fault": "evidence",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "trial": 25,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 26,
+      "fault": "schema",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "trial": 27,
+      "fault": "none",
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "trial": 28,
+      "fault": "optional_missing",
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "trial": 29,
+      "fault": "schema",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "trial": 30,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 31,
+      "fault": "schema",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "trial": 32,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 33,
+      "fault": "optional_missing",
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "trial": 34,
+      "fault": "none",
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "trial": 35,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 36,
+      "fault": "stale",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 37,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 38,
+      "fault": "model_binding",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH"
+      ]
+    },
+    {
+      "trial": 39,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 40,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 41,
+      "fault": "stale",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 42,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 43,
+      "fault": "uncertainty",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "trial": 44,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 45,
+      "fault": "optional_missing",
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "trial": 46,
+      "fault": "critical_missing",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "trial": 47,
+      "fault": "future_publication",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "trial": 48,
+      "fault": "model_binding",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH"
+      ]
+    },
+    {
+      "trial": 49,
+      "fault": "stale",
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_TOO_STALE"
+      ]
+    }
+  ],
+  "locked_test_accessed": false,
+  "scientific_superiority_established": false,
+  "claim_boundary": "Tests contract enforcement against a defined no-validation wrapper; it is not a comparison with a named SEP competitor."
+}

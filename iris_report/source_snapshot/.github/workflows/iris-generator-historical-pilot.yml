@@ -1,0 +1,96 @@
+name: IRIS Historical Generator Four-Arm Pilot
+
+on:
+  push:
+    branches: [iris-generator-historical]
+    paths:
+      - 'iris-model/train_generator.py'
+      - 'iris-model/evaluate_generator.py'
+      - 'iris-model/data.py'
+      - '.github/workflows/iris-generator-historical-pilot.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  train:
+    strategy:
+      fail-fast: false
+      matrix:
+        condition: [base, hj, pil, hj_pil]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-generator-historical
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+      - name: Compile model code
+        run: python -m compileall -q iris-model
+      - name: Train matched generator arm
+        run: |
+          python iris-model/train_generator.py \
+            --evidence-dir evidence \
+            --cache-dir cache/${{ matrix.condition }} \
+            --out-dir generator_outputs \
+            --condition ${{ matrix.condition }} \
+            --seed 2026 \
+            --batch-size 8 \
+            --epochs 50 \
+            --max-steps 800 \
+            --lr 2e-4 \
+            --lambda-hj 0.05 \
+            --lambda-pil 0.05 \
+            --diffusion-steps 200 \
+            --base-channels 32 \
+            --positive-fraction 0.40 \
+            --per-group 4 \
+            --positive-slots 4 \
+            --download-workers 8 \
+            --physics-max-t-frac 0.25
+      - name: Sample equal synthetic positives
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint generator_outputs/${{ matrix.condition }}/generator.pt \
+            --evidence-dir evidence \
+            --out-dir samples/${{ matrix.condition }} \
+            --per-group 2 \
+            --batch-size 8 \
+            --sampling-steps 30 \
+            --seed 2026 \
+            --max-groups 125
+      - name: Validate physical distributions
+        run: |
+          python iris-model/evaluate_generator.py \
+            --evidence-dir evidence \
+            --cache-dir cache/${{ matrix.condition }}/train \
+            --synthetic-manifest samples/${{ matrix.condition }}/synthetic_manifest.csv \
+            --out-dir physics_eval/${{ matrix.condition }} \
+            --real-per-group 4 \
+            --seed 2026
+      - name: Package arm
+        run: |
+          tar -czf iris-generator-${{ matrix.condition }}-pilot.tar.gz \
+            generator_outputs/${{ matrix.condition }} samples/${{ matrix.condition }} physics_eval/${{ matrix.condition }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-generator-${{ matrix.condition }}-pilot
+          path: iris-generator-${{ matrix.condition }}-pilot.tar.gz
+          retention-days: 30

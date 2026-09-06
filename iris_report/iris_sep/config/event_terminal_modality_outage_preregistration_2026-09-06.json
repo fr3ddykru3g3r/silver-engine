@@ -1,0 +1,101 @@
+{
+  "status": "PREREGISTERED_BEFORE_EVENT_TERMINAL_OUTAGE_RESULT_CAPABLE_CODE",
+  "scope": "DEVELOPMENT_ONLY_ALREADY_INSPECTED_SCORE_EVENT_STRATIFIED_AGGREGATE_INTERFACE",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "motivation": "The earlier label-blind daily modality-outage benchmark completed successfully but all nine affected score subsets contained zero positives. This separately preregistered extension is explicitly motivated by that observed support failure and is not presented as part of the original frozen experiment.",
+  "purpose": "Directly measure event-day detection and quiet-control false-alert behavior when the terminal forecast issue occurs after 24, 72 or 168 hours without XRS, proton or both aggregate input families, using the already-frozen promoted forecast and all existing simple recovery arms.",
+  "model": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+  "model_frozen_before_outage": true,
+  "score_role_already_inspected": true,
+  "prior_daily_outage_results_inspected": true,
+  "locked_test_accessed": false,
+  "monitor_used": false,
+  "interface_semantics": {
+    "source": "same hash-pinned released SEP-Prediction-V2 daily model-ready table used by the audited daily outage benchmark",
+    "one_issue_row": "one UTC daily forecast-input cycle summarizing the preceding 24 hours",
+    "event_terminal_interpretation": "At each selected terminal issue row, the tested modality has been unavailable for the declared preceding duration. Only values finite at the released aggregate interface are deliberately hidden; pre-existing unavailable cells remain unavailable.",
+    "not_claimed": "raw five-minute sensor-stream outage, native-sensor reconstruction truth or high-cadence causal reaggregation"
+  },
+  "modalities": ["XRS", "PROTON", "XRS_AND_PROTON"],
+  "durations": [
+    {"hours": 24, "daily_cycles": 1},
+    {"hours": 72, "daily_cycles": 3},
+    {"hours": 168, "daily_cycles": 7}
+  ],
+  "event_row_selection": {
+    "rule": "Use every score-role issue row with target label 1 for which the source clock contains the required preceding daily duration and at least one finite released aggregate-interface cell exists in the tested modality at the terminal row.",
+    "uses_model_predictions": false,
+    "uses_labels": true,
+    "reason_labels_are_allowed": "This is an explicitly event-stratified stress test intended to measure positive-case robustness, not a deployable outage selection policy.",
+    "post_result_repick": false,
+    "identity_reporting": "Report count and SHA256 of the ordered terminal issue-time list; do not hide unsupported positive rows."
+  },
+  "quiet_control_selection": {
+    "ratio": "1 unique quiet terminal row per selected positive terminal row when available",
+    "candidate_rule": "score-role label 0, at least 8 UTC days from every score-role positive issue time, required preceding daily source-clock duration exists, and at least one finite released aggregate-interface cell exists in the tested modality at the terminal row",
+    "matching_rule": "For each positive in chronological order choose the unused candidate with smallest absolute time distance; break ties by earlier issue time. Prefer same calendar year; if no same-year candidate exists use the global candidate set.",
+    "uses_model_predictions": false,
+    "post_result_repick": false
+  },
+  "recovery_arms": [
+    "MASK_AWARE_NO_FILL",
+    "TRAIN_FIT_MEDIAN",
+    "CAUSAL_FORWARD_FILL"
+  ],
+  "recovery_semantics": {
+    "MASK_AWARE_NO_FILL": "Hide eligible terminal-row modality cells and expose the model's existing missing-input handling; do not create values.",
+    "TRAIN_FIT_MEDIAN": "Replace only deliberately hidden terminal-row cells with per-feature medians fitted on the fit role before the score period.",
+    "CAUSAL_FORWARD_FILL": "For each deliberately hidden terminal-row cell use the most recent finite released aggregate value strictly before the declared outage start; never read inside the outage interval or after the forecast issue. If none exists, leave unresolved.",
+    "preexisting_unavailable_cells": "Never convert to deliberately observed truth and never count as reconstruction targets."
+  },
+  "fit_policy": {
+    "retrain_after_outage": false,
+    "recalibrate_after_outage": false,
+    "rethreshold_after_outage": false,
+    "fit_recovery_statistics_on_score_rows": false,
+    "meta_weights_from_outage_rows": false
+  },
+  "threshold_policies": {
+    "benchmark_primary": "MAX_TSS",
+    "secondary_reliability": "POD80_MIN_FAR",
+    "selection_data": "existing dedicated threshold role only",
+    "policy_reconciliation": "architecture/THRESHOLD_POLICY_RECONCILIATION_2026-09-06.md"
+  },
+  "required_reporting_per_scenario_arm": [
+    "eligible_positive_terminal_rows",
+    "positive_terminal_identity_sha256",
+    "quiet_control_terminal_rows",
+    "quiet_control_identity_sha256",
+    "hidden_terminal_cells",
+    "unresolved_hidden_cells",
+    "event_probability_mean_reference",
+    "event_probability_mean_candidate",
+    "event_probability_absolute_drift",
+    "event_probability_signed_delta",
+    "event_TP_FN_POD_under_each_declared_threshold",
+    "quiet_control_FP_TN_FPR_FAR_under_each_declared_threshold",
+    "combined_event_plus_quiet_metrics",
+    "whole_score_metrics",
+    "whole_score_delta_from_clean",
+    "paired_uncertainty_where_identifiable"
+  ],
+  "handling_policies": [
+    "ALWAYS_EXPOSE_NORMAL",
+    "EXPOSE_DEGRADED_ON_DECLARED_OUTAGE",
+    "ABSTAIN_ON_DECLARED_OUTAGE"
+  ],
+  "handling_accounting": "Abstained positive terminal rows must remain in the denominator and count as missed positives for full-cohort decision accounting. DEGRADED changes status only, not probability or threshold.",
+  "primary_questions": [
+    "Does any recovery arm preserve event-terminal probability and POD better than the alternatives as outage duration grows?",
+    "What false-alert cost appears on matched quiet controls?",
+    "At what modality/duration does reconstruction cease to justify NORMAL exposure and require DEGRADED or ABSTAIN?"
+  ],
+  "selection_rule": "Report every modality x duration x recovery arm x declared threshold policy. Do not select a favorable arm or duration after inspecting outcomes.",
+  "software_gate_before_data_execution": {
+    "required": true,
+    "preregistration_must_be_git_ancestor_of_result_capable_runner": true,
+    "dedicated_source_tests": true,
+    "independent_recomputation_of_saved_metrics": true
+  },
+  "claim_boundary": "Post-hoc-motivated but prospectively preregistered development stress test on already-inspected score identities. It may quantify event-bearing aggregate-interface outage sensitivity but cannot establish raw-sensor reconstruction accuracy, untouched final robustness, operational certification, company superiority, economic savings or locked-test performance."
+}

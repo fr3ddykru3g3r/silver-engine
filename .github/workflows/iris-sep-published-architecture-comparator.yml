@@ -1,0 +1,143 @@
+name: IRIS-SEP published-architecture comparator
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/sepnet_prism_architecture_comparator_preregistration_2026-09-05.json'
+      - 'iris_report/iris_sep/tools/run_sepnet_prism_architecture_seed.py'
+      - 'iris_report/iris_sep/tools/aggregate_sepnet_prism_architecture_comparator.py'
+      - '.github/workflows/iris-sep-published-architecture-comparator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  seed:
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [7, 13, 26, 42, 73]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install frozen comparator dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
+          python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Compile comparator source
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/tools/run_sepnet_prism_architecture_seed.py \
+            iris_report/iris_sep/tools/aggregate_sepnet_prism_architecture_comparator.py
+
+      - name: Acquire hash-pinned public inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Train released architecture seed ${{ matrix.seed }}
+        run: |
+          python -m iris_report.iris_sep.tools.run_sepnet_prism_architecture_seed \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --seed '${{ matrix.seed }}' \
+            --output '/tmp/sepnet-prism-seed-${{ matrix.seed }}'
+
+      - name: Upload seed evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sepnet-prism-seed-${{ matrix.seed }}-${{ github.sha }}
+          path: /tmp/sepnet-prism-seed-${{ matrix.seed }}
+          if-no-files-found: warn
+          retention-days: 30
+
+  aggregate:
+    needs: seed
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install aggregation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Download five comparator seeds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: sepnet-prism-seed-*-${{ github.sha }}
+          path: /tmp/comparator-seeds
+
+      - name: Download frozen late-fusion development predictions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/context-stability
+          gh run download 33981729019 \
+            --repo '${{ github.repository }}' \
+            --name 'iris-sep-context-stability-88711650ac88430e540770af294d0b583f554f9e' \
+            --dir /tmp/context-stability
+          test -f /tmp/context-stability/predictions.csv
+
+      - name: Aggregate and run paired same-row comparison
+        run: |
+          python -m iris_report.iris_sep.tools.aggregate_sepnet_prism_architecture_comparator \
+            --seed-root /tmp/comparator-seeds \
+            --late-fusion-predictions /tmp/context-stability/predictions.csv \
+            --output /tmp/sepnet-prism-comparator
+
+      - name: Record runtime
+        run: |
+          python - <<'PY'
+          import json, platform
+          import numpy, pandas, sklearn, xgboost
+          from pathlib import Path
+          Path('/tmp/sepnet-prism-comparator/runtime.json').write_text(json.dumps({
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'locked_test_accessed': False,
+          }, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload paired comparator result
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-published-architecture-comparator-${{ github.sha }}
+          path: /tmp/sepnet-prism-comparator
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,41 @@
+{
+  "status": "PREREGISTERED_BEFORE_TWO_STATE_SCORE",
+  "scope": "DEVELOPMENT_ONLY_ARCHITECTURE_DIAGNOSTIC",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "architecture": {
+    "name": "IRIS_TWO_STATE_CROSSFIT_STACK_V1",
+    "principle": "Represent one explicit causal state transition per specialist; keep the successful cross-fitted evidence fusion unchanged.",
+    "specialists": ["solar", "xrs", "proton"],
+    "state_features": {
+      "current": "current 24-hour aggregate vector",
+      "previous": "nearest aggregate vector ending 24 hours earlier, tolerance +/-3 hours, strictly earlier only",
+      "delta": "current minus previous for features finite in both states",
+      "provenance": ["lag24_available", "lag_age_hours"],
+      "missing_lag": "leave previous/delta as NaN for XGBoost native missing handling; do not impute a synthetic state"
+    },
+    "expert_model": "same frozen five-seed XGBoost recipe as static specialists",
+    "inner_crossfit": "same four expanding outer-fit folds as IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+    "meta_model": "same PositiveEvidenceStack equation and hyperparameters as IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+    "calibration": "one logit intercept on calibration role only",
+    "threshold": "MAX_TSS and POD80_MIN_FAR on threshold role only"
+  },
+  "comparators": [
+    "BASE_SOLAR_STATIC",
+    "LATE_FUSION_STATIC",
+    "IRIS_CROSSFIT_EVIDENCE_STACK_V1_STATIC"
+  ],
+  "why_this_is_bounded": [
+    "No LSTM",
+    "No Transformer",
+    "No diffusion model",
+    "No architecture width/depth search",
+    "No XGBoost hyperparameter change",
+    "Exactly one temporal lag and one deterministic delta"
+  ],
+  "metrics": ["TSS", "HSS", "POD", "FPR", "FAR", "BRIER", "BRIER_SKILL", "ECE", "AUPRC", "AUROC"],
+  "matched_detection_pod": [0.6, 0.7, 0.8, 0.9],
+  "paired_bootstrap": {"replicates": 10000, "unit": "complete SEP episode / predeclared quiet block"},
+  "promotion_rule": "Promote two-state specialists only if operational POD80_MIN_FAR TSS is not materially worse on the older score block, improves the 2023-2025 monitor point estimate, and does not materially degrade Brier/ECE or matched-detection FAR. Otherwise retain the static cross-fitted stack and stop architecture expansion until richer verified observations exist.",
+  "claim_rule": "All score/monitor evidence is already-inspected development evidence. No external or final superiority claim is permitted from this diagnostic."
+}

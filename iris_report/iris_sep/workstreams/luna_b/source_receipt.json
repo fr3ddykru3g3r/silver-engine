@@ -1,0 +1,114 @@
+{
+  "receipt_type": "IRIS_SEP_LUNA_B_SOURCE_REVIEW",
+  "schema_version": "1.0",
+  "reviewed_at_utc": "2026-09-04T00:00:00Z",
+  "reviewer": "Luna B",
+  "locked_test_boundary": {
+    "iris_sep_locked_test_accessed": false,
+    "iris_sep_locked_test_outcomes_accessed": false,
+    "iris_sep_locked_test_predictions_accessed": false,
+    "historical_public_notebook_outputs_used_as_IRIS_results": false
+  },
+  "sources": [
+    {
+      "id": "sep_prediction_v1",
+      "url": "https://github.com/yuyian/SEP-Prediction",
+      "release_url": "https://github.com/yuyian/SEP-Prediction/releases/tag/v1.0",
+      "commit_sha1": "f9cff73adfa41c4fbffc73a8693c529d39e80995",
+      "raw_files_reviewed": [
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/README.md",
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/Data-Construct.R",
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/multitask_model.py",
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction/f9cff73adfa41c4fbffc73a8693c529d39e80995/OtherGeneralModels_SEPVAL.ipynb"
+      ],
+      "verified_observations": [
+        "V1 README reports Python 3.12 and R 4.5.1.",
+        "V1 data construction uses fixed non-overlapping 24-hour predictor windows and the immediately following 24-hour forecast window.",
+        "V1 feature groups include SHARP, flare summary, and DONKI CME summary fields.",
+        "V1 classical notebook uses elastic-net logistic, SVM, random forest, and XGBoost with a hard 0.5 cutoff.",
+        "V1 model source defines a 256-128-64-16 shared dense representation and an LSTM/Transformer sequence variant.",
+        "V1 threshold selection code scans candidate thresholds and chooses by validation HSS; the notebook classical cells do not follow that safer policy."
+      ],
+      "reproducibility_defects_or_limits": [
+        "Several V1 random states are unset.",
+        "The historical classical evaluation supplies regression truth as if it were a regression prediction for a classifier, producing invalid perfect regression diagnostics.",
+        "The legacy SEPVAL window construction does not supply the IRIS connected-region/complete-episode disjoint and 24-hour purge guarantees.",
+        "A source-code review is not a local rerun; a Colab receipt is required before calling the reproduction executed."
+      ]
+    },
+    {
+      "id": "sep_prediction_v2",
+      "url": "https://github.com/yuyian/SEP-Prediction-V2",
+      "commit_url": "https://github.com/yuyian/SEP-Prediction-V2/commit/e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+      "commit_sha1": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+      "raw_files_reviewed": [
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/README.md",
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Pycode/Main_Operational_SEP.py",
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Pycode/multitask_model.py",
+        "https://raw.githubusercontent.com/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Pycode/split_helpers.py"
+      ],
+      "verified_observations": [
+        "V2 documents a CLEAR/PRISM pipeline and a CLEAR event file through 2025-09-10.",
+        "V2 operational runner adds proton-flux and XRS targets and uses explicit seed sweeps in its public configuration.",
+        "V2 public configuration contains a random_iid split option; it is reference code, not the IRIS split contract.",
+        "V2 classification-only evaluation code documents that regression predictions must be absent/NaN rather than copied from regression truth."
+      ],
+      "reproducibility_limits": [
+        "V2's split and operational choices require explicit override for IRIS chronological episode-disjoint purged partitions.",
+        "The current IRIS cohort/partition hashes are intentionally unfilled here until the primary agent's freeze receipts exist."
+      ]
+    },
+    {
+      "id": "sepnet_paper",
+      "url": "https://arxiv.org/html/2512.12786",
+      "version": "2512.12786v3",
+      "verified_observations": [
+        "The paper describes CLEAR/FetchSEP, SHARP, GOES XRS/flare, and DONKI CME sources.",
+        "The paper describes 24-hour non-overlapping predictor/forecast windows and train-only scaling.",
+        "The paper describes an operational threshold re-optimization for SEPNET-O using operational labels in a training/validation pool.",
+        "The paper reports both a five-repeat split description and aggregate results over 50 seeds in different sections; this is retained as a discrepancy."
+      ]
+    },
+    {
+      "id": "ccmc_sepnet_v1",
+      "url": "https://ccmc.gsfc.nasa.gov/models/SEPNET~1/",
+      "page_state_date": "2026-09-04",
+      "verified_observations": [
+        "The live contract describes a next-24-hour >10 MeV, >10 pfu probability forecast.",
+        "The live inputs are preceding-24-hour HMI SHARP near-real-time and SWPC flare-list context with timeliness caveats.",
+        "The described outputs include probability, symmetric uncertainty, and an all-clear flag; peak flux and time of peak are not listed.",
+        "Public prose uses >10 pfu notation; the IRIS parent contract uses >=10 pfu, so the authoritative label receipt must resolve the boundary before scoring."
+      ]
+    },
+    {
+      "id": "fetchsep_clear",
+      "url": "https://github.com/ktindiana/fetchsep/releases/tag/CLEAR_Benchmark_v1.0",
+      "commit_sha1": "9edc492567854d8fbf6ba0251be3659f48e88a20",
+      "verified_observations": [
+        "The pinned release is the CLEAR Benchmark v1.0 event-definition reference.",
+        "The public FetchSEP documentation distinguishes general SEP identification from operational definitions, including >10 MeV 10 pfu and >100 MeV 1 pfu thresholds."
+      ]
+    },
+    {
+      "id": "sep_prism_clear_dataset",
+      "url": "https://zenodo.org/records/21297635",
+      "role": "future_primary_cohort_source",
+      "review_note": "The parent data/provenance workstream owns file acquisition, schema verification, and cohort hashing. Luna B did not download or inspect locked outcomes."
+    }
+  ],
+  "run_state": {
+    "local_clone": "NOT_RUN",
+    "colab_run": "NOT_RUN",
+    "classical_baseline_predictions": "NOT_GENERATED",
+    "locked_test_evaluation": "NOT_ALLOWED_IN_THIS_WORKSTREAM",
+    "next_required_receipts": [
+      "source_manifest_sha256",
+      "cohort_manifest_sha256",
+      "partition_manifest_sha256",
+      "feature_manifest_sha256",
+      "configuration_sha256",
+      "environment_manifest_sha256",
+      "prediction_file_sha256"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "decision": "SELECT_V3_FOR_DEVELOPMENT_ONLY",
+  "locked_test_accessed": false,
+  "rejected_candidates": [
+    {
+      "manifest": "sepnet_v1_development_manifest.json",
+      "manifest_sha256": "1c4642bbda02892cac59b4d5038b7194e3e32e245044a9149dcc0778eec12cff",
+      "output_sha256": "6afb2d6d332c3c7ac5e42eba0e1bb0736bccc57014b170493e0ae56a8b9c2882",
+      "reason": "Calibration contained only 11 positive windows. Rejected from cohort adequacy before model-performance comparison."
+    },
+    {
+      "manifest": "sepnet_v1_development_v2_manifest.json",
+      "manifest_sha256": "a471f47106bd8d874d73a5f95ec97f04f2f9b108f237273e9c96630110d8cb6a",
+      "output_sha256": "d20aa88acbbc49b669460c2c6aba5d942662743c26edef863de7e3d9cb298402",
+      "reason": "Adjacent roles could begin exactly at the prior role's inclusive 24-hour forecast endpoint. Superseded after independent leakage audit."
+    }
+  ],
+  "scope": "PUBLISHER_TRAINING_SPLIT_ONLY_LEGACY_TARGET",
+  "selected_candidate": {
+    "manifest": "sepnet_v1_development_v3_manifest.json",
+    "manifest_sha256": "18c10d4fc76a2ce5e03b9a271951003f274435aa00180fcb90e4f2947eedaebb",
+    "output_sha256": "ab2bef52a80ebce5c27d2312f031b410843b3fa8e6b351d07a02f3e0ded010ef",
+    "selection_rule": "Chronological 70/10/10/10 positive-episode quotas with a gap strictly beyond the inclusive 24-hour target endpoint",
+    "purged_units": 2,
+    "role_positive_windows": {
+      "train": 1318,
+      "validation_monitor": 112,
+      "validation_calibration": 65,
+      "validation_threshold": 192
+    }
+  },
+  "status": "DEVELOPMENT_ONLY_NOT_FINAL_BENCHMARK",
+  "target_semantics": "PUBLISHER_LEGACY_FUTURE_OPERATIONAL_WINDOW_LABEL_NOT_AUDITED_NEW_CROSSING",
+  "forbidden_claims": [
+    "SEPVAL_SCORE",
+    "FINAL_NEW_CROSSING_SCORE",
+    "BREAKTHROUGH",
+    "OPERATIONAL_CERTIFICATION"
+  ]
+}

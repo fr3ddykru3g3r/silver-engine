@@ -1,0 +1,92 @@
+name: IRIS-SEP threshold robustness diagnostic
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/threshold_robustness_preregistration_2026-09-05.json'
+      - 'iris_report/iris_sep/tools/run_threshold_robustness_diagnostic.py'
+      - '.github/workflows/iris-sep-threshold-robustness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install bounded dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Compile frozen threshold diagnostic
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/tools/run_threshold_robustness_diagnostic.py \
+            iris_report/iris_sep/tools/run_late_fusion_rolling_replication.py \
+            iris_report/iris_sep/tools/run_context_stability_diagnostic.py \
+            iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py \
+            iris_report/iris_sep/tools/run_public_new_crossing_benchmark_v2.py
+
+      - name: Acquire hash-pinned public inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run frozen threshold robustness diagnostic
+        run: |
+          python -m iris_report.iris_sep.tools.run_threshold_robustness_diagnostic \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-threshold-robustness
+
+      - name: Record runtime
+        if: always()
+        run: |
+          mkdir -p /tmp/iris-threshold-robustness
+          python - <<'PY'
+          import json, platform
+          from pathlib import Path
+          import numpy, pandas, sklearn, xgboost
+          receipt = {
+              'scope': 'DEVELOPMENT_ONLY_PREMONITOR_THRESHOLD_ROBUSTNESS',
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'monitor_rows_accessed': False,
+              'locked_test_accessed': False,
+          }
+          Path('/tmp/iris-threshold-robustness/runtime.json').write_text(json.dumps(receipt, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload threshold diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-threshold-robustness-${{ github.sha }}
+          path: /tmp/iris-threshold-robustness
+          if-no-files-found: error
+          retention-days: 30

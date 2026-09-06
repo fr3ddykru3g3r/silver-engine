@@ -1,0 +1,139 @@
+name: IRIS-SEP public NEW-crossing missingness benchmark
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/tools/build_public_new_crossing_missingness_package.py'
+      - 'iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py'
+      - 'iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py'
+      - 'iris_report/iris_sep/src/iris_sep/missingness_experiment.py'
+      - 'iris_report/iris_sep/src/iris_sep/missingness_recovery.py'
+      - '.github/workflows/iris-sep-public-missingness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  missingness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install frozen dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.18.1 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Unit test and compile frozen missingness path
+        run: |
+          python -m unittest \
+            iris_report.iris_sep.tests.test_fixed_forecast_benchmark \
+            iris_report.iris_sep.tests.test_missingness_experiment \
+            iris_report.iris_sep.tests.test_missingness_forecast_tool \
+            iris_report.iris_sep.tests.test_missingness_recovery -v
+          python -m py_compile \
+            iris_report/iris_sep/tools/build_public_new_crossing_missingness_package.py \
+            iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py \
+            iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py \
+            iris_report/iris_sep/src/iris_sep/missingness_experiment.py \
+            iris_report/iris_sep/src/iris_sep/missingness_recovery.py
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/iris-public-input/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/iris-public-input/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/iris-public-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/iris-public-input/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/iris-public-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Build and validate train-only NEW-crossing package
+        run: |
+          mkdir -p /tmp/iris-public-missingness
+          python -m iris_report.iris_sep.tools.build_public_new_crossing_missingness_package \
+            --features /tmp/iris-public-input/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/iris-public-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-public-missingness/package
+
+      - name: Run preregistered artificial outage levels
+        run: |
+          for FRACTION in 0.05 0.20 0.40; do
+            TAG=$(echo "$FRACTION" | tr '.' '_')
+            python -m iris_report.iris_sep.tools.run_missingness_forecast_benchmark \
+              --package /tmp/iris-public-missingness/package/package.npz \
+              --metadata /tmp/iris-public-missingness/package/metadata.json \
+              --output "/tmp/iris-public-missingness/missingness_${TAG}" \
+              --missing-fraction "$FRACTION" \
+              --seed 20260906
+          done
+
+      - name: Aggregate receipts without selecting on outcome
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/iris-public-missingness')
+          root.mkdir(parents=True, exist_ok=True)
+          out = {
+              'scope': 'DEVELOPMENT_ONLY_PUBLIC_NEW_CROSSING_SYNTHETIC_OUTAGE',
+              'fractions_predeclared': [0.05, 0.20, 0.40],
+              'seed': 20260906,
+              'selection_on_result': False,
+              'locked_test_accessed': False,
+              'runs': {},
+          }
+          for tag in ('0_05', '0_20', '0_40'):
+              path = root / f'missingness_{tag}' / 'receipt.json'
+              out['runs'][tag] = json.loads(path.read_text()) if path.exists() else None
+          package = root / 'package' / 'package_receipt.json'
+          out['package'] = json.loads(package.read_text()) if package.exists() else None
+          (root / 'aggregate.json').write_text(json.dumps(out, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Bind runtime and source
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, platform
+          from pathlib import Path
+          import numpy, pandas, scipy, sklearn, xgboost
+          root = Path('/tmp/iris-public-missingness')
+          root.mkdir(parents=True, exist_ok=True)
+          receipt = {
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scipy': scipy.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'upstream_sep_prism_commit': 'e138dcd72c1952a00e11e1a0b025337f9e7c93fb',
+              'locked_test_accessed': False,
+              'development_only': True,
+          }
+          (root / 'runtime.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Upload immutable development result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-public-missingness-${{ github.sha }}
+          path: /tmp/iris-public-missingness
+          if-no-files-found: error
+          retention-days: 30

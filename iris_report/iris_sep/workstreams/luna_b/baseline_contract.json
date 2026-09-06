@@ -1,0 +1,318 @@
+{
+  "schema_version": "1.0",
+  "receipt_type": "IRIS_SEP_BASELINE_CONTRACT",
+  "workstream": "luna_b",
+  "created_at_utc": "2026-09-04T00:00:00Z",
+  "status": "SPECIFIED_NOT_RUN",
+  "scope": {
+    "purpose": "Predeclare same-cohort classical and SEPNET/SEPNET-O comparison interfaces before any locked evaluation",
+    "authoritative_parent_contract": "../../config/benchmark_contract.json",
+    "locked_test_access": "PROHIBITED_DURING_TUNING",
+    "test_outcomes_viewed_by_this_workstream": false,
+    "test_predictions_viewed_by_this_workstream": false,
+    "claims_permitted": [
+      "public_source_contract_observation",
+      "baseline_interface_specification",
+      "reproduction_discrepancy"
+    ],
+    "claims_not_permitted": [
+      "IRIS_BREAKTHROUGH",
+      "LOCKED_TEST_SCORE",
+      "IMPROVEMENT_OVER_SEPNET_O",
+      "PUBLIC_SEPNET_REPRODUCED_UNLESS_RECEIPTED"
+    ]
+  },
+  "source_pins": [
+    {
+      "id": "sep_prediction_v1",
+      "repository": "https://github.com/yuyian/SEP-Prediction",
+      "version": "v1.0",
+      "commit_sha1": "f9cff73adfa41c4fbffc73a8693c529d39e80995",
+      "release_url": "https://github.com/yuyian/SEP-Prediction/releases/tag/v1.0",
+      "commit_url": "https://github.com/yuyian/SEP-Prediction/commit/f9cff73adfa41c4fbffc73a8693c529d39e80995",
+      "archive_url": "https://zenodo.org/records/19007072",
+      "role": "legacy_training_and_baseline_reference"
+    },
+    {
+      "id": "sep_prediction_v2",
+      "repository": "https://github.com/yuyian/SEP-Prediction-V2",
+      "commit_sha1": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+      "commit_url": "https://github.com/yuyian/SEP-Prediction-V2/commit/e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+      "role": "current_public_prism_operational_reference"
+    },
+    {
+      "id": "sepnet_paper",
+      "url": "https://arxiv.org/html/2512.12786",
+      "version": "2512.12786v3",
+      "role": "primary_paper_protocol_reference"
+    },
+    {
+      "id": "ccmc_sepnet_v1",
+      "url": "https://ccmc.gsfc.nasa.gov/models/SEPNET~1/",
+      "page_state_date": "2026-09-04",
+      "role": "live_input_output_contract"
+    },
+    {
+      "id": "fetchsep_clear",
+      "repository": "https://github.com/ktindiana/fetchsep",
+      "release": "CLEAR_Benchmark_v1.0",
+      "commit_sha1": "9edc492567854d8fbf6ba0251be3659f48e88a20",
+      "release_url": "https://github.com/ktindiana/fetchsep/releases/tag/CLEAR_Benchmark_v1.0",
+      "commit_url": "https://github.com/ktindiana/fetchsep/commit/9edc492567854d8fbf6ba0251be3659f48e88a20",
+      "role": "event_definition_reference"
+    },
+    {
+      "id": "sep_prism_clear_dataset",
+      "url": "https://zenodo.org/records/21297635",
+      "role": "future_primary_cohort_source"
+    },
+    {
+      "id": "ccmc_sep_assessment",
+      "url": "https://ccmc.gsfc.nasa.gov/assessment/topics/SEP/campaign2020/data_sets.php",
+      "role": "public_benchmark_context"
+    }
+  ],
+  "forecast_contract": {
+    "issue_cadence_hours": 1,
+    "horizon_hours": 24,
+    "primary_target": "new_sep_10mev_10pfu_within_24h",
+    "primary_energy_threshold_mev": 10,
+    "primary_flux_threshold_pfu": 10,
+    "public_notation_boundary_note": "Public SEPNET/CLEAR prose may say >10 pfu while the IRIS parent contract declares >=10 pfu; resolve from the authoritative label receipt before scoring.",
+    "new_crossing_only": true,
+    "rows_already_above_primary_threshold_at_issue": "exclude_or_explicitly_separate_before_model_fit",
+    "secondary_targets": [
+      "new_sep_100mev_1pfu_within_24h",
+      "log_peak_proton_flux",
+      "time_to_onset"
+    ],
+    "input_cutoff": "issue_timestamp_after_declared_source_publication_latency",
+    "future_feature_policy": "reject"
+  },
+  "partition_contract": {
+    "roles": [
+      "train",
+      "validation_monitor",
+      "validation_calibration",
+      "validation_threshold",
+      "locked_test"
+    ],
+    "method": "chronological_connected_region_and_complete_episode_disjoint",
+    "purge_hours": 24,
+    "complete_sep_episode_stays_in_one_partition": true,
+    "tuning_allowed_roles": [
+      "train",
+      "validation_monitor",
+      "validation_calibration",
+      "validation_threshold"
+    ],
+    "tuning_locked_test_rows_allowed": false,
+    "tuning_locked_test_labels_allowed": false,
+    "tuning_locked_test_predictions_allowed": false,
+    "required_parent_receipts": [
+      "cohort_manifest_sha256",
+      "partition_manifest_sha256",
+      "feature_manifest_sha256"
+    ],
+    "hash_placeholders_until_parent_freeze": {
+      "cohort_manifest_sha256": null,
+      "partition_manifest_sha256": null,
+      "feature_manifest_sha256": null
+    }
+  },
+  "preprocessing_contract": {
+    "imputation_fit_role": "train",
+    "scaler_fit_role": "train",
+    "feature_selection_fit_role": "train",
+    "dimensionality_reduction_fit_role": "train",
+    "validation_calibration_role": "validation_calibration",
+    "validation_threshold_role": "validation_threshold",
+    "missing_value_indicators": "preserve_if_declared_in_feature_manifest",
+    "feature_snapshot_must_be_causal": true,
+    "test_rows_may_influence_preprocessing": false
+  },
+  "seed_policy": {
+    "seeds": [7, 13, 26, 42, 73],
+    "seed_count": 5,
+    "random_state_must_be_explicit": true,
+    "deterministic_baseline_repeats_are_audit_only": true
+  },
+  "calibration_and_threshold": {
+    "probabilities_must_be_retained": true,
+    "calibration_fit_role": "validation_calibration",
+    "calibration_method": "predeclared_before_test; temperature_or_intercept_only_for_logit_based_outputs",
+    "threshold_fit_role": "validation_threshold",
+    "threshold_objective": "TSS_or_predeclared_operational_policy",
+    "threshold_ties": "lowest_threshold_then_stable_seed_order",
+    "test_threshold_refit": false,
+    "test_calibration_refit": false
+  },
+  "required_baselines": [
+    {
+      "name": "climatology",
+      "kind": "constant_probability",
+      "fit": "training prevalence of primary target only",
+      "features": [],
+      "hyperparameters": {},
+      "threshold_policy": "report_degenerate_curve; any operating point must be predeclared and validation-only"
+    },
+    {
+      "name": "persistence",
+      "kind": "causal_last_state",
+      "fit": "none",
+      "features": ["last_observed_primary_threshold_state_before_issue"],
+      "hyperparameters": {},
+      "threshold_policy": "fixed_semantics_or_validation-only; never use future state",
+      "note": "With already-above rows excluded from a new-crossing target, a degenerate all-clear result is possible and must be reported rather than repaired by changing labels."
+    },
+    {
+      "name": "elastic_net_logistic_regression",
+      "kind": "binary_classifier",
+      "fit": "train",
+      "features": ["frozen_causal_sep_prism_feature_matrix"],
+      "hyperparameters": {
+        "penalty": "elasticnet",
+        "l1_ratio": 0.5,
+        "solver": "saga",
+        "C": 1.0,
+        "max_iter": 10000,
+        "class_weight": null,
+        "random_state": "run_seed"
+      },
+      "threshold_policy": "validation_threshold_role",
+      "source_reference": "SEP-Prediction v1 OtherGeneralModels_SEPVAL.ipynb"
+    },
+    {
+      "name": "xgboost",
+      "kind": "binary_classifier",
+      "fit": "train",
+      "features": ["frozen_causal_sep_prism_feature_matrix"],
+      "hyperparameters": {
+        "objective": "binary:logistic",
+        "n_estimators": 100,
+        "max_depth": 6,
+        "learning_rate": 0.1,
+        "eval_metric": "logloss",
+        "random_state": "run_seed",
+        "eval_set": null,
+        "early_stopping_rounds": null
+      },
+      "threshold_policy": "validation_threshold_role",
+      "source_reference": "SEP-Prediction v1 OtherGeneralModels_SEPVAL.ipynb"
+    },
+    {
+      "name": "sepnet_published",
+      "kind": "external_or_reproduced_model_adapter",
+      "fit": "none_if_public_endpoint_or_frozen_weights; otherwise NOT_RUN",
+      "features": [
+        "preceding_24h_hmi_sharp_after_latency",
+        "preceding_24h_swpc_flare_list_after_latency"
+      ],
+      "hyperparameters": {},
+      "outputs": [
+        "p_sep_10mev_10pfu",
+        "symmetric_uncertainty",
+        "all_clear_flag"
+      ],
+      "threshold_policy": "do_not_copy_from_paper; validation-only if an operating point is required",
+      "source_reference": "NASA CCMC SEPNET v1 page",
+      "missing_artifact_policy": "mark_NOT_RUN_and_preserve_gap"
+    },
+    {
+      "name": "sepnet_o_recalibrated",
+      "kind": "reproduced_general_target_plus_operational_threshold",
+      "fit": "general_sep_training_rows_only",
+      "features": [
+        "public_sepnet_v1_input_contract_or_archived_equivalent"
+      ],
+      "hyperparameters": {
+        "threshold_target": "operational_sep_label",
+        "threshold_fit_role": "validation_threshold",
+        "calibration_fit_role": "validation_calibration"
+      },
+      "threshold_policy": "maximize_predeclared_validation_TSS_or_operational_policy",
+      "source_reference": "SEPNet paper and SEP-Prediction v1",
+      "missing_artifact_policy": "mark_NOT_REPRODUCED_and_do_not_use_as_gate_comparator"
+    },
+    {
+      "name": "hmi_flare_expert_only",
+      "kind": "ablation_baseline",
+      "fit": "train",
+      "features": ["hmi_image_or_flare_expert_inputs_declared_by_parent_manifest"],
+      "hyperparameters": {
+        "all_non_hmi_modalities": "disabled"
+      },
+      "threshold_policy": "validation_threshold_role"
+    }
+  ],
+  "optional_historical_baselines": [
+    {
+      "name": "svm",
+      "kind": "SVC",
+      "source_hyperparameters": {
+        "probability": true,
+        "random_state": "run_seed"
+      }
+    },
+    {
+      "name": "random_forest",
+      "kind": "RandomForestClassifier",
+      "source_hyperparameters": {
+        "n_estimators": 100,
+        "random_state": "run_seed"
+      }
+    }
+  ],
+  "feature_groups": {
+    "magnetic": ["causal_24h_sharp_smarp_sequence"],
+    "eruption": ["causal_flare_history", "causal_goes_xrs_history", "causal_cme_features"],
+    "particle_context": ["causal_pre_event_proton_flux_history"],
+    "aia": {
+      "classical_baselines": "disabled",
+      "allowed_only_after_exact_unambiguous_aarp_hmi_bridge": true,
+      "approximate_date_or_nearest_timestamp_join": "reject"
+    }
+  },
+  "prediction_schema": {
+    "required_columns": [
+      "row_id",
+      "issue_time_utc",
+      "partition",
+      "model_name",
+      "seed",
+      "p_sep_10mev_10pfu",
+      "threshold_used"
+    ],
+    "probability_range": [0.0, 1.0],
+    "row_id_must_be_unique_within_model_seed": true,
+    "labels_are_stored_separately_from_prediction_frame": true,
+    "locked_test_prediction_file_must_be_hashed": true
+  },
+  "metric_schema": {
+    "threshold_free": ["AUROC", "AUPRC", "Brier", "Brier_skill_score", "calibration_error"],
+    "thresholded": ["TSS", "HSS", "POD", "FPR", "FAR", "warning_lead_time", "missed_event_severity"],
+    "primary": "TSS",
+    "paired_bootstrap_unit": "complete_sep_episode_or_quiet_block",
+    "paired_bootstrap_replicates": 10000,
+    "paired_interval": "95%",
+    "breakthrough_claim_requires": [
+      "higher_median_TSS_than_sepnet_o_recalibrated",
+      "paired_TSS_difference_interval_lower_bound_gt_0",
+      "lower_false_alarm_ratio_at_matched_detection",
+      "no_material_calibration_degradation",
+      "no_material_warning_lead_time_degradation",
+      "identical_frozen_cohort",
+      "all_data_contract_audits_pass"
+    ]
+  },
+  "receipt_placeholders": {
+    "source_manifest_sha256": null,
+    "cohort_manifest_sha256": null,
+    "partition_manifest_sha256": null,
+    "feature_manifest_sha256": null,
+    "configuration_sha256": null,
+    "prediction_file_sha256": null,
+    "environment_manifest_sha256": null,
+    "run_status": "NOT_RUN"
+  }
+}
