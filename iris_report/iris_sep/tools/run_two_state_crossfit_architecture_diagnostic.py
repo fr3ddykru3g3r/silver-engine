@@ -94,9 +94,9 @@ def load_static_predictions(path: Path, frame: pd.DataFrame, y: np.ndarray, role
     if not np.array_equal(static["label"].to_numpy(dtype=int), y): raise ValueError("static comparator label mismatch")
     if not np.array_equal(static["role"].astype(str).to_numpy(), roles.astype(str)): raise ValueError("static comparator role mismatch")
     if not np.array_equal(static["unit_id"].fillna("").astype(str).to_numpy(), units.astype(str)): raise ValueError("static comparator unit mismatch")
-    left = pd.to_datetime(static["issue_time"], utc=True).astype("int64").to_numpy()
-    right = pd.to_datetime(frame["window_end"], utc=True).astype("int64").to_numpy()
-    if not np.array_equal(left, right): raise ValueError("static comparator issue-time mismatch")
+    left = pd.DatetimeIndex(pd.to_datetime(static["issue_time"], utc=True, errors="raise"))
+    right = pd.DatetimeIndex(pd.to_datetime(frame["window_end"], utc=True, errors="raise"))
+    if not left.equals(right): raise ValueError("static comparator issue-time mismatch")
     missing = [name for name in STATIC_COMPARATORS if name not in static.columns]
     if missing: raise ValueError(f"static comparator columns missing: {missing}")
     return {name: static[name].to_numpy(dtype=float) for name in STATIC_COMPARATORS}
