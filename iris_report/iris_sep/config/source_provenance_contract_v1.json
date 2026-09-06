@@ -1,0 +1,93 @@
+{
+  "contract_id": "iris-sep-source-provenance-v1",
+  "status": "FAIL_CLOSED_PENDING_ROW_CELL_LINEAGE",
+  "pinned_upstream": {
+    "repository": "yuyian/SEP-Prediction-V2",
+    "commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb"
+  },
+  "allowed_states": [
+    "NATIVE_OBSERVED",
+    "ALTERNATE_SOURCE_OBSERVED",
+    "RECONSTRUCTED_CAUSAL",
+    "RECONSTRUCTED_NONCAUSAL_OR_RETROSPECTIVE",
+    "STRUCTURAL_UNAVAILABLE",
+    "UNKNOWN"
+  ],
+  "rules": {
+    "finite_implies_native_observed": false,
+    "unknown_implies_observed": false,
+    "unknown_implies_missing": false,
+    "native_truth_metric_requires_native_or_causally_declared_truth": true,
+    "publication_time_must_not_exceed_issue_time_for_causal_use": true,
+    "fit_interval_must_not_extend_beyond_allowed_development_information_for_prospective_claim": true,
+    "future_nearest_interpolation_is_causal": false,
+    "full_overlap_fit_backcast_is_prospective_native_observation": false
+  },
+  "families": {
+    "XRS": {
+      "aggregate_state": "UNKNOWN",
+      "known_upstream": [
+        "Rcode/Dataset_Preprocessing/XRay-rsb_Impute.R"
+      ],
+      "known_operations": [
+        "sub_5_min_to_5_min_bin_mean",
+        "explicit_5_min_grid_with_missing_bins_retained"
+      ],
+      "unresolved": [
+        "complete_downstream_daily_aggregation_lineage",
+        "publication_latency",
+        "cell_level_native_origin"
+      ]
+    },
+    "PROTON": {
+      "aggregate_state": "UNKNOWN",
+      "known_upstream": [
+        "Rcode/Dataset_Preprocessing/GOES-HAPI-proton-flux_fusion.R",
+        "Rcode/Dataset_Preprocessing/OMNI-HAPI-proton-flux_fusion.R"
+      ],
+      "known_operations": [
+        "linear_interpolation_of_HAPI_gaps",
+        "linear_interpolation_of_OMNI_gaps",
+        "OMNI_to_HAPI_linear_model_fit_on_overlap",
+        "pre_HAPI_backcast_from_overlap_fit",
+        "HAPI_gap_fill_from_OMNI_mapping"
+      ],
+      "known_retrospective_risk": true,
+      "unresolved": [
+        "daily_table_preservation_of_HAPI_from_OMNI",
+        "publication_latency",
+        "cell_level_origin"
+      ]
+    },
+    "MAGNETIC_SHARP_SMARP": {
+      "aggregate_state": "UNKNOWN",
+      "known_upstream": [
+        "Rcode/Dataset_Preprocessing/sharp-smarp_fusion.R"
+      ],
+      "known_operations": [
+        "nearest_time_feature_imputation_within_active_region",
+        "96_min_overlap_alignment",
+        "stepwise_SHARP_from_SMARP_regression_fit_on_overlap",
+        "pre_SHARP_backcast_from_overlap_fit"
+      ],
+      "known_retrospective_risk": true,
+      "unresolved": [
+        "daily_table_preservation_of_From_SMARP",
+        "publication_latency",
+        "cell_level_origin"
+      ]
+    },
+    "BASE_SOLAR_OTHER": {
+      "aggregate_state": "UNKNOWN",
+      "known_retrospective_risk": null,
+      "unresolved": [
+        "source_family_inventory",
+        "observation_time",
+        "publication_time",
+        "reconstruction_origin",
+        "preprocessing_fit_interval"
+      ]
+    }
+  },
+  "claim_boundary": "Existing development scores remain retrospective performance on the released aggregate dataset. Strict prospective forecast-time causality and native-sensor reconstruction claims remain blocked until lineage is demonstrated."
+}
