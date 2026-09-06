@@ -1,10 +1,15 @@
 """Preregisterable daily forecast-input modality outage benchmark.
 
-The model-ready SEPNET-PRISM table contains one UTC issue row per day, each
-summarizing the preceding 24 hours. Therefore a 24/72/168-hour outage on this
-*forecast-input interface* is represented by 1/3/7 consecutive daily issue
-cycles. This is deliberately distinct from a raw 5-minute instrument-stream
+The model-ready SEP-Prediction-V2 table contains one UTC issue row per day,
+each summarizing the preceding 24 hours. Therefore a 24/72/168-hour outage on
+this *forecast-input interface* is represented by 1/3/7 consecutive daily issue
+cycles. This is deliberately distinct from a raw five-minute instrument-stream
 outage, which requires upstream reaggregation and is not claimed here.
+
+Important provenance boundary: this runner perturbs finite cells in the released
+aggregate interface. It does not claim that every finite source cell is a native
+sensor observation. Upstream retrospective interpolation/harmonization is
+recorded by ``config/source_provenance_contract_v1.json``.
 """
 from __future__ import annotations
 
@@ -27,6 +32,7 @@ from iris_report.iris_sep.tools import run_promoted_stack_missingness_transfer a
 
 
 PREREG = "config/daily_modality_outage_preregistration_2026-09-06.json"
+PROVENANCE_CONTRACT = "config/source_provenance_contract_v1.json"
 DURATION_HOURS = (24, 72, 168)
 DURATION_DAYS = {24: 1, 72: 3, 168: 7}
 MODALITIES = ("XRS", "PROTON", "XRS_AND_PROTON")
@@ -63,19 +69,19 @@ def _contiguous_daily_starts(
     lower: pd.Timestamp,
     upper: pd.Timestamp,
 ) -> list[pd.Timestamp]:
+    """Return admissible daily starts without depending on datetime storage unit."""
     if duration_days <= 0:
         raise ValueError("duration_days must be positive")
-    times = pd.Series(source_times).reset_index(drop=True)
+    times = pd.Series(pd.to_datetime(source_times, utc=True, errors="raise")).reset_index(drop=True)
     times = times[(times >= lower) & (times <= upper)].reset_index(drop=True)
     if len(times) < duration_days:
         raise ValueError("source clock too short for daily outage")
-    ns = times.astype("int64").to_numpy(dtype=np.int64)
-    day_ns = int(DAY.value)
+
     starts: list[pd.Timestamp] = []
     for i in range(0, len(times) - duration_days + 1):
-        segment = ns[i:i + duration_days]
-        if duration_days == 1 or np.all(np.diff(segment) == day_ns):
-            start = times.iloc[i]
+        segment = times.iloc[i:i + duration_days]
+        if duration_days == 1 or (segment.diff().dropna() == DAY).all():
+            start = segment.iloc[0]
             end_exclusive = start + pd.Timedelta(days=duration_days)
             if end_exclusive - DAY <= upper:
                 starts.append(start)
@@ -116,32 +122,41 @@ def deterministic_daily_blocks(
 
 
 def scenario_holdout(
-    observed: np.ndarray,
+    finite_available: np.ndarray,
     score_rows: np.ndarray,
     eligible_times: pd.Series,
     source_times: pd.Series,
     feature_indices: np.ndarray,
     duration_hours: int,
 ):
+    """Project fixed daily outage intervals onto eligible score rows.
+
+    Returns both the cell holdout and the full interval-row mask. The latter is
+    necessary because an outage can affect a forecast decision even if the
+    published aggregate interface already lacked every requested modality cell.
+    """
     score_rows = np.asarray(score_rows, dtype=bool)
-    times = pd.Series(eligible_times).reset_index(drop=True)
-    if observed.ndim != 2 or observed.shape[0] != len(times) or len(score_rows) != len(times):
+    times = pd.Series(pd.to_datetime(eligible_times, utc=True, errors="raise")).reset_index(drop=True)
+    if finite_available.ndim != 2 or finite_available.shape[0] != len(times) or len(score_rows) != len(times):
         raise ValueError("outage inputs must align")
     if not score_rows.any():
         raise ValueError("score role empty")
+
     lower = times[score_rows].min()
     upper = times[score_rows].max()
     blocks = deterministic_daily_blocks(source_times, duration_hours, lower, upper)
-    holdout = np.zeros_like(observed, dtype=bool)
+    holdout = np.zeros_like(finite_available, dtype=bool)
+    outage_rows = np.zeros(len(times), dtype=bool)
     report = []
     for spec in blocks:
         start = spec["issue_start"]
         end_exclusive = spec["issue_end_exclusive"]
         affected = score_rows & (times >= start).to_numpy() & (times < end_exclusive).to_numpy()
+        outage_rows |= affected
         rows = np.flatnonzero(affected)
-        block = np.zeros_like(observed, dtype=bool)
+        block = np.zeros_like(finite_available, dtype=bool)
         if len(rows):
-            block[np.ix_(rows, feature_indices)] = observed[np.ix_(rows, feature_indices)]
+            block[np.ix_(rows, feature_indices)] = finite_available[np.ix_(rows, feature_indices)]
         holdout |= block
         report.append(
             {
@@ -150,11 +165,49 @@ def scenario_holdout(
                 "duration_hours": int(duration_hours),
                 "duration_daily_cycles": int(spec["duration_daily_cycles"]),
                 "eligible_score_rows_affected": int(len(rows)),
-                "hidden_cells": int(block.sum()),
-                "evaluable": bool(len(rows) and block.any()),
+                "finite_interface_cells_hidden": int(block.sum()),
+                "evaluable": bool(len(rows)),
             }
         )
-    return holdout, report
+    return holdout, outage_rows, report
+
+
+def _ece(y: np.ndarray, p: np.ndarray) -> float:
+    edges = np.linspace(0.0, 1.0, 11)
+    value = 0.0
+    for i in range(10):
+        mask = (p >= edges[i]) & (p < edges[i + 1] if i < 9 else p <= edges[i + 1])
+        if np.any(mask):
+            value += float(np.mean(mask) * abs(np.mean(p[mask]) - np.mean(y[mask])))
+    return float(value)
+
+
+def metrics_on_mask(y, p, mask, threshold, prevalence):
+    """Score a declared subset while retaining one-class subsets as reportable."""
+    mask = np.asarray(mask, dtype=bool)
+    if not mask.any():
+        return None
+    yy = np.asarray(y)[mask]
+    pp = np.asarray(p, dtype=float)[mask]
+    out = {
+        **v1.threshold_metrics(yy, pp, threshold),
+        "BRIER": float(np.mean((pp - yy) ** 2)),
+        "ECE": _ece(yy, pp),
+        "rows": int(mask.sum()),
+        "positives": int(yy.sum()),
+        "AUPRC": None,
+        "AUROC": None,
+        "BRIER_SKILL": None,
+        "matched_detection": None,
+    }
+    if len(np.unique(yy)) == 2:
+        probability = v1.probability_metrics(yy, pp, prevalence)
+        out.update(probability)
+        out["matched_detection"] = {
+            str(pod): v1.minimum_far_at_pod(yy, pp, pod)
+            for pod in (0.6, 0.7, 0.8, 0.9)
+        }
+    return out
 
 
 def run(features: Path, events: Path, output: Path):
@@ -171,7 +224,7 @@ def run(features: Path, events: Path, output: Path):
         raise ValueError("score role empty")
 
     # Model-ready source documentation says one UTC day per row. Fail closed if
-    # the actual hash-pinned table does not contain daily transitions.
+    # the actual hash-pinned table does not contain any daily transitions.
     diffs = source_times.diff().dropna()
     daily_fraction = float(np.mean(diffs == DAY)) if len(diffs) else 0.0
     if daily_fraction == 0.0:
@@ -179,8 +232,8 @@ def run(features: Path, events: Path, output: Path):
 
     feature_names = list(base) + list(xrs) + list(proton)
     raw_values = frame.loc[:, feature_names].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=np.float64)
-    observed = np.isfinite(raw_values)
-    structural = ~observed
+    finite_available = np.isfinite(raw_values)
+    preexisting_unavailable = ~finite_available
     fit_rows = roles == "fit"
     name_to_index = {name: i for i, name in enumerate(feature_names)}
     modality_indices = {
@@ -198,17 +251,29 @@ def run(features: Path, events: Path, output: Path):
         for policy, threshold in clean["thresholds"].items()
     }
 
-    prereg_path = Path(__file__).resolve().parents[1] / PREREG
+    project_root = Path(__file__).resolve().parents[1]
+    prereg_path = project_root / PREREG
+    provenance_path = project_root / PROVENANCE_CONTRACT
+    if not provenance_path.exists():
+        raise ValueError("source provenance contract missing")
+
     summary = {
         "status": "COMPLETED_DAILY_MODALITY_OUTAGE_DEVELOPMENT_ONLY",
         "target": v1.TARGET,
         "preregistration": PREREG,
         "preregistration_sha256": v2.digest(prereg_path),
         "runner_sha256": v2.digest(Path(__file__)),
+        "provenance_contract": PROVENANCE_CONTRACT,
+        "provenance_contract_sha256": v2.digest(provenance_path),
         "outage_semantics": (
             "Complete modality unavailable at consecutive daily forecast-input issue cycles in the "
             "model-ready table. 24/72/168 hours map to 1/3/7 daily cycles. This is not a raw "
-            "5-minute sensor-stream outage experiment."
+            "five-minute sensor-stream outage experiment."
+        ),
+        "truth_semantics": (
+            "Finite released aggregate-interface cells are perturbation reference values only. "
+            "They are not asserted to be native sensor observations; cell-level source provenance "
+            "is UNKNOWN unless independently demonstrated."
         ),
         "daily_source_transition_fraction": daily_fraction,
         "v1_v2_failures_preserved": True,
@@ -224,6 +289,8 @@ def run(features: Path, events: Path, output: Path):
         "score_positives": int(y[score].sum()),
         "positive_event_units": int(positive_units),
         "purged_units": purged,
+        "finite_interface_cells": int(finite_available.sum()),
+        "preexisting_unavailable_cells": int(preexisting_unavailable.sum()),
         "model": {
             "id": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
             "stack_diagnostics": clean["stack"].diagnostics(),
@@ -245,19 +312,30 @@ def run(features: Path, events: Path, output: Path):
     for modality in MODALITIES:
         cols = modality_indices[modality]
         for duration_hours in DURATION_HOURS:
-            holdout, blocks = scenario_holdout(
-                observed,
+            holdout, outage_rows, blocks = scenario_holdout(
+                finite_available,
                 score,
                 frame["window_end"],
                 source_times,
                 cols,
                 duration_hours,
             )
-            experimental = observed & ~holdout
+            experimental = finite_available & ~holdout
             no_fill = raw_values.copy()
             no_fill[holdout] = np.nan
-            median = recover_train_median(raw_values, observed, structural, holdout, fit_rows=fit_rows)
-            forward = recover_causal_forward_fill(raw_values, observed, structural, holdout)
+            median = recover_train_median(
+                raw_values,
+                finite_available,
+                preexisting_unavailable,
+                holdout,
+                fit_rows=fit_rows,
+            )
+            forward = recover_causal_forward_fill(
+                raw_values,
+                finite_available,
+                preexisting_unavailable,
+                holdout,
+            )
             values_by_arm = {
                 "MASK_AWARE_NO_FILL": no_fill,
                 "TRAIN_FIT_MEDIAN": median.values,
@@ -268,18 +346,30 @@ def run(features: Path, events: Path, output: Path):
                 "TRAIN_FIT_MEDIAN": median.available_mask,
                 "CAUSAL_FORWARD_FILL": forward.available_mask,
             }
-            affected_rows = holdout.any(axis=1)
             scenario_key = f"{modality}_{duration_hours}H"
+            positive_units_affected = np.unique(units[outage_rows & (y == 1)])
+            baseline_modality_cells = int(
+                finite_available[np.ix_(np.flatnonzero(outage_rows), cols)].sum()
+            ) if outage_rows.any() else 0
             scenario = {
                 "modality": modality,
                 "duration_hours": int(duration_hours),
                 "duration_daily_cycles": int(DURATION_DAYS[duration_hours]),
                 "blocks": blocks,
-                "hidden_cells": int(holdout.sum()),
-                "affected_score_rows": int(affected_rows.sum()),
+                "finite_interface_cells_hidden": int(holdout.sum()),
+                "affected_score_rows": int(outage_rows.sum()),
+                "affected_score_positives": int(y[outage_rows].sum()),
+                "affected_positive_event_units": int(len(positive_units_affected)),
+                "baseline_finite_modality_cells_on_affected_rows": baseline_modality_cells,
                 "evaluable_blocks": int(sum(bool(b["evaluable"]) for b in blocks)),
+                "reference_affected_metrics": {},
                 "arms": {},
             }
+            for policy, threshold in clean["thresholds"].items():
+                scenario["reference_affected_metrics"][policy] = metrics_on_mask(
+                    y, reference, outage_rows, threshold, clean["fit_prevalence"]
+                )
+
             for arm in ARMS:
                 vals = values_by_arm[arm].copy()
                 vals[~available_by_arm[arm]] = np.nan
@@ -291,16 +381,18 @@ def run(features: Path, events: Path, output: Path):
                     "unresolved_hidden_cells": int((holdout & ~available_by_arm[arm]).sum()),
                     "probability_abs_drift_score": float(np.mean(np.abs(p[score] - reference[score]))),
                     "probability_abs_drift_affected_rows": (
-                        float(np.mean(np.abs(p[affected_rows] - reference[affected_rows])))
-                        if affected_rows.any()
+                        float(np.mean(np.abs(p[outage_rows] - reference[outage_rows])))
+                        if outage_rows.any()
                         else None
                     ),
-                    "probability_bootstrap": transfer.bootstrap_probability_differences(
+                    "probability_bootstrap_whole_score": transfer.bootstrap_probability_differences(
                         y, reference, p, units, roles
                     ),
                     "policies": {},
                 }
                 role_mask = np.where(score, "score", "outside")
+                affected_role_mask = np.where(outage_rows, "affected", "outside")
+                affected_has_two_classes = outage_rows.any() and len(np.unique(y[outage_rows])) == 2
                 for policy, threshold in clean["thresholds"].items():
                     cand = transfer.score_metrics(y, p, roles, threshold, clean["fit_prevalence"])
                     ref = clean_metrics[policy]
@@ -316,15 +408,34 @@ def run(features: Path, events: Path, output: Path):
                         seed=SEED,
                         replicates=10000,
                     )
+                    affected_boot = None
+                    if affected_has_two_classes:
+                        affected_boot = cs.bootstrap_difference(
+                            y,
+                            p,
+                            threshold,
+                            reference,
+                            threshold,
+                            units,
+                            affected_role_mask,
+                            "affected",
+                            seed=SEED,
+                            replicates=10000,
+                        )
                     result["policies"][policy] = {
-                        "reference": ref,
-                        "candidate": cand,
-                        "delta_candidate_minus_reference": {
+                        "whole_score_reference": ref,
+                        "whole_score_candidate": cand,
+                        "whole_score_delta_candidate_minus_reference": {
                             "TSS": float(cand["TSS"] - ref["TSS"]),
                             "BRIER": float(cand["BRIER"] - ref["BRIER"]),
                             "ECE": float(cand["ECE"] - ref["ECE"]),
                         },
-                        "paired_TSS_bootstrap": tss_boot,
+                        "whole_score_paired_TSS_bootstrap": tss_boot,
+                        "affected_rows_reference": scenario["reference_affected_metrics"][policy],
+                        "affected_rows_candidate": metrics_on_mask(
+                            y, p, outage_rows, threshold, clean["fit_prevalence"]
+                        ),
+                        "affected_rows_paired_TSS_bootstrap": affected_boot,
                     }
                 scenario["arms"][arm] = result
                 prediction_columns[f"p_{scenario_key}_{arm}"] = p
@@ -341,18 +452,22 @@ def run(features: Path, events: Path, output: Path):
             "preregistration": PREREG,
             "preregistration_sha256": summary["preregistration_sha256"],
             "runner_sha256": summary["runner_sha256"],
+            "provenance_contract_sha256": summary["provenance_contract_sha256"],
             "predictions_sha256": summary["predictions_sha256"],
             "all_predeclared_scenarios_reported": True,
             "all_predeclared_arms_reported": True,
+            "affected_and_whole_score_metrics_reported": True,
             "v1_v2_failures_preserved": True,
             "locked_test_accessed": False,
             "monitor_used": False,
             "retraining_after_outage": False,
             "recalibration_after_outage": False,
             "rethresholding_after_outage": False,
+            "finite_cell_claimed_native_observation": False,
             "claim_boundary": (
-                "Development-only daily forecast-input outage diagnostic. It cannot independently validate "
-                "a raw-sensor outage policy, locked-test robustness, operational readiness or superiority."
+                "Development-only daily aggregate-interface outage diagnostic. It cannot independently "
+                "validate a raw-sensor outage policy, prospective input causality, locked-test robustness, "
+                "operational readiness or superiority."
             ),
         },
     )
