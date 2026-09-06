@@ -1,0 +1,156 @@
+name: IRIS-SEP preregistered event-terminal modality outage
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/event_terminal_modality_outage_preregistration_2026-09-06.json'
+      - 'iris_report/iris_sep/config/source_provenance_contract_v1.json'
+      - 'iris_report/iris_sep/tools/run_event_terminal_modality_outage.py'
+      - 'iris_report/iris_sep/tools/audit_event_terminal_modality_outage.py'
+      - 'iris_report/iris_sep/tools/run_daily_modality_outage.py'
+      - 'iris_report/iris_sep/tools/run_promoted_stack_missingness_transfer.py'
+      - 'iris_report/iris_sep/tools/run_context_stability_diagnostic.py'
+      - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py'
+      - 'iris_report/iris_sep/src/iris_sep/missingness_experiment.py'
+      - 'iris_report/iris_sep/src/iris_sep/modeling/positive_evidence_stack.py'
+      - 'iris_report/iris_sep/tests/test_event_terminal_modality_outage.py'
+      - '.github/workflows/iris-sep-event-terminal-outage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  event-terminal-outage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out exact branch head with history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned experiment dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            scipy==1.18.1 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4
+
+      - name: Verify preregistration predates result-capable code
+        run: |
+          PREREG_COMMIT='430283f0dcc702139b38e041acb8186dd064bf80'
+          git cat-file -e "${PREREG_COMMIT}^{commit}"
+          git merge-base --is-ancestor "$PREREG_COMMIT" HEAD
+          test -s iris_report/iris_sep/config/event_terminal_modality_outage_preregistration_2026-09-06.json
+          test -s iris_report/iris_sep/config/source_provenance_contract_v1.json
+          sha256sum \
+            iris_report/iris_sep/config/event_terminal_modality_outage_preregistration_2026-09-06.json \
+            iris_report/iris_sep/config/source_provenance_contract_v1.json
+
+      - name: Compile and test event-terminal contract
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/tools/run_event_terminal_modality_outage.py \
+            iris_report/iris_sep/tools/audit_event_terminal_modality_outage.py
+          python -m unittest \
+            iris_report.iris_sep.tests.test_event_terminal_modality_outage \
+            iris_report.iris_sep.tests.test_daily_modality_outage \
+            iris_report.iris_sep.tests.test_positive_evidence_stack \
+            iris_report.iris_sep.tests.test_missingness_experiment \
+            -v
+
+      - name: Acquire exact hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/iris-input/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/iris-input/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/iris-input/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Execute all event-bearing outage scenarios
+        run: |
+          python -m iris_report.iris_sep.tools.run_event_terminal_modality_outage \
+            --features /tmp/iris-input/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-event-terminal-outage
+
+      - name: Independently recompute saved event and quiet metrics
+        run: |
+          python -m iris_report.iris_sep.tools.audit_event_terminal_modality_outage \
+            --predictions /tmp/iris-event-terminal-outage/predictions.csv \
+            --summary /tmp/iris-event-terminal-outage/summary.json \
+            --output /tmp/iris-event-terminal-outage/independent_audit.json
+
+      - name: Print bounded result summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('/tmp/iris-event-terminal-outage/summary.json').read_text())
+          a=json.loads(Path('/tmp/iris-event-terminal-outage/independent_audit.json').read_text())
+          print('audit_status', a['status'])
+          print('score_rows', s['score_rows'], 'score_positives', s['score_positives'])
+          print('thresholds', json.dumps(s['model']['thresholds'], sort_keys=True))
+          for key in sorted(s['scenarios']):
+              sc=s['scenarios'][key]
+              print(key, 'event=', sc['eligible_positive_terminal_rows'], 'quiet=', sc['quiet_control_terminal_rows'], 'hidden=', sc['hidden_terminal_cells'])
+              for arm in sorted(sc['arms']):
+                  r=sc['arms'][arm]
+                  m=r['policies']['MAX_TSS']
+                  print(' ', arm, 'event_drift=', round(r['event_probability_absolute_drift'],6), 'event_POD=', m['event_rows_candidate']['POD'], 'quiet_FP=', m['quiet_rows_candidate']['FP'], 'dTSS=', round(m['whole_score_delta_candidate_minus_reference']['TSS'],6))
+          PY
+
+      - name: Bind runtime and immutable hashes
+        if: always()
+        run: |
+          mkdir -p /tmp/iris-event-terminal-outage
+          python - <<'PY'
+          import hashlib, json, platform
+          from pathlib import Path
+          import numpy, pandas, scipy, sklearn, xgboost
+          def sha(path):
+              p=Path(path); h=hashlib.sha256()
+              if not p.exists(): return None
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(1024*1024), b''): h.update(b)
+              return h.hexdigest()
+          receipt={
+              'scope':'DEVELOPMENT_ONLY_PREREGISTERED_EVENT_TERMINAL_AGGREGATE_INTERFACE_OUTAGE',
+              'git_head':'${{ github.sha }}',
+              'preregistration_ancestor_commit':'430283f0dcc702139b38e041acb8186dd064bf80',
+              'python':platform.python_version(), 'numpy':numpy.__version__, 'pandas':pandas.__version__,
+              'scipy':scipy.__version__, 'scikit_learn':sklearn.__version__, 'xgboost':xgboost.__version__,
+              'feature_table_sha256':sha('/tmp/iris-input/Data/rolling_combinded_seq_24hours.csv'),
+              'event_catalogue_sha256':sha('/tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv'),
+              'summary_sha256':sha('/tmp/iris-event-terminal-outage/summary.json'),
+              'predictions_sha256':sha('/tmp/iris-event-terminal-outage/predictions.csv'),
+              'independent_audit_sha256':sha('/tmp/iris-event-terminal-outage/independent_audit.json'),
+              'locked_test_accessed':False, 'monitor_used':False, 'development_only':True,
+          }
+          Path('/tmp/iris-event-terminal-outage/runtime.json').write_text(json.dumps(receipt, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable event-terminal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-event-terminal-outage-${{ github.sha }}
+          path: /tmp/iris-event-terminal-outage
+          if-no-files-found: error
+          retention-days: 30
