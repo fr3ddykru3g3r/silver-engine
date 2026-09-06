@@ -1,14 +1,17 @@
 # Current IRIS-SEP checkpoint
 
-The full historical `START_HERE.md` is retained for audit continuity.
+Read `CURRENT_STATUS.md` first. It is the authoritative current-state page.
 
-For the current executable build, read in this order:
+Then read, in order:
 
-1. `LATEST_BUILD.md`
-2. `PROJECT_IN_PLAIN_ENGLISH.md`
-3. `architecture/SIMPLE_MISSING_DATA_PHYSICS_BUILD_2026-09-05.md`
-4. `receipts/simple_missing_data_physics_build_v1_2026-09-05.json`
+1. `config/current_development_architecture_v1.json`
+2. `CHANGELOG.md`
+3. `architecture/THRESHOLD_POLICY_RECONCILIATION_2026-09-06.md`
+4. `provenance/SOURCE_PROVENANCE_AUDIT_2026-09-06.md`
+5. `config/source_provenance_contract_v1.json`
+6. `config/inspected_evidence_registry_v1.json`
+7. `config/evaluation_policy_v1.json`
 
-Tested source head: `c7135b3a0bba84cfb39431c2be7ac6834b23e507`.
+Historical `START_HERE.md`, architecture reports and receipts remain preserved for audit continuity, but any historical claim that real-data experiments are still unrun is superseded by `CURRENT_STATUS.md`.
 
-Real-data experiments remain NOT_RUN until verified train-only packages are available.
+The current model is development-only. Existing score/monitor evidence has been inspected. The locked test remains forbidden during development, and strict prospective causality for all released aggregate predictors remains unresolved pending lineage reconstruction.
