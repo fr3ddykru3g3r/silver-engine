@@ -104,17 +104,25 @@ def score(y: np.ndarray, p: np.ndarray, threshold: float, prevalence: float) -> 
         return None
     out = threshold_metrics(y, p, threshold)
     brier = float(np.mean((p - y) ** 2))
+    two_classes = len(np.unique(y)) == 2
     reference_brier = float(np.mean((prevalence - y) ** 2))
     out.update(
         {
             "BRIER": brier,
-            "BRIER_SKILL": float(1 - brier / reference_brier) if reference_brier > 0 else None,
+            # Match the preregistered reporting contract: skill relative to a
+            # prevalence reference is withheld for one-class affected subsets.
+            # Brier score and ECE remain directly auditable there.
+            "BRIER_SKILL": (
+                float(1 - brier / reference_brier)
+                if two_classes and reference_brier > 0
+                else None
+            ),
             "ECE": ece(y, p),
-            "AUPRC": float(average_precision_score(y, p)) if len(np.unique(y)) == 2 else None,
-            "AUROC": float(roc_auc_score(y, p)) if len(np.unique(y)) == 2 else None,
+            "AUPRC": float(average_precision_score(y, p)) if two_classes else None,
+            "AUROC": float(roc_auc_score(y, p)) if two_classes else None,
             "matched_detection": (
                 {str(pod): minimum_far_at_pod(y, p, pod) for pod in MATCHED_PODS}
-                if len(np.unique(y)) == 2
+                if two_classes
                 else None
             ),
             "rows": int(len(y)),
