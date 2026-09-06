@@ -1,0 +1,74 @@
+{
+  "registry_id": "iris-sep-inspected-evidence-v1",
+  "status": "ACTIVE_DEVELOPMENT_GUARD",
+  "purpose": "Prevent development cohorts, identities or result artifacts that have already informed model/policy choices from later being relabelled as fresh final evidence.",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test": {
+    "status": "FORBIDDEN_DURING_DEVELOPMENT",
+    "identity_or_outcome_accessed": false,
+    "claim_rule": "No final untouched claim may be made without an independent custodian attestation."
+  },
+  "inspected_sets": [
+    {
+      "name": "public_new_crossing_development_roles",
+      "status": "INSPECTED",
+      "description": "Fit/calibration/threshold/score roles constructed from the public SEP-Prediction-V2 aggregate table and CLEAR event catalogue have been repeatedly used for development, threshold selection and diagnostics.",
+      "source_feature_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+      "source_event_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "context_stability_fixed_monitor",
+      "status": "INSPECTED",
+      "start_inclusive": "2023-07-31T00:00:00Z",
+      "end_inclusive": "2025-09-10T00:00:00Z",
+      "source": "config/context_stability_preregistration_2026-09-05.json",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "crossfit_evidence_stack_development_result",
+      "status": "INSPECTED",
+      "run_id": 33985243824,
+      "git_head": "5d90a177462401d1486891e06c6fa6794ea4fbdb",
+      "artifact_digest": "sha256:ed04d5b34df094e2eb7f7db3f07b426619494b38987f1993c0faddca90d58f99",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "random_missingness_promoted_stack",
+      "status": "INSPECTED",
+      "run_id": 33987312162,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "two_state_architecture_diagnostic",
+      "status": "INSPECTED",
+      "run_id": 33985567816,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "residual_expert_architecture_diagnostic",
+      "status": "INSPECTED",
+      "run_id": 33984943106,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "contiguous_outage_failed_runs",
+      "status": "INSPECTED_FAILURES",
+      "runs": [33987778788, 34043978773],
+      "fresh_final_evidence": false
+    }
+  ],
+  "future_untouched_rule": {
+    "required_before_label_untouched": true,
+    "attestation_producer": "independent_custodian_or_publisher",
+    "development_side_must_not_receive_protected_identities": true,
+    "minimum_attestation": [
+      "candidate cohort identifier/hash",
+      "statement that identities/outcomes were not exposed to development",
+      "overlap check against this registry and any later registry versions",
+      "attestation timestamp and producer"
+    ],
+    "if_attestation_unavailable": "Describe evaluation as retrospective/development, not untouched or final superiority evidence."
+  },
+  "maintenance_rule": "Append every subsequently inspected cohort, comparator output, outage block result or policy-selection dataset before it can influence development decisions. Never delete an inspected entry because a result is negative or obsolete."
+}
