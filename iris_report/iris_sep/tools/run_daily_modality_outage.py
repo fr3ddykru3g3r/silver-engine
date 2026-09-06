@@ -1,4 +1,4 @@
-"""Preregisterable daily forecast-input modality outage benchmark.
+"""Preregistered daily forecast-input modality outage benchmark.
 
 The model-ready SEP-Prediction-V2 table contains one UTC issue row per day,
 each summarizing the preceding 24 hours. Therefore a 24/72/168-hour outage on
@@ -134,6 +134,8 @@ def scenario_holdout(
     Returns both the cell holdout and the full interval-row mask. The latter is
     necessary because an outage can affect a forecast decision even if the
     published aggregate interface already lacked every requested modality cell.
+    A declared interval with score rows but zero finite modality cells remains in
+    the report as zero-exposure and is marked unevaluable; it is never re-picked.
     """
     score_rows = np.asarray(score_rows, dtype=bool)
     times = pd.Series(pd.to_datetime(eligible_times, utc=True, errors="raise")).reset_index(drop=True)
@@ -166,7 +168,8 @@ def scenario_holdout(
                 "duration_daily_cycles": int(spec["duration_daily_cycles"]),
                 "eligible_score_rows_affected": int(len(rows)),
                 "finite_interface_cells_hidden": int(block.sum()),
-                "evaluable": bool(len(rows)),
+                "zero_exposure": bool(len(rows) == 0 or not block.any()),
+                "evaluable": bool(len(rows) and block.any()),
             }
         )
     return holdout, outage_rows, report
@@ -254,6 +257,8 @@ def run(features: Path, events: Path, output: Path):
     project_root = Path(__file__).resolve().parents[1]
     prereg_path = project_root / PREREG
     provenance_path = project_root / PROVENANCE_CONTRACT
+    if not prereg_path.exists():
+        raise ValueError("daily outage preregistration missing")
     if not provenance_path.exists():
         raise ValueError("source provenance contract missing")
 
@@ -362,6 +367,7 @@ def run(features: Path, events: Path, output: Path):
                 "affected_positive_event_units": int(len(positive_units_affected)),
                 "baseline_finite_modality_cells_on_affected_rows": baseline_modality_cells,
                 "evaluable_blocks": int(sum(bool(b["evaluable"]) for b in blocks)),
+                "zero_exposure_blocks": int(sum(bool(b["zero_exposure"]) for b in blocks)),
                 "reference_affected_metrics": {},
                 "arms": {},
             }
@@ -457,6 +463,7 @@ def run(features: Path, events: Path, output: Path):
             "all_predeclared_scenarios_reported": True,
             "all_predeclared_arms_reported": True,
             "affected_and_whole_score_metrics_reported": True,
+            "zero_exposure_blocks_preserved": True,
             "v1_v2_failures_preserved": True,
             "locked_test_accessed": False,
             "monitor_used": False,
@@ -480,7 +487,8 @@ def main():
     p.add_argument("--events", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     a = p.parse_args()
-    run(a.features, a.events, a.output)
+    summary = run(a.features, a.events, a.output)
+    print(json.dumps(finite_or_none(summary), indent=2, sort_keys=True, allow_nan=False))
 
 
 if __name__ == "__main__":
