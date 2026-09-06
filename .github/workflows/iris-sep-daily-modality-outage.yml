@@ -6,15 +6,18 @@ on:
       - codex/iris-sep-continuation-20260905
     paths:
       - 'iris_report/iris_sep/config/daily_modality_outage_preregistration_2026-09-06.json'
+      - 'iris_report/iris_sep/config/selective_outage_policy_preregistration_2026-09-06.json'
       - 'iris_report/iris_sep/config/source_provenance_contract_v1.json'
       - 'iris_report/iris_sep/tools/run_daily_modality_outage.py'
       - 'iris_report/iris_sep/tools/audit_daily_modality_outage.py'
+      - 'iris_report/iris_sep/tools/run_selective_outage_policy.py'
       - 'iris_report/iris_sep/tools/run_promoted_stack_missingness_transfer.py'
       - 'iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py'
       - 'iris_report/iris_sep/tools/run_context_stability_diagnostic.py'
       - 'iris_report/iris_sep/src/iris_sep/modeling/positive_evidence_stack.py'
       - 'iris_report/iris_sep/src/iris_sep/missingness_experiment.py'
       - 'iris_report/iris_sep/tests/test_daily_modality_outage.py'
+      - 'iris_report/iris_sep/tests/test_selective_outage_policy.py'
       - '.github/workflows/iris-sep-daily-modality-outage.yml'
   workflow_dispatch:
 
@@ -47,22 +50,28 @@ jobs:
             scikit-learn==1.8.0 \
             xgboost==3.0.4
 
-      - name: Verify preregistration predates result-capable head
+      - name: Verify preregistrations predate result-capable head
         run: |
-          PREREG_COMMIT='15059089f856215ac3c3474fe91014edaa2f46b1'
-          git cat-file -e "${PREREG_COMMIT}^{commit}"
-          git merge-base --is-ancestor "$PREREG_COMMIT" HEAD
+          OUTAGE_PREREG_COMMIT='15059089f856215ac3c3474fe91014edaa2f46b1'
+          POLICY_PREREG_COMMIT='9363fd07b4538784a6857572dbed341ee150f4d0'
+          git cat-file -e "${OUTAGE_PREREG_COMMIT}^{commit}"
+          git cat-file -e "${POLICY_PREREG_COMMIT}^{commit}"
+          git merge-base --is-ancestor "$OUTAGE_PREREG_COMMIT" HEAD
+          git merge-base --is-ancestor "$POLICY_PREREG_COMMIT" HEAD
           test -s iris_report/iris_sep/config/daily_modality_outage_preregistration_2026-09-06.json
+          test -s iris_report/iris_sep/config/selective_outage_policy_preregistration_2026-09-06.json
           test -s iris_report/iris_sep/config/source_provenance_contract_v1.json
           sha256sum \
             iris_report/iris_sep/config/daily_modality_outage_preregistration_2026-09-06.json \
+            iris_report/iris_sep/config/selective_outage_policy_preregistration_2026-09-06.json \
             iris_report/iris_sep/config/source_provenance_contract_v1.json
 
-      - name: Compile and test daily outage contract
+      - name: Compile and test outage and handling-policy contracts
         run: |
           python -m py_compile \
             iris_report/iris_sep/tools/run_daily_modality_outage.py \
             iris_report/iris_sep/tools/audit_daily_modality_outage.py \
+            iris_report/iris_sep/tools/run_selective_outage_policy.py \
             iris_report/iris_sep/tools/run_promoted_stack_missingness_transfer.py \
             iris_report/iris_sep/tools/run_public_new_crossing_benchmark.py \
             iris_report/iris_sep/tools/run_context_stability_diagnostic.py \
@@ -70,6 +79,7 @@ jobs:
             iris_report/iris_sep/src/iris_sep/missingness_experiment.py
           python -m unittest \
             iris_report.iris_sep.tests.test_daily_modality_outage \
+            iris_report.iris_sep.tests.test_selective_outage_policy \
             iris_report.iris_sep.tests.test_positive_evidence_stack \
             iris_report.iris_sep.tests.test_missingness_experiment \
             -v
@@ -100,6 +110,14 @@ jobs:
             --summary /tmp/iris-daily-modality-outage/summary.json \
             --output /tmp/iris-daily-modality-outage/independent_audit.json
 
+      - name: Execute every preregistered handling-policy evaluation
+        run: |
+          python -m iris_report.iris_sep.tools.run_selective_outage_policy \
+            --predictions /tmp/iris-daily-modality-outage/predictions.csv \
+            --outage-summary /tmp/iris-daily-modality-outage/summary.json \
+            --independent-audit /tmp/iris-daily-modality-outage/independent_audit.json \
+            --output /tmp/iris-daily-modality-outage/selective_policy.json
+
       - name: Print bounded experiment summary
         run: |
           python - <<'PY'
@@ -107,10 +125,12 @@ jobs:
           from pathlib import Path
           s=json.loads(Path('/tmp/iris-daily-modality-outage/summary.json').read_text())
           a=json.loads(Path('/tmp/iris-daily-modality-outage/independent_audit.json').read_text())
+          q=json.loads(Path('/tmp/iris-daily-modality-outage/selective_policy.json').read_text())
           print('audit_status', a['status'])
           print('scenario_count', a['scenario_count'])
           print('arm_count', a['arm_count'])
           print('policy_evaluations', a['policy_evaluations'])
+          print('handling_policy_evaluations', q['policy_evaluations'])
           print('score_rows', s['score_rows'])
           print('score_positives', s['score_positives'])
           print('thresholds', json.dumps(s['model']['thresholds'], sort_keys=True))
@@ -134,9 +154,10 @@ jobs:
                   for b in iter(lambda:f.read(1024*1024), b''): h.update(b)
               return h.hexdigest()
           receipt = {
-              'scope': 'DEVELOPMENT_ONLY_PREREGISTERED_DAILY_AGGREGATE_INTERFACE_OUTAGE',
+              'scope': 'DEVELOPMENT_ONLY_PREREGISTERED_DAILY_AGGREGATE_INTERFACE_OUTAGE_AND_HANDLING_POLICY',
               'git_head': '${{ github.sha }}',
-              'preregistration_ancestor_commit': '15059089f856215ac3c3474fe91014edaa2f46b1',
+              'outage_preregistration_ancestor_commit': '15059089f856215ac3c3474fe91014edaa2f46b1',
+              'handling_policy_preregistration_ancestor_commit': '9363fd07b4538784a6857572dbed341ee150f4d0',
               'python': platform.python_version(),
               'numpy': numpy.__version__,
               'pandas': pandas.__version__,
@@ -148,6 +169,7 @@ jobs:
               'summary_sha256': sha('/tmp/iris-daily-modality-outage/summary.json'),
               'predictions_sha256': sha('/tmp/iris-daily-modality-outage/predictions.csv'),
               'independent_audit_sha256': sha('/tmp/iris-daily-modality-outage/independent_audit.json'),
+              'selective_policy_sha256': sha('/tmp/iris-daily-modality-outage/selective_policy.json'),
               'locked_test_accessed': False,
               'monitor_used': False,
               'development_only': True,
