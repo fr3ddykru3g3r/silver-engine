@@ -19,6 +19,7 @@ class TwoStateFeatureTests(unittest.TestCase):
         self.assertEqual(out.loc[1, "lag24__a"], 1.0)
         self.assertEqual(out.loc[2, "delta24__a"], 6.0)
         self.assertEqual(out.loc[2, "delta24__b"], 2.0)
+        self.assertTrue(receipt["timestamp_storage_unit_independent"])
 
     def test_nearest_within_tolerance_is_causal(self):
         frame = pd.DataFrame({
@@ -36,6 +37,20 @@ class TwoStateFeatureTests(unittest.TestCase):
         })
         out, _ = build_two_state_features(frame, ["x"])
         self.assertTrue(np.isnan(out.loc[1, "delta24__x"]))
+
+    def test_nanosecond_and_microsecond_storage_are_equivalent(self):
+        base = pd.date_range("2026-01-01T00:00:00Z", periods=5, freq="24h")
+        ns = base.as_unit("ns")
+        us = base.as_unit("us")
+        values = [1.0, 2.0, 4.0, 8.0, 16.0]
+
+        frame_ns = pd.DataFrame({"window_end": ns, "x": values})
+        frame_us = pd.DataFrame({"window_end": us, "x": values})
+        out_ns, receipt_ns = build_two_state_features(frame_ns, ["x"])
+        out_us, receipt_us = build_two_state_features(frame_us, ["x"])
+
+        pd.testing.assert_frame_equal(out_ns, out_us)
+        self.assertEqual(receipt_ns, receipt_us)
 
     def test_unsorted_or_duplicate_time_fails_closed(self):
         for times in (
