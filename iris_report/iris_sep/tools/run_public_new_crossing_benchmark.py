@@ -52,6 +52,21 @@ def save_json(path: Path, value) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n")
 
 
+def _unix_seconds(values) -> np.ndarray:
+    """Return integer POSIX seconds independent of pandas datetime storage unit.
+
+    ``Series.astype('int64')`` exposes the backing datetime unit. Pandas 2.x
+    commonly yielded nanoseconds while pandas 3.x can preserve microseconds.
+    ``Timestamp.value`` is explicitly nanoseconds for these in-range dates, so
+    normalizing timestamp-by-timestamp preserves the historical epoch-second
+    identities used by existing development receipts.
+    """
+    parsed = pd.to_datetime(pd.Series(values), utc=True, errors="raise")
+    if parsed.isna().any():
+        raise ValueError("timestamps must be finite")
+    return np.asarray([int(pd.Timestamp(value).value // 1_000_000_000) for value in parsed], dtype=np.int64)
+
+
 def sigmoid(z):
     z = np.asarray(z, dtype=float)
     out = np.empty_like(z)
@@ -148,13 +163,13 @@ def derive_target(frame: pd.DataFrame, event_frame: pd.DataFrame):
     if events.empty or (events["end"] < events["start"]).any():
         raise ValueError("invalid CLEAR operational event catalogue")
 
-    issue = frame["window_end"]
+    issue = pd.to_datetime(frame["window_end"], utc=True, errors="raise")
     active = np.zeros(len(frame), dtype=bool)
     target = np.zeros(len(frame), dtype=np.int8)
     event_ids = np.full(len(frame), "", dtype="U64")
-    event_start_seconds = events["start"].astype("int64").to_numpy() // 10**9
-    event_end_seconds = events["end"].astype("int64").to_numpy() // 10**9
-    issue_seconds = issue.astype("int64").to_numpy() // 10**9
+    event_start_seconds = _unix_seconds(events["start"])
+    event_end_seconds = _unix_seconds(events["end"])
+    issue_seconds = _unix_seconds(issue)
     horizon = 24 * 3600
     for i, t in enumerate(issue_seconds):
         is_active = np.any((event_start_seconds <= t) & (event_end_seconds >= t))
@@ -481,7 +496,7 @@ def run(features_csv: Path, events_csv: Path, output: Path):
     role_map = {"fit": "fit", "calibration": "calibration", "threshold": "threshold", "score": "score"}
     package_roles = np.array([role_map[r] for r in roles], dtype="U16")
     issue_ids = np.array([hashlib.sha256(t.isoformat().encode()).hexdigest() for t in frame["window_end"]], dtype="U64")
-    seconds = frame["window_end"].astype("int64").to_numpy(dtype=np.int64) / 1e9
+    seconds = _unix_seconds(frame["window_end"]).astype(np.float64)
     package_path = output / "missingness_package.npz"
     np.savez(
         package_path,
