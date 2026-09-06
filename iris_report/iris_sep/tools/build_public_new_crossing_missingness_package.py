@@ -1,4 +1,4 @@
-"""Build a safe train-only NEW-crossing package for the frozen missingness benchmark.
+"""Build a train-only NEW-crossing package for the legacy missingness benchmark.
 
 This adapter uses only the hash-pinned public SEP-PRISM feature table and CLEAR
 operational event catalogue already accepted by the development diagnostics.
@@ -6,10 +6,23 @@ It reuses the hardened NEW-crossing target and episode-disjoint chronological
 role construction, excludes the already-inspected 2023-2025 monitor, and never
 includes locked-test data.
 
-Pre-existing unavailable cells are conservatively marked unavailable to the
-synthetic outage experiment.  The benchmark may hide only genuinely observed,
-finite score-role cells; this adapter makes no claim that every historical
-unavailable cell was physically structural rather than transient.
+IMPORTANT PROVENANCE BOUNDARY
+-----------------------------
+The released aggregate table does not preserve enough row/cell lineage to infer
+that a finite value is a native sensor observation, or that a missing value is
+physically structural. The frozen consumer format unfortunately names its two
+availability fields ``observed_mask`` and ``structural_unavailable_mask``.
+For backward compatibility this adapter retains those field names, but their
+scientific semantics here are only:
+
+- ``observed_mask`` = finite value available at the released aggregate interface;
+- ``structural_unavailable_mask`` = pre-existing unavailable aggregate cell.
+
+Neither field establishes native-vs-reconstructed source provenance. Provenance
+is ``UNKNOWN`` unless separately demonstrated under
+``config/source_provenance_contract_v1.json``. Consequently this package may be
+used for aggregate-interface perturbation stress tests, not a native-sensor
+reconstruction-truth claim.
 """
 from __future__ import annotations
 
@@ -30,6 +43,7 @@ TARGET = missing.TARGET
 SCOPE = "TRAIN_ONLY_NEW_CROSSING_MISSINGNESS"
 RETAINED_ROLES = tuple(missing.ROLES)
 UPSTREAM_SEP_PRISM_COMMIT = "e138dcd72c1952a00e11e1a0b025337f9e7c93fb"
+PROVENANCE_CONTRACT = "config/source_provenance_contract_v1.json"
 
 
 def digest(path: Path) -> str:
@@ -62,12 +76,15 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
         raise ValueError("output directory must be new and immutable")
     output.mkdir(parents=True)
 
+    project_root = Path(__file__).resolve().parents[1]
+    provenance_path = project_root / PROVENANCE_CONTRACT
+    if not provenance_path.exists():
+        raise ValueError("source provenance contract missing")
+
     # prepare_frame fails closed on both pinned public source hashes and derives
     # the exact NEW-crossing target while removing already-active issue times.
     frame, y, event_ids, base, xrs, proton, dropped = cs.prepare_frame(features, events)
-    roles, units, purged, positive_units = cs.build_scope_roles(
-        frame, y, event_ids, None
-    )
+    roles, units, purged, positive_units = cs.build_scope_roles(frame, y, event_ids, None)
 
     keep = np.isin(roles, RETAINED_ROLES)
     if not keep.any():
@@ -80,28 +97,24 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
     retained_roles = np.asarray(roles, dtype="U16")[keep]
     retained_units = np.asarray(units, dtype="U64")[keep]
 
-    # Families come from the hardened feature splitter: future_* and CLEAR
-    # OSEP/GSEP catalogue labels are excluded from learned predictors.
     feature_names = list(base) + list(xrs) + list(proton)
     if len(feature_names) != len(set(feature_names)) or not feature_names:
-        raise ValueError("causal feature names must be unique and non-empty")
+        raise ValueError("feature names must be unique and non-empty")
 
     raw_values = retained_frame.loc[:, feature_names].to_numpy(dtype=np.float64)
-    observed = np.isfinite(raw_values)
-    unavailable = ~observed
+    finite_available = np.isfinite(raw_values)
+    preexisting_unavailable = ~finite_available
     values = raw_values.copy()
-    # Missing entries are never interpreted as observations.  A finite sentinel
-    # makes the package portable; the masks remain the authoritative provenance.
-    values[unavailable] = 0.0
+    values[preexisting_unavailable] = 0.0
 
-    if not observed.any() or np.any(observed & unavailable):
-        raise ValueError("invalid observed/unavailable masks")
+    if not finite_available.any() or np.any(finite_available & preexisting_unavailable):
+        raise ValueError("invalid finite/unavailable masks")
 
     issue_times = retained_frame["window_end"]
     issue_ids = np.asarray([issue_id(t) for t in issue_times], dtype="U64")
     if len(np.unique(issue_ids)) != len(issue_ids):
         raise ValueError("issue identifiers are not unique")
-    issue_seconds = issue_times.astype("int64").to_numpy(dtype=np.int64) // 10**9
+    issue_seconds = v1._unix_seconds(issue_times)
     if np.any(np.diff(issue_seconds) <= 0):
         raise ValueError("retained issue times are not strictly increasing")
 
@@ -127,9 +140,14 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
         "expected_feature_table_sha256": v1.EXPECTED_FEATURE_SHA256,
         "event_catalogue_sha256": digest(events),
         "expected_event_catalogue_sha256": v1.EXPECTED_EVENT_SHA256,
+        "source_provenance_contract": PROVENANCE_CONTRACT,
+        "source_provenance_contract_sha256": digest(provenance_path),
+        "aggregate_cell_provenance": "UNKNOWN_UNLESS_SEPARATELY_DEMONSTRATED",
+        "finite_cell_claimed_native_observation": False,
+        "missing_cell_claimed_physically_structural": False,
         "target_builder": "run_public_new_crossing_benchmark.derive_target",
-        "role_builder": "run_public_new_crossing_benchmark_v2.build_units via run_context_stability_diagnostic.build_scope_roles",
-        "feature_splitter": "run_public_new_crossing_benchmark_v2.feature_sets",
+        "role_builder": "run_context_stability_diagnostic.build_scope_roles",
+        "feature_splitter": "run_public_new_crossing_benchmark.feature_sets",
         "monitor_start_excluded": cs.MONITOR_START.isoformat(),
         "monitor_rows_included": False,
         "locked_test_included": False,
@@ -139,20 +157,22 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
         "feature_count": int(len(feature_names)),
         "feature_schema_sha256": json_digest(feature_names),
         "dropped_non_numeric_columns": list(dropped),
-        "preexisting_unavailable_cells": int(unavailable.sum()),
-        "observed_cells": int(observed.sum()),
-        "preexisting_unavailable_semantics": (
-            "EXCLUDED_FROM_ARTIFICIAL_HOLDOUT_AND_RECONSTRUCTION; "
-            "NO_CLAIM_THAT_EVERY_HISTORICAL_GAP_HAS_PHYSICAL_STRUCTURAL_CAUSE"
-        ),
+        "preexisting_unavailable_cells": int(preexisting_unavailable.sum()),
+        "finite_interface_cells": int(finite_available.sum()),
+        "legacy_mask_field_semantics": {
+            "observed_mask": "FINITE_AT_RELEASED_AGGREGATE_INTERFACE_NOT_NATIVE_PROVENANCE",
+            "structural_unavailable_mask": "PREEXISTING_UNAVAILABLE_AT_AGGREGATE_INTERFACE_NOT_PHYSICAL_STRUCTURAL_PROOF"
+        },
         "score_block_prior_inspection_disclosed": True,
-        "allowed_use": "DEVELOPMENT_ONLY_SYNTHETIC_FORECAST_TIME_OUTAGE_ROBUSTNESS",
+        "allowed_use": "DEVELOPMENT_ONLY_AGGREGATE_INTERFACE_PERTURBATION_STRESS",
         "forbidden_claims": [
+            "native_sensor_reconstruction_truth",
+            "strict_prospective_input_causality",
             "final_locked_new_crossing_result",
             "operational_certification",
             "superiority",
-            "breakthrough",
-        ],
+            "breakthrough"
+        ]
     }
     source_manifest_path = output / "source_manifest.json"
     save_json(source_manifest_path, source_manifest)
@@ -161,8 +181,8 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
     np.savez_compressed(
         package_path,
         values=values,
-        observed_mask=observed,
-        structural_unavailable_mask=unavailable,
+        observed_mask=finite_available,
+        structural_unavailable_mask=preexisting_unavailable,
         labels=retained_y,
         roles=retained_roles,
         issue_ids=issue_ids,
@@ -183,12 +203,13 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
         "source_manifest_sha256": digest(source_manifest_path),
         "source_feature_table_sha256": digest(features),
         "source_event_catalogue_sha256": digest(events),
+        "source_provenance_contract_sha256": digest(provenance_path),
         "monitor_rows_included": False,
         "score_block_prior_inspection_disclosed": True,
-        "preexisting_unavailable_mask_semantics": source_manifest[
-            "preexisting_unavailable_semantics"
-        ],
-        "unobserved_value_sentinel": 0.0,
+        "aggregate_cell_provenance": "UNKNOWN_UNLESS_SEPARATELY_DEMONSTRATED",
+        "legacy_observed_mask_semantics": "FINITE_AT_RELEASED_AGGREGATE_INTERFACE_NOT_NATIVE_PROVENANCE",
+        "legacy_structural_mask_semantics": "PREEXISTING_UNAVAILABLE_NOT_PHYSICAL_STRUCTURAL_PROOF",
+        "unobserved_value_sentinel": 0.0
     }
     metadata_path = output / "metadata.json"
     save_json(metadata_path, metadata)
@@ -202,15 +223,17 @@ def build(features: Path, events: Path, output: Path) -> dict[str, object]:
         "rows": int(len(retained_y)),
         "positives": int(retained_y.sum()),
         "feature_count": int(len(feature_names)),
-        "observed_cells": int(observed.sum()),
-        "preexisting_unavailable_cells": int(unavailable.sum()),
+        "finite_interface_cells": int(finite_available.sum()),
+        "preexisting_unavailable_cells": int(preexisting_unavailable.sum()),
         "package_sha256": digest(package_path),
         "metadata_sha256": digest(metadata_path),
         "source_manifest_sha256": digest(source_manifest_path),
+        "source_provenance_contract_sha256": digest(provenance_path),
         "consumer_contract_validation_passed": True,
+        "finite_cell_claimed_native_observation": False,
         "locked_test_accessed": False,
         "monitor_included": False,
-        "development_only": True,
+        "development_only": True
     }
     save_json(output / "package_receipt.json", receipt)
     return receipt
