@@ -10,6 +10,11 @@ The forecast model, calibration, thresholds, durations, modality scenarios,
 recovery arms, number of blocks, block fractions, bootstrap and evaluation
 roles remain frozen. This is development-only; locked test and monitor are not
 used.
+
+This historical hourly-interface prototype is retained for audit continuity and
+has been superseded scientifically by the daily aggregate-interface outage
+experiment. Timestamp mechanics remain tested and portable across pandas
+storage resolutions.
 """
 from __future__ import annotations
 
@@ -96,17 +101,15 @@ def _contiguous_source_starts(
     """All starts with every hourly source timestamp present in [start,end)."""
     if duration_hours <= 0:
         raise ValueError("duration_hours must be positive")
-    times = pd.Series(source_times).reset_index(drop=True)
+    times = pd.Series(pd.to_datetime(source_times, utc=True, errors="raise")).reset_index(drop=True)
     times = times[(times >= lower) & (times <= upper)].reset_index(drop=True)
     if len(times) < duration_hours:
         raise ValueError("source clock too short for requested outage")
-    ns = times.astype("int64").to_numpy(dtype=np.int64)
-    hour_ns = int(pd.Timedelta(hours=1).value)
     starts: list[pd.Timestamp] = []
     for i in range(0, len(times) - duration_hours + 1):
-        segment = ns[i:i + duration_hours]
-        if duration_hours == 1 or np.all(np.diff(segment) == hour_ns):
-            start = times.iloc[i]
+        segment = times.iloc[i:i + duration_hours]
+        if duration_hours == 1 or (segment.diff().dropna() == HOUR).all():
+            start = segment.iloc[0]
             end_exclusive = start + pd.Timedelta(hours=duration_hours)
             if end_exclusive - HOUR <= upper:
                 starts.append(start)
@@ -154,7 +157,7 @@ def scenario_holdout(
     score_rows = np.asarray(score_rows, dtype=bool)
     if observed.ndim != 2 or len(score_rows) != observed.shape[0]:
         raise ValueError("observed and score_rows must align")
-    times = pd.Series(eligible_times).reset_index(drop=True)
+    times = pd.Series(pd.to_datetime(eligible_times, utc=True, errors="raise")).reset_index(drop=True)
     if len(times) != observed.shape[0]:
         raise ValueError("eligible_times must align with observed rows")
     if not score_rows.any():
