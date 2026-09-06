@@ -11,8 +11,15 @@
     "fusion_training": "four_expanding_chronological_outer_fit_crossfit",
     "calibration": "single_logit_intercept_calibration_role_only",
     "decision": "threshold_role_only",
-    "operational_primary_policy": "POD80_MIN_FAR",
+    "benchmark_primary_policy": "MAX_TSS",
+    "secondary_reliability_policy": "POD80_MIN_FAR",
     "validity": "existing_IRIS_validity_and_admission_envelope"
+  },
+  "threshold_policy_reconciliation": {
+    "source": "architecture/THRESHOLD_POLICY_RECONCILIATION_2026-09-06.md",
+    "frozen_evaluation_policy": "config/evaluation_policy_v1.json",
+    "historical_pod80_results_preserved": true,
+    "pod80_guaranteed_outside_threshold_role": false
   },
   "frozen_development_hyperparameters": {
     "specialist_seeds": [7, 13, 26, 42, 73],
@@ -50,7 +57,8 @@
     "run_id": 33985243824,
     "git_head": "5d90a177462401d1486891e06c6fa6794ea4fbdb",
     "artifact_digest": "sha256:ed04d5b34df094e2eb7f7db3f07b426619494b38987f1993c0faddca90d58f99",
-    "operational_pod80_tss": {
+    "reported_policy_for_values_below": "POD80_MIN_FAR",
+    "pod80_tss": {
       "older_score": 0.5119717680693291,
       "monitor_2023_2025": 0.23585787751285647
     },
@@ -62,6 +70,10 @@
     },
     "matched_pod80_monitor_far": 0.9522673031026253,
     "already_inspected_development_only": true
+  },
+  "input_provenance": {
+    "contract": "config/source_provenance_contract_v1.json",
+    "strict_prospective_causality_established_for_all_aggregate_predictors": false
   },
   "rejected_architecture_evidence": [
     {
@@ -77,5 +89,5 @@
   ],
   "architecture_stop_rule": "No further architecture expansion on the current daily aggregate dataset. Reconsider sequence/spatial encoders only after richer verified causal observations are available.",
   "locked_test_accessed": false,
-  "claim_rule": "This file records the current development candidate only. It does not establish external superiority, operational readiness, or final locked-test performance."
+  "claim_rule": "This file records the current development candidate only. It does not establish external superiority, operational readiness, prospective forecast-time causality for every aggregate predictor, or final locked-test performance."
 }
