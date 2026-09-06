@@ -50,17 +50,19 @@ jobs:
             pandas==${{ matrix.pandas }} \
             scipy==1.18.1 \
             scikit-learn==1.8.0 \
-            xgboost==3.0.4
+            xgboost==3.0.4 \
+            pytest==8.4.2
           python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
 
       - name: Record runtime
         run: |
           python - <<'PY'
           import platform
-          import numpy, pandas, scipy, sklearn, torch, xgboost
+          import numpy, pandas, pytest, scipy, sklearn, torch, xgboost
           print('python', platform.python_version())
           print('numpy', numpy.__version__)
           print('pandas', pandas.__version__)
+          print('pytest', pytest.__version__)
           print('scipy', scipy.__version__)
           print('scikit_learn', sklearn.__version__)
           print('xgboost', xgboost.__version__)
@@ -83,12 +85,9 @@ jobs:
               py_compile.compile(str(path), doraise=True)
           PY
 
-      - name: Run every source-only unit test
+      - name: Run every source-only test and inventory data-bound exclusions
         run: |
-          python -m unittest discover \
-            -s iris_report/iris_sep/tests \
-            -p 'test_*.py' \
-            -v
+          python -m iris_report.iris_sep.tools.run_source_only_tests
 
       - name: Verify JSON configuration parses
         run: |
@@ -99,4 +98,16 @@ jobs:
           for path in files:
               json.loads(path.read_text(encoding='utf-8'))
           print('parsed', len(files), 'configuration files')
+          PY
+
+      - name: Assert data-dependent tests are explicitly registered
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('iris_report/iris_sep/config/data_dependent_test_registry_v1.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          print('ignored data-bound files:', len(data['ignore_files']))
+          print('deselected data-bound nodeids:', len(data['deselect_nodeids']))
+          print('source-only success does not establish data-dependent test success or forecasting usefulness')
           PY
