@@ -1,13 +1,26 @@
 # Latest IRIS-SEP build
 
-Current executable checkpoint: `architecture/SIMPLE_MISSING_DATA_PHYSICS_BUILD_2026-09-05.md`.
+The authoritative current status is `CURRENT_STATUS.md`.
 
-Plain-English explanation: `PROJECT_IN_PLAIN_ENGLISH.md`.
+Do **not** treat older “latest” prose in historical architecture reports as current when it conflicts with that page. Historical reports and receipts remain preserved for audit continuity.
 
-Exact verification receipt: `receipts/simple_missing_data_physics_build_v1_2026-09-05.json`.
+## Current development candidate
 
-Source-tested head: `c7135b3a0bba84cfb39431c2be7ac6834b23e507`.
+`IRIS_CROSSFIT_EVIDENCE_STACK_V1` is the current development candidate. Its architecture is frozen on the current daily aggregate interface; no new architecture search is authorized during the two-week submission sprint.
 
-Verification: GitHub Actions run `33978887134`, job `101340379074`, 81 tests, zero failures/errors, `py_compile` PASS.
+See:
 
-Real-data NEW-crossing and magnetic-map experiments remain NOT_RUN until their verified train-only packages are available. Do not substitute mixed or locked data.
+- `CURRENT_STATUS.md`
+- `config/current_development_architecture_v1.json`
+- `CHANGELOG.md`
+- `architecture/THRESHOLD_POLICY_RECONCILIATION_2026-09-06.md`
+- `provenance/SOURCE_PROVENANCE_AUDIT_2026-09-06.md`
+- `config/inspected_evidence_registry_v1.json`
+
+## Current evidence boundary
+
+Real development experiments have run and are preserved. They are retrospective development evidence on the released aggregate dataset, not untouched final superiority evidence.
+
+Strict forecast-time causality for every aggregate predictor is not yet established because upstream preprocessing includes retrospective interpolation/harmonization operations and complete row/cell provenance is not preserved in the reviewed model-ready table.
+
+The locked test remains untouched during development.
