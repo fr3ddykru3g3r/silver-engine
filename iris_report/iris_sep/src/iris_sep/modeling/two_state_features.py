@@ -111,6 +111,6 @@ def build_two_state_features(
         "lag_missing_rows": int(np.sum(available == 0.0)),
         "strictly_earlier_lag_rows": bool(np.all((lag_index < 0) | (lag_index < np.arange(n)))),
         "exact_24h_lag_rows": int(np.sum(np.isclose(age_hours, cfg.lag_hours, equal_nan=False))),
-        "timestamp_storage_unit_independent": true,
+        "timestamp_storage_unit_independent": True,
     }
     return result, receipt
