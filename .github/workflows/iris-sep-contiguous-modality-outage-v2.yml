@@ -19,8 +19,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - name: Check out preregistered head
+      - name: Check out preregistered head with history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Verify preregistration predates this result run
         run: |
@@ -83,22 +85,30 @@ jobs:
         run: |
           mkdir -p /tmp/iris-contiguous-modality-outage-v2
           python - <<'PY'
-          import hashlib, json, platform
+          import hashlib, importlib.metadata, json, platform
           from pathlib import Path
-          import numpy, pandas, scipy, sklearn, xgboost
+
           def digest(path):
               return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+          def version(distribution):
+              try:
+                  return importlib.metadata.version(distribution)
+              except importlib.metadata.PackageNotFoundError:
+                  return None
+
           receipt = {
               'git_head': '${{ github.sha }}',
               'python': platform.python_version(),
-              'numpy': numpy.__version__,
-              'pandas': pandas.__version__,
-              'scipy': scipy.__version__,
-              'scikit_learn': sklearn.__version__,
-              'xgboost': xgboost.__version__,
+              'numpy': version('numpy'),
+              'pandas': version('pandas'),
+              'scipy': version('scipy'),
+              'scikit_learn': version('scikit-learn'),
+              'xgboost': version('xgboost'),
               'runner_sha256': digest('iris_report/iris_sep/tools/run_contiguous_modality_outage_v2.py'),
               'preregistration_sha256': digest('iris_report/iris_sep/config/contiguous_modality_outage_preregistration_v2_2026-09-06.json'),
               'test_sha256': digest('iris_report/iris_sep/tests/test_contiguous_modality_outage_v2.py'),
+              'workflow_only_retry_after_shallow_checkout_failure': True,
               'v1_failed_run_preserved': True,
               'locked_test_accessed': False,
               'monitor_used': False,
