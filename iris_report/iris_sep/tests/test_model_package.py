@@ -1,6 +1,11 @@
 from __future__ import annotations
 import copy
+from pathlib import Path
 import unittest
+from unittest.mock import patch
+
+import numpy as np
+import pandas as pd
 
 from iris_report.iris_sep.src.iris_sep.model_package import (
     PACKAGE_FORMAT,
@@ -9,6 +14,7 @@ from iris_report.iris_sep.src.iris_sep.model_package import (
     STATE_OPERATOR_PERMISSION,
     STATE_STACK_KIND_V3,
     V3_ARCHITECTURE,
+    LoadedAvailabilityPackage,
     expected_state_feature_schema,
     expected_state_feature_schema_sha256,
     validate_manifest,
@@ -131,6 +137,34 @@ class ModelPackageTests(unittest.TestCase):
         manifest["operator_permissions"]["NO_XRS_OR_PROTON"] = "DEGRADED"
         with self.assertRaisesRegex(ValueError, "operator permissions"):
             validate_manifest(manifest)
+
+    def test_solar_only_threshold_crossing_cannot_become_alert(self):
+        package = LoadedAvailabilityPackage(
+            root=Path("."),
+            manifest=valid_v3_manifest(),
+            models={},
+        )
+        frame = pd.DataFrame({"s": [1.0]})
+        with patch.object(package, "predict", return_value=np.asarray([0.99])):
+            result = package.decision(frame, state="NO_XRS_OR_PROTON", policy="MAX_TSS")
+        self.assertTrue(bool(result["threshold_crossed"][0]))
+        self.assertEqual(result["operator_permission"], "ABSTAIN")
+        self.assertFalse(result["alert_permitted"])
+        self.assertFalse(bool(result["alert"][0]))
+
+    def test_degraded_state_retains_explicit_permission_when_threshold_crosses(self):
+        package = LoadedAvailabilityPackage(
+            root=Path("."),
+            manifest=valid_v3_manifest(),
+            models={},
+        )
+        frame = pd.DataFrame({"s": [1.0], "p": [1.0]})
+        with patch.object(package, "predict", return_value=np.asarray([0.99])):
+            result = package.decision(frame, state="NO_XRS", policy="MAX_TSS")
+        self.assertTrue(bool(result["threshold_crossed"][0]))
+        self.assertEqual(result["operator_permission"], "DEGRADED")
+        self.assertTrue(result["alert_permitted"])
+        self.assertTrue(bool(result["alert"][0]))
 
     def test_state_contract_is_complete(self):
         self.assertEqual(set(STATE_EXPERTS), {"FULL", "NO_XRS", "NO_PROTON", "NO_XRS_OR_PROTON"})
