@@ -1,9 +1,9 @@
-"""Reloadable IRIS-SEP availability-conditioned model package.
+"""Reloadable IRIS-SEP availability-conditioned model packages.
 
-A package contains 15 XGBoost specialists (5 seeds for each of solar, XRS,
-proton), frozen feature order, fit prevalence, availability-state fusion
-parameters, calibration intercepts, decision thresholds, dependency versions,
-and SHA-256 bindings. Loading never trains or calibrates a model.
+V1 packages contain 15 XGBoost specialists plus state-specific evidence stacks.
+V2 adds the promoted distilled-V3 state architecture, position-sensitive feature
+schema hashes, an immutable manifest receipt and executable operator-permission
+semantics. Loading never trains, calibrates or retunes a model.
 
 Runtime deliberately loads raw XGBoost ``Booster`` objects rather than sklearn
 wrappers. This keeps serialization independent of sklearn estimator-mixin API
@@ -23,12 +23,35 @@ import pandas as pd
 import xgboost
 from xgboost import Booster, DMatrix
 
+from .feature_schema_binding import (
+    FeatureSchemaBindingError,
+    build_feature_vector_schema,
+    feature_vector_schema_sha256,
+    validate_feature_vector_schema,
+)
+
+
 PACKAGE_FORMAT = "IRIS_SEP_AVAILABILITY_MODEL_PACKAGE_V1"
+PACKAGE_FORMAT_V2 = "IRIS_SEP_AVAILABILITY_MODEL_PACKAGE_V2"
+SUPPORTED_PACKAGE_FORMATS = frozenset({PACKAGE_FORMAT, PACKAGE_FORMAT_V2})
+V3_ARCHITECTURE = "IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3"
 STATE_EXPERTS = {
     "FULL": ("SOLAR", "XRS", "PROTON"),
     "NO_XRS": ("SOLAR", "PROTON"),
     "NO_PROTON": ("SOLAR", "XRS"),
     "NO_XRS_OR_PROTON": ("SOLAR",),
+}
+STATE_STACK_KIND_V3 = {
+    "FULL": "POSITIVE_EVIDENCE_STACK_TEACHER",
+    "NO_XRS": "DISTILLED_POSITIVE_EVIDENCE_STACK",
+    "NO_PROTON": "DISTILLED_POSITIVE_EVIDENCE_STACK",
+    "NO_XRS_OR_PROTON": "SOLAR_ONLY",
+}
+STATE_OPERATOR_PERMISSION = {
+    "FULL": "NORMAL_ONLY_IF_ADMISSION_PASSES",
+    "NO_XRS": "DEGRADED",
+    "NO_PROTON": "DEGRADED",
+    "NO_XRS_OR_PROTON": "ABSTAIN",
 }
 FAMILY_KEY = {"SOLAR": "solar", "XRS": "xrs", "PROTON": "proton"}
 
@@ -80,11 +103,45 @@ def _booster_probability(booster: Booster, frame: pd.DataFrame, names: list[str]
     probability = np.asarray(booster.predict(matrix), dtype=np.float64)
     if probability.ndim != 1 or len(probability) != len(frame):
         raise RuntimeError("specialist booster emitted unexpected prediction shape")
+    if not np.isfinite(probability).all() or ((probability < 0) | (probability > 1)).any():
+        raise RuntimeError("specialist booster emitted invalid probabilities")
     return probability
 
 
-def validate_manifest(manifest: Mapping[str, object]) -> None:
-    if manifest.get("format") != PACKAGE_FORMAT:
+def _state_feature_families(families: Mapping[str, list[str]], state: str) -> dict[str, tuple[str, ...]]:
+    return {
+        expert: tuple(families[FAMILY_KEY[expert]])
+        for expert in STATE_EXPERTS[state]
+    }
+
+
+def expected_state_feature_schema(families: Mapping[str, list[str]], state: str) -> dict[str, object]:
+    """Return the exact vector schema consumed by one availability state."""
+    if state not in STATE_EXPERTS:
+        raise ValueError("unknown availability state")
+    try:
+        return build_feature_vector_schema(
+            _state_feature_families(families, state),
+            family_order=STATE_EXPERTS[state],
+        )
+    except FeatureSchemaBindingError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+def expected_state_feature_schema_sha256(families: Mapping[str, list[str]], state: str) -> str:
+    if state not in STATE_EXPERTS:
+        raise ValueError("unknown availability state")
+    try:
+        return feature_vector_schema_sha256(
+            _state_feature_families(families, state),
+            family_order=STATE_EXPERTS[state],
+        )
+    except FeatureSchemaBindingError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+def _validate_base_manifest(manifest: Mapping[str, object]) -> dict[str, list[str]]:
+    if manifest.get("format") not in SUPPORTED_PACKAGE_FORMATS:
         raise ValueError("unsupported model package format")
     if manifest.get("target") != "new_sep_10mev_10pfu_within_24h":
         raise ValueError("unexpected target")
@@ -105,6 +162,8 @@ def validate_manifest(manifest: Mapping[str, object]) -> None:
     for family, entries in model_files.items():
         if not isinstance(entries, list) or len(entries) != 5:
             raise ValueError(f"{family} must contain five specialist files")
+        if [entry.get("seed") if isinstance(entry, dict) else None for entry in entries] != seeds:
+            raise ValueError(f"{family} specialist seed order mismatch")
         for entry in entries:
             if not isinstance(entry, dict) or set(entry) < {"seed", "path", "sha256"}:
                 raise ValueError("invalid model entry")
@@ -118,7 +177,7 @@ def validate_manifest(manifest: Mapping[str, object]) -> None:
         raise ValueError("availability states incomplete")
     for state, experts in STATE_EXPERTS.items():
         row = states[state]
-        if tuple(row.get("experts", [])) != experts:
+        if not isinstance(row, Mapping) or tuple(row.get("experts", [])) != experts:
             raise ValueError(f"state expert mismatch for {state}")
         if not math.isfinite(float(row.get("calibration_intercept"))):
             raise ValueError("invalid calibration intercept")
@@ -134,6 +193,82 @@ def validate_manifest(manifest: Mapping[str, object]) -> None:
                 raise ValueError("invalid stack parameters")
             if not math.isfinite(float(stack.get("intercept"))) or any(not math.isfinite(float(v)) or float(v) < 0 for v in stack["weights"]):
                 raise ValueError("invalid stack parameters")
+        elif row.get("stack") is not None:
+            raise ValueError("solar-only state must not carry a learned stack")
+    prevalence = float(manifest.get("fit_prevalence", 0.5))
+    limit = float(manifest.get("evidence_limit", 6.0))
+    if not 0 < prevalence < 1 or not math.isfinite(limit) or limit <= 0:
+        raise ValueError("invalid prevalence or evidence limit")
+    return families
+
+
+def _validate_v2_manifest(manifest: Mapping[str, object], families: Mapping[str, list[str]]) -> None:
+    if manifest.get("architecture") != V3_ARCHITECTURE:
+        raise ValueError("V2 package must identify the distilled V3 architecture")
+    if manifest.get("runtime_training_allowed") is not False:
+        raise ValueError("V2 runtime training must be explicitly disabled")
+
+    permissions = manifest.get("operator_permissions")
+    if permissions != STATE_OPERATOR_PERMISSION:
+        raise ValueError("V2 operator permissions do not match the frozen state policy")
+
+    distillation = manifest.get("distillation")
+    if not isinstance(distillation, Mapping):
+        raise ValueError("V2 distillation contract missing")
+    teacher_weight = float(distillation.get("teacher_weight", -1))
+    hard_weight = float(distillation.get("hard_label_weight", -1))
+    l2_weight = float(distillation.get("l2_weight", -1))
+    if not math.isclose(teacher_weight, 0.35, rel_tol=0.0, abs_tol=1e-15):
+        raise ValueError("unexpected V3 teacher weight")
+    if not math.isclose(hard_weight, 0.65, rel_tol=0.0, abs_tol=1e-15):
+        raise ValueError("unexpected V3 hard-label weight")
+    if not math.isclose(teacher_weight + hard_weight, 1.0, rel_tol=0.0, abs_tol=1e-15):
+        raise ValueError("V3 distillation target weights must sum to one")
+    if not math.isclose(l2_weight, 0.03, rel_tol=0.0, abs_tol=1e-15):
+        raise ValueError("unexpected V3 L2 weight")
+    prereg = distillation.get("preregistration")
+    prereg_sha = distillation.get("preregistration_sha256")
+    if not isinstance(prereg, str) or not prereg or not isinstance(prereg_sha, str) or len(prereg_sha) != 64:
+        raise ValueError("V3 preregistration binding missing")
+
+    schemas = manifest.get("state_feature_schemas")
+    if not isinstance(schemas, Mapping) or set(schemas) != set(STATE_EXPERTS):
+        raise ValueError("V2 state feature schemas incomplete")
+    for state in STATE_EXPERTS:
+        row = schemas[state]
+        if not isinstance(row, Mapping):
+            raise ValueError("invalid state feature schema record")
+        expected = expected_state_feature_schema(families, state)
+        expected_sha = expected_state_feature_schema_sha256(families, state)
+        if row.get("sha256") != expected_sha:
+            raise ValueError(f"state feature schema digest mismatch for {state}")
+        try:
+            serialized = validate_feature_vector_schema(row.get("schema", {}))
+        except FeatureSchemaBindingError as exc:
+            raise ValueError(str(exc)) from exc
+        if serialized != expected:
+            raise ValueError(f"state feature schema mismatch for {state}")
+
+    states = manifest["states"]
+    for state, expected_kind in STATE_STACK_KIND_V3.items():
+        if states[state].get("stack_kind") != expected_kind:
+            raise ValueError(f"unexpected V3 stack kind for {state}")
+        stack = states[state].get("stack")
+        if expected_kind == "DISTILLED_POSITIVE_EVIDENCE_STACK":
+            if not isinstance(stack, Mapping):
+                raise ValueError("distilled state requires stack parameters")
+            if not math.isclose(float(stack.get("teacher_weight", -1)), 0.35, rel_tol=0.0, abs_tol=1e-15):
+                raise ValueError("distilled state teacher weight mismatch")
+            if not math.isclose(float(stack.get("hard_label_weight", -1)), 0.65, rel_tol=0.0, abs_tol=1e-15):
+                raise ValueError("distilled state hard-label weight mismatch")
+            if not math.isclose(float(stack.get("l2_weight", -1)), 0.03, rel_tol=0.0, abs_tol=1e-15):
+                raise ValueError("distilled state L2 weight mismatch")
+
+
+def validate_manifest(manifest: Mapping[str, object]) -> None:
+    families = _validate_base_manifest(manifest)
+    if manifest.get("format") == PACKAGE_FORMAT_V2:
+        _validate_v2_manifest(manifest, families)
 
 
 @dataclass
@@ -150,6 +285,17 @@ class LoadedAvailabilityPackage:
             raise ValueError("manifest.json missing")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         validate_manifest(manifest)
+        if manifest.get("format") == PACKAGE_FORMAT_V2:
+            receipt_path = root / "package_receipt.json"
+            if not receipt_path.is_file():
+                raise ValueError("V2 package_receipt.json missing")
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if receipt.get("format") != PACKAGE_FORMAT_V2:
+                raise ValueError("V2 package receipt format mismatch")
+            if receipt.get("manifest_sha256") != sha256_file(manifest_path):
+                raise ValueError("V2 manifest digest mismatch")
+            if receipt.get("runtime_training_allowed") is not False:
+                raise ValueError("V2 receipt must disable runtime training")
         if enforce_dependency_version and manifest.get("dependencies", {}).get("xgboost") != xgboost.__version__:
             raise ValueError("xgboost version does not match package")
         models: dict[str, list[Booster]] = {}
@@ -172,6 +318,20 @@ class LoadedAvailabilityPackage:
         for expert in STATE_EXPERTS[state]:
             names.extend(self.manifest["feature_families"][FAMILY_KEY[expert]])
         return tuple(names)
+
+    def state_feature_schema_sha256(self, state: str) -> str:
+        """Return the position-sensitive schema digest for one runtime state."""
+        if self.manifest.get("format") == PACKAGE_FORMAT_V2:
+            return str(self.manifest["state_feature_schemas"][state]["sha256"])
+        return expected_state_feature_schema_sha256(self.manifest["feature_families"], state)
+
+    def operator_permission(self, state: str) -> str:
+        if state not in STATE_EXPERTS:
+            raise ValueError("unknown availability state")
+        permissions = self.manifest.get("operator_permissions")
+        if isinstance(permissions, Mapping):
+            return str(permissions.get(state, STATE_OPERATOR_PERMISSION[state]))
+        return STATE_OPERATOR_PERMISSION[state]
 
     def _family_probability(self, family: str, frame: pd.DataFrame) -> np.ndarray:
         names = self.manifest["feature_families"][family]
@@ -214,15 +374,22 @@ class LoadedAvailabilityPackage:
             raise RuntimeError("package emitted invalid probability")
         return calibrated
 
-    def decision(self, frame: pd.DataFrame, *, state: str = "FULL", policy: str = "MAX_TSS") -> dict[str, np.ndarray | float | str]:
+    def decision(self, frame: pd.DataFrame, *, state: str = "FULL", policy: str = "MAX_TSS") -> dict[str, np.ndarray | float | str | bool]:
         if policy not in ("MAX_TSS", "POD80_MIN_FAR"):
             raise ValueError("unknown threshold policy")
         probability = self.predict(frame, state=state)
         threshold = float(self.manifest["states"][state]["thresholds"][policy])
+        threshold_crossed = probability >= threshold
+        permission = self.operator_permission(state)
+        alert_permitted = permission != "ABSTAIN"
+        alert = threshold_crossed & alert_permitted
         return {
             "state": state,
             "policy": policy,
             "threshold": threshold,
             "probability": probability,
-            "alert": probability >= threshold,
+            "threshold_crossed": threshold_crossed,
+            "operator_permission": permission,
+            "alert_permitted": alert_permitted,
+            "alert": alert,
         }
