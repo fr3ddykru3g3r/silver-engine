@@ -1,0 +1,118 @@
+name: IRIS-SEP availability-conditioned fallback
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/availability_conditioned_fallback_preregistration_2026-09-07.json'
+      - 'iris_report/iris_sep/src/iris_sep/modeling/availability_fallback.py'
+      - 'iris_report/iris_sep/tests/test_availability_fallback.py'
+      - 'iris_report/iris_sep/tools/run_availability_conditioned_fallback.py'
+      - 'iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py'
+      - '.github/workflows/iris-sep-availability-fallback.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  availability-fallback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out continuation branch with ancestry
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify preregistration predates result-capable implementation
+        run: |
+          git merge-base --is-ancestor 629c0736ee2ea307c5dea12beac4e6fe5abb10ee HEAD
+          test -f iris_report/iris_sep/config/availability_conditioned_fallback_preregistration_2026-09-07.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            scikit-learn==1.8.0 \
+            scipy==1.18.1 \
+            xgboost==3.0.4
+
+      - name: Compile and test fallback contract
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/modeling/availability_fallback.py \
+            iris_report/iris_sep/tools/run_availability_conditioned_fallback.py \
+            iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_availability_fallback.py' -v
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run frozen availability-conditioned fallback experiment
+        run: |
+          python -m iris_report.iris_sep.tools.run_availability_conditioned_fallback \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/availability-fallback \
+            > /tmp/availability-fallback.stdout.json
+
+      - name: Independently audit saved predictions and operator gates
+        run: |
+          python -m iris_report.iris_sep.tools.audit_availability_conditioned_fallback \
+            --result-dir /tmp/availability-fallback \
+            --output /tmp/availability-fallback/independent_audit.json
+
+      - name: Bind runtime and source hashes
+        run: |
+          python - <<'PY'
+          import hashlib, json, platform
+          from pathlib import Path
+          import numpy, pandas, scipy, sklearn, xgboost
+          root=Path('/tmp/availability-fallback')
+          def h(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          payload={
+            'git_head':'${{ github.sha }}',
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'scipy':scipy.__version__,
+            'scikit_learn':sklearn.__version__,
+            'xgboost':xgboost.__version__,
+            'preregistration_ancestor_commit':'629c0736ee2ea307c5dea12beac4e6fe5abb10ee',
+            'predictions_sha256':h(root/'predictions.csv'),
+            'summary_sha256':h(root/'summary.json'),
+            'independent_audit_sha256':h(root/'independent_audit.json'),
+            'locked_test_accessed':False,
+            'monitor_used':False,
+            'imputation_used':False,
+            'reconstruction_used':False,
+          }
+          (root/'runtime.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable fallback evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-availability-fallback-${{ github.sha }}
+          path: /tmp/availability-fallback
+          if-no-files-found: error
+          retention-days: 30
