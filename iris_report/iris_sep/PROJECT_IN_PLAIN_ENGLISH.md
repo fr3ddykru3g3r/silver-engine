@@ -2,146 +2,151 @@
 
 ## The project in one sentence
 
-**When some solar measurements temporarily go missing, can a simple physics-based reconstruction keep a 24-hour solar-radiation-storm forecast useful better than ordinary fill-in methods?**
+**When a solar-radiation warning system loses an important sensor feed, can it tell when a reduced-sensor forecast is still useful — and when it should refuse to guess?**
 
 That is the project.
 
-The forecast target stays the same: the probability that a **new** >10 MeV solar energetic particle event will cross **10 pfu within the next 24 hours**.
+The forecast target is fixed: the probability that a **new** >10 MeV solar energetic particle event will cross **10 pfu within the next 24 hours**.
+
+You do not need to know solar physics to understand the problem. Think of it as a rare radiation-storm warning: measurements arrive from several sources, and the system has to decide whether tomorrow is unusually risky.
 
 ## Why this matters
 
-Solar-radiation-storm forecasts use measurements of the Sun and near-Earth particle conditions. Real data feeds are not perfect: measurements can be missing, delayed or temporarily unavailable.
+A normal forecasting model assumes its inputs are there.
 
-A forecasting system then has three choices:
+Real sensor systems do not always behave that way. A feed can disappear, become stale, or be unavailable for part of the historical record.
 
-1. guess the missing value with a simple statistical rule;
-2. use a physics model to estimate what the missing solar state probably looked like;
-3. admit that the data are too incomplete and refuse to give a normal forecast.
+The dangerous failure mode is not necessarily a crash. The model can still output a perfectly normal-looking number — for example, `17% risk` — even though important evidence is missing.
 
-IRIS-SEP asks which choice is actually safest and most useful.
+IRIS-SEP asks a different question from ordinary forecasting:
 
-## The main experiment
+> **When is a forecast probability trustworthy enough to show to a human?**
 
-We start with periods where the real measurement is known.
+## The simple idea
 
-Then we deliberately hide part of it.
+Instead of inventing a missing measurement at runtime, we train small forecast combinations in advance for the information that might actually remain available.
 
-We ask several methods to fill the gap:
+There are four information states:
 
-- **No fill:** keep the value missing and let the forecast model know it is missing.
-- **Simple fill:** use only earlier data or values learned from the training set.
-- **Physics fill:** use a simple physical model of how the relevant solar quantity changes through time.
+1. **FULL** — all main information families are available.
+2. **NO_XRS** — the X-ray information is unavailable.
+3. **NO_PROTON** — the proton-context information is unavailable.
+4. **NO_XRS_OR_PROTON** — both are unavailable, leaving only the remaining solar information.
 
-Because we hid data that we actually know, we can compare every reconstruction with the real answer.
+When a feed disappears, the system does not retrain itself and does not fabricate a replacement measurement. It switches to the already-frozen state that matches the information actually available.
 
-Then we run the same SEP forecaster with each version and ask the question that matters most:
+Then it makes a second decision:
 
-> **Which method preserves the radiation-storm forecast best?**
+- **NORMAL** — sufficient evidence for the ordinary forecast;
+- **DEGRADED** — reduced information, but development evidence says a limited forecast may still be shown with a warning;
+- **ABSTAIN** — too much useful evidence has disappeared, so the system should not pretend the probability is decision-worthy.
 
-A physics reconstruction only survives if it performs better than the simpler methods on the same hidden-data cases.
+## What the controlled development experiment found
 
-## What is built now
+This is **development-only evidence**, not the untouched final test.
 
-The experiment is now implemented in code.
+Using event-bearing sensor-loss cases and quiet controls:
 
-The forecast-side runner trains a simple reference forecaster on normal train-only data, freezes it, and only then pretends that some score-time measurements disappeared. It compares:
+| Information missing | Development permission |
+|---|---|
+| X-ray feed | **DEGRADED** |
+| proton-context feed | **DEGRADED** |
+| both X-ray + proton-context feeds | **ABSTAIN** |
 
-- leaving the measurement missing;
-- filling it with a value learned from the training data;
-- carrying forward the last earlier real value.
+The important part is the last row.
 
-The physics-side runner works on magnetic maps. Its first physics model is intentionally easy to explain:
+Even the solar-only fallback still produces finite probabilities. The system therefore cannot use “the model returned a number” as proof that the number is useful. When both major context feeds are removed, detection on the controlled affected cohort falls below the predeclared minimum, so the operator rule refuses the forecast.
 
-> **Take the last real magnetic map, move it sideways as the Sun carries the magnetic pattern around, and let the pattern spread a little.**
+That is the central design principle:
 
-Mathematically this is a small advection-and-diffusion model. It is **not** a full simulation of the Sun and it is **not** MHD.
+> **A forecasting system should know when it no longer has enough evidence to act normal.**
 
-We test that physics model by hiding real later magnetic maps and asking whether it predicts them better than the simplest alternative: just reusing the last real map unchanged.
+## What about 24-hour, 72-hour and 168-hour outages?
 
-The code also enforces several rules automatically:
+The availability-conditioned fallback uses only the information present at the current forecast issue time. It does not use or reconstruct history from the missing feed.
 
-- a measurement that never existed in an older instrument era cannot be turned into fake "observed" data;
-- a hidden value cannot leak back into the model through the input array;
-- a hidden magnetic map can use only an earlier real map, never a later map;
-- two missing maps in a row do not use one synthetic map to create the next one;
-- if there is no earlier real magnetic map, the physics method abstains;
-- locked-test roles are rejected before fitting or scoring;
-- the forecaster is not retrained after the artificial outage.
+Therefore, once a feed is absent, the fallback probability depends on the **availability state**, not on whether that feed has already been absent for one, three or seven days. The earlier terminal-outage experiment consequently produced the same endpoint cohort and state prediction at those durations.
 
-The complete source build currently passes **81 automated tests** plus compile checks on the pinned source-test environment.
+Those receipts remain preserved for audit history, but we do **not** present them as three independent scientific findings.
 
-What has **not** happened yet is the real-data scientific experiment. The verified train-only NEW-crossing package and the verified train-only magnetic-map package are not stored in ordinary Git, so the real comparison has not been fabricated from substitute or locked data.
+Duration matters for methods such as forward-fill or reconstruction, because those methods depend on how old the last available value is. It does not create extra evidence for a state-only fallback.
 
-## What we measure
+## The uncomfortable number we do not hide
 
-For the missing solar measurement itself, we measure how close each reconstruction is to the real hidden value.
+On the inspected development score block, the full-input model has useful ranking/discrimination but a very high row-level false-alarm ratio under the frozen binary threshold.
 
-For the final SEP forecast, we measure whether it still detects events without creating too many false alarms, whether its probabilities remain well calibrated, and how often the system has to abstain because the data are not trustworthy enough.
+That means a naive story such as “send an alert every time the threshold is crossed” is not good enough.
 
-The important result is not "the reconstructed solar map looks realistic." The important result is whether reconstruction preserves **forecast usefulness**.
+Instead of hiding this weakness, the project turns it into a second research question:
 
-## A crucial distinction
+> **Can the model concentrate rare events into a small, fixed fraction of days that a human analyst could realistically review?**
 
-Not every blank value is something that should be reconstructed.
+Before any locked-test access, we froze a primary human-review budget of **5% of eligible forecast days**, about **18 days of review per 365 issue-days**. We will report how many event-positive issue days fall inside that fixed high-risk slice, plus the enrichment over random review at the same workload.
 
-### Temporary gap
+This metric is frozen after development inspection but before the untouched test; we do not pretend it was preregistered before seeing development data.
 
-The instrument normally measures the quantity, but one section is missing or delayed.
+## Why this is more than “another AI solar-flare model”
 
-This is eligible for the reconstruction experiment.
+The headline is not a new neural network.
 
-### Measurement never existed in that era
+The project separates two questions that are often mixed together:
 
-An older instrument simply did not measure the same quantity.
+1. **What is the probability of a new radiation event?**
+2. **Do the available measurements justify exposing that probability as a normal forecast?**
 
-This is **not** treated as a temporary gap. We do not generate a fake historical measurement and call it observed data.
+That second question creates a reliability layer around the model.
 
-If a comparable real measurement from another instrument exists, we test that real source first.
+The interesting scientific result can therefore be negative:
 
-## Where physics fits
+- if one missing feed still leaves useful evidence, show a **DEGRADED** forecast;
+- if too much evidence disappears, **ABSTAIN**;
+- if a supposedly clever missing-data method does not improve the final forecast, remove it.
 
-Physics is deliberately kept simple.
+## What is built
 
-We do **not** begin by building a giant simulation of the whole Sun.
+The repository now contains:
 
-We first test the simplest physical model that can describe the missing quantity. Only if that clearly improves the forecast do we consider a more advanced physical simulation.
-
-So the order is:
-
-**real observations -> simple missing-data methods -> simple physics -> only then more complex physics if needed.**
-
-## What would count as a strong result
-
-A strong result would be something like:
-
-> When a solar data feed has a temporary gap, ordinary fill-in methods lose forecast skill quickly, while a physics-based reconstruction preserves more of the original forecasting ability. When the gap becomes too large, the system's uncertainty rises and it automatically stops pretending the forecast is reliable.
-
-That would show both a scientific result and a practical reliability improvement.
-
-A negative result is also scientifically useful:
-
-> If simple statistical filling works just as well as physics, then the more complicated physics model is unnecessary.
-
-The project is designed to report that result too.
+- a fixed NEW-SEP target and chronological role construction;
+- specialist forecast models for different information families;
+- a cross-fitted evidence combination;
+- calibration and threshold selection separated from fitting;
+- availability-conditioned reduced-sensor models;
+- explicit NORMAL / DEGRADED / ABSTAIN rules;
+- event-bearing outage stress tests;
+- independent auditing of saved predictions and gates;
+- hash-pinned public development inputs and immutable CI evidence;
+- a frozen 5% operator-review-budget policy for the future locked evaluation;
+- strict claim boundaries separating development evidence from untouched final evidence.
 
 ## What we are NOT claiming
 
-We are not claiming that we perfectly simulate the Sun, that every missing solar measurement can be recovered, that the system is operationally certified, or that it will win a competition.
+We are not claiming:
 
-Those claims would require experimental evidence that does not exist yet.
+- operational certification;
+- perfect prediction of solar radiation storms;
+- that false alarms have been solved;
+- that missing measurements can always be reconstructed;
+- a full simulation of the Sun;
+- economic savings;
+- superiority on an untouched test that has not been opened;
+- any competition or award outcome.
 
 ## Thirty-second explanation for a judge
 
-"We are building a 24-hour solar-radiation-storm forecaster. One problem is that real solar measurements can temporarily disappear. Instead of automatically guessing the missing data, we take measurements we already know, deliberately hide them, and compare three choices: leave them missing, fill them statistically, or reconstruct them with simple solar physics. We then test which option best preserves the actual storm forecast. If the reconstruction becomes unreliable, the system is designed to say so rather than give a confident-looking forecast from bad data."
+“Solar-radiation forecasts depend on several sensor feeds. I found that losing a sensor does not necessarily make a model crash — it can keep giving a convincing-looking probability even when the warning is no longer trustworthy. So we trained separate forecast combinations for the sensors that remain and added a second decision: normal, degraded, or abstain. In development tests, losing either one of two major information feeds still supported a degraded forecast, but losing both failed our detection requirement and forced the system to refuse the forecast. We are now testing whether the risk ranking can concentrate rare events into a fixed 5% of days worth human review, with the final metric frozen before an untouched evaluation.”
 
 ## The research question
 
-**Can a causal physics-based reconstruction of temporarily missing solar observations preserve 24-hour NEW-SEP forecasting skill better than simpler missing-data methods, while uncertainty tells the system when to abstain?**
+**Can availability-conditioned forecasting preserve useful 24-hour NEW-SEP risk information when solar sensor feeds are missing, while a frozen reliability rule identifies when the system should degrade or abstain rather than expose an unjustified probability?**
 
 ## The rule that keeps the project simple
 
-Every added method must answer one question:
+Every component must answer one of two questions:
 
-> **Does this improve the forecast on a controlled experiment?**
+> **Does this improve the forecast?**
 
-If the answer is no, we remove it from the final model.
+or
+
+> **Does this make the system better at knowing when not to trust the forecast?**
+
+If the answer to both is no, it does not belong in the final project.
