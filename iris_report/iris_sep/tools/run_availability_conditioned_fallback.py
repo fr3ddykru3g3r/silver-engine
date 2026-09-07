@@ -1,8 +1,8 @@
 """Preregistered availability-conditioned fallback experiment for IRIS-SEP.
 
-No missing measurement is reconstructed or imputed.  Specialist models and small
+No missing measurement is reconstructed or imputed. Specialist models and small
 fusion rules are trained in advance for the information families that remain
-available.  Runtime feed loss selects the corresponding frozen fallback.
+available. Runtime feed loss selects the corresponding frozen fallback.
 
 Development-only: score data are already inspected and no locked test is read.
 """
@@ -171,8 +171,25 @@ def run(features: Path, events: Path, output: Path):
 
     frame, y, event_ids, base, xrs, proton, dropped = cs.prepare_frame(features, events)
     roles, units, purged, positive_units = cs.build_scope_roles(frame, y, event_ids, None)
+
+    # The preregistration forbids use of the previously inspected 2023-2025
+    # monitor. build_scope_roles labels those rows so that other diagnostics can
+    # evaluate them. Here we remove them completely before any specialist fit,
+    # calibration, thresholding, prediction export, scenario selection, or
+    # metric calculation. This preserves the exact pre-monitor role identities
+    # while making monitor_used=false literal rather than merely aspirational.
+    monitor_mask = roles == "monitor"
+    monitor_rows_excluded = int(monitor_mask.sum())
+    if monitor_rows_excluded:
+        keep = ~monitor_mask
+        frame = frame.loc[keep].reset_index(drop=True)
+        y = np.asarray(y)[keep]
+        event_ids = np.asarray(event_ids)[keep]
+        roles = np.asarray(roles)[keep]
+        units = np.asarray(units)[keep]
     if np.any(roles == "monitor"):
-        raise ValueError("monitor role is forbidden")
+        raise ValueError("monitor exclusion failed")
+
     score = roles == "score"
     if not score.any() or int(y[score].sum()) == 0:
         raise ValueError("event-bearing score role required")
@@ -213,6 +230,7 @@ def run(features: Path, events: Path, output: Path):
         "event_catalogue_sha256": digest(events),
         "locked_test_accessed": False,
         "monitor_used": False,
+        "monitor_rows_excluded_before_modeling": monitor_rows_excluded,
         "score_role_already_inspected": True,
         "imputation_used": False,
         "reconstruction_used": False,
@@ -339,6 +357,7 @@ def run(features: Path, events: Path, output: Path):
         "predictions_sha256": summary["predictions_sha256"],
         "locked_test_accessed": False,
         "monitor_used": False,
+        "monitor_rows_excluded_before_modeling": monitor_rows_excluded,
         "imputation_used": False,
         "reconstruction_used": False,
         "runtime_retraining": False,
