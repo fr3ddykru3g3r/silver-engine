@@ -10,6 +10,7 @@ on:
       - 'iris_report/iris_sep/tests/test_availability_fallback.py'
       - 'iris_report/iris_sep/tools/run_availability_conditioned_fallback.py'
       - 'iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py'
+      - 'iris_report/iris_sep/tools/render_availability_fallback_judge_summary.py'
       - '.github/workflows/iris-sep-availability-fallback.yml'
   workflow_dispatch:
 
@@ -52,7 +53,8 @@ jobs:
           python -m py_compile \
             iris_report/iris_sep/src/iris_sep/modeling/availability_fallback.py \
             iris_report/iris_sep/tools/run_availability_conditioned_fallback.py \
-            iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py
+            iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py \
+            iris_report/iris_sep/tools/render_availability_fallback_judge_summary.py
           python -m unittest discover -s iris_report/iris_sep/tests -p 'test_availability_fallback.py' -v
 
       - name: Acquire hash-pinned public development inputs
@@ -81,6 +83,14 @@ jobs:
             --result-dir /tmp/availability-fallback \
             --output /tmp/availability-fallback/independent_audit.json
 
+      - name: Render plain-English judge evidence
+        run: |
+          python -m iris_report.iris_sep.tools.render_availability_fallback_judge_summary \
+            --summary /tmp/availability-fallback/summary.json \
+            --output /tmp/availability-fallback/JUDGE_SUMMARY.md
+          test -s /tmp/availability-fallback/JUDGE_SUMMARY.md
+          cat /tmp/availability-fallback/JUDGE_SUMMARY.md
+
       - name: Bind runtime and source hashes
         run: |
           python - <<'PY'
@@ -101,6 +111,7 @@ jobs:
             'predictions_sha256':h(root/'predictions.csv'),
             'summary_sha256':h(root/'summary.json'),
             'independent_audit_sha256':h(root/'independent_audit.json'),
+            'judge_summary_sha256':h(root/'JUDGE_SUMMARY.md'),
             'locked_test_accessed':False,
             'monitor_used':False,
             'imputation_used':False,
