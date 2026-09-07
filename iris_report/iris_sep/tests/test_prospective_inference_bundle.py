@@ -5,6 +5,9 @@ import json
 import unittest
 from datetime import datetime, timezone
 
+from iris_report.iris_sep.src.iris_sep.feature_schema_binding import (
+    feature_vector_schema_sha256,
+)
 from iris_report.iris_sep.src.iris_sep.inference_bundle import (
     build_inference_bundle,
     replay_inference_bundle,
@@ -20,13 +23,16 @@ from iris_report.iris_sep.workstreams.luna_i_eval_ops.operator import OperatorRu
 
 
 ISSUED = datetime(2026, 1, 1, 12, tzinfo=timezone.utc)
+REQUIRED = {"XRS": ("xrs_feature",), "PROTON": ("proton_feature",)}
+FAMILY_ORDER = ("XRS", "PROTON")
+SCHEMA_SHA256 = feature_vector_schema_sha256(REQUIRED, family_order=FAMILY_ORDER)
 
 
 def inference_fixture():
     runtime = OperatorRuntimePolicy(
         "fixture-policy",
         "fixture-calibration",
-        "b" * 64,
+        SCHEMA_SHA256,
         {"MONITOR": 0.2, "PREPARE": 0.5, "PROTECT": 0.75},
         {"magnetic": 120, "eruption": 60, "particle_context": 15},
         ("magnetic",),
@@ -109,7 +115,14 @@ def provenance_records(state="NATIVE_OBSERVED"):
     ]
 
 
-REQUIRED = {"XRS": ("xrs_feature",), "PROTON": ("proton_feature",)}
+def prospective_kwargs():
+    return {
+        "input_provenance_records": provenance_records(),
+        "required_features": REQUIRED,
+        "feature_family_order": FAMILY_ORDER,
+        "development_information_cutoff": None,
+        **inference_fixture(),
+    }
 
 
 def reanchor(envelope):
@@ -128,12 +141,7 @@ class ProspectiveInferenceBundleTests(unittest.TestCase):
             bundle_bytes=inner_bundle,
             expected_bundle_sha256=inner_digest,
         )
-        bundle, digest = build_prospective_inference_bundle(
-            input_provenance_records=provenance_records(),
-            required_features=REQUIRED,
-            development_information_cutoff=None,
-            **fixture,
-        )
+        bundle, digest = build_prospective_inference_bundle(**prospective_kwargs())
         result = replay_prospective_inference_bundle(
             bundle_bytes=bundle,
             expected_bundle_sha256=digest,
@@ -145,6 +153,7 @@ class ProspectiveInferenceBundleTests(unittest.TestCase):
             "prospective_inference_bundle_sha256",
             "prospective_inference_bundle_scope",
             "forecast_input_provenance",
+            "forecast_feature_vector_schema_sha256",
             "forecast_probability_permitted_by_provenance",
         }
         preserved_inner_result = {
@@ -153,33 +162,42 @@ class ProspectiveInferenceBundleTests(unittest.TestCase):
         self.assertEqual(preserved_inner_result, inner_result)
         self.assertTrue(result["forecast_probability_permitted_by_provenance"])
         self.assertEqual(result["forecast_input_provenance"]["status"], "VALID")
+        self.assertEqual(result["forecast_feature_vector_schema_sha256"], SCHEMA_SHA256)
         self.assertEqual(result["prospective_inference_bundle_sha256"], digest)
 
     def test_builder_blocks_unknown_aggregate_lineage(self):
+        kwargs = prospective_kwargs()
+        kwargs["input_provenance_records"] = provenance_records(state="UNKNOWN")
         with self.assertRaises(ProspectiveInferenceBundleError):
-            build_prospective_inference_bundle(
-                input_provenance_records=provenance_records(state="UNKNOWN"),
-                required_features=REQUIRED,
-                development_information_cutoff=None,
-                **inference_fixture(),
-            )
+            build_prospective_inference_bundle(**kwargs)
 
     def test_builder_requires_lineage_for_every_transformed_feature(self):
+        kwargs = prospective_kwargs()
+        kwargs["required_features"] = {"XRS": ("xrs_feature",)}
+        kwargs["feature_family_order"] = ("XRS",)
         with self.assertRaises(ProspectiveInferenceBundleError):
-            build_prospective_inference_bundle(
-                input_provenance_records=provenance_records(),
-                required_features={"XRS": ("xrs_feature",)},
-                development_information_cutoff=None,
-                **inference_fixture(),
-            )
+            build_prospective_inference_bundle(**kwargs)
+
+    def test_builder_rejects_same_length_feature_vector_with_different_order(self):
+        kwargs = prospective_kwargs()
+        kwargs["feature_family_order"] = ("PROTON", "XRS")
+        with self.assertRaisesRegex(
+            ProspectiveInferenceBundleError,
+            "ordered feature-vector schema does not match",
+        ):
+            build_prospective_inference_bundle(**kwargs)
+
+    def test_builder_rejects_runtime_schema_hash_not_derived_from_vector(self):
+        kwargs = prospective_kwargs()
+        kwargs["input_schema_sha256"] = "f" * 64
+        with self.assertRaisesRegex(
+            ProspectiveInferenceBundleError,
+            "ordered feature-vector schema does not match",
+        ):
+            build_prospective_inference_bundle(**kwargs)
 
     def test_replay_rejects_tampered_raw_lineage_even_with_new_outer_anchor(self):
-        bundle, _ = build_prospective_inference_bundle(
-            input_provenance_records=provenance_records(),
-            required_features=REQUIRED,
-            development_information_cutoff=None,
-            **inference_fixture(),
-        )
+        bundle, _ = build_prospective_inference_bundle(**prospective_kwargs())
         envelope = json.loads(bundle)
         envelope["payload"]["provenance"]["records"][0]["state"] = "UNKNOWN"
         mutated, anchor = reanchor(envelope)
@@ -190,12 +208,7 @@ class ProspectiveInferenceBundleTests(unittest.TestCase):
             )
 
     def test_replay_rejects_forged_saved_gate_even_with_new_outer_anchor(self):
-        bundle, _ = build_prospective_inference_bundle(
-            input_provenance_records=provenance_records(),
-            required_features=REQUIRED,
-            development_information_cutoff=None,
-            **inference_fixture(),
-        )
+        bundle, _ = build_prospective_inference_bundle(**prospective_kwargs())
         envelope = json.loads(bundle)
         envelope["payload"]["provenance"]["gate_receipt"]["manifest_sha256"] = "0" * 64
         mutated, anchor = reanchor(envelope)
@@ -205,13 +218,20 @@ class ProspectiveInferenceBundleTests(unittest.TestCase):
                 expected_bundle_sha256=anchor,
             )
 
+    def test_replay_rejects_reordered_schema_even_if_outer_anchor_is_recomputed(self):
+        bundle, _ = build_prospective_inference_bundle(**prospective_kwargs())
+        envelope = json.loads(bundle)
+        schema = envelope["payload"]["provenance"]["feature_vector_schema"]
+        schema["family_order"] = ["PROTON", "XRS"]
+        mutated, anchor = reanchor(envelope)
+        with self.assertRaises(ProspectiveInferenceBundleError):
+            replay_prospective_inference_bundle(
+                bundle_bytes=mutated,
+                expected_bundle_sha256=anchor,
+            )
+
     def test_replay_rejects_provenance_issue_time_different_from_inner_request(self):
-        bundle, _ = build_prospective_inference_bundle(
-            input_provenance_records=provenance_records(),
-            required_features=REQUIRED,
-            development_information_cutoff=None,
-            **inference_fixture(),
-        )
+        bundle, _ = build_prospective_inference_bundle(**prospective_kwargs())
         envelope = json.loads(bundle)
         envelope["payload"]["provenance"]["issued_at"] = "2026-01-01T11:59:00+00:00"
         mutated, anchor = reanchor(envelope)
