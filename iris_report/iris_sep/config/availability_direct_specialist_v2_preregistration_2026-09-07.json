@@ -41,8 +41,9 @@
     "NO_XRS_OR_PROTON": "direct solar specialist v2 versus solar-family fallback v1 on identical score rows"
   },
   "promotion_logic": {
-    "selection_on_score_forbidden": true,
+    "per_state_architecture_or_weight_selection_on_score_forbidden": true,
     "normal_status_from_development_forbidden": true,
+    "development_score_is_used_only_for_one_predeclared_v2_keep_or_reject_decision": true,
     "keep_v2_for_final_locked_evaluation_only_if": [
       "whole-score primary MAX_TSS is not lower than v1 by more than 0.02",
       "whole-score Brier score is not worse than v1 by more than 0.005",
