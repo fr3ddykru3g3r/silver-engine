@@ -14,9 +14,9 @@ def valid_manifest():
         "feature_families": {"solar": ["s"], "xrs": ["x"], "proton": ["p"]},
         "model_files": {"solar": entries("s"), "xrs": entries("x"), "proton": entries("p")},
         "states": {
-            "FULL": {"experts": ["SOLAR", "XRS", "PROTON"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": {"weights": [1, 1, 1]}},
-            "NO_XRS": {"experts": ["SOLAR", "PROTON"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": {"weights": [1, 1]}},
-            "NO_PROTON": {"experts": ["SOLAR", "XRS"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": {"weights": [1, 1]}},
+            "FULL": {"experts": ["SOLAR", "XRS", "PROTON"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": {"intercept": 0.0, "weights": [1, 1, 1]}},
+            "NO_XRS": {"experts": ["SOLAR", "PROTON"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": {"intercept": 0.0, "weights": [1, 1]}},
+            "NO_PROTON": {"experts": ["SOLAR", "XRS"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": {"intercept": 0.0, "weights": [1, 1]}},
             "NO_XRS_OR_PROTON": {"experts": ["SOLAR"], "calibration_intercept": 0.0, "thresholds": {"MAX_TSS": 0.1, "POD80_MIN_FAR": 0.2}, "stack": None}
         }
     }
