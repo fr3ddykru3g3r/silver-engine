@@ -69,12 +69,29 @@ class SourceAuthenticationTests(unittest.TestCase):
         self.assertIn("REGISTRY_DIGEST_MISMATCH", joined)
         self.assertIn("RECEIPT_DIGEST_MISMATCH", joined)
 
+    def test_valid_drms_query_requires_host_and_series(self):
+        receipt = build_acquisition_receipt(
+            source_id="JSOC_HMI_SHARP_NRT",
+            retrieved_at=ISSUE - timedelta(minutes=1),
+            artifact_sha256=DUMMY_SHA,
+            artifact_bytes=42,
+            source_url="https://jsoc.stanford.edu",
+            query_identity="hmi.sharp_cea_720s_nrt[][2026.09.07_00:00:00_TAI/1d]",
+        )
+        result = require_authenticated_acquisitions(
+            issue_time=ISSUE,
+            receipts=[receipt],
+            required_source_ids=["JSOC_HMI_SHARP_NRT"],
+        )
+        self.assertTrue(result["authenticated_for_prospective_use"])
+
     def test_drms_query_must_bind_registered_series(self):
         receipt = build_acquisition_receipt(
             source_id="JSOC_HMI_SHARP_NRT",
             retrieved_at=ISSUE - timedelta(minutes=1),
             artifact_sha256=DUMMY_SHA,
             artifact_bytes=42,
+            source_url="https://jsoc.stanford.edu",
             query_identity="hmi.sharp_720s[][2026.09.07_00:00:00_TAI/1d]",
         )
         result = authenticate_acquisition_receipts(
@@ -84,6 +101,66 @@ class SourceAuthenticationTests(unittest.TestCase):
         )
         self.assertFalse(result["authenticated_for_prospective_use"])
         self.assertTrue(any("DRMS_SERIES_NOT_BOUND_IN_QUERY" in reason for reason in result["reasons"]))
+
+    def test_drms_query_cannot_hide_behind_correct_series_on_wrong_host(self):
+        receipt = build_acquisition_receipt(
+            source_id="JSOC_HMI_SHARP_NRT",
+            retrieved_at=ISSUE - timedelta(minutes=1),
+            artifact_sha256=DUMMY_SHA,
+            artifact_bytes=42,
+            source_url="https://example.com",
+            query_identity="hmi.sharp_cea_720s_nrt[][2026.09.07_00:00:00_TAI/1d]",
+        )
+        result = authenticate_acquisition_receipts(
+            issue_time=ISSUE,
+            receipts=[receipt],
+            required_source_ids=["JSOC_HMI_SHARP_NRT"],
+        )
+        self.assertTrue(any("SOURCE_HOST_MISMATCH" in reason for reason in result["reasons"]))
+
+    def test_cdaw_template_accepts_only_registered_monthly_path(self):
+        valid = build_acquisition_receipt(
+            source_id="NASA_GSFC_CDAW_CME",
+            retrieved_at=ISSUE - timedelta(minutes=1),
+            artifact_sha256=DUMMY_SHA,
+            artifact_bytes=42,
+            source_url="https://cdaw.gsfc.nasa.gov/CME_list/UNIVERSAL_ver2/2026_09/univ2026_09.html",
+        )
+        self.assertTrue(require_authenticated_acquisitions(
+            issue_time=ISSUE,
+            receipts=[valid],
+            required_source_ids=["NASA_GSFC_CDAW_CME"],
+        )["authenticated_for_prospective_use"])
+
+        invalid = build_acquisition_receipt(
+            source_id="NASA_GSFC_CDAW_CME",
+            retrieved_at=ISSUE - timedelta(minutes=1),
+            artifact_sha256="b" * 64,
+            artifact_bytes=42,
+            source_url="https://cdaw.gsfc.nasa.gov/CME_list/UNIVERSAL_ver2/not_the_catalog.html",
+        )
+        result = authenticate_acquisition_receipts(
+            issue_time=ISSUE,
+            receipts=[invalid],
+            required_source_ids=["NASA_GSFC_CDAW_CME"],
+        )
+        self.assertTrue(any("SOURCE_ENDPOINT_TEMPLATE_MISMATCH" in reason for reason in result["reasons"]))
+
+    def test_hek_query_requires_registered_host(self):
+        receipt = build_acquisition_receipt(
+            source_id="LMSAL_HEK_GOES_FLARES",
+            retrieved_at=ISSUE - timedelta(minutes=1),
+            artifact_sha256=DUMMY_SHA,
+            artifact_bytes=42,
+            source_url="https://example.com/hek/her",
+            query_identity="event_type=FL;observatory=GOES",
+        )
+        result = authenticate_acquisition_receipts(
+            issue_time=ISSUE,
+            receipts=[receipt],
+            required_source_ids=["LMSAL_HEK_GOES_FLARES"],
+        )
+        self.assertTrue(any("SOURCE_HOST_MISMATCH" in reason for reason in result["reasons"]))
 
     def test_missing_required_source_is_blocked(self):
         with self.assertRaises(SourceAuthenticationError):
