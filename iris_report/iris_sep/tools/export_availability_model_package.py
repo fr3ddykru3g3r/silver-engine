@@ -66,7 +66,10 @@ def run(features: Path, events: Path, output: Path):
         for seed, model in zip(SEEDS, models):
             rel = Path("models") / f"{family}_seed_{seed}.json"
             path = output / rel
-            model.save_model(path)
+            # Persist the learned trees directly.  XGBoost 3.0.4's sklearn
+            # wrapper is not serialization-stable with sklearn 1.8 estimator
+            # mixins, while Booster JSON is the native XGBoost model format.
+            model.get_booster().save_model(str(path))
             entries.append({"seed": int(seed), "path": str(rel), "sha256": sha256_file(path)})
         model_files[family] = entries
 
@@ -88,6 +91,7 @@ def run(features: Path, events: Path, output: Path):
         "status": "DEVELOPMENT_ONLY_RELOADABLE_PACKAGE",
         "target": v1.TARGET,
         "architecture": "IRIS_AVAILABILITY_CONDITIONED_EVIDENCE_STACK_V1",
+        "serialization": "XGBOOST_BOOSTER_JSON",
         "source_evidence": {
             "availability_fallback_run_id": SOURCE_RUN,
             "availability_fallback_head": SOURCE_HEAD,
@@ -148,6 +152,7 @@ def run(features: Path, events: Path, output: Path):
         "replay_input_sha256": sha256_file(output / "replay_input.csv"),
         "reference_predictions_sha256": sha256_file(output / "export_reference_predictions.csv"),
         "specialist_model_count": 15,
+        "serialization": "XGBOOST_BOOSTER_JSON",
         "locked_test_accessed": False,
         "monitor_used": False
     })
