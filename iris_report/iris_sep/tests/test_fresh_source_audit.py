@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from iris_report.iris_sep.tools.run_fresh_source_audit import summarize_protons, summarize_xrs
+import pandas as pd
+
+from iris_report.iris_sep.tools.run_fresh_source_audit import (
+    _cadence_summary,
+    summarize_protons,
+    summarize_xrs,
+)
 
 
 class FreshSourceAuditTests(unittest.TestCase):
@@ -17,6 +23,24 @@ class FreshSourceAuditTests(unittest.TestCase):
         self.assertEqual(result["samples_at_or_above_10_pfu"], 1)
         self.assertTrue(result["threshold_10_pfu_active_at_latest_sample"])
         self.assertEqual(result["cadence"]["median_cadence_seconds"], 300.0)
+
+    def test_cadence_is_invariant_to_datetime_storage_resolution(self):
+        base = pd.date_range(
+            "2026-09-01T00:00:00Z",
+            periods=3,
+            freq="5min",
+        )
+        expected = {
+            "rows": 3,
+            "median_cadence_seconds": 300.0,
+            "max_gap_seconds": 300.0,
+            "duplicate_timestamps": 0,
+        }
+        for unit in ("ns", "us"):
+            with self.subTest(unit=unit):
+                result = _cadence_summary(base.as_unit(unit))
+                for key, value in expected.items():
+                    self.assertEqual(result[key], value)
 
     def test_xrs_parser_keeps_bands_separate(self):
         records = [
