@@ -41,6 +41,7 @@ MODALITY_TO_STATE = {
 }
 SEED = 20260907
 POLICIES = ("MAX_TSS", "POD80_MIN_FAR")
+PROMOTED_REPRO_TOLERANCE = 1e-6
 
 
 def digest(path: Path) -> str:
@@ -202,12 +203,23 @@ def run(features: Path, events: Path, output: Path):
         for policy in POLICIES
     }
 
-    # Verify that the FULL state is the same promoted architecture, not a new
-    # clean-data candidate created by this fallback experiment.
+    # Verify that the FULL state is the promoted architecture, not a new clean-
+    # data candidate. Two independent XGBoost fits can differ by tiny floating-
+    # point amounts, so require both a tight probability tolerance and identical
+    # score decisions under both frozen policies rather than impossible bitwise
+    # equality.
     promoted = transfer.build_clean_model(frame, y, roles, units, base, xrs, proton)
     max_abs_full_diff = float(np.max(np.abs(promoted["clean_probability"] - clean)))
-    if max_abs_full_diff > 1e-12:
-        raise ValueError(f"FULL state does not reproduce promoted stack: {max_abs_full_diff}")
+    if max_abs_full_diff > PROMOTED_REPRO_TOLERANCE:
+        raise ValueError(f"FULL state does not reproduce promoted stack within tolerance: {max_abs_full_diff}")
+    promoted_decision_mismatches = {}
+    for policy in POLICIES:
+        here = clean[score] >= float(model["thresholds"]["FULL"][policy])
+        reference = promoted["clean_probability"][score] >= float(promoted["thresholds"][policy])
+        mismatches = int(np.sum(here != reference))
+        promoted_decision_mismatches[policy] = mismatches
+        if mismatches:
+            raise ValueError(f"FULL state changes {policy} score decisions: {mismatches}")
 
     source_times = source_clock.load_source_clock(features)
     raw_values = frame.loc[:, list(base) + list(xrs) + list(proton)].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=np.float64)
@@ -236,6 +248,8 @@ def run(features: Path, events: Path, output: Path):
         "reconstruction_used": False,
         "retraining_at_outage_time": False,
         "full_state_max_abs_difference_vs_promoted_stack": max_abs_full_diff,
+        "full_state_reproduction_tolerance": PROMOTED_REPRO_TOLERANCE,
+        "full_state_score_decision_mismatches": promoted_decision_mismatches,
         "positive_event_units": int(positive_units),
         "purged_units": purged,
         "oof_rows": model["oof_rows"],
