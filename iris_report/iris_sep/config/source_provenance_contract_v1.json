@@ -1,6 +1,6 @@
 {
   "contract_id": "iris-sep-source-provenance-v1",
-  "status": "FAIL_CLOSED_PENDING_ROW_CELL_LINEAGE",
+  "status": "FAIL_CLOSED_PENDING_ROW_CELL_LINEAGE_AND_TRUSTED_SOURCE_AUTHENTICATION",
   "pinned_upstream": {
     "repository": "yuyian/SEP-Prediction-V2",
     "commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb"
@@ -21,7 +21,22 @@
     "publication_time_must_not_exceed_issue_time_for_causal_use": true,
     "fit_interval_must_not_extend_beyond_allowed_development_information_for_prospective_claim": true,
     "future_nearest_interpolation_is_causal": false,
-    "full_overlap_fit_backcast_is_prospective_native_observation": false
+    "full_overlap_fit_backcast_is_prospective_native_observation": false,
+    "source_revision_string_is_authenticated_source_identity": false,
+    "caller_supplied_digest_without_trusted_registry_is_source_authentication": false,
+    "trusted_acquisition_receipt_or_source_registry_required_for_authenticated_prospective_claim": true
+  },
+  "source_authentication": {
+    "status": "NOT_YET_ESTABLISHED",
+    "current_source_revision_semantics": "DECLARED_IDENTIFIER_NOT_CRYPTOGRAPHIC_PROOF",
+    "required_future_binding": [
+      "trusted_source_or_acquisition_revision",
+      "source_artifact_or_acquisition_receipt_sha256",
+      "producer_or_endpoint_identity",
+      "observation_and_publication_time_semantics",
+      "registry_or_receipt_trust_anchor_bound_outside_the_untrusted_lineage_record"
+    ],
+    "reason": "A free-form source_revision or caller-supplied digest can describe lineage but cannot independently authenticate source identity. Adding an untrusted digest alone would create security theatre rather than a trust anchor."
   },
   "families": {
     "XRS": {
@@ -36,7 +51,8 @@
       "unresolved": [
         "complete_downstream_daily_aggregation_lineage",
         "publication_latency",
-        "cell_level_native_origin"
+        "cell_level_native_origin",
+        "trusted_source_authentication"
       ]
     },
     "PROTON": {
@@ -56,7 +72,8 @@
       "unresolved": [
         "daily_table_preservation_of_HAPI_from_OMNI",
         "publication_latency",
-        "cell_level_origin"
+        "cell_level_origin",
+        "trusted_source_authentication"
       ]
     },
     "MAGNETIC_SHARP_SMARP": {
@@ -74,7 +91,8 @@
       "unresolved": [
         "daily_table_preservation_of_From_SMARP",
         "publication_latency",
-        "cell_level_origin"
+        "cell_level_origin",
+        "trusted_source_authentication"
       ]
     },
     "BASE_SOLAR_OTHER": {
@@ -85,9 +103,10 @@
         "observation_time",
         "publication_time",
         "reconstruction_origin",
-        "preprocessing_fit_interval"
+        "preprocessing_fit_interval",
+        "trusted_source_authentication"
       ]
     }
   },
-  "claim_boundary": "Existing development scores remain retrospective performance on the released aggregate dataset. Strict prospective forecast-time causality and native-sensor reconstruction claims remain blocked until lineage is demonstrated."
+  "claim_boundary": "Existing development scores remain retrospective performance on the released aggregate dataset. Strict prospective forecast-time causality, native-sensor reconstruction and authenticated source-identity claims remain blocked until row/cell lineage and a trusted acquisition/source-registry binding are demonstrated."
 }
