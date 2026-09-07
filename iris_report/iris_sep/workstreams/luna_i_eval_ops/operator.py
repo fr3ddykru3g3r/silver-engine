@@ -10,6 +10,7 @@ from typing import Any, Mapping, Sequence
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 STATES = ("NORMAL", "MONITOR", "PREPARE", "PROTECT")
+AVAILABILITY_PERMISSIONS = frozenset({"VALID", "DEGRADED", "ABSTAIN"})
 
 
 class OperatorContractError(ValueError):
@@ -70,21 +71,45 @@ def build_operator_forecast(
     model_version: str,
     evidence_receipt_sha256: str,
     abstention_reasons: Sequence[str] = (),
+    availability_permission: str | None = None,
 ) -> dict[str, Any]:
-    """Build one advisory forecast; never emit a spacecraft command."""
+    """Build one advisory forecast; never emit a spacecraft command.
+
+    ``availability_permission`` is the output of a separately frozen
+    availability-validation gate.  Missingness alone therefore no longer forces
+    a DEGRADED label: a validated fallback can remain VALID, a weaker but useful
+    fallback can be DEGRADED, and an unsupported state must ABSTAIN.
+
+    Backwards compatibility is fail-closed: if a caller supplies no availability
+    permission, a missing critical modality still causes ABSTAIN and any other
+    missing modality remains DEGRADED exactly as before.
+    """
 
     if not model_version:
         raise OperatorContractError("model version is required")
     if _SHA256.fullmatch(evidence_receipt_sha256) is None:
         raise OperatorContractError("evidence receipt must be a lowercase SHA-256")
+    if availability_permission is not None and availability_permission not in AVAILABILITY_PERMISSIONS:
+        raise OperatorContractError("availability_permission must be VALID, DEGRADED, ABSTAIN, or null")
     if input_schema_sha256 != runtime_policy.schema_sha256:
         abstention_reasons = tuple(abstention_reasons) + ("SCHEMA_FAILURE",)
     allowed_modalities = set(runtime_policy.maximum_age_minutes)
     missing = sorted(set(missing_modalities))
     if not set(missing).issubset(allowed_modalities) or not set(data_freshness).issubset(allowed_modalities):
         raise OperatorContractError("unknown modality in runtime inputs")
+
     critical_missing = sorted(set(missing).intersection(runtime_policy.critical_modalities))
-    reasons = sorted(set(abstention_reasons).union({"CRITICAL_INPUT_MISSING"} if critical_missing else set()))
+    reasons = sorted(set(abstention_reasons))
+
+    # A pre-trained fallback with an explicit validated permission may replace a
+    # missing critical feed.  Without that receipt, preserve the historical
+    # fail-closed behavior.
+    if critical_missing and availability_permission not in {"VALID", "DEGRADED"}:
+        reasons.append("CRITICAL_INPUT_MISSING")
+
+    if missing and availability_permission == "ABSTAIN":
+        reasons.append("AVAILABILITY_STATE_NOT_VALIDATED")
+
     for modality in sorted(allowed_modalities - set(missing)):
         record = data_freshness.get(modality)
         age = record.get("age_minutes") if isinstance(record, Mapping) else None
@@ -93,6 +118,8 @@ def build_operator_forecast(
             break
     if calibrated_probability is not None and not 0 <= float(calibrated_probability) <= 1:
         raise OperatorContractError("calibrated probability must be in [0,1] or null")
+
+    reasons = sorted(set(reasons))
     if reasons or calibrated_probability is None:
         if not reasons:
             reasons = ["EVIDENCE_RECEIPT_FAILURE"]
@@ -104,7 +131,18 @@ def build_operator_forecast(
         probability = float(calibrated_probability)
         all_clear = 1.0 - probability
         operator_state = _state(probability, runtime_policy.operating_thresholds)
-        status = "DEGRADED" if missing else "VALID"
+        if not missing:
+            status = "VALID"
+        elif availability_permission == "VALID":
+            status = "VALID"
+        elif availability_permission in {None, "DEGRADED"}:
+            status = "DEGRADED"
+        else:  # defensive; ABSTAIN was converted into a reason above.
+            status = "ABSTAIN"
+            probability = None
+            all_clear = None
+            operator_state = None
+
     return {
         "issued_at_utc": _utc_z(issued_at),
         "horizon_hours": 24,
@@ -116,6 +154,7 @@ def build_operator_forecast(
         "input_schema_sha256": input_schema_sha256,
         "data_freshness": dict(data_freshness),
         "missing_modalities": missing,
+        "availability_permission": availability_permission,
         "uncertainty": dict(uncertainty),
         "operator_state": operator_state,
         "abstention_reasons": reasons,
