@@ -12,11 +12,75 @@ from iris_report.iris_sep.src.iris_sep.modeling.availability_fallback import (
     select_evidence,
     stacked_raw_probability,
 )
+from iris_report.iris_sep.tools.render_availability_fallback_judge_summary import (
+    render_markdown,
+    validate_summary,
+)
 
 
 def sigmoid(x):
     x = np.asarray(x, dtype=float)
     return 1.0 / (1.0 + np.exp(-x))
+
+
+def judge_summary_fixture():
+    scenarios = {}
+    mapping = {
+        "NO_XRS": "XRS",
+        "NO_PROTON": "PROTON",
+        "NO_XRS_OR_PROTON": "XRS_AND_PROTON",
+    }
+    passes = {
+        "NO_XRS": (True, True, True),
+        "NO_PROTON": (True, False, True),
+        "NO_XRS_OR_PROTON": (False, False, False),
+    }
+    for state, modality in mapping.items():
+        for hours, passed in zip((24, 72, 168), passes[state]):
+            scenarios[f"{modality}_{hours}H"] = {
+                "availability_state": state,
+                "operator_gate": {"passed": passed},
+            }
+    return {
+        "locked_test_accessed": False,
+        "monitor_used": False,
+        "imputation_used": False,
+        "reconstruction_used": False,
+        "retraining_at_outage_time": False,
+        "states": {
+            "FULL": {
+                "whole_score": {
+                    "MAX_TSS": {
+                        "rows": 100,
+                        "positives": 5,
+                        "TSS": 0.3,
+                        "POD": 0.6,
+                        "FAR": 0.9,
+                        "BRIER": 0.1,
+                        "ECE": 0.05,
+                    }
+                }
+            }
+        },
+        "scenarios": scenarios,
+        "operator_state_decision": {
+            "NO_XRS": {
+                "permission": "DEGRADED",
+                "normal_allowed": False,
+                "all_three_durations_pass_degraded_candidate_gate": True,
+            },
+            "NO_PROTON": {
+                "permission": "ABSTAIN",
+                "normal_allowed": False,
+                "all_three_durations_pass_degraded_candidate_gate": False,
+            },
+            "NO_XRS_OR_PROTON": {
+                "permission": "ABSTAIN",
+                "normal_allowed": False,
+                "all_three_durations_pass_degraded_candidate_gate": False,
+            },
+        },
+    }
 
 
 class AvailabilityFallbackTests(unittest.TestCase):
@@ -95,6 +159,20 @@ class AvailabilityFallbackTests(unittest.TestCase):
     def test_rule_rejects_invalid_margin(self):
         with self.assertRaises(ValueError):
             AvailabilityPromotionRule(maximum_whole_score_brier_delta=-0.1)
+
+    def test_judge_summary_surfaces_failures_and_false_alarm_rate(self):
+        text = render_markdown(judge_summary_fixture())
+        self.assertIn("X-ray feed unavailable | PASS | PASS | PASS | DEGRADED | no", text)
+        self.assertIn("proton-context feed unavailable | PASS | FAIL | PASS | ABSTAIN | no", text)
+        self.assertIn("FAR 0.900", text)
+        self.assertIn("Locked test accessed: **no**", text)
+        self.assertIn("cannot establish operational superiority", text)
+
+    def test_judge_summary_refuses_to_hide_locked_test_access(self):
+        summary = judge_summary_fixture()
+        summary["locked_test_accessed"] = True
+        with self.assertRaises(ValueError):
+            validate_summary(summary)
 
 
 if __name__ == "__main__":
