@@ -5,7 +5,11 @@ import json
 import unittest
 from datetime import datetime, timezone
 
-from iris_report.iris_sep.src.iris_sep.inference_bundle import static_inference_binding_sha256
+from iris_report.iris_sep.src.iris_sep.inference_bundle import (
+    build_inference_bundle,
+    replay_inference_bundle,
+    static_inference_binding_sha256,
+)
 from iris_report.iris_sep.src.iris_sep.pilot_admission_v2 import AdmissionPolicyV2
 from iris_report.iris_sep.src.iris_sep.prospective_inference_bundle import (
     ProspectiveInferenceBundleError,
@@ -118,17 +122,26 @@ def reanchor(envelope):
 
 class ProspectiveInferenceBundleTests(unittest.TestCase):
     def test_valid_provenance_is_bound_and_recomputed_on_replay(self):
+        fixture = inference_fixture()
+        inner_bundle, inner_digest = build_inference_bundle(**fixture)
+        inner_result = replay_inference_bundle(
+            bundle_bytes=inner_bundle,
+            expected_bundle_sha256=inner_digest,
+        )
         bundle, digest = build_prospective_inference_bundle(
             input_provenance_records=provenance_records(),
             required_features=REQUIRED,
             development_information_cutoff=None,
-            **inference_fixture(),
+            **fixture,
         )
         result = replay_prospective_inference_bundle(
             bundle_bytes=bundle,
             expected_bundle_sha256=digest,
         )
-        self.assertEqual(result["forecast_status"], "VALID")
+        # Provenance permission is independent of the operator's VALID/DEGRADED/
+        # ABSTAIN decision. The wrapper must preserve, never upgrade, that decision.
+        self.assertEqual(result["forecast_status"], inner_result["forecast_status"])
+        self.assertEqual(result["action_tier"], inner_result["action_tier"])
         self.assertTrue(result["forecast_probability_permitted_by_provenance"])
         self.assertEqual(result["forecast_input_provenance"]["status"], "VALID")
         self.assertEqual(result["prospective_inference_bundle_sha256"], digest)
