@@ -4,6 +4,10 @@ A package contains 15 XGBoost specialists (5 seeds for each of solar, XRS,
 proton), frozen feature order, fit prevalence, availability-state fusion
 parameters, calibration intercepts, decision thresholds, dependency versions,
 and SHA-256 bindings. Loading never trains or calibrates a model.
+
+Runtime deliberately loads raw XGBoost ``Booster`` objects rather than sklearn
+wrappers. This keeps serialization independent of sklearn estimator-mixin API
+changes while preserving the exact fitted trees.
 """
 from __future__ import annotations
 
@@ -17,7 +21,7 @@ from typing import Mapping
 import numpy as np
 import pandas as pd
 import xgboost
-from xgboost import XGBClassifier
+from xgboost import Booster, DMatrix
 
 PACKAGE_FORMAT = "IRIS_SEP_AVAILABILITY_MODEL_PACKAGE_V1"
 STATE_EXPERTS = {
@@ -70,6 +74,15 @@ def _family_reliability(frame: pd.DataFrame, names: list[str]) -> np.ndarray:
     return np.mean(np.isfinite(values), axis=1).astype(np.float64)
 
 
+def _booster_probability(booster: Booster, frame: pd.DataFrame, names: list[str]) -> np.ndarray:
+    numeric = frame.loc[:, names].apply(pd.to_numeric, errors="coerce")
+    matrix = DMatrix(numeric, feature_names=list(names), missing=np.nan)
+    probability = np.asarray(booster.predict(matrix), dtype=np.float64)
+    if probability.ndim != 1 or len(probability) != len(frame):
+        raise RuntimeError("specialist booster emitted unexpected prediction shape")
+    return probability
+
+
 def validate_manifest(manifest: Mapping[str, object]) -> None:
     if manifest.get("format") != PACKAGE_FORMAT:
         raise ValueError("unsupported model package format")
@@ -97,7 +110,8 @@ def validate_manifest(manifest: Mapping[str, object]) -> None:
                 raise ValueError("invalid model entry")
             if not isinstance(entry["path"], str) or Path(entry["path"]).is_absolute() or ".." in Path(entry["path"]).parts:
                 raise ValueError("model paths must be safe relative paths")
-            if not isinstance(entry["sha256"], str) or len(entry["sha256"]) != 64:
+            digest = entry["sha256"]
+            if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
                 raise ValueError("invalid model SHA-256")
     states = manifest.get("states")
     if not isinstance(states, dict) or set(states) != set(STATE_EXPERTS):
@@ -111,9 +125,14 @@ def validate_manifest(manifest: Mapping[str, object]) -> None:
         thresholds = row.get("thresholds")
         if not isinstance(thresholds, dict) or set(thresholds) != {"MAX_TSS", "POD80_MIN_FAR"}:
             raise ValueError("state thresholds incomplete")
+        for value in thresholds.values():
+            if not math.isfinite(float(value)) or not 0 <= float(value) <= 1:
+                raise ValueError("invalid threshold")
         if state != "NO_XRS_OR_PROTON":
             stack = row.get("stack")
             if not isinstance(stack, dict) or len(stack.get("weights", [])) != len(experts):
+                raise ValueError("invalid stack parameters")
+            if not math.isfinite(float(stack.get("intercept"))) or any(not math.isfinite(float(v)) or float(v) < 0 for v in stack["weights"]):
                 raise ValueError("invalid stack parameters")
 
 
@@ -121,7 +140,7 @@ def validate_manifest(manifest: Mapping[str, object]) -> None:
 class LoadedAvailabilityPackage:
     root: Path
     manifest: dict
-    models: dict[str, list[XGBClassifier]]
+    models: dict[str, list[Booster]]
 
     @classmethod
     def load(cls, root: Path, *, enforce_dependency_version: bool = True) -> "LoadedAvailabilityPackage":
@@ -133,16 +152,16 @@ class LoadedAvailabilityPackage:
         validate_manifest(manifest)
         if enforce_dependency_version and manifest.get("dependencies", {}).get("xgboost") != xgboost.__version__:
             raise ValueError("xgboost version does not match package")
-        models: dict[str, list[XGBClassifier]] = {}
+        models: dict[str, list[Booster]] = {}
         for family, entries in manifest["model_files"].items():
             family_models = []
             for entry in entries:
                 path = root / entry["path"]
                 if not path.is_file() or sha256_file(path) != entry["sha256"]:
                     raise ValueError(f"model integrity failure: {entry['path']}")
-                model = XGBClassifier()
-                model.load_model(path)
-                family_models.append(model)
+                booster = Booster()
+                booster.load_model(str(path))
+                family_models.append(booster)
             models[family] = family_models
         return cls(root=root, manifest=manifest, models=models)
 
@@ -159,8 +178,7 @@ class LoadedAvailabilityPackage:
         missing = [name for name in names if name not in frame.columns]
         if missing:
             raise ValueError(f"missing {family} features: {missing[:5]}")
-        x = frame.loc[:, names]
-        seed_probability = [model.predict_proba(x)[:, 1] for model in self.models[family]]
+        seed_probability = [_booster_probability(model, frame, names) for model in self.models[family]]
         return np.median(np.stack(seed_probability, axis=0), axis=0).astype(np.float64)
 
     def predict(self, frame: pd.DataFrame, *, state: str = "FULL") -> np.ndarray:
