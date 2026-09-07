@@ -3,7 +3,8 @@
 This module deliberately contains no training path. Training tools may export a
 package, but runtime consumers can only verify, load and score the frozen 15
 specialist XGBoost models plus the frozen evidence-stack/calibration/threshold
-parameters.
+parameters. New exports also bind the exact ordered feature-vector schema and
+report seed disagreement as diagnostics without changing the forecast.
 """
 from __future__ import annotations
 
@@ -17,6 +18,13 @@ from typing import Mapping, Sequence
 import numpy as np
 import pandas as pd
 from xgboost import Booster, DMatrix, XGBClassifier
+
+from .feature_schema_binding import (
+    FeatureSchemaBindingError,
+    build_feature_vector_schema,
+    feature_vector_schema_sha256,
+    validate_feature_vector_schema,
+)
 
 
 FORMAT = "IRIS_SEP_PROMOTED_MODEL_PACKAGE_V1"
@@ -51,8 +59,23 @@ def sha256_file(path: Path) -> str:
 
 
 def feature_schema_sha256(feature_families: Mapping[str, Sequence[str]]) -> str:
+    """Legacy family-mapping hash retained for existing evidence compatibility."""
     payload = {family: list(feature_families[family]) for family in FAMILIES}
     return sha256_bytes(_canonical_json(payload))
+
+
+def ordered_feature_vector_schema(feature_families: Mapping[str, Sequence[str]]) -> dict[str, object]:
+    try:
+        return build_feature_vector_schema(feature_families, family_order=FAMILIES)
+    except FeatureSchemaBindingError as exc:
+        raise PromotedModelPackageError(str(exc)) from exc
+
+
+def ordered_feature_vector_schema_sha256(feature_families: Mapping[str, Sequence[str]]) -> str:
+    try:
+        return feature_vector_schema_sha256(feature_families, family_order=FAMILIES)
+    except FeatureSchemaBindingError as exc:
+        raise PromotedModelPackageError(str(exc)) from exc
 
 
 def _validate_feature_families(feature_families: Mapping[str, Sequence[str]]) -> dict[str, list[str]]:
@@ -146,6 +169,8 @@ def export_promoted_package(
 
     source_payload = {str(k): str(v) for k, v in source_bindings.items()}
     dependency_payload = {str(k): str(v) for k, v in dependency_versions.items()}
+    vector_schema = ordered_feature_vector_schema(feature_families)
+    vector_schema_sha = ordered_feature_vector_schema_sha256(feature_families)
     manifest = {
         "format": FORMAT,
         "architecture": ARCHITECTURE,
@@ -155,6 +180,8 @@ def export_promoted_package(
         "models_per_family": MODELS_PER_FAMILY,
         "feature_families": feature_families,
         "feature_schema_sha256": feature_schema_sha256(feature_families),
+        "ordered_feature_vector_schema": vector_schema,
+        "ordered_feature_vector_schema_sha256": vector_schema_sha,
         "fit_prevalence": prevalence,
         "evidence": {
             "expert_order": list(FAMILIES),
@@ -162,6 +189,10 @@ def export_promoted_package(
             "limit": evidence_limit,
             "stack_intercept": stack_intercept,
             "stack_weights": weights,
+        },
+        "diagnostics": {
+            "specialist_seed_disagreement": "POPULATION_STD_ACROSS_FIVE_FIXED_SEED_PROBABILITIES",
+            "changes_forecast_probability": False,
         },
         "calibration": {
             "method": "LOGIT_INTERCEPT_ONLY",
@@ -180,6 +211,7 @@ def export_promoted_package(
         "format": FORMAT,
         "manifest_sha256": sha256_file(output_dir / "manifest.json"),
         "feature_schema_sha256": manifest["feature_schema_sha256"],
+        "ordered_feature_vector_schema_sha256": vector_schema_sha,
         "model_file_count": sum(len(v) for v in model_records.values()),
         "serialization": SERIALIZATION,
         "runtime_training_allowed": False,
@@ -213,6 +245,11 @@ class LoadedPromotedModelPackage:
     def thresholds(self) -> dict[str, float]:
         return {str(k): float(v) for k, v in dict(self.manifest["thresholds"]).items()}
 
+    @property
+    def ordered_feature_vector_schema_sha256(self) -> str:
+        families = _validate_feature_families(self.manifest["feature_families"])
+        return ordered_feature_vector_schema_sha256(families)
+
     def predict(self, frame: pd.DataFrame) -> dict[str, np.ndarray]:
         """Score rows without fitting or mutating the package."""
         if not isinstance(frame, pd.DataFrame) or len(frame) == 0:
@@ -224,12 +261,14 @@ class LoadedPromotedModelPackage:
 
         raw: dict[str, np.ndarray] = {}
         reliability: dict[str, np.ndarray] = {}
+        seed_std: dict[str, np.ndarray] = {}
         for family in FAMILIES:
             names = families[family]
             values = frame.loc[:, names].apply(pd.to_numeric, errors="coerce")
             dmatrix = DMatrix(values.to_numpy(dtype=np.float64), feature_names=names, missing=np.nan)
-            preds = [model.predict(dmatrix) for model in self.models[family]]
-            raw[family] = np.median(np.stack(preds, axis=0), axis=0).astype(np.float64)
+            prediction_matrix = np.stack([model.predict(dmatrix) for model in self.models[family]], axis=0).astype(np.float64)
+            raw[family] = np.median(prediction_matrix, axis=0).astype(np.float64)
+            seed_std[family] = np.std(prediction_matrix, axis=0, ddof=0).astype(np.float64)
             reliability[family] = np.mean(np.isfinite(values.to_numpy(dtype=np.float64)), axis=1)
 
         prevalence = float(self.manifest["fit_prevalence"])
@@ -252,6 +291,9 @@ class LoadedPromotedModelPackage:
             "raw_solar_probability": raw["SOLAR"],
             "raw_xrs_probability": raw["XRS"],
             "raw_proton_probability": raw["PROTON"],
+            "solar_seed_probability_std": seed_std["SOLAR"],
+            "xrs_seed_probability_std": seed_std["XRS"],
+            "proton_seed_probability_std": seed_std["PROTON"],
             "xrs_reliability": reliability["XRS"],
             "proton_reliability": reliability["PROTON"],
         }
@@ -279,6 +321,25 @@ def load_promoted_package(root: Path) -> LoadedPromotedModelPackage:
     families = _validate_feature_families(manifest.get("feature_families", {}))
     if manifest.get("feature_schema_sha256") != feature_schema_sha256(families):
         raise PromotedModelPackageError("feature schema digest mismatch")
+
+    # Legacy packages predate the position-sensitive schema. New exports always
+    # contain it; when present, it is independently rebuilt and verified.
+    vector_schema = manifest.get("ordered_feature_vector_schema")
+    vector_sha = manifest.get("ordered_feature_vector_schema_sha256")
+    if vector_schema is not None or vector_sha is not None:
+        if not isinstance(vector_schema, Mapping) or not isinstance(vector_sha, str):
+            raise PromotedModelPackageError("ordered feature-vector schema binding malformed")
+        try:
+            validated = validate_feature_vector_schema(vector_schema)
+        except FeatureSchemaBindingError as exc:
+            raise PromotedModelPackageError(str(exc)) from exc
+        expected_schema = ordered_feature_vector_schema(families)
+        expected_sha = ordered_feature_vector_schema_sha256(families)
+        if validated != expected_schema or vector_sha != expected_sha:
+            raise PromotedModelPackageError("ordered feature-vector schema mismatch")
+        if receipt.get("ordered_feature_vector_schema_sha256") != expected_sha:
+            raise PromotedModelPackageError("ordered feature-vector receipt mismatch")
+
     if int(manifest.get("models_per_family", -1)) != MODELS_PER_FAMILY:
         raise PromotedModelPackageError("unexpected specialist count")
 
