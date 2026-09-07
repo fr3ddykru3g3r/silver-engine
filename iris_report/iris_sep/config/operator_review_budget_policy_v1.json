@@ -1,0 +1,44 @@
+{
+  "id": "IRIS_SEP_OPERATOR_REVIEW_BUDGET_POLICY_V1",
+  "status": "FROZEN_BEFORE_LOCKED_TEST_AFTER_DEVELOPMENT_INSPECTION",
+  "frozen_date": "2026-09-07",
+  "target": "NEW >10 MeV, >=10 pfu SEP threshold crossing within the next 24 hours",
+  "purpose": "Measure whether forecast probabilities can prioritize a small, fixed fraction of issue days for human review, and whether reduced-sensor fallbacks preserve that prioritization.",
+  "primary_review_fraction": 0.05,
+  "secondary_review_fractions": [0.01, 0.02, 0.10],
+  "primary_rationale": "Five percent corresponds to about 18 review-days per 365 issue-days: small enough to represent a constrained analyst workload while remaining large enough to estimate event capture on rare-event cohorts.",
+  "selection_rule": {
+    "ranking": "descending forecast probability",
+    "budget_rows": "ceil(review_fraction * eligible_score_rows)",
+    "tie_break": "earlier issue_time first only for exact ties; tie sensitivity is reported at the cutoff",
+    "labels_not_used_for_selection": true
+  },
+  "reported_metrics": [
+    "review_rows",
+    "review_days_per_365_issue_days",
+    "captured_positive_rows",
+    "event_capture_fraction",
+    "precision_within_review_budget",
+    "enrichment_vs_random_review",
+    "expected_positive_rows_under_random_review",
+    "cutoff_probability",
+    "cutoff_tie_rows",
+    "cutoff_tie_positive_rows",
+    "tie_robust_event_capture_min",
+    "tie_robust_event_capture_max"
+  ],
+  "states": ["FULL", "NO_XRS", "NO_PROTON", "NO_XRS_OR_PROTON"],
+  "interpretation": {
+    "FULL": "Normal-input ranking reference.",
+    "NO_XRS": "Reduced-sensor ranking candidate; cannot be promoted above DEGRADED without independent evidence.",
+    "NO_PROTON": "Reduced-sensor ranking candidate; cannot be promoted above DEGRADED without independent evidence.",
+    "NO_XRS_OR_PROTON": "Solar-only ranking candidate; if development evidence fails the availability gate the operator action remains ABSTAIN regardless of ranking enrichment."
+  },
+  "evidence_boundary": {
+    "development_score_already_inspected": true,
+    "development_metric_selection_is_not_claimed_as_preregistered": true,
+    "locked_test_accessed": false,
+    "locked_test_primary_metric_frozen_before_opening": true
+  },
+  "claim_boundary": "Development results are architecture-selection evidence only. The primary 5% review-budget metric is frozen now for the untouched locked evaluation. No operational-benefit or superiority claim is permitted until that independent evaluation is opened under the frozen protocol."
+}
