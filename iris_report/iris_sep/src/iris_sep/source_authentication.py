@@ -15,6 +15,7 @@ from datetime import datetime
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlparse
 
@@ -139,6 +140,24 @@ def _url_host(value: Any) -> str | None:
     return parsed.hostname.lower()
 
 
+def _source_url_host_reasons(source_url: Any, source: Mapping[str, Any]) -> list[str]:
+    host = _url_host(source_url)
+    if host is None:
+        return ["HTTPS_SOURCE_URL_REQUIRED"]
+    if host != _registered_host(source):
+        return ["SOURCE_HOST_MISMATCH"]
+    return []
+
+
+def _matches_endpoint_template(source_url: str, template: str) -> bool:
+    # Registry templates intentionally expose only YYYY/MM placeholders. Convert
+    # them to a strict full-URL regex; no arbitrary template execution occurs.
+    pattern = re.escape(template)
+    pattern = pattern.replace(re.escape("{YYYY}"), r"\d{4}")
+    pattern = pattern.replace(re.escape("{MM}"), r"(?:0[1-9]|1[0-2])")
+    return re.fullmatch(pattern, source_url) is not None
+
+
 def _receipt_reasons(
     receipt: Mapping[str, Any],
     *,
@@ -177,15 +196,20 @@ def _receipt_reasons(
 
     transport = str(source.get("transport", ""))
     source_url = receipt.get("source_url")
+    # Every registered remote acquisition must bind the provider host, including
+    # higher-level clients such as DRMS and SunPy/HEK.
+    reasons.extend(_source_url_host_reasons(source_url, source))
+
     if transport.startswith("HTTPS"):
-        host = _url_host(source_url)
-        if host is None:
-            reasons.append("HTTPS_SOURCE_URL_REQUIRED")
-        elif host != _registered_host(source):
-            reasons.append("SOURCE_HOST_MISMATCH")
         endpoint = source.get("endpoint")
+        template = source.get("endpoint_template")
         if isinstance(endpoint, str) and endpoint and source_url != endpoint:
             reasons.append("SOURCE_ENDPOINT_MISMATCH")
+        if isinstance(template, str) and template:
+            if not isinstance(source_url, str) or not _matches_endpoint_template(source_url, template):
+                reasons.append("SOURCE_ENDPOINT_TEMPLATE_MISMATCH")
+        if not endpoint and not template:
+            reasons.append("REGISTRY_ENDPOINT_RULE_MISSING")
     elif transport == "DRMS_QUERY":
         query = receipt.get("query_identity")
         series = source.get("series")
