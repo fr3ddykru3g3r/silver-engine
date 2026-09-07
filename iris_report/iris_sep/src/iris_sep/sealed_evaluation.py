@@ -2,8 +2,8 @@
 
 A forecast is sealed before its 24-hour outcome is known. The seal binds the
 frozen model package, exact feature row, trusted-source authentication receipt,
-state probabilities and frozen thresholds. Outcome derivation happens later
-from primary >10 MeV proton observations.
+causal feature-derivation receipt, state probabilities and frozen thresholds.
+Outcome derivation happens later from primary >10 MeV proton observations.
 
 This module contains no training, calibration or threshold selection path.
 """
@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 
-FORMAT = "IRIS_SEP_SEALED_FORECAST_V1"
+FORMAT = "IRIS_SEP_SEALED_FORECAST_V2"
 LABEL_FORMAT = "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V1"
 TARGET = "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H"
 HORIZON = timedelta(hours=24)
@@ -77,6 +77,7 @@ def build_forecast_seal(
     package_manifest_sha256: str,
     feature_row_sha256: str,
     source_authentication_sha256: str,
+    causal_feature_derivation_sha256: str,
     probabilities: Mapping[str, float],
     thresholds: Mapping[str, Mapping[str, float]],
     operator_permissions: Mapping[str, str],
@@ -116,6 +117,10 @@ def build_forecast_seal(
         "package_manifest_sha256": _sha(package_manifest_sha256, "package_manifest_sha256"),
         "feature_row_sha256": _sha(feature_row_sha256, "feature_row_sha256"),
         "source_authentication_sha256": _sha(source_authentication_sha256, "source_authentication_sha256"),
+        "causal_feature_derivation_sha256": _sha(
+            causal_feature_derivation_sha256,
+            "causal_feature_derivation_sha256",
+        ),
         "probabilities": probability_payload,
         "thresholds": threshold_payload,
         "operator_permissions": {state: str(value) for state, value in operator_permissions.items()},
@@ -139,6 +144,10 @@ def validate_forecast_seal(seal: Mapping[str, Any]) -> dict[str, Any]:
     sealed = _time(seal.get("sealed_at"), "sealed_at")
     if sealed < issue or (sealed - issue).total_seconds() > 300:
         raise SealedEvaluationError("forecast was not sealed at issue time")
+    _sha(seal.get("package_manifest_sha256"), "package_manifest_sha256")
+    _sha(seal.get("feature_row_sha256"), "feature_row_sha256")
+    _sha(seal.get("source_authentication_sha256"), "source_authentication_sha256")
+    _sha(seal.get("causal_feature_derivation_sha256"), "causal_feature_derivation_sha256")
     if seal.get("runtime_training_allowed") is not False or seal.get("runtime_recalibration_allowed") is not False or seal.get("runtime_rethresholding_allowed") is not False:
         raise SealedEvaluationError("forecast seal permits runtime model changes")
     return dict(seal)
@@ -187,8 +196,6 @@ def derive_new_crossing_labels(
         label = None
         first_crossing = None
         if eligible:
-            # Include the current sample as the predecessor and search future
-            # samples through the closed 24-hour horizon.
             future_idx = np.where((times > issue) & (times <= end))[0]
             previous = current_flux
             label = 0
