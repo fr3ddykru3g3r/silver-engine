@@ -6,11 +6,14 @@ on:
       - codex/iris-sep-continuation-20260905
     paths:
       - 'iris_report/iris_sep/config/availability_conditioned_fallback_preregistration_2026-09-07.json'
+      - 'iris_report/iris_sep/config/operator_review_budget_policy_v1.json'
       - 'iris_report/iris_sep/src/iris_sep/modeling/availability_fallback.py'
       - 'iris_report/iris_sep/tests/test_availability_fallback.py'
+      - 'iris_report/iris_sep/tests/test_operator_review_budget.py'
       - 'iris_report/iris_sep/tools/run_availability_conditioned_fallback.py'
       - 'iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py'
       - 'iris_report/iris_sep/tools/render_availability_fallback_judge_summary.py'
+      - 'iris_report/iris_sep/tools/run_operator_review_budget_diagnostic.py'
       - '.github/workflows/iris-sep-availability-fallback.yml'
   workflow_dispatch:
 
@@ -31,6 +34,7 @@ jobs:
         run: |
           git merge-base --is-ancestor 629c0736ee2ea307c5dea12beac4e6fe5abb10ee HEAD
           test -f iris_report/iris_sep/config/availability_conditioned_fallback_preregistration_2026-09-07.json
+          test -f iris_report/iris_sep/config/operator_review_budget_policy_v1.json
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -54,8 +58,10 @@ jobs:
             iris_report/iris_sep/src/iris_sep/modeling/availability_fallback.py \
             iris_report/iris_sep/tools/run_availability_conditioned_fallback.py \
             iris_report/iris_sep/tools/audit_availability_conditioned_fallback.py \
-            iris_report/iris_sep/tools/render_availability_fallback_judge_summary.py
+            iris_report/iris_sep/tools/render_availability_fallback_judge_summary.py \
+            iris_report/iris_sep/tools/run_operator_review_budget_diagnostic.py
           python -m unittest discover -s iris_report/iris_sep/tests -p 'test_availability_fallback.py' -v
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_operator_review_budget.py' -v
 
       - name: Acquire hash-pinned public development inputs
         run: |
@@ -91,6 +97,21 @@ jobs:
           test -s /tmp/availability-fallback/JUDGE_SUMMARY.md
           cat /tmp/availability-fallback/JUDGE_SUMMARY.md
 
+      - name: Quantify fixed operator review budget
+        run: |
+          python -m iris_report.iris_sep.tools.run_operator_review_budget_diagnostic \
+            --result-dir /tmp/availability-fallback \
+            --output /tmp/availability-fallback/operator_review_budget.json \
+            > /tmp/operator-review-budget.stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/availability-fallback/operator_review_budget.json').read_text())
+          print(json.dumps(d['judge_headline'], indent=2, sort_keys=True))
+          assert d['locked_test_accessed'] is False
+          assert abs(d['primary_review_fraction'] - 0.05) < 1e-12
+          PY
+
       - name: Bind runtime and source hashes
         run: |
           python - <<'PY'
@@ -112,6 +133,7 @@ jobs:
             'summary_sha256':h(root/'summary.json'),
             'independent_audit_sha256':h(root/'independent_audit.json'),
             'judge_summary_sha256':h(root/'JUDGE_SUMMARY.md'),
+            'operator_review_budget_sha256':h(root/'operator_review_budget.json'),
             'locked_test_accessed':False,
             'monitor_used':False,
             'imputation_used':False,
