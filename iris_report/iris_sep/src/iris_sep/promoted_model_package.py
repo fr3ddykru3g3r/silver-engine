@@ -16,7 +16,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 import pandas as pd
-from xgboost import XGBClassifier
+from xgboost import Booster, DMatrix, XGBClassifier
 
 
 FORMAT = "IRIS_SEP_PROMOTED_MODEL_PACKAGE_V1"
@@ -24,6 +24,7 @@ ARCHITECTURE = "IRIS_CROSSFIT_EVIDENCE_STACK_V1"
 TARGET = "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H"
 FAMILIES = ("SOLAR", "XRS", "PROTON")
 MODELS_PER_FAMILY = 5
+SERIALIZATION = "XGBOOST_BOOSTER_JSON"
 
 
 class PromotedModelPackageError(ValueError):
@@ -96,7 +97,9 @@ def export_promoted_package(
     """Export one immutable directory and return its manifest.
 
     The caller is responsible for fitting the models before this function is
-    called. This exporter never calls ``fit``.
+    called. This exporter never calls ``fit``. Fitted sklearn wrappers are
+    serialized through their native Booster objects to avoid sklearn mixin
+    compatibility affecting the on-disk model representation.
     """
     output_dir = Path(output_dir)
     if output_dir.exists():
@@ -133,7 +136,7 @@ def export_promoted_package(
             relative = Path("models") / family.lower() / f"seed_{index}.json"
             destination = output_dir / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
-            model.save_model(destination)
+            model.get_booster().save_model(str(destination))
             records.append({
                 "index": index,
                 "path": relative.as_posix(),
@@ -148,6 +151,7 @@ def export_promoted_package(
         "architecture": ARCHITECTURE,
         "target": TARGET,
         "scope": "DEVELOPMENT_MODEL_PACKAGE_NOT_OPERATIONALLY_CERTIFIED",
+        "serialization": SERIALIZATION,
         "models_per_family": MODELS_PER_FAMILY,
         "feature_families": feature_families,
         "feature_schema_sha256": feature_schema_sha256(feature_families),
@@ -177,6 +181,7 @@ def export_promoted_package(
         "manifest_sha256": sha256_file(output_dir / "manifest.json"),
         "feature_schema_sha256": manifest["feature_schema_sha256"],
         "model_file_count": sum(len(v) for v in model_records.values()),
+        "serialization": SERIALIZATION,
         "runtime_training_allowed": False,
     }
     (output_dir / "package_receipt.json").write_bytes(_canonical_json(receipt) + b"\n")
@@ -202,7 +207,7 @@ def _sigmoid(z: np.ndarray) -> np.ndarray:
 class LoadedPromotedModelPackage:
     root: Path
     manifest: dict[str, object]
-    models: dict[str, list[XGBClassifier]]
+    models: dict[str, list[Booster]]
 
     @property
     def thresholds(self) -> dict[str, float]:
@@ -222,7 +227,8 @@ class LoadedPromotedModelPackage:
         for family in FAMILIES:
             names = families[family]
             values = frame.loc[:, names].apply(pd.to_numeric, errors="coerce")
-            preds = [model.predict_proba(values)[:, 1] for model in self.models[family]]
+            dmatrix = DMatrix(values.to_numpy(dtype=np.float64), feature_names=names, missing=np.nan)
+            preds = [model.predict(dmatrix) for model in self.models[family]]
             raw[family] = np.median(np.stack(preds, axis=0), axis=0).astype(np.float64)
             reliability[family] = np.mean(np.isfinite(values.to_numpy(dtype=np.float64)), axis=1)
 
@@ -264,6 +270,8 @@ def load_promoted_package(root: Path) -> LoadedPromotedModelPackage:
         raise PromotedModelPackageError("invalid package JSON") from exc
     if manifest.get("format") != FORMAT or manifest.get("architecture") != ARCHITECTURE or manifest.get("target") != TARGET:
         raise PromotedModelPackageError("unsupported package identity")
+    if manifest.get("serialization") != SERIALIZATION or receipt.get("serialization") != SERIALIZATION:
+        raise PromotedModelPackageError("unsupported model serialization")
     if manifest.get("runtime_training_allowed") is not False:
         raise PromotedModelPackageError("runtime-training flag must be false")
     if receipt.get("manifest_sha256") != sha256_file(manifest_path):
@@ -277,12 +285,12 @@ def load_promoted_package(root: Path) -> LoadedPromotedModelPackage:
     models_payload = manifest.get("models")
     if not isinstance(models_payload, Mapping) or set(models_payload) != set(FAMILIES):
         raise PromotedModelPackageError("model records malformed")
-    loaded: dict[str, list[XGBClassifier]] = {}
+    loaded: dict[str, list[Booster]] = {}
     for family in FAMILIES:
         records = list(models_payload[family])
         if len(records) != MODELS_PER_FAMILY:
             raise PromotedModelPackageError(f"wrong model count for {family}")
-        family_models = []
+        family_models: list[Booster] = []
         for record in records:
             if not isinstance(record, Mapping):
                 raise PromotedModelPackageError("invalid model record")
@@ -292,8 +300,8 @@ def load_promoted_package(root: Path) -> LoadedPromotedModelPackage:
             model_path = root / relative
             if not model_path.is_file() or sha256_file(model_path) != record.get("sha256"):
                 raise PromotedModelPackageError("model file digest mismatch")
-            model = XGBClassifier()
-            model.load_model(model_path)
+            model = Booster()
+            model.load_model(str(model_path))
             family_models.append(model)
         loaded[family] = family_models
 
