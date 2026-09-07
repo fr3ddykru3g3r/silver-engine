@@ -18,7 +18,6 @@ import argparse
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
-import math
 from pathlib import Path
 from typing import Any
 
@@ -56,17 +55,25 @@ def _parse_times(records: list[dict[str, Any]]) -> pd.DatetimeIndex:
 
 def _cadence_summary(times: pd.DatetimeIndex) -> dict[str, Any]:
     if len(times) < 2:
-        return {"rows": int(len(times)), "first": None, "last": None, "median_cadence_seconds": None,
-                "max_gap_seconds": None, "duplicate_timestamps": 0}
+        return {
+            "rows": int(len(times)),
+            "first": None,
+            "last": None,
+            "median_cadence_seconds": None,
+            "max_gap_seconds": None,
+            "duplicate_timestamps": 0,
+        }
     ordered = times.sort_values()
-    ns = ordered.asi8
-    gaps = np_diff = [int((b - a) // 1_000_000_000) for a, b in zip(ns[:-1], ns[1:])]
+    # Do not assume DatetimeIndex.asi8 is nanoseconds. Pandas 3 can preserve a
+    # microsecond-resolution dtype, so dividing the raw integer representation by
+    # 1e9 can silently turn a real five-minute cadence into zero seconds.
+    gaps = [float((b - a).total_seconds()) for a, b in zip(ordered[:-1], ordered[1:])]
     return {
         "rows": int(len(times)),
         "first": ordered[0].isoformat(),
         "last": ordered[-1].isoformat(),
-        "median_cadence_seconds": float(pd.Series(gaps).median()),
-        "max_gap_seconds": int(max(gaps)),
+        "median_cadence_seconds": float(pd.Series(gaps, dtype=float).median()),
+        "max_gap_seconds": float(max(gaps)),
         "duplicate_timestamps": int(len(times) - len(pd.Index(times).unique())),
     }
 
@@ -83,7 +90,11 @@ def summarize_protons(records: list[dict[str, Any]]) -> dict[str, Any]:
         labels = sorted(str(x) for x in frame[energy_col].dropna().unique())
         # SWPC currently uses strings such as ">=10 MeV". Prefer that channel;
         # if source wording changes, fail closed rather than silently selecting another energy.
-        matches = [label for label in labels if "10" in label and "MeV" in label and (">" in label or "ge" in label.lower())]
+        matches = [
+            label
+            for label in labels
+            if "10" in label and "MeV" in label and (">" in label or "ge" in label.lower())
+        ]
         if not matches:
             raise ValueError(f"could not identify >=10 MeV proton channel; labels={labels}")
         selected = matches[0]
@@ -134,13 +145,15 @@ def summarize_xrs(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def np_isfinite(values):
-    # Tiny dependency-free wrapper keeps the audit easy to inspect.
+    # Tiny dependency-local wrapper keeps the audit easy to inspect.
     import numpy as np
+
     return np.isfinite(values)
 
 
 def np_nanmax(values):
     import numpy as np
+
     return np.nanmax(values)
 
 
@@ -222,7 +235,10 @@ def run(output: Path) -> dict[str, Any]:
         "sources": sources,
         "jsoc": jsoc,
     }
-    (output / "fresh_source_audit.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (output / "fresh_source_audit.json").write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     return receipt
 
 
@@ -231,12 +247,18 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     result = run(args.output)
-    print(json.dumps({
-        "format": result["format"],
-        "jsoc_status": result["jsoc"].get("status"),
-        "proton": result["sources"]["goes_primary_integral_protons_7d"]["summary"],
-        "fresh_forecast_probability_emitted": False,
-    }, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "format": result["format"],
+                "jsoc_status": result["jsoc"].get("status"),
+                "proton": result["sources"]["goes_primary_integral_protons_7d"]["summary"],
+                "fresh_forecast_probability_emitted": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":
