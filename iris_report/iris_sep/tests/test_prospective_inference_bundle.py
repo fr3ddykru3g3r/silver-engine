@@ -139,9 +139,18 @@ class ProspectiveInferenceBundleTests(unittest.TestCase):
             expected_bundle_sha256=digest,
         )
         # Provenance permission is independent of the operator's VALID/DEGRADED/
-        # ABSTAIN decision. The wrapper must preserve, never upgrade, that decision.
-        self.assertEqual(result["forecast_status"], inner_result["forecast_status"])
-        self.assertEqual(result["action_tier"], inner_result["action_tier"])
+        # ABSTAIN decision. The wrapper must preserve, never upgrade or mutate,
+        # every field produced by the legacy replay API.
+        provenance_keys = {
+            "prospective_inference_bundle_sha256",
+            "prospective_inference_bundle_scope",
+            "forecast_input_provenance",
+            "forecast_probability_permitted_by_provenance",
+        }
+        preserved_inner_result = {
+            key: value for key, value in result.items() if key not in provenance_keys
+        }
+        self.assertEqual(preserved_inner_result, inner_result)
         self.assertTrue(result["forecast_probability_permitted_by_provenance"])
         self.assertEqual(result["forecast_input_provenance"]["status"], "VALID")
         self.assertEqual(result["prospective_inference_bundle_sha256"], digest)
