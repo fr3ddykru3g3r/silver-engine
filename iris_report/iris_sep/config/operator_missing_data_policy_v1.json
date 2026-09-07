@@ -1,0 +1,64 @@
+{
+  "format": "IRIS_SEP_OPERATOR_MISSING_DATA_POLICY_V1",
+  "status": "DEVELOPMENT_POLICY_FROZEN_FROM_PREREGISTERED_EVIDENCE",
+  "target": "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H",
+  "normal_policy": {
+    "required_state": "FULL",
+    "permission": "NORMAL_ONLY_IF_ALL_ADMISSION_CHECKS_PASS"
+  },
+  "availability_states": {
+    "FULL": {
+      "available_experts": ["SOLAR", "XRS", "PROTON"],
+      "permission": "NORMAL_ONLY_IF_ALL_ADMISSION_CHECKS_PASS",
+      "runtime_imputation": false
+    },
+    "NO_XRS": {
+      "available_experts": ["SOLAR", "PROTON"],
+      "permission": "DEGRADED",
+      "runtime_imputation": false,
+      "reason": "Preregistered availability-conditioned fallback passed the DEGRADED-candidate gate at all tested event-terminal duration labels."
+    },
+    "NO_PROTON": {
+      "available_experts": ["SOLAR", "XRS"],
+      "permission": "DEGRADED",
+      "runtime_imputation": false,
+      "reason": "Preregistered availability-conditioned fallback passed the DEGRADED-candidate gate at all tested event-terminal duration labels."
+    },
+    "NO_XRS_OR_PROTON": {
+      "available_experts": ["SOLAR"],
+      "permission": "ABSTAIN",
+      "runtime_imputation": false,
+      "reason": "Solar-only fallback failed the preregistered affected-row POD gate; unsupported combined context loss must not emit a normal or degraded probability."
+    }
+  },
+  "simple_imputation_policy": {
+    "default": "NOT_USED_WHEN_A_VERIFIED_AVAILABILITY_FALLBACK_EXISTS",
+    "TRAIN_FIT_MEDIAN": "REJECTED_AS_OPERATOR_DEFAULT_DUE_FALSE_ALERT_INSTABILITY",
+    "MASK_AWARE_NO_FILL": "DIAGNOSTIC_FAIL_CLOSED_ARM_NOT_GENERAL_EVENT_PRESERVING_RECOVERY",
+    "CAUSAL_FORWARD_FILL": "SECONDARY_DEVELOPMENT_RESEARCH_FALLBACK_ONLY_NOT_DEFAULT_RUNTIME_PATH"
+  },
+  "physics_reconstruction_policy": "UNPROMOTED_UNTIL_IT_BEATS_CAUSAL_SIMPLE_CONTROL_ON_HIDDEN_TRUTH_AND_DOWNSTREAM_FORECAST_PRESERVATION",
+  "evidence": {
+    "availability_fallback_run_id": 34083153471,
+    "availability_fallback_source_head": "a43e059d04cdc112e773807219a3cc32b7142979",
+    "artifact_id": 10004412827,
+    "artifact_zip_sha256": "583cd505ae9e676dadb43b852a18a9fe26547f0cf57efc036ca208722d0297e6",
+    "predictions_sha256": "d4e9b8b706f3eeb12a32b3af838815debeb4f706611a2e3eb0d72361aaed928b",
+    "summary_sha256": "763ac18b79ef73a1d0339c896983b0f76aa36a1be8110137fa5048af58b253e9",
+    "preregistration_sha256": "611d1ba875bf9d4c978f1a22c84ad8a6d2f20426a62f186b4381758e624d2b26",
+    "runner_sha256": "b9e07afc9ec346f9a0d7935c11b840d7a55209fbcc20ed6a41214a471c2538e2",
+    "independent_audit_status": "PASSED",
+    "independent_audit_mismatch_count": 0,
+    "independent_audit_policy_evaluations": 18,
+    "event_terminal_imputation_run_id": 34052511341,
+    "event_terminal_artifact_sha256": "2e0c832d949048344649708a03644219fb01454df9e13e9b15b752d24b1a851a"
+  },
+  "claim_boundary": {
+    "locked_test_accessed": false,
+    "monitor_used_for_availability_fallback": false,
+    "fresh_independent_evaluation": false,
+    "operational_certification": false,
+    "company_superiority_claim": false,
+    "note": "DEGRADED permissions are development-only evidence-bound permissions. Fresh independent evaluation is required before operational deployment or NORMAL promotion of a degraded state."
+  }
+}
