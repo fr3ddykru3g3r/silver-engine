@@ -15,6 +15,7 @@ BASE = datetime(2026, 9, 7, 0, 0, tzinfo=timezone.utc)
 SHA_A = "a" * 64
 SHA_B = "b" * 64
 SHA_C = "c" * 64
+SHA_D = "d" * 64
 STATES = ("FULL", "NO_XRS", "NO_PROTON", "NO_XRS_OR_PROTON")
 
 
@@ -29,6 +30,7 @@ def seal(issue, *, full=0.8, no_xrs=0.7, no_proton=0.6, solar=0.4, thresholds=No
         package_manifest_sha256=SHA_A,
         feature_row_sha256=SHA_B,
         source_authentication_sha256=SHA_C,
+        causal_feature_derivation_sha256=SHA_D,
         probabilities={
             "FULL": full,
             "NO_XRS": no_xrs,
@@ -55,6 +57,7 @@ class SealedEvaluationTests(unittest.TestCase):
                 package_manifest_sha256=SHA_A,
                 feature_row_sha256=SHA_B,
                 source_authentication_sha256=SHA_C,
+                causal_feature_derivation_sha256=SHA_D,
                 probabilities={state: 0.1 for state in STATES},
                 thresholds={state: {"MAX_TSS": 0.2, "POD80_MIN_FAR": 0.1} for state in STATES},
                 operator_permissions={state: "DEGRADED" for state in STATES},
@@ -127,6 +130,17 @@ class SealedEvaluationTests(unittest.TestCase):
                 forecast_seals=[first, second],
                 label_receipt=labels,
                 minimum_positive_support=1,
+            )
+
+    def test_derivation_digest_is_part_of_seal_integrity(self):
+        original = seal(BASE)
+        mutated = dict(original)
+        mutated["causal_feature_derivation_sha256"] = "e" * 64
+        with self.assertRaisesRegex(SealedEvaluationError, "seal digest mismatch"):
+            derive_new_crossing_labels(
+                forecast_seals=[mutated],
+                proton_times=[BASE - timedelta(minutes=5), BASE + timedelta(hours=1)],
+                proton_flux=[1.0, 2.0],
             )
 
 
