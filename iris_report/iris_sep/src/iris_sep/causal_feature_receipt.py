@@ -18,11 +18,13 @@ import math
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-import numpy as np
 import pandas as pd
 
 from .feature_schema_binding import feature_vector_schema_sha256
-from .source_authentication import FORMAT as SOURCE_AUTH_FORMAT
+from .source_authentication import (
+    FORMAT as SOURCE_AUTH_FORMAT,
+    authenticate_acquisition_receipts,
+)
 
 
 FORMAT = "IRIS_SEP_CAUSAL_FEATURE_DERIVATION_RECEIPT_V1"
@@ -78,10 +80,32 @@ def canonical_feature_row_bytes(frame: pd.DataFrame, ordered_features: Sequence[
             value = float(raw)
             if not math.isfinite(value):
                 raise CausalFeatureReceiptError("infinite feature value is not permitted")
-            # hex() is an exact, locale-independent float representation.
             encoded = {"kind": "finite", "float_hex": value.hex()}
         values.append({"feature_name": name, "value": encoded})
     return _canonical_json({"features": values})
+
+
+def _recompute_source_authentication(
+    *,
+    issue: datetime,
+    source_authentication: Mapping[str, Any],
+    acquisition_receipts: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    if source_authentication.get("format") != SOURCE_AUTH_FORMAT:
+        raise CausalFeatureReceiptError("source authentication receipt format mismatch")
+    required = source_authentication.get("required_source_ids")
+    if not isinstance(required, list) or not required:
+        raise CausalFeatureReceiptError("source authentication required_source_ids missing")
+    recomputed = authenticate_acquisition_receipts(
+        issue_time=issue,
+        receipts=acquisition_receipts,
+        required_source_ids=[str(value) for value in required],
+    )
+    if dict(source_authentication) != recomputed:
+        raise CausalFeatureReceiptError("source authentication receipt does not match recomputation")
+    if recomputed.get("authenticated_for_prospective_use") is not True:
+        raise CausalFeatureReceiptError("source acquisitions are not authenticated for prospective use")
+    return recomputed
 
 
 def build_causal_feature_derivation_receipt(
@@ -95,13 +119,14 @@ def build_causal_feature_derivation_receipt(
     aggregator_path: Path = AGGREGATOR_PATH,
 ) -> dict[str, Any]:
     issue = _aware(issue_time, "issue_time")
-    if source_authentication.get("format") != SOURCE_AUTH_FORMAT:
-        raise CausalFeatureReceiptError("source authentication receipt format mismatch")
-    if source_authentication.get("authenticated_for_prospective_use") is not True:
-        raise CausalFeatureReceiptError("source acquisitions are not authenticated for prospective use")
-    if source_authentication.get("issue_time") != issue.isoformat():
+    recomputed_auth = _recompute_source_authentication(
+        issue=issue,
+        source_authentication=source_authentication,
+        acquisition_receipts=acquisition_receipts,
+    )
+    if recomputed_auth.get("issue_time") != issue.isoformat():
         raise CausalFeatureReceiptError("source-authentication issue time mismatch")
-    auth_sha = source_authentication.get("authentication_receipt_sha256")
+    auth_sha = recomputed_auth.get("authentication_receipt_sha256")
     if not _valid_sha(auth_sha):
         raise CausalFeatureReceiptError("source-authentication digest missing")
 
