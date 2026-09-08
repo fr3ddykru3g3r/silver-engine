@@ -1,0 +1,42 @@
+{
+  "format": "IRIS_SEP_EVENT_LABEL_SEMANTICS_CONTRACT_V1",
+  "frozen_on": "2026-09-09",
+  "target_id": "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H",
+  "measurement": {
+    "quantity": ">10 MeV integral proton flux",
+    "threshold_pfu": 10.0,
+    "primary_series_required": true,
+    "finite_nonnegative_samples_required": true
+  },
+  "issue_eligibility": {
+    "latest_primary_sample_age_seconds_max": 300,
+    "eligible_if_issue_support_flux_pfu": "< 10",
+    "ineligible_if_issue_support_flux_pfu": ">= 10",
+    "reason": "The target is a NEW threshold crossing, not continuation of an already-active condition."
+  },
+  "positive_label_rule": {
+    "transition": "previous sampled flux < 10 pfu AND current sampled flux >= 10 pfu",
+    "search_interval": "after issue support through the exact issue+24h endpoint, inclusive",
+    "crossing_at_exact_24h_endpoint_counts": true,
+    "touching_exactly_10_pfu_from_below_counts": true
+  },
+  "negative_label_rule": {
+    "definition": "eligible resolved issue with no sampled <10 to >=10 pfu transition inside the complete 24h window"
+  },
+  "resolution_requirements": {
+    "exact_issue_plus_24h_endpoint_required": true,
+    "maximum_gap_seconds": 300,
+    "duplicate_timestamps_permitted": false,
+    "immature_window_status": "UNRESOLVED",
+    "gappy_window_status": "UNRESOLVED",
+    "stale_issue_support_status": "UNRESOLVED"
+  },
+  "scientific_boundary": {
+    "sampled_primary_series_crossing_definition_verified_in_code": true,
+    "official_event_catalogue_equivalence_established": false,
+    "allowed_claim": "sampled primary-series NEW >=10 pfu crossing within 24 hours",
+    "forbidden_claim_until_validated": "equivalent to an official SEP event catalogue event definition"
+  },
+  "implementation": "src/iris_sep/sealed_evaluation.py",
+  "tests": "tests/test_event_label_semantics_contract.py"
+}
