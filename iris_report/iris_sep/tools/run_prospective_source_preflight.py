@@ -19,6 +19,8 @@ from typing import Any
 
 import pandas as pd
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from iris_report.iris_sep.src.iris_sep.source_authentication import (
     build_acquisition_receipt,
@@ -51,15 +53,31 @@ def _save(path: Path, data: bytes) -> None:
     path.write_bytes(data)
 
 
-def _http_snapshot(url: str, *, params: dict[str, str] | None = None) -> tuple[bytes, datetime]:
-    response = requests.get(
-        url,
-        params=params,
-        timeout=90,
-        headers={"User-Agent": "IRIS-SEP-prospective-preflight/1.0"},
+def _session() -> requests.Session:
+    retry = Retry(
+        total=5,
+        connect=5,
+        read=5,
+        status=5,
+        backoff_factor=1.0,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset({"GET"}),
+        raise_on_status=False,
     )
-    response.raise_for_status()
-    return response.content, datetime.now(timezone.utc)
+    session = requests.Session()
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    session.headers.update({
+        "User-Agent": "IRIS-SEP-prospective-preflight/1.1 (+research source audit)",
+        "Accept": "*/*",
+    })
+    return session
+
+
+def _http_snapshot(url: str, *, params: dict[str, str] | None = None) -> tuple[bytes, datetime]:
+    with _session() as session:
+        response = session.get(url, params=params, timeout=(20, 90))
+        response.raise_for_status()
+        return response.content, datetime.now(timezone.utc)
 
 
 def _noaa(source_id: str, endpoint: str, output: Path) -> dict[str, Any]:
@@ -205,10 +223,15 @@ def run(output: Path) -> dict[str, Any]:
         raise ValueError("output must be a new immutable directory")
     output.mkdir(parents=True)
 
+    if not REGISTRY.is_file() or not INTERFACE_DISPOSITION.is_file():
+        raise FileNotFoundError("preflight trust registry and causal-interface disposition must both exist")
+
     started = datetime.now(timezone.utc)
     lookback_start = started - timedelta(hours=24)
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    interface = json.loads(INTERFACE_DISPOSITION.read_text(encoding="utf-8"))
+    registry_bytes = REGISTRY.read_bytes()
+    interface_bytes = INTERFACE_DISPOSITION.read_bytes()
+    registry = json.loads(registry_bytes)
+    interface = json.loads(interface_bytes)
     receipts: list[dict[str, Any]] = []
     failures: dict[str, dict[str, str]] = {}
 
@@ -232,8 +255,6 @@ def run(output: Path) -> dict[str, Any]:
     attempt("NASA_CCMC_DONKI_CME", lambda: _donki(output, lookback_start, started))
     attempt("NASA_GSFC_CDAW_CME", lambda: _cdaw(output, started))
 
-    # The issue time is defined only after every acquisition attempt has ended,
-    # so successful acquisitions necessarily precede the hypothetical issue.
     issue_time = datetime.now(timezone.utc)
     auth = authenticate_acquisition_receipts(
         issue_time=issue_time,
@@ -258,7 +279,7 @@ def run(output: Path) -> dict[str, Any]:
         blockers.append("FROZEN_INTERFACE_DISPOSITION_RETROSPECTIVE_ONLY")
 
     payload = {
-        "format": "IRIS_SEP_PROSPECTIVE_SOURCE_PREFLIGHT_V1",
+        "format": "IRIS_SEP_PROSPECTIVE_SOURCE_PREFLIGHT_V2",
         "started_utc": started.isoformat(),
         "hypothetical_issue_time_utc": issue_time.isoformat(),
         "lookback_start_utc": lookback_start.isoformat(),
@@ -268,6 +289,8 @@ def run(output: Path) -> dict[str, Any]:
         "source_authentication": auth,
         "jsoc_nrt_missing_required_keywords": missing_nrt,
         "causal_interface_disposition": interface.get("disposition"),
+        "trusted_source_registry_sha256": _sha(registry_bytes),
+        "causal_interface_disposition_sha256": _sha(interface_bytes),
         "forecast_probability_emitted": False,
         "prospective_skill_forecast_admissible": forecast_admissible,
         "blockers": sorted(set(blockers)),
