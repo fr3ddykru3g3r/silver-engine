@@ -109,12 +109,27 @@ class CausalFeatureReceiptTests(unittest.TestCase):
                 acquisition_receipts=rows,
             )
 
-    def test_unauthenticated_source_chain_is_rejected(self):
+    def test_tampered_source_authentication_is_rejected_by_recomputation(self):
         rows = acquisitions()
         authentication = auth(rows)
         authentication["authenticated_for_prospective_use"] = False
         frame = pd.DataFrame([[1.0, 2.0, 3.0]], columns=["s1", "x1", "p1"])
-        with self.assertRaisesRegex(CausalFeatureReceiptError, "not authenticated"):
+        with self.assertRaisesRegex(CausalFeatureReceiptError, "does not match recomputation"):
+            build_causal_feature_derivation_receipt(
+                issue_time=ISSUE,
+                feature_row=frame,
+                feature_families=FEATURES,
+                family_order=ORDER,
+                source_authentication=authentication,
+                acquisition_receipts=rows,
+            )
+
+    def test_raw_acquisition_tamper_is_rejected_even_with_stored_valid_authentication(self):
+        rows = acquisitions()
+        authentication = auth(rows)
+        rows[0]["artifact_sha256"] = "c" * 64
+        frame = pd.DataFrame([[1.0, 2.0, 3.0]], columns=["s1", "x1", "p1"])
+        with self.assertRaisesRegex(CausalFeatureReceiptError, "does not match recomputation"):
             build_causal_feature_derivation_receipt(
                 issue_time=ISSUE,
                 feature_row=frame,
