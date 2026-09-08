@@ -21,6 +21,7 @@ import numpy as np
 
 from .promoted_model_package import ARCHITECTURE, TARGET
 from .sealed_evaluation import (
+    SealedEvaluationError,
     threshold_metrics,
     validate_forecast_seal,
     validate_label_receipt,
@@ -238,7 +239,10 @@ def evaluate_sealed_comparators(
     post-outcome substitution. Every forecast must have exactly one comparator
     receipt and one V2 outcome row, including unresolved/ineligible cases.
     """
-    labels = validate_label_receipt(label_receipt)
+    try:
+        label_rows = validate_label_receipt(label_receipt)
+    except SealedEvaluationError as exc:
+        raise SealedComparisonError(str(exc)) from exc
     if isinstance(forecast_seals, (str, bytes)) or not isinstance(forecast_seals, Sequence) or not forecast_seals:
         raise SealedComparisonError("forecast_seals must be a non-empty sequence")
     if isinstance(comparison_receipts, (str, bytes)) or not isinstance(comparison_receipts, Sequence) or not comparison_receipts:
@@ -282,7 +286,6 @@ def evaluate_sealed_comparators(
     if set(comparisons_by_forecast) != set(forecasts_by_hash):
         raise SealedComparisonError("every forecast must have exactly one sealed comparison receipt")
 
-    label_rows = labels["rows"]
     label_by_forecast = {str(row["forecast_seal_sha256"]): row for row in label_rows}
     if set(label_by_forecast) != set(forecasts_by_hash):
         raise SealedComparisonError("outcome labels do not exactly match comparison forecast cohort")
