@@ -399,7 +399,8 @@ def derive_new_crossing_labels(
     return payload
 
 
-def _validate_label_receipt(receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
+def validate_label_receipt(receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Validate V2 sampled-outcome receipt integrity and frozen target semantics."""
     if not isinstance(receipt, Mapping) or receipt.get("format") != LABEL_FORMAT:
         raise SealedEvaluationError("unsupported label receipt; V2 required")
     if receipt.get("target") != TARGET:
@@ -490,7 +491,7 @@ def evaluate_sealed_cohort(
     if not isinstance(minimum_positive_support, int) or minimum_positive_support < 1:
         raise SealedEvaluationError("minimum_positive_support must be positive")
 
-    labels = _validate_label_receipt(label_receipt)
+    labels = validate_label_receipt(label_receipt)
     label_by_hash = {row["forecast_seal_sha256"]: row for row in labels}
     forecast_hashes: set[str] = set()
     forecast_issues: set[str] = set()
