@@ -1,0 +1,129 @@
+{
+  "format": "IRIS_SEP_EIGHT_ISSUE_STATUS_V1",
+  "status_date": "2026-09-08",
+  "branch": "codex/iris-sep-continuation-20260905",
+  "principle": "No item remains labelled IN_PROGRESS. Each is PASS, CLOSED_WITH_EXTERNAL_BLOCKER, CLOSED_WITH_SCIENTIFIC_BLOCKER, or NOT_APPLICABLE_UNTIL_A_VALID_LIVE_FORECAST_EXISTS.",
+  "items": {
+    "1_immutable_v3_package": {
+      "status": "PASS",
+      "evidence": {
+        "build_run_id": 34141515134,
+        "github_artifact_id": 10026120558,
+        "package_zip_sha256": "69be4a5d79c17e452d2fe6115c6447995f22297002a6b25e2dc692c760495a75",
+        "manifest_sha256": "88c1a73f73f9c3b48c7b5b3c59cdc42dd3d80421ec7b47829f8ab4036e8790a7",
+        "specialist_model_count": 15,
+        "self_replay_max_abs_difference": 0.0,
+        "durable_archive_provider": "Google Drive",
+        "durable_archive_file_id": "1u7GdhAXusiDNojJ-ARrKRCmqogR5Oi8z"
+      },
+      "boundary": "Package integrity does not establish prospective input causality or forecast skill."
+    },
+    "2_fresh_trusted_source_acquisition": {
+      "status": "CLOSED_WITH_EXTERNAL_BLOCKER",
+      "evidence": {
+        "preflight_run_id": 34217607075,
+        "preflight_artifact_id": 10052465094,
+        "preflight_artifact_zip_sha256": "95ae852fb005674fcac555bc7c741bd1becab04ac2829823819ea6c0575ed5e3",
+        "required_source_count": 7,
+        "authenticated_source_count": 6,
+        "authenticated_sources": [
+          "NOAA_SWPC_PRIMARY_PROTON_7D",
+          "NOAA_SWPC_PRIMARY_XRS_7D",
+          "NOAA_SWPC_GOES_INSTRUMENT_SOURCES",
+          "JSOC_HMI_SHARP_NRT",
+          "LMSAL_HEK_GOES_FLARES",
+          "NASA_CCMC_DONKI_CME"
+        ],
+        "external_failure": "NASA_GSFC_CDAW_CME connection reset after five bounded retries",
+        "authentication_receipt_sha256": "b6fd5156a91dfb54c13d1255e059ab82f3e245f5c84751580605150429a6932b"
+      },
+      "boundary": "CDAW was not substituted by another catalogue. Full source authentication therefore remained false."
+    },
+    "3_exact_causal_259_feature_interface": {
+      "status": "CLOSED_WITH_SCIENTIFIC_BLOCKER",
+      "evidence": {
+        "interface_positions": 259,
+        "solar_context_positions": 251,
+        "xrs_positions": 4,
+        "proton_positions": 4,
+        "jsoc_nrt_missing_keywords": ["CMASKL", "MEANGBL", "USFLUXL"],
+        "affected_frozen_positions": 18,
+        "disposition": "FROZEN_MODEL_RETROSPECTIVE_ONLY_FOR_SKILL_UNTIL_SOURCE_EQUIVALENCE_IS_ESTABLISHED"
+      },
+      "forbidden_workarounds": [
+        "zero fill",
+        "similarly named substitution",
+        "retrospective backcast",
+        "definitive-to-NRT silent swap",
+        "relabel reduced interface as the same frozen model"
+      ]
+    },
+    "4_load_only_inference_and_provenance": {
+      "status": "PASS",
+      "evidence": {
+        "serialized_specialists": 15,
+        "independent_xgboost_runtime_replay_max_abs_difference": 2.22e-16,
+        "ordered_feature_schema_bound": true,
+        "runtime_training_allowed": false,
+        "runtime_recalibration_allowed": false,
+        "runtime_rethresholding_allowed": false,
+        "solar_only_abstain_can_emit_alert": false
+      },
+      "boundary": "Prospective source truth still depends on item 3."
+    },
+    "5_forecast_seal_and_external_witness": {
+      "status": "PASS_ENGINEERING_NO_ADMISSIBLE_SKILL_FORECAST_TO_WITNESS",
+      "evidence": {
+        "forecast_seal_format": "IRIS_SEP_SEALED_FORECAST_V2",
+        "maximum_seal_delay_seconds": 300,
+        "semantic_probability_and_horizon_validation": true,
+        "github_server_witness_implemented": true,
+        "witness_claim": "pre-outcome digest existence only"
+      },
+      "boundary": "No prospective skill forecast was emitted because item 3 blocks the frozen interface. Creating a witness for a scientifically inadmissible forecast would not improve evidence."
+    },
+    "6_fair_same_cohort_comparator": {
+      "status": "PASS_ENGINEERING_NO_ADMISSIBLE_LIVE_CASE",
+      "evidence": {
+        "comparison_seal_format": "IRIS_SEP_SEALED_COMPARISON_V1",
+        "caller_supplied_iris_probability_allowed": false,
+        "one_forecast_one_comparison_one_label_enforced": true,
+        "post_outcome_comparator_selection_allowed": false,
+        "built_in_frozen_comparator": "FIT_ROLE_PREVALENCE_CLIMATOLOGY"
+      },
+      "boundary": "A live comparator result requires an admissible live forecast; none was emitted because item 3 is blocked."
+    },
+    "7_correct_24h_outcome": {
+      "status": "PASS_EVALUATOR_NO_ADMISSIBLE_LIVE_FORECAST_TO_LABEL",
+      "evidence": {
+        "label_format": "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V2",
+        "maximum_gap_seconds": 300,
+        "exact_horizon_endpoint_required": true,
+        "finite_nonnegative_flux_required": true,
+        "duplicate_timestamps_rejected": true,
+        "immature_or_gappy_windows": "UNRESOLVED",
+        "already_active_issue": "INELIGIBLE"
+      },
+      "boundary": "A 24-hour outcome cannot exist before its horizon matures, and no admissible prospective skill forecast currently exists to label."
+    },
+    "8_evidence_and_paper_generation": {
+      "status": "PASS_INTERNAL_EVIDENCE_PACKAGE",
+      "evidence": {
+        "evidence_dossier": "architecture/IRIS_EVIDENCE_DOSSIER_2026-09-08.md",
+        "student_writing_template": "architecture/STUDENT_PAPER_WRITING_TEMPLATE_2026-09-08.md",
+        "final_submission_prose_ai_generated": false
+      },
+      "boundary": "The dossier is an internal evidence source, not a submission-ready paper. Student authors must write final competition prose in their own words and disclose assistance as required."
+    }
+  },
+  "alert_filter_decision": {
+    "status": "REJECT_ADDITIONAL_POST_HOC_FILTERING_KEEP_PLAIN_V3",
+    "failed_decision_filter_run": 34206898291,
+    "monotone_veto_run": 34216432375,
+    "reason": "The first filter could create new false alerts. The monotone veto cut false positives by roughly 25-29 percent but lost detections: NO_XRS 13->12 TP and NO_PROTON 16->13 TP. Further tuning on an already-inspected score block would increase overfitting risk.",
+    "frozen_candidate": "IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3"
+  },
+  "overall_scientific_disposition": "RETROSPECTIVE_RELIABILITY_STUDY_WITH_PROSPECTIVE_FAIL_CLOSED_VALIDATION_FRAMEWORK",
+  "independent_prospective_skill_established": false,
+  "award_outcome_claimed": false
+}
