@@ -3,8 +3,14 @@
 A Git commit timestamp or caller-provided ``sealed_at`` field is not independent
 evidence that a forecast digest existed before its outcome. This module binds an
 already-created forecast/comparison seal to the exact body of a GitHub issue/PR
-comment and validates the server-assigned ``created_at`` timestamp returned by
-GitHub.
+comment and validates the server-assigned ``created_at`` *and* ``updated_at``
+timestamps returned by GitHub.
+
+A usable witness must be immutable after creation: ``updated_at`` must equal
+``created_at``. This deliberately rejects comments edited after creation even if
+the final body exactly matches the requested witness text. Otherwise a harmless
+comment could be created before the outcome and rewritten after the outcome to
+claim an earlier forecast.
 
 The witness proves only pre-outcome existence of the bound digest. It does not
 attest that source bytes came from a provider, that model inputs were causal, or
@@ -19,12 +25,12 @@ from typing import Any, Mapping
 from urllib.parse import urlparse
 
 
-FORMAT = "IRIS_SEP_GITHUB_FORECAST_WITNESS_V1"
+FORMAT = "IRIS_SEP_GITHUB_FORECAST_WITNESS_V2"
 MAX_WITNESS_DELAY = timedelta(minutes=5)
 
 
 class ForecastWitnessError(ValueError):
-    """Raised when a server witness cannot establish timely digest publication."""
+    """Raised when a server witness cannot establish timely immutable publication."""
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -95,7 +101,12 @@ def validate_github_comment_witness(
     statement: Mapping[str, Any],
     github_comment: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Validate exact body plus GitHub's server-assigned comment creation time."""
+    """Validate exact body plus immutable GitHub server timestamps.
+
+    ``updated_at == created_at`` is required. GitHub's issue-comment resource
+    exposes both values server-side, so an edited comment is not an admissible
+    pre-outcome witness even when its final body is correct.
+    """
     expected_body = witness_comment_body(statement)
     if not isinstance(github_comment, Mapping):
         raise ForecastWitnessError("github_comment must be a mapping")
@@ -104,12 +115,18 @@ def validate_github_comment_witness(
     comment_id = github_comment.get("id")
     if not isinstance(comment_id, int) or comment_id <= 0:
         raise ForecastWitnessError("GitHub witness comment id is invalid")
+
     created = _time(github_comment.get("created_at"), "GitHub created_at")
+    updated = _time(github_comment.get("updated_at"), "GitHub updated_at")
+    if updated != created:
+        raise ForecastWitnessError("GitHub witness comment was edited after creation")
+
     issue = _time(statement.get("issued_at"), "statement issued_at")
     if created < issue:
         raise ForecastWitnessError("GitHub witness predates forecast issue")
     if created - issue > MAX_WITNESS_DELAY:
         raise ForecastWitnessError("GitHub witness was published more than five minutes after issue")
+
     html_url = github_comment.get("html_url")
     if not isinstance(html_url, str):
         raise ForecastWitnessError("GitHub witness html_url missing")
@@ -123,10 +140,12 @@ def validate_github_comment_witness(
         "statement_sha256": str(statement["statement_sha256"]),
         "github_comment_id": comment_id,
         "github_comment_created_at": created.isoformat(),
+        "github_comment_updated_at": updated.isoformat(),
+        "github_comment_unedited_since_creation": True,
         "github_comment_html_url": html_url,
         "github_comment_body_sha256": hashlib.sha256(expected_body.encode("utf-8")).hexdigest(),
         "witness_delay_seconds": float((created - issue).total_seconds()),
-        "server_timestamp_provider": "GitHub issue-comment created_at",
+        "server_timestamp_provider": "GitHub issue-comment created_at/updated_at",
         "pre_outcome_digest_existence_witnessed": True,
         "provider_source_attestation_verified": False,
         "custodian_blinding_verified": False,
