@@ -1,14 +1,14 @@
 """Independent fresh-source audit for IRIS-SEP.
 
 This tool validates *source availability and cadence*, not forecasting skill.
-It deliberately does not train, calibrate, threshold, or score IRIS.  A fresh
+It deliberately does not train, calibrate, threshold, or score IRIS. A fresh
 forecast is allowed only after the complete causal feature interface exists.
 
 Public checks:
 - NOAA/SWPC primary GOES integral proton 7-day JSON
 - NOAA/SWPC primary GOES XRS 7-day JSON
 - NOAA/SWPC GOES instrument-source declaration
-- JSOC DRMS SHARP and SHARP-NRT series metadata and a bounded recent metadata query
+- JSOC DRMS CEA SHARP and CEA SHARP-NRT series metadata and a bounded recent query
 
 No JSOC export email is needed for metadata queries and no email is recorded.
 """
@@ -27,7 +27,48 @@ import requests
 NOAA_PROTON_URL = "https://services.swpc.noaa.gov/json/goes/primary/integral-protons-7-day.json"
 NOAA_XRS_URL = "https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json"
 NOAA_SOURCE_URL = "https://services.swpc.noaa.gov/json/goes/instrument-sources.json"
-JSOC_SERIES = ("hmi.sharp_720s", "hmi.sharp_720s_nrt")
+# These must stay aligned with trusted_source_registry_v1.json and with the
+# promoted 251-feature solar interface. The model consumes CEA SHARP keyword
+# summaries, not the non-CEA hmi.sharp_720s products.
+JSOC_SERIES = ("hmi.sharp_cea_720s", "hmi.sharp_cea_720s_nrt")
+REQUIRED_SHARP_KEYWORDS = (
+    "AREA",
+    "AREA_ACR",
+    "CAR_ROT",
+    "CMASKL",
+    "CRLN_OBS",
+    "CRLT_OBS",
+    "DSUN_OBS",
+    "LAT_FWT",
+    "LAT_MAX",
+    "LAT_MIN",
+    "LON_FWT",
+    "LON_MAX",
+    "LON_MIN",
+    "MEANALP",
+    "MEANGAM",
+    "MEANGBH",
+    "MEANGBL",
+    "MEANGBT",
+    "MEANGBZ",
+    "MEANJZD",
+    "MEANJZH",
+    "MEANPOT",
+    "MEANSHR",
+    "NACR",
+    "NOAA_AR",
+    "NPIX",
+    "RSUN_OBS",
+    "R_VALUE",
+    "SAVNCPP",
+    "SHRGT45",
+    "SIZE",
+    "SIZE_ACR",
+    "TOTPOT",
+    "TOTUSJZ",
+    "USFLUX",
+    "USFLUXL",
+)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -157,6 +198,16 @@ def np_nanmax(values):
     return np.nanmax(values)
 
 
+def _keyword_names(info: Any) -> set[str]:
+    keywords = getattr(info, "keywords", None)
+    if keywords is None:
+        return set()
+    index = getattr(keywords, "index", None)
+    if index is None:
+        return set()
+    return {str(value) for value in index}
+
+
 def audit_jsoc() -> dict[str, Any]:
     result: dict[str, Any] = {"status": "NOT_RUN", "series": {}}
     try:
@@ -165,28 +216,43 @@ def audit_jsoc() -> dict[str, Any]:
         return {"status": "DRMS_IMPORT_FAILED", "error": type(exc).__name__, "series": {}}
     try:
         client = drms.Client()
+        missing_any: dict[str, list[str]] = {}
         for series in JSOC_SERIES:
             info = client.info(series)
+            keyword_names = _keyword_names(info)
+            missing = sorted(set(REQUIRED_SHARP_KEYWORDS) - keyword_names)
             result["series"][series] = {
                 "primekeys": [str(x) for x in info.primekeys],
                 "segment_count": int(len(info.segments)),
                 "keyword_count": int(len(info.keywords)),
+                "required_keyword_count": len(REQUIRED_SHARP_KEYWORDS),
+                "missing_required_keywords": missing,
                 "note": str(info.note),
             }
+            if missing:
+                missing_any[series] = missing
+        if missing_any:
+            raise ValueError(f"CEA SHARP series missing frozen-interface keywords: {missing_any}")
+
         # Query only one previous UTC day of NRT metadata. Empty HARPNUM selector
-        # means all active-region records during the bounded time selector.
+        # means all active-region records during the bounded time selector. Query
+        # the exact CEA product consumed by the promoted feature interface.
         now = datetime.now(timezone.utc)
         day = (now - timedelta(days=1)).date()
         start = f"{day:%Y.%m.%d}_00:00:00_TAI"
-        query = f"hmi.sharp_720s_nrt[][{start}/1d]"
-        recent = client.query(query, key="HARPNUM,T_REC")
+        query = f"hmi.sharp_cea_720s_nrt[][{start}/1d]"
+        keys = ",".join(("HARPNUM", "T_REC") + REQUIRED_SHARP_KEYWORDS)
+        recent = client.query(query, key=keys)
         result["recent_query"] = {
             "recordset": query,
             "rows": int(len(recent)),
             "unique_harps": int(pd.to_numeric(recent.get("HARPNUM"), errors="coerce").nunique()) if len(recent) else 0,
             "first_t_rec": str(recent["T_REC"].iloc[0]) if len(recent) and "T_REC" in recent else None,
             "last_t_rec": str(recent["T_REC"].iloc[-1]) if len(recent) and "T_REC" in recent else None,
+            "required_keyword_count": len(REQUIRED_SHARP_KEYWORDS),
         }
+        if len(recent) == 0:
+            raise ValueError("bounded CEA SHARP-NRT query returned zero rows")
         result["status"] = "PASSED"
     except Exception as exc:  # preserve source failure as evidence
         result["status"] = "QUERY_FAILED"
