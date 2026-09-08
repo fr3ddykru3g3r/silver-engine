@@ -19,10 +19,10 @@ ISSUE = datetime(2026, 9, 9, 0, 0, tzinfo=timezone.utc)
 STATES = ("FULL", "NO_XRS", "NO_PROTON", "NO_XRS_OR_PROTON")
 
 
-def _seal():
+def _seal(issue=ISSUE):
     return build_forecast_seal(
-        issued_at=ISSUE,
-        sealed_at=ISSUE + timedelta(seconds=20),
+        issued_at=issue,
+        sealed_at=issue + timedelta(seconds=20),
         package_manifest_sha256="a" * 64,
         feature_row_sha256="b" * 64,
         source_authentication_sha256="c" * 64,
@@ -39,11 +39,11 @@ def _seal():
     )
 
 
-def _series(default=1.0):
+def _series(default=1.0, *, start=None, end=None):
     times = []
     flux = []
-    current = ISSUE - timedelta(minutes=5)
-    end = ISSUE + timedelta(hours=24)
+    current = start or ISSUE - timedelta(minutes=5)
+    end = end or ISSUE + timedelta(hours=24)
     while current <= end:
         times.append(current)
         flux.append(float(default))
@@ -123,17 +123,49 @@ def test_crossing_after_24h_is_not_counted():
 
 
 def test_issue_support_older_than_five_minutes_is_unresolved():
-    times, flux = _series()
-    issue_index = times.index(ISSUE)
-    del times[issue_index]
-    del flux[issue_index]
-    prior_index = times.index(ISSUE - timedelta(minutes=5))
-    del times[prior_index]
-    del flux[prior_index]
+    times, flux = _series(start=ISSUE - timedelta(minutes=10))
+    for timestamp in (ISSUE, ISSUE - timedelta(minutes=5)):
+        idx = times.index(timestamp)
+        del times[idx]
+        del flux[idx]
     result = derive_new_crossing_labels(
         forecast_seals=[_seal()], proton_times=times, proton_flux=flux
     )
     row = result["rows"][0]
     assert row["outcome_resolved"] is False
     assert row["resolution_reason"] == "ISSUE_SUPPORT_STALE"
+    assert row["label"] is None
+
+
+@pytest.mark.parametrize("invalid", [float("nan"), float("inf"), -1.0])
+def test_invalid_flux_inside_one_window_is_unresolved_not_a_batch_crash(invalid):
+    second_issue = ISSUE + timedelta(days=2)
+    times, flux = _series(
+        start=ISSUE - timedelta(minutes=5),
+        end=second_issue + timedelta(hours=24),
+    )
+    bad_time = ISSUE + timedelta(hours=6)
+    flux[times.index(bad_time)] = invalid
+    result = derive_new_crossing_labels(
+        forecast_seals=[_seal(ISSUE), _seal(second_issue)],
+        proton_times=times,
+        proton_flux=flux,
+    )
+    first, second = result["rows"]
+    assert first["outcome_resolved"] is False
+    assert first["resolution_reason"] == "OUTCOME_INVALID_OR_NONFINITE_FLUX"
+    assert first["label"] is None
+    assert second["outcome_resolved"] is True
+    assert second["label"] == 0
+
+
+def test_invalid_issue_support_is_unresolved():
+    times, flux = _series()
+    flux[times.index(ISSUE)] = float("nan")
+    result = derive_new_crossing_labels(
+        forecast_seals=[_seal()], proton_times=times, proton_flux=flux
+    )
+    row = result["rows"][0]
+    assert row["outcome_resolved"] is False
+    assert row["resolution_reason"] == "ISSUE_SUPPORT_INVALID_FLUX"
     assert row["label"] is None
