@@ -218,12 +218,17 @@ def _normalize_outcome_series(
     proton_times: Sequence[Any],
     proton_flux: Sequence[Any],
 ) -> tuple[pd.DatetimeIndex, np.ndarray]:
+    """Parse and order primary proton samples without hiding bad measurements.
+
+    Invalid flux values are intentionally retained so that only forecast windows
+    touching them become unresolved. Dropping them would hide gaps; rejecting the
+    whole series would let an unrelated bad sample poison every forecast in a
+    batch.
+    """
     times = pd.to_datetime(list(proton_times), utc=True, errors="coerce")
     flux = pd.to_numeric(pd.Series(list(proton_flux)), errors="coerce").to_numpy(dtype=float)
     if len(times) != len(flux) or len(times) < 2 or bool(pd.isna(times).any()):
         raise SealedEvaluationError("proton outcome series is invalid")
-    if not np.isfinite(flux).all() or np.any(flux < 0):
-        raise SealedEvaluationError("proton outcome series must be finite and nonnegative")
 
     order = np.argsort(pd.DatetimeIndex(times).view("i8"), kind="mergesort")
     times = pd.DatetimeIndex(times[order])
@@ -252,6 +257,13 @@ def _coverage_for_issue(
             "reason": "ISSUE_SUPPORT_STALE",
             "issue_support_lag_seconds": float(issue_lag.total_seconds()),
         }
+    issue_flux = float(flux[issue_idx])
+    if not math.isfinite(issue_flux) or issue_flux < 0:
+        return {
+            "resolved": False,
+            "reason": "ISSUE_SUPPORT_INVALID_FLUX",
+            "issue_support_lag_seconds": float(issue_lag.total_seconds()),
+        }
     if times[-1] < end:
         return {
             "resolved": False,
@@ -269,6 +281,14 @@ def _coverage_for_issue(
     end_idx = int(endpoint_matches[0])
     if end_idx <= issue_idx:
         return {"resolved": False, "reason": "OUTCOME_WINDOW_INVALID"}
+
+    covered_flux = flux[issue_idx : end_idx + 1]
+    if not np.isfinite(covered_flux).all() or np.any(covered_flux < 0):
+        return {
+            "resolved": False,
+            "reason": "OUTCOME_INVALID_OR_NONFINITE_FLUX",
+            "issue_support_lag_seconds": float(issue_lag.total_seconds()),
+        }
 
     covered_times = times[issue_idx : end_idx + 1]
     gaps = [
