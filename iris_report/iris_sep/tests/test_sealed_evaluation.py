@@ -224,7 +224,6 @@ class SealedEvaluationTests(unittest.TestCase):
         times, flux = five_minute_series(start, end, default=1.0)
         cross = BASE + timedelta(hours=1)
         cross_index = times.index(cross)
-        # Return below threshold before the second issue so only the first row is positive.
         reset = BASE + timedelta(hours=2)
         reset_index = times.index(reset)
         for i in range(cross_index, reset_index):
@@ -316,9 +315,14 @@ class SealedEvaluationTests(unittest.TestCase):
             forecast_seals=[s], label_receipt=labels, minimum_positive_support=1
         )
         solar = result["states"]["NO_XRS_OR_PROTON"]
-        self.assertEqual(solar["numerical_threshold_metrics"]["fp"], 1)
-        self.assertEqual(solar["permission_filtered_alert_metrics"]["fp"], 0)
+        for policy in ("MAX_TSS", "POD80_MIN_FAR"):
+            self.assertEqual(solar["numerical_threshold_metrics"][policy]["fp"], 1)
+            self.assertEqual(solar["permission_filtered_alert_metrics"][policy]["fp"], 0)
+            self.assertIsNone(solar["numerical_threshold_metrics"][policy]["pod"])
+        self.assertIsNone(solar["review_capture_rate"])
+        self.assertIsNone(solar["review_enrichment_vs_random"])
         self.assertFalse(solar["alerts_permitted_by_policy"])
+        _canonical(result)
 
     def test_review_enrichment_uses_actual_rounded_fraction(self):
         forecasts = [
