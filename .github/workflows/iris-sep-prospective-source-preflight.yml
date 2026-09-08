@@ -38,7 +38,9 @@ jobs:
             requests==2.32.5 \
             drms==0.9.0 \
             astropy==7.1.0 \
-            sunpy==7.0.2
+            'sunpy[net]==7.0.2' \
+            'beautifulsoup4>=4.13.0,<5' \
+            'zeep>=4.3.0,<5'
 
       - name: Compile preflight and authentication layer
         run: |
@@ -83,7 +85,7 @@ jobs:
           root=Path('/tmp/iris-sep-prospective-preflight')
           h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
           payload={
-            'format':'IRIS_SEP_PROSPECTIVE_SOURCE_PREFLIGHT_RUNTIME_V1',
+            'format':'IRIS_SEP_PROSPECTIVE_SOURCE_PREFLIGHT_RUNTIME_V2',
             'git_head':'${{ github.sha }}',
             'python':platform.python_version(),
             'numpy':numpy.__version__,
