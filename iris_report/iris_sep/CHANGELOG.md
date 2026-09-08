@@ -10,6 +10,13 @@ The project does **not** claim operational certification, guaranteed superiority
 
 ---
 
+## 2026-09-08 — Outcome integrity correction and evidence-based direction
+
+Senior review at `27692b5` rechecked the V3 replay artifact and latest fresh-source audit. V3 has a small NO_PROTON development gain and unchanged top-5% capture; a fresh causal forecast is still unproven. Current execution direction is in `architecture/SENIOR_REVIEW_2026-09-08.md`.
+
+A reproduced defect assigned a negative 24-hour label from only five minutes of future proton observations. V2 outcome receipts now require complete sampled coverage; unknown outcomes stay unresolved. Model/comparator scoring validates receipt integrity. Duplicate forecasts and mixed model packages are rejected, and a numerical support gate cannot certify independence. Historical V1 labels are preserved but must be regenerated from adequate raw observations before current scoring.
+
+
 ## 2026-09-06 — Source-clock audit: the model-ready table is daily, not hourly
 
 **Decision:** separate two scientifically different outage questions.

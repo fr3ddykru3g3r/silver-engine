@@ -20,7 +20,7 @@ import pandas as pd
 
 
 FORMAT = "IRIS_SEP_SEALED_FORECAST_V2"
-LABEL_FORMAT = "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V1"
+LABEL_FORMAT = "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V2"
 TARGET = "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H"
 HORIZON = timedelta(hours=24)
 
@@ -150,6 +150,17 @@ def validate_forecast_seal(seal: Mapping[str, Any]) -> dict[str, Any]:
     _sha(seal.get("causal_feature_derivation_sha256"), "causal_feature_derivation_sha256")
     if seal.get("runtime_training_allowed") is not False or seal.get("runtime_recalibration_allowed") is not False or seal.get("runtime_rethresholding_allowed") is not False:
         raise SealedEvaluationError("forecast seal permits runtime model changes")
+    rebuilt = build_forecast_seal(
+        issued_at=issue, sealed_at=sealed,
+        package_manifest_sha256=seal["package_manifest_sha256"],
+        feature_row_sha256=seal["feature_row_sha256"],
+        source_authentication_sha256=seal["source_authentication_sha256"],
+        causal_feature_derivation_sha256=seal["causal_feature_derivation_sha256"],
+        probabilities=seal.get("probabilities", {}), thresholds=seal.get("thresholds", {}),
+        operator_permissions=seal.get("operator_permissions", {}), architecture_id=seal.get("architecture_id", ""),
+    )
+    if rebuilt != dict(seal):
+        raise SealedEvaluationError("forecast seal semantic mismatch")
     return dict(seal)
 
 
@@ -166,8 +177,8 @@ def derive_new_crossing_labels(
     the label is one when the sampled >10 MeV flux crosses from below threshold
     to at/above threshold during ``(issue, issue+24h]``.
     """
-    if not math.isfinite(float(threshold_pfu)) or threshold_pfu <= 0:
-        raise SealedEvaluationError("threshold_pfu must be positive")
+    if isinstance(threshold_pfu, bool) or threshold_pfu != 10.0:
+        raise SealedEvaluationError("frozen target requires threshold_pfu=10")
     times = pd.to_datetime(list(proton_times), utc=True, errors="coerce")
     flux = pd.to_numeric(pd.Series(list(proton_flux)), errors="coerce").to_numpy(dtype=float)
     if len(times) != len(flux) or len(times) < 2 or bool(pd.isna(times).any()):
@@ -175,44 +186,59 @@ def derive_new_crossing_labels(
     order = np.argsort(times.asi8)
     times = pd.DatetimeIndex(times[order])
     flux = flux[order]
-    finite = np.isfinite(flux)
-    if not finite.all():
-        times = times[finite]
-        flux = flux[finite]
-    if len(times) < 2:
-        raise SealedEvaluationError("insufficient finite proton outcome samples")
-
+    if times.has_duplicates:
+        raise SealedEvaluationError("duplicate proton outcome timestamps")
+    # Do not drop missing/invalid samples: that hides gaps in the outcome record.
+    valid_flux = np.isfinite(flux) & (flux >= 0)
+    cadence = pd.Timedelta(minutes=5)
     rows = []
+    seen = set()
+    seen_issues = set()
     for raw in forecast_seals:
         seal = validate_forecast_seal(raw)
+        key = seal["forecast_seal_sha256"]
+        if key in seen:
+            raise SealedEvaluationError("duplicate forecast seal")
+        seen.add(key)
         issue = pd.Timestamp(_time(seal["issued_at"], "issued_at"))
+        if issue in seen_issues:
+            raise SealedEvaluationError("duplicate forecast issue")
+        seen_issues.add(issue)
         end = issue + pd.Timedelta(hours=24)
-        prior_idx = np.where(times <= issue)[0]
-        if len(prior_idx) == 0:
-            raise SealedEvaluationError("no proton observation at/before one forecast issue")
-        current_index = int(prior_idx[-1])
-        current_flux = float(flux[current_index])
-        eligible = current_flux < threshold_pfu
+        prior = np.flatnonzero(times <= issue)
+        current = int(prior[-1]) if len(prior) else None
+        current_flux = None
+        eligible = None
         label = None
-        first_crossing = None
-        if eligible:
-            future_idx = np.where((times > issue) & (times <= end))[0]
-            previous = current_flux
-            label = 0
-            for idx in future_idx:
-                value = float(flux[idx])
-                if previous < threshold_pfu <= value:
-                    label = 1
-                    first_crossing = times[idx].isoformat()
-                    break
-                previous = value
+        crossing = None
+        reason = "STALE_OR_MISSING_ISSUE_OBSERVATION"
+        if current is not None and valid_flux[current] and issue - times[current] <= cadence:
+            current_flux = float(flux[current])
+            eligible = current_flux < threshold_pfu
+            if not eligible:
+                reason = "INELIGIBLE_ALREADY_ABOVE_THRESHOLD"
+            else:
+                future = np.flatnonzero((times > issue) & (times <= end))
+                # Negative and positive labels use the same complete-horizon gate.
+                # No inference across instrument gaps or an immature outcome window.
+                idx = np.r_[current, future]
+                complete = (len(future) > 0 and times[future[-1]] == end
+                            and valid_flux[idx].all()
+                            and (pd.Series(times[idx]).diff().dropna() <= cadence).all())
+                reason = "INCOMPLETE_OR_INVALID_OUTCOME_WINDOW"
+                if complete:
+                    above = future[flux[future] >= threshold_pfu]
+                    label = int(len(above) > 0)
+                    crossing = times[above[0]].isoformat() if len(above) else None
+                    reason = "COMPLETE_SAMPLED_24H_OUTCOME"
         rows.append({
-            "forecast_seal_sha256": seal["forecast_seal_sha256"],
+            "forecast_seal_sha256": key,
             "issued_at": issue.isoformat(),
-            "eligible_new_crossing_issue": bool(eligible),
+            "eligible_new_crossing_issue": eligible,
             "label": label,
             "current_flux_pfu": current_flux,
-            "first_crossing_utc": first_crossing,
+            "first_crossing_utc": crossing,
+            "outcome_status": reason,
         })
 
     payload = {
@@ -220,12 +246,43 @@ def derive_new_crossing_labels(
         "target": TARGET,
         "threshold_pfu": float(threshold_pfu),
         "forecast_count": len(rows),
-        "eligible_count": sum(int(row["eligible_new_crossing_issue"]) for row in rows),
+        "eligible_count": sum(row["eligible_new_crossing_issue"] is True for row in rows),
+        "unresolved_count": sum(row["label"] is None and row["eligible_new_crossing_issue"] is not False for row in rows),
+        "maximum_sample_gap_seconds": 300,
+        "endpoint_rule": "OBSERVATION_REQUIRED_AT_HORIZON_END",
+        "label_semantics": "SAMPLED_CROSSING_NOT_YET_VALIDATED_AGAINST_CLEAR_EVENT_CATALOGUE",
         "positive_count": sum(int(row["label"] == 1) for row in rows),
         "rows": rows,
     }
     payload["label_receipt_sha256"] = sha256_bytes(_canonical_json(payload))
     return payload
+
+
+def validate_label_receipt(receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Check internal integrity; a hash is not independent source authentication."""
+    if not isinstance(receipt, Mapping) or receipt.get("format") != LABEL_FORMAT or receipt.get("target") != TARGET:
+        raise SealedEvaluationError("unsupported label receipt")
+    unsigned = dict(receipt)
+    claimed = unsigned.pop("label_receipt_sha256", None)
+    if claimed != sha256_bytes(_canonical_json(unsigned)):
+        raise SealedEvaluationError("label receipt digest mismatch")
+    rows = receipt.get("rows")
+    if not isinstance(rows, list):
+        raise SealedEvaluationError("label receipt rows missing")
+    seen = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            raise SealedEvaluationError("invalid label row")
+        key = _sha(row.get("forecast_seal_sha256"), "forecast_seal_sha256")
+        if key in seen:
+            raise SealedEvaluationError("duplicate label row")
+        seen.add(key)
+        label = row.get("label")
+        if label is not None and (type(label) is not int or label not in (0, 1)):
+            raise SealedEvaluationError("invalid binary label")
+        if label is not None and (row.get("eligible_new_crossing_issue") is not True or row.get("outcome_status") != "COMPLETE_SAMPLED_24H_OUTCOME"):
+            raise SealedEvaluationError("label lacks complete eligible outcome")
+    return rows
 
 
 def threshold_metrics(y_true: Sequence[int], probability: Sequence[float], threshold: float) -> dict[str, float | int]:
@@ -263,17 +320,36 @@ def evaluate_sealed_cohort(
     if not isinstance(minimum_positive_support, int) or minimum_positive_support < 1:
         raise SealedEvaluationError("minimum_positive_support must be positive")
 
-    labels = label_receipt.get("rows") if isinstance(label_receipt, Mapping) else None
-    if not isinstance(labels, list):
-        raise SealedEvaluationError("label receipt rows missing")
+    labels = validate_label_receipt(label_receipt)
     label_by_hash = {row.get("forecast_seal_sha256"): row for row in labels if isinstance(row, Mapping)}
     state_probability = {state: [] for state in ("FULL", "NO_XRS", "NO_PROTON", "NO_XRS_OR_PROTON")}
     state_threshold = {state: None for state in state_probability}
     y = []
+    seen = set()
+    package = None
+    seen_issues = set()
+    unresolved = 0
     for raw in forecast_seals:
         seal = validate_forecast_seal(raw)
-        label = label_by_hash.get(seal["forecast_seal_sha256"])
-        if label is None or not label.get("eligible_new_crossing_issue"):
+        key = seal["forecast_seal_sha256"]
+        if key in seen:
+            raise SealedEvaluationError("duplicate forecast seal")
+        seen.add(key)
+        issue = _time(seal["issued_at"], "issued_at")
+        if issue in seen_issues:
+            raise SealedEvaluationError("duplicate forecast issue")
+        seen_issues.add(issue)
+        identity = (seal["package_manifest_sha256"], seal["architecture_id"])
+        if package is not None and package != identity:
+            raise SealedEvaluationError("model package changed within sealed cohort")
+        package = identity
+        label = label_by_hash.get(key)
+        if label is None:
+            raise SealedEvaluationError("forecast missing from label receipt")
+        if label.get("eligible_new_crossing_issue") is False:
+            continue
+        if label.get("label") is None:
+            unresolved += 1
             continue
         if label.get("label") not in (0, 1):
             raise SealedEvaluationError("eligible forecast is missing a binary label")
@@ -298,7 +374,7 @@ def evaluate_sealed_cohort(
             rank = np.argsort(-p, kind="mergesort")[:n_review]
             capture = int(np.sum(yy[rank]))
             capture_rate = capture / positives if positives else math.nan
-            random_expectation = review_fraction
+            random_expectation = n_review / len(p)
             enrichment = capture_rate / random_expectation if positives and random_expectation else math.nan
         else:
             capture = 0
@@ -325,7 +401,12 @@ def evaluate_sealed_cohort(
         "positives": positives,
         "minimum_positive_support": minimum_positive_support,
         "support_gate_passed": enough,
-        "claim_status": "INDEPENDENT_EVALUATION_SUPPORT_SUFFICIENT" if enough else "INSUFFICIENT_POSITIVE_SUPPORT_DO_NOT_CLAIM_FINAL_SKILL",
+        "claim_status": "NUMERICAL_SUPPORT_ONLY_INDEPENDENCE_UNVERIFIED" if enough else "INSUFFICIENT_POSITIVE_SUPPORT_DO_NOT_CLAIM_FINAL_SKILL",
+        "independent_evaluation_verified": False,
+        "unresolved_outcome_rows": unresolved,
+        "review_metric_scope": "RETROSPECTIVE_RANKING_NOT_A_DEPLOYABLE_DAILY_BUDGET_POLICY",
+        "threshold_metric_scope": "COUNTERFACTUAL_PROBABILITY_SCORES_NOT_PERMISSION_FILTERED_ALERTS",
+        "seal_limitation": "Self-reported timestamps and digests require externally witnessed pre-outcome publication; they do not prove independence.",
         "states": results,
         "runtime_training_allowed": False,
         "runtime_recalibration_allowed": False,

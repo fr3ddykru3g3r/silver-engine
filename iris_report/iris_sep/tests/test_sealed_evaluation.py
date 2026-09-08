@@ -48,6 +48,14 @@ def seal(issue, *, full=0.8, no_xrs=0.7, no_proton=0.6, solar=0.4, thresholds=No
     )
 
 
+def complete_series(issues, positive_issues):
+    start = min(issues) - timedelta(minutes=5)
+    end = max(issues) + timedelta(hours=24)
+    times = [start + timedelta(minutes=5 * i) for i in range(int((end-start).total_seconds()/300) + 1)]
+    spikes = {issue + timedelta(hours=1) for issue in positive_issues}
+    return times, [12.0 if time in spikes else 1.0 for time in times]
+
+
 class SealedEvaluationTests(unittest.TestCase):
     def test_forecast_must_be_sealed_at_issue_time(self):
         with self.assertRaisesRegex(SealedEvaluationError, "five minutes"):
@@ -67,14 +75,7 @@ class SealedEvaluationTests(unittest.TestCase):
     def test_new_crossing_is_labeled_only_inside_24h_horizon(self):
         first = seal(BASE)
         second = seal(BASE + timedelta(days=2))
-        times = [
-            BASE - timedelta(minutes=5),
-            BASE + timedelta(hours=12),
-            BASE + timedelta(hours=25),
-            BASE + timedelta(days=2) - timedelta(minutes=5),
-            BASE + timedelta(days=2, hours=25),
-        ]
-        flux = [2.0, 12.0, 15.0, 2.0, 12.0]
+        times, flux = complete_series([BASE, BASE + timedelta(days=2)], [BASE])
         labels = derive_new_crossing_labels(
             forecast_seals=[first, second],
             proton_times=times,
@@ -96,12 +97,7 @@ class SealedEvaluationTests(unittest.TestCase):
 
     def test_support_gate_prevents_tiny_cohort_from_being_called_final(self):
         forecasts = [seal(BASE + timedelta(days=i), full=0.9 if i == 0 else 0.1) for i in range(3)]
-        times = []
-        flux = []
-        for i in range(3):
-            issue = BASE + timedelta(days=i)
-            times.extend([issue - timedelta(minutes=5), issue + timedelta(hours=1)])
-            flux.extend([1.0, 12.0 if i == 0 else 1.0])
+        times, flux = complete_series([BASE + timedelta(days=i) for i in range(3)], [BASE])
         labels = derive_new_crossing_labels(forecast_seals=forecasts, proton_times=times, proton_flux=flux)
         result = evaluate_sealed_cohort(
             forecast_seals=forecasts,
@@ -117,14 +113,8 @@ class SealedEvaluationTests(unittest.TestCase):
         changed = {state: {"MAX_TSS": 0.5, "POD80_MIN_FAR": 0.4} for state in STATES}
         changed["FULL"] = {"MAX_TSS": 0.6, "POD80_MIN_FAR": 0.4}
         second = seal(BASE + timedelta(days=1), thresholds=changed)
-        labels = derive_new_crossing_labels(
-            forecast_seals=[first, second],
-            proton_times=[
-                BASE - timedelta(minutes=5), BASE + timedelta(hours=1),
-                BASE + timedelta(days=1) - timedelta(minutes=5), BASE + timedelta(days=1, hours=1),
-            ],
-            proton_flux=[1.0, 12.0, 1.0, 12.0],
-        )
+        times, flux = complete_series([BASE, BASE + timedelta(days=1)], [BASE, BASE + timedelta(days=1)])
+        labels = derive_new_crossing_labels(forecast_seals=[first, second], proton_times=times, proton_flux=flux)
         with self.assertRaisesRegex(SealedEvaluationError, "threshold changed"):
             evaluate_sealed_cohort(
                 forecast_seals=[first, second],

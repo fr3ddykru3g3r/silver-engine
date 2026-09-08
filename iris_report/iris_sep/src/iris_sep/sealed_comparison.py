@@ -19,7 +19,7 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 from .promoted_model_package import ARCHITECTURE, TARGET
-from .sealed_evaluation import validate_forecast_seal
+from .sealed_evaluation import validate_forecast_seal, validate_label_receipt, SealedEvaluationError
 
 
 FORMAT = "IRIS_SEP_SEALED_COMPARISON_V1"
@@ -223,18 +223,23 @@ def evaluate_sealed_comparators(
     the FULL IRIS probability.  When supplied, paired Brier deltas are reported.
     No parameter is estimated from the outcomes.
     """
-    labels = label_receipt.get("rows") if isinstance(label_receipt, Mapping) else None
-    if not isinstance(labels, list):
-        raise SealedComparisonError("label receipt rows missing")
+    try:
+        labels = validate_label_receipt(label_receipt)
+    except SealedEvaluationError as exc:
+        raise SealedComparisonError(str(exc)) from exc
     label_by_forecast = {
         str(row.get("forecast_seal_sha256")): int(row["label"])
         for row in labels
         if isinstance(row, Mapping) and row.get("eligible_new_crossing_issue") is True and row.get("label") in (0, 1)
     }
     rows_by_id: dict[str, list[tuple[int, float, str]]] = {}
+    seen_forecasts = set()
     for raw in comparison_receipts:
         receipt = validate_sealed_comparison(raw)
         forecast_sha = str(receipt["forecast_seal_sha256"])
+        if forecast_sha in seen_forecasts:
+            raise SealedComparisonError("duplicate comparison forecast")
+        seen_forecasts.add(forecast_sha)
         if forecast_sha not in label_by_forecast:
             continue
         y = label_by_forecast[forecast_sha]

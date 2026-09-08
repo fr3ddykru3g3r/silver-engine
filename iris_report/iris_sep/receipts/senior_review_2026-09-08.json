@@ -1,0 +1,30 @@
+{
+  "reviewed_head": "27692b5fac31d2e0094a66e0e2f3caa09a401a2a",
+  "changed_files_inventoried": 102,
+  "changed_file_blob_hashes_verified": 102,
+  "source_tests": {
+    "passed": 276,
+    "deselected_nodes": 10,
+    "excluded_data_dependent_files": 3,
+    "subtests_passed": 32,
+    "python": "3.14.4",
+    "pandas": "3.0.1",
+    "full_training_rerun": false
+  },
+  "verified_artifact_sha256": {
+    "34138370215": "0d6c38cc34d1d55604bade0611f37d5635620ad6112d35a9f193ef51b39b2390",
+    "34191713209": "781743978753c207b64a473fb946f2a5078918f65502fb534f2b0c69068ae8f5"
+  },
+  "changed_files": {
+    "iris_report/iris_sep/src/iris_sep/sealed_evaluation.py": "b86e0fe09c4eeab30569aa5b170c1b031c0b8c2c033d9a765a2a4d9717278329",
+    "iris_report/iris_sep/src/iris_sep/sealed_comparison.py": "2797c2fce1be4360bbdcce9947ec690b66beb16d88b4d5453cd3b66380d33aa7",
+    "iris_report/iris_sep/tests/test_sealed_evaluation.py": "f950771e7eb820e13d2b586d60d582c7682bc8d7361de36537fedc6bb7d99e13",
+    "iris_report/iris_sep/tests/test_sealed_outcome_integrity.py": "4ed334c1547113b2d0dd8a401051235ad69db23433afe4209cea6a86787e0167",
+    "iris_report/iris_sep/CURRENT_STATUS.md": "38496c0d6fb5757fb3b64e03b53ee45bf5ea4d25ab7d57b98f64b943f67bba54",
+    "iris_report/iris_sep/CHANGELOG.md": "85ff83bf0f73bd2fa37dc1853ac258d18c5cce80f22fe36a886e992e5275c29f",
+    "iris_report/iris_sep/architecture/SENIOR_REVIEW_2026-09-08.md": "10acbc0b02672a0e1f3cfe69348476854ea051f85da93727fd377dae358a7996"
+  },
+  "new_label_schema": "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V2",
+  "old_labels_preserved": true,
+  "independent_evaluation_established": false
+}
