@@ -1,0 +1,134 @@
+name: IRIS-SEP V3 alert veto filter
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/src/iris_sep/modeling/alert_decision_filter.py'
+      - 'iris_report/iris_sep/src/iris_sep/modeling/alert_veto_filter.py'
+      - 'iris_report/iris_sep/tools/run_v3_alert_veto_filter.py'
+      - 'iris_report/iris_sep/config/v3_alert_veto_filter_freeze_2026-09-08.json'
+      - '.github/workflows/iris-sep-v3-alert-veto-filter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  alert-veto:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out continuation branch with history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify V2 freeze record predates this workflow execution
+        run: git merge-base --is-ancestor 815c97f35b0deaaa02faac989ec186b9f8174977 HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.18.1 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Compile and test veto layer
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/modeling/alert_decision_filter.py \
+            iris_report/iris_sep/src/iris_sep/modeling/alert_veto_filter.py \
+            iris_report/iris_sep/tools/run_v3_alert_veto_filter.py
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_alert_decision_filter.py' -v
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_alert_veto_filter.py' -v
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run frozen monotone veto candidate
+        run: |
+          rm -rf /tmp/v3-alert-veto
+          python -m iris_report.iris_sep.tools.run_v3_alert_veto_filter \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/v3-alert-veto \
+            | tee /tmp/v3-alert-veto.stdout.json
+
+      - name: Enforce monotonicity and frozen development gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/v3-alert-veto')
+          d=json.loads((root/'summary.json').read_text())
+          assert d['architecture']=='IRIS_V3_ALERT_VETO_FILTER_V2'
+          assert d['predecessor_failed_run']==34206898291
+          assert d['locked_test_accessed'] is False
+          assert d['monitor_used'] is False
+          assert d['candidate_probability_changed'] is False
+          assert d['new_alerts_outside_v3_allowed'] is False
+          for state in ('NO_XRS','NO_PROTON'):
+              s=d['states'][state]
+              assert s['veto_only'] is True
+              assert s['new_alerts_outside_v3_allowed'] is False
+              ref=s['score_role']['v3_reference']
+              cand=s['score_role']['veto_layer']
+              assert cand['FP'] <= ref['FP']
+              assert cand['TP'] <= ref['TP']
+              print(state, json.dumps(s['score_role'], sort_keys=True))
+          print('both_states_large_gate', d['both_states_pass_large_development_improvement_gate'])
+          print('candidate_for_future_prospective_comparison', d['candidate_for_future_prospective_comparison'])
+          PY
+
+      - name: Bind runtime and immutable output digests
+        run: |
+          python - <<'PY'
+          import hashlib,json,platform
+          from pathlib import Path
+          import numpy,pandas,scipy,sklearn,xgboost
+          root=Path('/tmp/v3-alert-veto')
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          freeze=Path('iris_report/iris_sep/config/v3_alert_veto_filter_freeze_2026-09-08.json')
+          payload={
+            'format':'IRIS_V3_ALERT_VETO_FILTER_RUNTIME_V2',
+            'git_head':'${{ github.sha }}',
+            'freeze_commit':'815c97f35b0deaaa02faac989ec186b9f8174977',
+            'freeze_sha256':h(freeze),
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'scipy':scipy.__version__,
+            'scikit_learn':sklearn.__version__,
+            'xgboost':xgboost.__version__,
+            'summary_sha256':h(root/'summary.json'),
+            'predictions_sha256':h(root/'predictions.csv'),
+            'receipt_sha256':h(root/'receipt.json'),
+            'locked_test_accessed':False,
+            'monitor_used':False,
+            'independent_validation':False,
+          }
+          (root/'runtime.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable veto evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-v3-alert-veto-filter-${{ github.sha }}
+          path: /tmp/v3-alert-veto
+          if-no-files-found: error
+          retention-days: 30
