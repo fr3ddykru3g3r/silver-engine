@@ -1,0 +1,159 @@
+{
+  "status": "PREREGISTERED_BEFORE_DATA_READINESS_RESULT_AND_BEFORE_TRAINING",
+  "study_id": "NOAA_CAUSAL_REDUCED_INPUT_V1",
+  "date": "2026-09-09",
+  "reason_for_new_study": "The frozen V3 interface cannot be produced prospectively because CMASKL, MEANGBL and USFLUXL are absent from both SHARP NRT series. The bounded sibling-series equivalence probe failed its live-availability gate. This study therefore uses a separately named causal interface rather than mutating V3.",
+  "target": "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H",
+  "target_threshold_pfu": 10.0,
+  "horizon_hours": 24,
+  "already_active_issue_times_are_ineligible": true,
+  "sampled_label_semantics": "previous primary >=10 MeV proton sample below 10 pfu and a later sample at or above 10 pfu within (issue, issue+24h], subject to the frozen V2 outcome coverage rules",
+  "official_event_catalogue_equivalence_established": false,
+  "locked_test_accessed": false,
+  "monitor_used_for_selection": false,
+  "training_allowed_before_data_readiness_gate": false,
+  "source_interface": {
+    "families": [
+      "NOAA_GOES_XRS",
+      "NOAA_GOES_INTEGRAL_PROTON"
+    ],
+    "live_reference": [
+      "SWPC primary GOES XRS JSON",
+      "SWPC primary GOES integral-proton JSON",
+      "SWPC GOES instrument-source declaration"
+    ],
+    "historical_archive_reference": [
+      "NOAA/NCEI GOES 1-15 operational or science-quality archive where applicable",
+      "NOAA/NCEI GOES-R XRSF L2 1-minute archive",
+      "NOAA/NCEI GOES-R SGPS L2 1-minute archive"
+    ],
+    "no_solar_magnetogram_input": true,
+    "no_sharp_input": true,
+    "no_runtime_imputation": true,
+    "no_runtime_reconstruction": true,
+    "no_future_fill": true,
+    "no_silent_satellite_substitution": true
+  },
+  "data_readiness_gate": {
+    "must_pass_before_training": true,
+    "checks": [
+      "historical XRS files are retrievable from an official NOAA/NCEI archive and contain documented timestamps, units, quality fields and the required XRS bands",
+      "historical proton files are retrievable from an official NOAA/NCEI archive and contain documented timestamps, units, quality fields and a defensible >=10 MeV integral-proton quantity or a preregistered derivation whose semantics are fixed before labels are inspected",
+      "the routing rule from archived satellites to one forecast-time XRS stream and one forecast-time proton stream is explicit, deterministic and independent of target outcomes",
+      "source timestamps can be converted to UTC without using observations published after each forecast issue",
+      "quality/missing flags are preserved rather than converted to ordinary numeric measurements",
+      "cadence, duplicate timestamps, maximum gaps and period of record are measured before training",
+      "the common historical coverage period and chronological role boundaries are frozen using coverage/timestamp information only, before event labels or model scores are inspected"
+    ],
+    "failure_action": "STOP_TRAINING_AND_REPORT_SOURCE_INTERFACE_BLOCKER",
+    "cannot_be_overridden_by": [
+      "better model score",
+      "more rows after interpolation",
+      "retrospective source substitution",
+      "manual deletion of inconvenient gaps"
+    ]
+  },
+  "feature_policy": {
+    "lookback_hours": 24,
+    "issue_time_excluded_from_predictor_window": true,
+    "xrs_features": [
+      "per documented XRS band: finite count, coverage fraction, minimum, maximum, mean, median, standard deviation, last causal value, time since last causal value",
+      "long-band threshold exceedance counts at fixed physical flux levels declared in implementation before modeling",
+      "maximum causal first difference and maximum causal log-flux change using only ordered past observations"
+    ],
+    "proton_features": [
+      "for the >=10 MeV integral-proton stream: finite count, coverage fraction, minimum, maximum, mean, median, standard deviation, last causal value, time since last causal value",
+      "fixed counts of past samples at or above 1, 5 and 8 pfu; 10 pfu is not used as a predictor threshold at issue times already ineligible",
+      "maximum causal first difference and maximum causal log-flux change using only ordered past observations"
+    ],
+    "missingness_features": [
+      "coverage fraction by family",
+      "age of most recent valid observation by family"
+    ],
+    "feature_selection_from_outcomes": false,
+    "post_readiness_feature_expansion": false
+  },
+  "models": {
+    "primary": {
+      "id": "JOINT_XRS_PROTON_XGBOOST",
+      "description": "one lightweight XGBoost classifier on the frozen causal XRS+proton summary interface",
+      "hyperparameters": {
+        "n_estimators": 300,
+        "learning_rate": 0.03,
+        "max_depth": 3,
+        "min_child_weight": 5,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0,
+        "reg_alpha": 0.0,
+        "tree_method": "hist"
+      },
+      "seeds": [7, 13, 26, 42, 73],
+      "aggregation": "median probability across seeds"
+    },
+    "comparators": [
+      {
+        "id": "XRS_ONLY_XGBOOST",
+        "rule": "same fixed XGBoost hyperparameters and seeds using only the frozen XRS feature family"
+      },
+      {
+        "id": "PROTON_ONLY_XGBOOST",
+        "rule": "same fixed XGBoost hyperparameters and seeds using only the frozen proton feature family"
+      },
+      {
+        "id": "FIT_PREVALENCE_CLIMATOLOGY",
+        "rule": "constant probability equal to positive prevalence in the fit role only"
+      },
+      {
+        "id": "FAIL_CLOSED_ABSTENTION",
+        "rule": "no probability/alert when the preregistered source freshness or minimum-coverage rule is not met"
+      }
+    ],
+    "hyperparameter_sweep": false,
+    "architecture_search_after_score_inspection": false
+  },
+  "roles": {
+    "construction_rule": "After the data-readiness gate passes, derive one chronological common-coverage timeline. Freeze chronological fit/calibration/threshold/score boundaries from timestamps and coverage only; do not inspect labels to move boundaries.",
+    "fit": "model fitting only",
+    "calibration": "single logit-intercept calibration only; no model refit",
+    "threshold": "select primary MAX_TSS threshold; separately select POD80_MIN_FAR diagnostic threshold",
+    "score": "one development comparison on the frozen same eligible cohort",
+    "future_prospective": "forecasts issued only after the complete package, source rules and thresholds are frozen; future outcomes are not used for tuning"
+  },
+  "same_cohort_requirement": {
+    "all_strategy_probabilities_bound_to_same_issue_ids": true,
+    "all_strategy_outcomes_bound_to_same_v2_label_receipt": true,
+    "unresolved_outcomes_reported_not_dropped_silently": true,
+    "already_active_issue_times_reported_and_excluded_equally": true
+  },
+  "metrics": {
+    "primary_operational_counts": [
+      "detected crossings",
+      "missed crossings",
+      "false alerts",
+      "true quiet decisions",
+      "forecast coverage fraction",
+      "positive-event coverage fraction",
+      "alerts per detected crossing"
+    ],
+    "secondary": [
+      "TSS",
+      "POD",
+      "FAR",
+      "Brier score",
+      "ECE",
+      "AUROC",
+      "AUPRC"
+    ],
+    "uncertainty": "paired block/bootstrap intervals using independent chronological event/quiet units rather than IID issue rows wherever support permits"
+  },
+  "primary_improvement_criterion": {
+    "reference": "best simple non-abstaining available-input comparator on the identical eligible score cohort",
+    "required_false_alert_reduction_fraction": 0.20,
+    "maximum_additional_missed_crossings": 0,
+    "minimum_forecast_coverage_fraction": 0.80,
+    "rule": "All three conditions must hold together. The 20% false-alert ambition may not be relaxed after viewing the score result. Abstentions on positive eligible issues count against missed-crossing performance rather than disappearing from the denominator."
+  },
+  "interpretation_if_primary_criterion_fails": "Report the exact tradeoff and negative result. Do not tune another filter, move thresholds, alter coverage rules or rename the study as successful.",
+  "claim_boundary": "This preregistration authorizes a separate causal NOAA reduced-input development study after source readiness passes. It does not establish independent superiority, operational certification, catalogue-event equivalence, economic impact, or award outcome."
+}
