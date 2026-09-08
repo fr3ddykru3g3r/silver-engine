@@ -4,7 +4,10 @@ from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 
+import pytest
+
 from iris_report.iris_sep.src.iris_sep.sealed_evaluation import (
+    SealedEvaluationError,
     build_forecast_seal,
     derive_new_crossing_labels,
 )
@@ -54,6 +57,17 @@ def test_contract_preserves_catalogue_equivalence_boundary():
     boundary = data["scientific_boundary"]
     assert boundary["sampled_primary_series_crossing_definition_verified_in_code"] is True
     assert boundary["official_event_catalogue_equivalence_established"] is False
+
+
+def test_target_threshold_cannot_change_under_same_target_identifier():
+    times, flux = _series()
+    with pytest.raises(SealedEvaluationError, match="frozen target requires threshold_pfu=10"):
+        derive_new_crossing_labels(
+            forecast_seals=[_seal()],
+            proton_times=times,
+            proton_flux=flux,
+            threshold_pfu=20.0,
+        )
 
 
 def test_exactly_ten_from_below_counts_as_positive_crossing():
