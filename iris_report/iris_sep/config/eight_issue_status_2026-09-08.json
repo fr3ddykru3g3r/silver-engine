@@ -1,8 +1,8 @@
 {
-  "format": "IRIS_SEP_EIGHT_ISSUE_STATUS_V1",
+  "format": "IRIS_SEP_EIGHT_ISSUE_STATUS_V2",
   "status_date": "2026-09-08",
   "branch": "codex/iris-sep-continuation-20260905",
-  "principle": "No item remains labelled IN_PROGRESS. Each is PASS, CLOSED_WITH_EXTERNAL_BLOCKER, CLOSED_WITH_SCIENTIFIC_BLOCKER, or NOT_APPLICABLE_UNTIL_A_VALID_LIVE_FORECAST_EXISTS.",
+  "principle": "No item remains labelled IN_PROGRESS. Each item is either implemented, closed with an explicit blocker, or implemented but awaiting a scientifically admissible live case.",
   "items": {
     "1_immutable_v3_package": {
       "status": "PASS",
@@ -46,7 +46,11 @@
         "solar_context_positions": 251,
         "xrs_positions": 4,
         "proton_positions": 4,
-        "jsoc_nrt_missing_keywords": ["CMASKL", "MEANGBL", "USFLUXL"],
+        "jsoc_nrt_missing_keywords": [
+          "CMASKL",
+          "MEANGBL",
+          "USFLUXL"
+        ],
         "affected_frozen_positions": 18,
         "disposition": "FROZEN_MODEL_RETROSPECTIVE_ONLY_FOR_SKILL_UNTIL_SOURCE_EQUIVALENCE_IS_ESTABLISHED"
       },
@@ -110,7 +114,9 @@
       "status": "PASS_INTERNAL_EVIDENCE_PACKAGE",
       "evidence": {
         "evidence_dossier": "architecture/IRIS_EVIDENCE_DOSSIER_2026-09-08.md",
+        "evidence_dossier_git_blob_sha1": "c137fdb3fbb1d6c7f3481805bd713072f18ed364",
         "student_writing_template": "architecture/STUDENT_PAPER_WRITING_TEMPLATE_2026-09-08.md",
+        "student_writing_template_git_blob_sha1": "69ace4bf1706ef221af129f342df9d31cdf72f5d",
         "final_submission_prose_ai_generated": false
       },
       "boundary": "The dossier is an internal evidence source, not a submission-ready paper. Student authors must write final competition prose in their own words and disclose assistance as required."
