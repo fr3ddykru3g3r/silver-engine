@@ -1,5 +1,5 @@
 {
-  "format": "IRIS_SEP_EIGHT_ISSUE_STATUS_V2",
+  "format": "IRIS_SEP_EIGHT_ISSUE_STATUS_V3",
   "status_date": "2026-09-08",
   "branch": "codex/iris-sep-continuation-20260905",
   "principle": "No item remains labelled IN_PROGRESS. Each item is either implemented, closed with an explicit blocker, or implemented but awaiting a scientifically admissible live case.",
@@ -117,16 +117,50 @@
         "evidence_dossier_git_blob_sha1": "c137fdb3fbb1d6c7f3481805bd713072f18ed364",
         "student_writing_template": "architecture/STUDENT_PAPER_WRITING_TEMPLATE_2026-09-08.md",
         "student_writing_template_git_blob_sha1": "69ace4bf1706ef221af129f342df9d31cdf72f5d",
+        "judge_result_tables": "architecture/IRIS_JUDGE_RESULT_TABLES_2026-09-08.md",
+        "judge_result_tables_git_blob_sha1": "a78a3a48eb7634e9c1e6378edc5abb496988a90b",
+        "judge_figures": [
+          {
+            "path": "figures/FIGURE_1_RELIABILITY_STATE_MACHINE_2026-09-08.svg",
+            "git_blob_sha1": "b003805dfa96e3782a957742b96f617878579918"
+          },
+          {
+            "path": "figures/FIGURE_2_ALERT_VETO_TRADEOFF_2026-09-08.svg",
+            "git_blob_sha1": "a234f068bf1bc7d3b8bb2dd2d256e9784ccabe4a"
+          },
+          {
+            "path": "figures/FIGURE_3_PROSPECTIVE_PREFLIGHT_FAIL_CLOSED_2026-09-08.svg",
+            "git_blob_sha1": "3fefa3276a1104ece38f16884bbfe96c31380292"
+          }
+        ],
         "final_submission_prose_ai_generated": false
       },
-      "boundary": "The dossier is an internal evidence source, not a submission-ready paper. Student authors must write final competition prose in their own words and disclose assistance as required."
+      "boundary": "The dossier, tables and figures are internal evidence/visual aids, not a submission-ready paper. Student authors must write final competition prose in their own words and disclose assistance as required."
     }
   },
   "alert_filter_decision": {
     "status": "REJECT_ADDITIONAL_POST_HOC_FILTERING_KEEP_PLAIN_V3",
     "failed_decision_filter_run": 34206898291,
     "monotone_veto_run": 34216432375,
-    "reason": "The first filter could create new false alerts. The monotone veto cut false positives by roughly 25-29 percent but lost detections: NO_XRS 13->12 TP and NO_PROTON 16->13 TP. Further tuning on an already-inspected score block would increase overfitting risk.",
+    "monotone_veto_score": {
+      "NO_XRS": {
+        "v3_tp": 13,
+        "v3_fp": 603,
+        "veto_tp": 12,
+        "veto_fp": 431,
+        "false_positive_reduction_fraction": 0.28524046434494196,
+        "true_positive_change": -1
+      },
+      "NO_PROTON": {
+        "v3_tp": 16,
+        "v3_fp": 796,
+        "veto_tp": 13,
+        "veto_fp": 594,
+        "false_positive_reduction_fraction": 0.2537688442211055,
+        "true_positive_change": -3
+      }
+    },
+    "reason": "The first filter could create new false alerts. The monotone veto cut false positives by roughly 25-29 percent but lost detections. Further tuning on an already-inspected score block would increase overfitting risk.",
     "frozen_candidate": "IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3"
   },
   "overall_scientific_disposition": "RETROSPECTIVE_RELIABILITY_STUDY_WITH_PROSPECTIVE_FAIL_CLOSED_VALIDATION_FRAMEWORK",
