@@ -471,7 +471,7 @@ def validate_label_receipt(receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
-def threshold_metrics(y_true: Sequence[int], probability: Sequence[float], threshold: float) -> dict[str, float | int]:
+def threshold_metrics(y_true: Sequence[int], probability: Sequence[float], threshold: float) -> dict[str, float | int | None]:
     y = np.asarray(y_true, dtype=int)
     p = np.asarray(probability, dtype=float)
     pred = p >= float(threshold)
@@ -479,7 +479,8 @@ def threshold_metrics(y_true: Sequence[int], probability: Sequence[float], thres
     fp = int(np.sum(pred & (y == 0)))
     fn = int(np.sum((~pred) & (y == 1)))
     tn = int(np.sum((~pred) & (y == 0)))
-    pod = tp / (tp + fn) if tp + fn else math.nan
+    # Undefined rates are represented as JSON null, never NaN and never fake zero.
+    pod = tp / (tp + fn) if tp + fn else None
     far = fp / (tp + fp) if tp + fp else 0.0
     tss = (tp / (tp + fn) if tp + fn else 0.0) - (fp / (fp + tn) if fp + tn else 0.0)
     return {"tp": tp, "fp": fp, "fn": fn, "tn": tn, "pod": pod, "far": far, "tss": tss}
@@ -594,11 +595,11 @@ def evaluate_sealed_cohort(
         rank = np.argsort(-p, kind="mergesort")[:n_review]
         capture = int(np.sum(yy[rank]))
         actual_review_fraction = n_review / len(p)
-        capture_rate = capture / positives if positives else math.nan
+        capture_rate = capture / positives if positives else None
         enrichment = (
             capture_rate / actual_review_fraction
-            if positives and actual_review_fraction
-            else math.nan
+            if capture_rate is not None and actual_review_fraction
+            else None
         )
         results[state] = {
             "rows": int(len(p)),
