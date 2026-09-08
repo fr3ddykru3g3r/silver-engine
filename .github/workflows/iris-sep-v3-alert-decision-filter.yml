@@ -1,0 +1,141 @@
+name: IRIS-SEP V3 alert decision filter
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/src/iris_sep/modeling/alert_decision_filter.py'
+      - 'iris_report/iris_sep/tools/run_v3_alert_decision_filter.py'
+      - 'iris_report/iris_sep/config/v3_alert_decision_filter_freeze_2026-09-08.json'
+      - '.github/workflows/iris-sep-v3-alert-decision-filter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  alert-filter:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out continuation branch with history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify freeze record predates this workflow execution
+        run: |
+          git merge-base --is-ancestor 27516e7bb0ca32990ef724edbd64b6ac9a275266 HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            scipy==1.18.1 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4
+
+      - name: Compile and test decision layer
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/modeling/alert_decision_filter.py \
+            iris_report/iris_sep/tools/run_v3_alert_decision_filter.py
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_alert_decision_filter.py' -v
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run frozen development-selected decision layer
+        run: |
+          rm -rf /tmp/v3-alert-filter
+          python -m iris_report.iris_sep.tools.run_v3_alert_decision_filter \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/v3-alert-filter \
+            | tee /tmp/v3-alert-filter.stdout.json
+
+      - name: Enforce frozen development gate and claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/v3-alert-filter')
+          d = json.loads((root/'summary.json').read_text())
+          assert d['selection_status'] == 'POST_HOC_DEVELOPMENT_SELECTION_SCORE_ALREADY_INSPECTED'
+          assert d['locked_test_accessed'] is False
+          assert d['monitor_used'] is False
+          assert d['candidate_probability_changed'] is False
+          assert d['runtime_missing_family_reconstruction'] is False
+          assert d['both_states_pass_large_development_improvement_gate'] is True
+          assert d['candidate_for_future_prospective_comparison'] is True
+          for state in ('NO_XRS','NO_PROTON'):
+              s = d['states'][state]
+              imp = s['score_role']['improvement']
+              assert imp['no_score_detection_loss'] is True
+              assert imp['false_positive_reduction_fraction'] >= 0.20
+              assert imp['large_development_improvement_gate'] is True
+              assert s['absent_family_used_by_filter'] is False
+              assert s['probability_replaced'] is False
+              print(state, json.dumps({
+                  'v3_reference': s['score_role']['v3_reference'],
+                  'decision_layer': s['score_role']['decision_layer'],
+                  'improvement': imp,
+                  'paired_unit_bootstrap': s['score_role']['paired_unit_bootstrap'],
+              }, sort_keys=True))
+          PY
+
+      - name: Bind runtime and immutable output digests
+        run: |
+          python - <<'PY'
+          import hashlib, json, platform
+          from pathlib import Path
+          import numpy, pandas, scipy, sklearn, xgboost
+          root=Path('/tmp/v3-alert-filter')
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          freeze=Path('iris_report/iris_sep/config/v3_alert_decision_filter_freeze_2026-09-08.json')
+          payload={
+            'format':'IRIS_V3_ALERT_DECISION_FILTER_RUNTIME_V1',
+            'git_head':'${{ github.sha }}',
+            'freeze_commit':'27516e7bb0ca32990ef724edbd64b6ac9a275266',
+            'freeze_sha256':h(freeze),
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'scipy':scipy.__version__,
+            'scikit_learn':sklearn.__version__,
+            'xgboost':xgboost.__version__,
+            'summary_sha256':h(root/'summary.json'),
+            'predictions_sha256':h(root/'predictions.csv'),
+            'receipt_sha256':h(root/'receipt.json'),
+            'locked_test_accessed':False,
+            'monitor_used':False,
+            'independent_validation':False,
+          }
+          (root/'runtime.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable decision-layer evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-v3-alert-decision-filter-${{ github.sha }}
+          path: /tmp/v3-alert-filter
+          if-no-files-found: error
+          retention-days: 30
