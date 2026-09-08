@@ -1,12 +1,13 @@
 """Prospective comparator sealing for untouched IRIS-SEP evaluation.
 
 Comparators must be frozen and bound at the same forecast issue time, before the
-24-hour target outcome is known.  The built-in comparator is the promoted
-package's fit-role prevalence climatology.  External comparators are accepted
+24-hour target outcome is known. The built-in comparator is the promoted
+package's fit-role prevalence climatology. External comparators are accepted
 only when an immutable artifact digest and pre-outcome probability are supplied.
 
-This module contains no training, calibration, threshold-selection or model
-selection path.
+Comparator scoring uses the probabilities embedded in the sealed IRIS forecasts;
+callers cannot substitute a separate probability map after outcomes are known.
+The entire forecast/comparator/label cohort must align one-to-one before scoring.
 """
 from __future__ import annotations
 
@@ -19,11 +20,15 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 from .promoted_model_package import ARCHITECTURE, TARGET
-from .sealed_evaluation import validate_forecast_seal
+from .sealed_evaluation import (
+    threshold_metrics,
+    validate_forecast_seal,
+    validate_label_receipt,
+)
 
 
 FORMAT = "IRIS_SEP_SEALED_COMPARISON_V1"
-EVALUATION_FORMAT = "IRIS_SEP_SEALED_COMPARATOR_EVALUATION_V1"
+EVALUATION_FORMAT = "IRIS_SEP_SEALED_COMPARATOR_EVALUATION_V2"
 MAX_SEAL_DELAY = timedelta(minutes=5)
 
 
@@ -73,11 +78,7 @@ def build_fit_prevalence_climatology(
     package_manifest: Mapping[str, Any],
     package_manifest_sha256: str,
 ) -> dict[str, Any]:
-    """Build the only package-native no-retraining comparator.
-
-    The reference probability is the prevalence fixed on the package's fit role;
-    it is not re-estimated on the prospective evaluation cohort.
-    """
+    """Build the package-native no-retraining comparator."""
     if not isinstance(package_manifest, Mapping):
         raise SealedComparisonError("package_manifest must be a mapping")
     if package_manifest.get("architecture") != ARCHITECTURE or package_manifest.get("target") != TARGET:
@@ -187,9 +188,15 @@ def validate_sealed_comparison(receipt: Mapping[str, Any]) -> dict[str, Any]:
     sealed = _time(receipt.get("sealed_at"), "sealed_at")
     if sealed < issue or sealed - issue > MAX_SEAL_DELAY:
         raise SealedComparisonError("comparison was not sealed at issue time")
-    if any(receipt.get(key) is not False for key in (
-        "training_allowed", "recalibration_allowed", "rethresholding_allowed", "post_outcome_comparator_selection_allowed"
-    )):
+    if any(
+        receipt.get(key) is not False
+        for key in (
+            "training_allowed",
+            "recalibration_allowed",
+            "rethresholding_allowed",
+            "post_outcome_comparator_selection_allowed",
+        )
+    ):
         raise SealedComparisonError("comparison receipt permits post-freeze adaptation")
     comparators = receipt.get("comparators")
     if not isinstance(comparators, list) or not comparators:
@@ -211,59 +218,142 @@ def validate_sealed_comparison(receipt: Mapping[str, Any]) -> dict[str, Any]:
     return dict(receipt)
 
 
+def _comparator_identity(row: Mapping[str, Any]) -> tuple[str, str, str]:
+    cid = str(row["comparator_id"])
+    kind = str(row.get("comparator_kind", ""))
+    version = str(row.get("comparator_version", "PACKAGE_NATIVE"))
+    return cid, kind, version
+
+
 def evaluate_sealed_comparators(
     *,
+    forecast_seals: Sequence[Mapping[str, Any]],
     comparison_receipts: Sequence[Mapping[str, Any]],
     label_receipt: Mapping[str, Any],
-    full_state_probabilities: Mapping[str, float] | None = None,
 ) -> dict[str, Any]:
-    """Score predeclared comparators on exactly the eligible sealed cohort.
+    """Score comparators and sealed FULL IRIS probabilities on one exact cohort.
 
-    ``full_state_probabilities`` is an optional mapping from forecast seal SHA to
-    the FULL IRIS probability.  When supplied, paired Brier deltas are reported.
-    No parameter is estimated from the outcomes.
+    There is intentionally no caller-supplied IRIS probability map. FULL
+    probabilities are read directly from the validated forecast seals to prevent
+    post-outcome substitution. Every forecast must have exactly one comparator
+    receipt and one V2 outcome row, including unresolved/ineligible cases.
     """
-    labels = label_receipt.get("rows") if isinstance(label_receipt, Mapping) else None
-    if not isinstance(labels, list):
-        raise SealedComparisonError("label receipt rows missing")
-    label_by_forecast = {
-        str(row.get("forecast_seal_sha256")): int(row["label"])
-        for row in labels
-        if isinstance(row, Mapping) and row.get("eligible_new_crossing_issue") is True and row.get("label") in (0, 1)
-    }
-    rows_by_id: dict[str, list[tuple[int, float, str]]] = {}
+    labels = validate_label_receipt(label_receipt)
+    if isinstance(forecast_seals, (str, bytes)) or not isinstance(forecast_seals, Sequence) or not forecast_seals:
+        raise SealedComparisonError("forecast_seals must be a non-empty sequence")
+    if isinstance(comparison_receipts, (str, bytes)) or not isinstance(comparison_receipts, Sequence) or not comparison_receipts:
+        raise SealedComparisonError("comparison_receipts must be a non-empty sequence")
+
+    forecasts_by_hash: dict[str, dict[str, Any]] = {}
+    issue_to_hash: dict[str, str] = {}
+    package_hashes: set[str] = set()
+    architecture_ids: set[str] = set()
+    for raw in forecast_seals:
+        forecast = validate_forecast_seal(raw)
+        sha = str(forecast["forecast_seal_sha256"])
+        issue = str(forecast["issued_at"])
+        if sha in forecasts_by_hash or issue in issue_to_hash:
+            raise SealedComparisonError("duplicate forecast identity in comparison cohort")
+        forecasts_by_hash[sha] = forecast
+        issue_to_hash[issue] = sha
+        package_hashes.add(str(forecast["package_manifest_sha256"]))
+        architecture_ids.add(str(forecast["architecture_id"]))
+    if len(package_hashes) != 1 or len(architecture_ids) != 1:
+        raise SealedComparisonError("forecast model package/architecture changed within comparison cohort")
+
+    comparisons_by_forecast: dict[str, dict[str, Any]] = {}
+    expected_identity_set: set[tuple[str, str, str]] | None = None
     for raw in comparison_receipts:
         receipt = validate_sealed_comparison(raw)
         forecast_sha = str(receipt["forecast_seal_sha256"])
-        if forecast_sha not in label_by_forecast:
+        if forecast_sha not in forecasts_by_hash:
+            raise SealedComparisonError("comparison receipt references forecast outside supplied cohort")
+        if forecast_sha in comparisons_by_forecast:
+            raise SealedComparisonError("duplicate comparison receipt for one forecast")
+        forecast = forecasts_by_hash[forecast_sha]
+        if str(receipt["issued_at"]) != str(forecast["issued_at"]):
+            raise SealedComparisonError("comparison issue time does not match forecast seal")
+        identity_set = {_comparator_identity(row) for row in receipt["comparators"]}
+        if expected_identity_set is None:
+            expected_identity_set = identity_set
+        elif identity_set != expected_identity_set:
+            raise SealedComparisonError("comparator set/version changed within common cohort")
+        comparisons_by_forecast[forecast_sha] = receipt
+    if set(comparisons_by_forecast) != set(forecasts_by_hash):
+        raise SealedComparisonError("every forecast must have exactly one sealed comparison receipt")
+
+    label_rows = labels["rows"]
+    label_by_forecast = {str(row["forecast_seal_sha256"]): row for row in label_rows}
+    if set(label_by_forecast) != set(forecasts_by_hash):
+        raise SealedComparisonError("outcome labels do not exactly match comparison forecast cohort")
+
+    rows_by_id: dict[str, list[tuple[int, float, float, float | None]]] = {}
+    unresolved = 0
+    ineligible = 0
+    for forecast_sha, forecast in forecasts_by_hash.items():
+        label = label_by_forecast[forecast_sha]
+        if str(label["issued_at"]) != str(forecast["issued_at"]):
+            raise SealedComparisonError("label issue time does not match forecast seal")
+        if not label["outcome_resolved"]:
+            unresolved += 1
             continue
-        y = label_by_forecast[forecast_sha]
+        if label["eligible_new_crossing_issue"] is not True:
+            ineligible += 1
+            continue
+        if label["label"] not in (0, 1):
+            raise SealedComparisonError("eligible resolved row is missing binary label")
+        y = int(label["label"])
+        iris_p = _probability(forecast["probabilities"]["FULL"], "sealed FULL IRIS probability")
+        receipt = comparisons_by_forecast[forecast_sha]
         for comparator in receipt["comparators"]:
-            rows_by_id.setdefault(str(comparator["comparator_id"]), []).append((y, float(comparator["probability"]), forecast_sha))
+            cid = str(comparator["comparator_id"])
+            cp = _probability(comparator["probability"], f"{cid} probability")
+            threshold = comparator.get("threshold")
+            rows_by_id.setdefault(cid, []).append(
+                (y, cp, iris_p, None if threshold is None else float(threshold))
+            )
 
     results: dict[str, Any] = {}
     for comparator_id, rows in sorted(rows_by_id.items()):
         y = np.asarray([r[0] for r in rows], dtype=float)
         p = np.asarray([r[1] for r in rows], dtype=float)
+        iris_p = np.asarray([r[2] for r in rows], dtype=float)
         comparator_brier = float(np.mean((p - y) ** 2))
-        result: dict[str, Any] = {"rows": len(rows), "positives": int(np.sum(y)), "brier": comparator_brier}
-        if full_state_probabilities is not None:
-            try:
-                iris_p = np.asarray([_probability(full_state_probabilities[r[2]], "FULL probability") for r in rows], dtype=float)
-            except KeyError as exc:
-                raise SealedComparisonError("FULL probability missing for one sealed forecast") from exc
-            iris_brier = float(np.mean((iris_p - y) ** 2))
-            result["iris_full_brier"] = iris_brier
-            result["iris_minus_comparator_brier"] = iris_brier - comparator_brier
-            result["iris_brier_skill_vs_comparator"] = (
+        iris_brier = float(np.mean((iris_p - y) ** 2))
+        thresholds = {r[3] for r in rows}
+        result: dict[str, Any] = {
+            "rows": len(rows),
+            "positives": int(np.sum(y)),
+            "comparator_brier": comparator_brier,
+            "iris_full_brier": iris_brier,
+            "iris_minus_comparator_brier": iris_brier - comparator_brier,
+            "iris_brier_skill_vs_comparator": (
                 1.0 - iris_brier / comparator_brier if comparator_brier > 0 else math.nan
+            ),
+        }
+        if len(thresholds) != 1:
+            raise SealedComparisonError("comparator threshold changed within common cohort")
+        threshold = next(iter(thresholds))
+        if threshold is not None:
+            result["comparator_numerical_threshold_metrics"] = threshold_metrics(
+                y.astype(int), p, float(threshold)
             )
         results[comparator_id] = result
+
     return {
         "format": EVALUATION_FORMAT,
         "target": TARGET,
+        "forecast_count": len(forecasts_by_hash),
+        "resolved_eligible_rows": sum(len(rows) for rows in rows_by_id.values()) // max(len(rows_by_id), 1),
+        "unresolved_rows": unresolved,
+        "resolved_ineligible_rows": ineligible,
+        "package_manifest_sha256": next(iter(package_hashes)),
+        "architecture_id": next(iter(architecture_ids)),
+        "common_cohort_verified": True,
+        "iris_probabilities_sourced_from_forecast_seals": True,
         "comparators": results,
         "training_allowed": False,
         "recalibration_allowed": False,
         "rethresholding_allowed": False,
+        "independence_verified": False,
     }
