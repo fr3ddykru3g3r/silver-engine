@@ -26,6 +26,7 @@ FORMAT = "IRIS_SEP_SEALED_FORECAST_V2"
 LABEL_FORMAT = "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V2"
 EVALUATION_FORMAT = "IRIS_SEP_SEALED_COHORT_EVALUATION_V2"
 TARGET = "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H"
+TARGET_THRESHOLD_PFU = 10.0
 HORIZON = timedelta(hours=24)
 MAX_SEAL_DELAY = timedelta(minutes=5)
 MAX_OUTCOME_GAP = timedelta(minutes=5)
@@ -298,7 +299,7 @@ def derive_new_crossing_labels(
     forecast_seals: Sequence[Mapping[str, Any]],
     proton_times: Sequence[Any],
     proton_flux: Sequence[Any],
-    threshold_pfu: float = 10.0,
+    threshold_pfu: float = TARGET_THRESHOLD_PFU,
 ) -> dict[str, Any]:
     """Derive sampled NEW-crossing outcomes from complete primary proton data.
 
@@ -313,8 +314,10 @@ def derive_new_crossing_labels(
     outcome data. Equivalence between this sampled crossing rule and any external
     catalogue event definition remains a separate validation requirement.
     """
-    if not math.isfinite(float(threshold_pfu)) or threshold_pfu <= 0:
-        raise SealedEvaluationError("threshold_pfu must be positive")
+    if isinstance(threshold_pfu, bool) or not isinstance(threshold_pfu, (int, float)):
+        raise SealedEvaluationError("frozen target requires threshold_pfu=10")
+    if not math.isfinite(float(threshold_pfu)) or float(threshold_pfu) != TARGET_THRESHOLD_PFU:
+        raise SealedEvaluationError("frozen target requires threshold_pfu=10")
     times, flux = _normalize_outcome_series(proton_times, proton_flux)
 
     seen_hashes: set[str] = set()
@@ -354,7 +357,7 @@ def derive_new_crossing_labels(
         issue_idx = int(coverage["issue_index"])
         end_idx = int(coverage["end_index"])
         current_flux = float(flux[issue_idx])
-        eligible = current_flux < float(threshold_pfu)
+        eligible = current_flux < TARGET_THRESHOLD_PFU
         row["current_flux_pfu"] = current_flux
         row["eligible_new_crossing_issue"] = bool(eligible)
         if not eligible:
@@ -365,7 +368,7 @@ def derive_new_crossing_labels(
         previous = current_flux
         for idx in range(issue_idx + 1, end_idx + 1):
             value = float(flux[idx])
-            if previous < threshold_pfu <= value:
+            if previous < TARGET_THRESHOLD_PFU <= value:
                 label = 1
                 row["first_crossing_utc"] = times[idx].isoformat()
                 break
@@ -376,7 +379,7 @@ def derive_new_crossing_labels(
     payload = {
         "format": LABEL_FORMAT,
         "target": TARGET,
-        "threshold_pfu": float(threshold_pfu),
+        "threshold_pfu": TARGET_THRESHOLD_PFU,
         "forecast_count": len(rows),
         "resolved_count": sum(int(row["outcome_resolved"]) for row in rows),
         "unresolved_count": sum(int(not row["outcome_resolved"]) for row in rows),
@@ -388,278 +391,233 @@ def derive_new_crossing_labels(
         "maximum_permitted_gap_seconds": float(MAX_OUTCOME_GAP.total_seconds()),
         "exact_horizon_endpoint_required": True,
         "duplicate_timestamps_permitted": False,
-        "sampled_crossing_equivalence_to_catalogue_definition_established": False,
+        "sampled_crossing_semantics": "PREVIOUS_LT10_AND_CURRENT_GE10_ON_PRIMARY_SERIES",
+        "official_event_catalogue_equivalence_established": False,
         "rows": rows,
     }
     payload["label_receipt_sha256"] = sha256_bytes(_canonical_json(payload))
     return payload
 
 
-def validate_label_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate V2 label receipt semantics before any model/comparator scoring."""
-    if not isinstance(receipt, Mapping) or receipt.get("format") != LABEL_FORMAT or receipt.get("target") != TARGET:
-        raise SealedEvaluationError("unsupported outcome-label receipt; V2 required")
+def _validate_label_receipt(receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
+    if not isinstance(receipt, Mapping) or receipt.get("format") != LABEL_FORMAT:
+        raise SealedEvaluationError("unsupported label receipt; V2 required")
+    if receipt.get("target") != TARGET:
+        raise SealedEvaluationError("label receipt target mismatch")
+    if receipt.get("threshold_pfu") != TARGET_THRESHOLD_PFU:
+        raise SealedEvaluationError("label receipt threshold does not match frozen 10 pfu target")
+    if receipt.get("official_event_catalogue_equivalence_established") is not False:
+        raise SealedEvaluationError("label receipt overstates official catalogue equivalence")
     unsigned = dict(receipt)
     claimed = unsigned.pop("label_receipt_sha256", None)
     if _sha(claimed, "label_receipt_sha256") != sha256_bytes(_canonical_json(unsigned)):
-        raise SealedEvaluationError("outcome-label receipt digest mismatch")
-    if float(receipt.get("maximum_permitted_gap_seconds", -1)) != MAX_OUTCOME_GAP.total_seconds():
-        raise SealedEvaluationError("outcome-label gap contract mismatch")
-    if receipt.get("exact_horizon_endpoint_required") is not True:
-        raise SealedEvaluationError("outcome-label receipt does not require exact horizon support")
-    if receipt.get("duplicate_timestamps_permitted") is not False:
-        raise SealedEvaluationError("outcome-label receipt permits duplicate timestamps")
-
+        raise SealedEvaluationError("label receipt digest mismatch")
     rows = receipt.get("rows")
     if not isinstance(rows, list):
-        raise SealedEvaluationError("outcome-label rows missing")
-    seen_hashes: set[str] = set()
-    seen_issues: set[str] = set()
-    resolved = unresolved = eligible = positives = 0
+        raise SealedEvaluationError("label receipt rows missing")
+    seen: set[str] = set()
     for row in rows:
         if not isinstance(row, Mapping):
-            raise SealedEvaluationError("invalid outcome-label row")
-        seal_sha = _sha(row.get("forecast_seal_sha256"), "forecast_seal_sha256")
-        issue = _time(row.get("issued_at"), "label issued_at").isoformat()
-        end = _time(row.get("outcome_window_end"), "label outcome_window_end")
-        if end != _time(issue, "label issued_at") + HORIZON:
-            raise SealedEvaluationError("label outcome horizon mismatch")
-        if seal_sha in seen_hashes or issue in seen_issues:
-            raise SealedEvaluationError("duplicate forecast identity in outcome-label receipt")
-        seen_hashes.add(seal_sha)
-        seen_issues.add(issue)
-
-        is_resolved = row.get("outcome_resolved")
-        if not isinstance(is_resolved, bool):
-            raise SealedEvaluationError("outcome_resolved must be boolean")
-        reason = row.get("resolution_reason")
-        if not isinstance(reason, str) or not reason:
-            raise SealedEvaluationError("resolution_reason missing")
-        if is_resolved:
-            resolved += 1
-            current = row.get("current_flux_pfu")
-            if not isinstance(current, (int, float)) or isinstance(current, bool) or not math.isfinite(float(current)) or float(current) < 0:
-                raise SealedEvaluationError("resolved outcome missing valid current flux")
-            eligible_flag = row.get("eligible_new_crossing_issue")
-            if not isinstance(eligible_flag, bool):
-                raise SealedEvaluationError("resolved outcome eligibility must be boolean")
-            if eligible_flag:
-                eligible += 1
-                if row.get("label") not in (0, 1):
-                    raise SealedEvaluationError("eligible resolved outcome requires binary label")
-                positives += int(row["label"] == 1)
-            elif row.get("label") is not None:
-                raise SealedEvaluationError("ineligible issue must not carry a binary label")
+            raise SealedEvaluationError("label row invalid")
+        key = _sha(row.get("forecast_seal_sha256"), "forecast_seal_sha256")
+        if key in seen:
+            raise SealedEvaluationError("duplicate label row")
+        seen.add(key)
+        resolved = row.get("outcome_resolved")
+        if not isinstance(resolved, bool):
+            raise SealedEvaluationError("label row outcome_resolved must be boolean")
+        eligible = row.get("eligible_new_crossing_issue")
+        label = row.get("label")
+        if not resolved:
+            if label is not None or eligible is not None:
+                raise SealedEvaluationError("unresolved label row cannot contain an outcome")
+        elif eligible is False:
+            if label is not None:
+                raise SealedEvaluationError("ineligible already-active issue cannot have a label")
+        elif eligible is True:
+            if label not in (0, 1) or isinstance(label, bool):
+                raise SealedEvaluationError("eligible resolved label row must have binary label")
         else:
-            unresolved += 1
-            if row.get("eligible_new_crossing_issue") is not None or row.get("label") is not None:
-                raise SealedEvaluationError("unresolved outcome must not carry eligibility or label")
-
-    expected = {
-        "forecast_count": len(rows),
-        "resolved_count": resolved,
-        "unresolved_count": unresolved,
-        "eligible_resolved_count": eligible,
-        "positive_count": positives,
-    }
-    for key, value in expected.items():
-        if receipt.get(key) != value:
-            raise SealedEvaluationError(f"outcome-label receipt {key} mismatch")
-    return dict(receipt)
-
-
-def _binary_metrics(y_true: np.ndarray, prediction: np.ndarray) -> dict[str, float | int]:
-    y = np.asarray(y_true, dtype=int)
-    pred = np.asarray(prediction, dtype=bool)
-    if y.ndim != 1 or pred.ndim != 1 or len(y) != len(pred) or len(y) == 0:
-        raise SealedEvaluationError("metric inputs must be aligned non-empty vectors")
-    if not set(np.unique(y)).issubset({0, 1}):
-        raise SealedEvaluationError("labels must be binary")
-    tp = int(np.sum((y == 1) & pred))
-    fn = int(np.sum((y == 1) & ~pred))
-    fp = int(np.sum((y == 0) & pred))
-    tn = int(np.sum((y == 0) & ~pred))
-    pod = tp / (tp + fn) if tp + fn else math.nan
-    pofd = fp / (fp + tn) if fp + tn else math.nan
-    tss = pod - pofd if math.isfinite(pod) and math.isfinite(pofd) else math.nan
-    far = fp / (tp + fp) if tp + fp else math.nan
-    return {"tp": tp, "fn": fn, "fp": fp, "tn": tn, "pod": pod, "far": far, "tss": tss}
+            raise SealedEvaluationError("resolved label row requires eligibility")
+    if receipt.get("forecast_count") != len(rows):
+        raise SealedEvaluationError("label receipt forecast_count mismatch")
+    if receipt.get("resolved_count") != sum(int(row["outcome_resolved"]) for row in rows):
+        raise SealedEvaluationError("label receipt resolved_count mismatch")
+    if receipt.get("unresolved_count") != sum(int(not row["outcome_resolved"]) for row in rows):
+        raise SealedEvaluationError("label receipt unresolved_count mismatch")
+    if receipt.get("positive_count") != sum(int(row.get("label") == 1) for row in rows):
+        raise SealedEvaluationError("label receipt positive_count mismatch")
+    return [dict(row) for row in rows]
 
 
 def threshold_metrics(y_true: Sequence[int], probability: Sequence[float], threshold: float) -> dict[str, float | int]:
     y = np.asarray(y_true, dtype=int)
     p = np.asarray(probability, dtype=float)
-    if p.ndim != 1 or len(y) != len(p) or len(y) == 0 or not np.isfinite(p).all():
-        raise SealedEvaluationError("metric inputs must be aligned finite non-empty vectors")
-    return _binary_metrics(y, p >= float(threshold))
+    pred = p >= float(threshold)
+    tp = int(np.sum(pred & (y == 1)))
+    fp = int(np.sum(pred & (y == 0)))
+    fn = int(np.sum((~pred) & (y == 1)))
+    tn = int(np.sum((~pred) & (y == 0)))
+    pod = tp / (tp + fn) if tp + fn else math.nan
+    far = fp / (tp + fp) if tp + fp else 0.0
+    tss = (tp / (tp + fn) if tp + fn else 0.0) - (fp / (fp + tn) if fp + tn else 0.0)
+    return {"tp": tp, "fp": fp, "fn": fn, "tn": tn, "pod": pod, "far": far, "tss": tss}
+
+
+def brier(y_true: Sequence[int], probability: Sequence[float]) -> float:
+    y = np.asarray(y_true, dtype=float)
+    p = np.asarray(probability, dtype=float)
+    return float(np.mean((p - y) ** 2))
 
 
 def evaluate_sealed_cohort(
     *,
     forecast_seals: Sequence[Mapping[str, Any]],
     label_receipt: Mapping[str, Any],
-    policy: str = "MAX_TSS",
     review_fraction: float = 0.05,
     minimum_positive_support: int = 20,
 ) -> dict[str, Any]:
-    """Score immutable forecasts without tuning any parameter on outcomes.
+    """Evaluate only resolved, eligible rows under frozen policies.
 
-    Sample size sufficiency is reported separately from independence. This
-    function cannot verify an external pre-outcome witness, custodian-controlled
-    blindness, or provider-side source attestation, so it never emits an
-    "independent evaluation established" claim by itself.
+    Passing the positive-support gate is necessary but not sufficient for an
+    independent-evaluation claim. ``independence_verified`` deliberately remains
+    false until a separate trusted witness/custodian mechanism is validated.
     """
-    if policy not in POLICIES:
-        raise SealedEvaluationError("unknown frozen policy")
-    if not 0 < review_fraction <= 1:
+    if not forecast_seals:
+        raise SealedEvaluationError("no forecast seals supplied")
+    if not 0 < float(review_fraction) <= 1:
         raise SealedEvaluationError("review_fraction must be in (0,1]")
     if not isinstance(minimum_positive_support, int) or minimum_positive_support < 1:
         raise SealedEvaluationError("minimum_positive_support must be positive")
-    labels = validate_label_receipt(label_receipt)
 
-    if isinstance(forecast_seals, (str, bytes)) or not isinstance(forecast_seals, Sequence) or not forecast_seals:
-        raise SealedEvaluationError("forecast_seals must be a non-empty sequence")
-    validated: list[dict[str, Any]] = []
-    seen_hashes: set[str] = set()
-    seen_issues: set[str] = set()
-    package_hashes: set[str] = set()
-    architecture_ids: set[str] = set()
+    labels = _validate_label_receipt(label_receipt)
+    label_by_hash = {row["forecast_seal_sha256"]: row for row in labels}
+    forecast_hashes: set[str] = set()
+    forecast_issues: set[str] = set()
+    package_identity: tuple[str, str] | None = None
+    frozen_thresholds: dict[str, dict[str, float]] | None = None
+    frozen_permissions: dict[str, str] | None = None
+    state_probability = {state: [] for state in STATES}
+    y: list[int] = []
+    unresolved = 0
+    ineligible = 0
+
+    validated_forecasts = []
     for raw in forecast_seals:
         seal = validate_forecast_seal(raw)
-        seal_sha = str(seal["forecast_seal_sha256"])
+        seal_hash = str(seal["forecast_seal_sha256"])
         issue = str(seal["issued_at"])
-        if seal_sha in seen_hashes:
-            raise SealedEvaluationError("duplicate forecast seal in evaluation cohort")
-        if issue in seen_issues:
-            raise SealedEvaluationError("duplicate forecast issue time in evaluation cohort")
-        seen_hashes.add(seal_sha)
-        seen_issues.add(issue)
-        package_hashes.add(str(seal["package_manifest_sha256"]))
-        architecture_ids.add(str(seal["architecture_id"]))
-        validated.append(seal)
-    if len(package_hashes) != 1:
-        raise SealedEvaluationError("model package changed within evaluation cohort")
-    if len(architecture_ids) != 1:
-        raise SealedEvaluationError("architecture changed within evaluation cohort")
+        if seal_hash in forecast_hashes:
+            raise SealedEvaluationError("duplicate forecast seal within cohort")
+        if issue in forecast_issues:
+            raise SealedEvaluationError("duplicate forecast issue time within cohort")
+        forecast_hashes.add(seal_hash)
+        forecast_issues.add(issue)
+        validated_forecasts.append(seal)
 
-    label_rows = labels["rows"]
-    label_by_hash = {str(row["forecast_seal_sha256"]): row for row in label_rows}
-    if set(label_by_hash) != seen_hashes:
-        missing = sorted(seen_hashes - set(label_by_hash))
-        extra = sorted(set(label_by_hash) - seen_hashes)
-        raise SealedEvaluationError(
-            f"outcome-label cohort does not exactly match forecasts; missing={missing[:3]}, extra={extra[:3]}"
-        )
+        identity = (str(seal["package_manifest_sha256"]), str(seal["architecture_id"]))
+        if package_identity is None:
+            package_identity = identity
+        elif identity != package_identity:
+            raise SealedEvaluationError("model package changed within sealed cohort")
+        thresholds = seal["thresholds"]
+        permissions = seal["operator_permissions"]
+        if frozen_thresholds is None:
+            frozen_thresholds = thresholds
+            frozen_permissions = permissions
+        elif thresholds != frozen_thresholds:
+            raise SealedEvaluationError("frozen threshold changed within sealed cohort")
+        elif permissions != frozen_permissions:
+            raise SealedEvaluationError("operator permission changed within sealed cohort")
 
-    state_probability = {state: [] for state in STATES}
-    state_threshold: dict[str, float | None] = {state: None for state in STATES}
-    state_permission: dict[str, str | None] = {state: None for state in STATES}
-    y: list[int] = []
-    unresolved_count = 0
-    ineligible_count = 0
-    for seal in validated:
-        label = label_by_hash[str(seal["forecast_seal_sha256"])]
-        if str(label["issued_at"]) != str(seal["issued_at"]):
-            raise SealedEvaluationError("label issue time does not match forecast seal")
+    if set(label_by_hash) != forecast_hashes:
+        raise SealedEvaluationError("forecast seals and label receipt rows must exactly match")
+
+    eligible_forecasts = []
+    for seal in validated_forecasts:
+        label = label_by_hash[seal["forecast_seal_sha256"]]
         if not label["outcome_resolved"]:
-            unresolved_count += 1
+            unresolved += 1
             continue
-        if label["eligible_new_crossing_issue"] is not True:
-            ineligible_count += 1
+        if label["eligible_new_crossing_issue"] is False:
+            ineligible += 1
             continue
-        if label["label"] not in (0, 1):
-            raise SealedEvaluationError("eligible resolved forecast is missing a binary label")
         y.append(int(label["label"]))
+        eligible_forecasts.append(seal)
         for state in STATES:
             state_probability[state].append(float(seal["probabilities"][state]))
-            threshold = float(seal["thresholds"][state][policy])
-            if state_threshold[state] is None:
-                state_threshold[state] = threshold
-            elif not math.isclose(float(state_threshold[state]), threshold, rel_tol=0, abs_tol=1e-15):
-                raise SealedEvaluationError("frozen threshold changed within sealed cohort")
-            permission = str(seal["operator_permissions"][state])
-            if state_permission[state] is None:
-                state_permission[state] = permission
-            elif state_permission[state] != permission:
-                raise SealedEvaluationError("operator permission changed within sealed cohort")
 
-    positives = int(sum(y))
+    if not eligible_forecasts:
+        raise SealedEvaluationError("no resolved eligible forecasts to evaluate")
+
+    results = {}
     yy = np.asarray(y, dtype=int)
-    results: dict[str, Any] = {}
-    for state, values in state_probability.items():
-        p = np.asarray(values, dtype=float)
-        if len(p):
-            threshold = float(state_threshold[state])
-            numerical_crossing = p >= threshold
-            numerical_metrics = _binary_metrics(yy, numerical_crossing)
-            permission = str(state_permission[state])
-            permitted = permission != "ABSTAIN"
-            exposed_alert = numerical_crossing if permitted else np.zeros(len(p), dtype=bool)
-            alert_metrics = _binary_metrics(yy, exposed_alert)
-            brier = float(np.mean((p - yy.astype(float)) ** 2))
-            n_review = max(1, int(math.ceil(len(p) * review_fraction)))
-            actual_review_fraction = n_review / len(p)
-            rank = np.argsort(-p, kind="mergesort")[:n_review]
-            capture = int(np.sum(yy[rank]))
-            capture_rate = capture / positives if positives else math.nan
-            enrichment = (
-                capture_rate / actual_review_fraction
-                if positives and actual_review_fraction > 0
-                else math.nan
-            )
-        else:
-            permission = None
-            permitted = False
-            numerical_metrics = {}
-            alert_metrics = {}
-            brier = math.nan
-            n_review = 0
-            actual_review_fraction = math.nan
-            capture = 0
-            capture_rate = math.nan
-            enrichment = math.nan
+    positives = int(np.sum(yy))
+    for state in STATES:
+        p = np.asarray(state_probability[state], dtype=float)
+        by_policy = {
+            policy: threshold_metrics(yy, p, frozen_thresholds[state][policy])
+            for policy in POLICIES
+        }
+        permission = frozen_permissions[state]
+        alerts_permitted = permission != "ABSTAIN"
+        alert_by_policy = {}
+        for policy in POLICIES:
+            numerical = by_policy[policy]
+            if alerts_permitted:
+                alert_by_policy[policy] = dict(numerical)
+            else:
+                alert_by_policy[policy] = threshold_metrics(yy, np.zeros_like(p), 1.0)
+
+        n_review = max(1, min(len(p), int(math.ceil(review_fraction * len(p)))))
+        rank = np.argsort(-p, kind="mergesort")[:n_review]
+        capture = int(np.sum(yy[rank]))
+        actual_review_fraction = n_review / len(p)
+        capture_rate = capture / positives if positives else math.nan
+        enrichment = (
+            capture_rate / actual_review_fraction
+            if positives and actual_review_fraction
+            else math.nan
+        )
         results[state] = {
-            "rows": len(p),
+            "rows": int(len(p)),
             "positives": positives,
-            "numerical_threshold_metrics": numerical_metrics,
+            "probability_brier": brier(yy, p),
+            "numerical_threshold_metrics": by_policy,
+            "permission_filtered_alert_metrics": alert_by_policy,
             "operator_permission": permission,
-            "alerts_permitted_by_policy": permitted,
-            "permission_filtered_alert_metrics": alert_metrics,
-            "brier": brier,
-            "requested_review_fraction": review_fraction,
-            "actual_review_fraction": actual_review_fraction,
+            "alerts_permitted_by_policy": alerts_permitted,
             "review_rows": n_review,
+            "actual_review_fraction": actual_review_fraction,
             "review_positive_capture": capture,
-            "review_positive_capture_rate": capture_rate,
+            "review_capture_rate": capture_rate,
             "review_enrichment_vs_random": enrichment,
         }
 
-    support_sufficient = positives >= minimum_positive_support
-    claim_status = (
-        "POSITIVE_SUPPORT_SUFFICIENT_BUT_INDEPENDENCE_UNVERIFIED"
-        if support_sufficient
-        else "INSUFFICIENT_POSITIVE_SUPPORT_DO_NOT_CLAIM_FINAL_SKILL"
-    )
-    return {
+    support_ok = positives >= minimum_positive_support
+    payload = {
         "format": EVALUATION_FORMAT,
         "target": TARGET,
-        "policy": policy,
-        "forecast_count": len(validated),
-        "resolved_eligible_rows": len(y),
-        "unresolved_rows": unresolved_count,
-        "resolved_ineligible_rows": ineligible_count,
+        "sealed_forecasts": len(validated_forecasts),
+        "eligible_rows": len(eligible_forecasts),
+        "unresolved_outcome_rows": unresolved,
+        "ineligible_already_active_rows": ineligible,
         "positives": positives,
         "minimum_positive_support": minimum_positive_support,
-        "positive_support_gate_passed": support_sufficient,
+        "positive_support_gate_passed": support_ok,
         "independence_verified": False,
         "trusted_pre_outcome_witness_verified": False,
         "provider_source_attestation_verified": False,
-        "claim_status": claim_status,
-        "package_manifest_sha256": next(iter(package_hashes)),
-        "architecture_id": next(iter(architecture_ids)),
+        "claim_status": (
+            "POSITIVE_SUPPORT_SUFFICIENT_BUT_INDEPENDENCE_UNVERIFIED"
+            if support_ok
+            else "INSUFFICIENT_POSITIVE_SUPPORT_DO_NOT_CLAIM_FINAL_SKILL"
+        ),
+        "review_metric_scope": "RETROSPECTIVE_RANKING_DIAGNOSTIC_NOT_A_DEPLOYED_FIXED_DAILY_BUDGET_POLICY",
         "states": results,
         "runtime_training_allowed": False,
         "runtime_recalibration_allowed": False,
         "runtime_rethresholding_allowed": False,
-        "sampled_crossing_equivalence_to_catalogue_definition_established": False,
     }
+    payload["evaluation_sha256"] = sha256_bytes(_canonical_json(payload))
+    return payload
