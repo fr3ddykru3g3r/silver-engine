@@ -1,0 +1,38 @@
+{
+  "format": "IRIS_SEP_FROZEN_V3_PACKAGE_ARCHIVE_V1",
+  "architecture": "IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "archive_date": "2026-09-08",
+  "original_github_actions": {
+    "run_id": 34141515134,
+    "artifact_id": 10026120558,
+    "artifact_name": "iris-sep-availability-distilled-v3-package-c5060a827055fce6dd5e5c0deb1d4e476049bc3e",
+    "artifact_zip_sha256": "69be4a5d79c17e452d2fe6115c6447995f22297002a6b25e2dc692c760495a75",
+    "build_head": "c5060a827055fce6dd5e5c0deb1d4e476049bc3e"
+  },
+  "package_internal": {
+    "manifest_sha256": "88c1a73f73f9c3b48c7b5b3c59cdc42dd3d80421ec7b47829f8ab4036e8790a7",
+    "package_receipt_sha256": "67a90c59fabde591364412c9d596a4ad8c8dde81e35ee0de7dc2dc4d8810a098",
+    "reference_predictions_sha256": "91d5ea4967218c1192b2053213f62e2c5678471c3ab6ce29935c1eb3a9fc4e8a",
+    "specialist_model_count": 15,
+    "serialization": "XGBOOST_BOOSTER_JSON",
+    "self_replay_max_abs_difference": 0.0,
+    "runtime_training_allowed": false,
+    "locked_test_accessed": false,
+    "monitor_used": false
+  },
+  "durable_archive": {
+    "provider": "Google Drive",
+    "file_id": "1u7GdhAXusiDNojJ-ARrKRCmqogR5Oi8z",
+    "file_name": "IRIS_SEP_FROZEN_V3_PACKAGE_2026-09-08.zip",
+    "expected_zip_sha256": "69be4a5d79c17e452d2fe6115c6447995f22297002a6b25e2dc692c760495a75"
+  },
+  "rules": {
+    "prospective_runtime_may_retrain": false,
+    "prospective_runtime_may_rebuild_package": false,
+    "prospective_runtime_must_verify_archive_zip_sha256": true,
+    "prospective_runtime_must_verify_manifest_sha256": true,
+    "package_substitution_after_forecast_issue": false
+  },
+  "claim_boundary": "The durable archive preserves the exact already-validated V3 package bytes. It does not by itself validate prospective causal inputs or forecast skill."
+}
