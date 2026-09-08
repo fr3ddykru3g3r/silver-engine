@@ -1,0 +1,109 @@
+name: IRIS-SEP prospective source preflight
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/tools/run_prospective_source_preflight.py'
+      - 'iris_report/iris_sep/src/iris_sep/source_authentication.py'
+      - 'iris_report/iris_sep/config/trusted_source_registry_v1.json'
+      - 'iris_report/iris_sep/architecture/prospective_causal_interface_disposition_2026-09-08.json'
+      - '.github/workflows/iris-sep-prospective-source-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out continuation branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned acquisition dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            requests==2.32.5 \
+            drms==0.9.0 \
+            astropy==7.1.0 \
+            sunpy==7.0.2
+
+      - name: Compile preflight and authentication layer
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/source_authentication.py \
+            iris_report/iris_sep/tools/run_prospective_source_preflight.py
+
+      - name: Execute all-source prospective preflight
+        run: |
+          rm -rf /tmp/iris-sep-prospective-preflight
+          python -m iris_report.iris_sep.tools.run_prospective_source_preflight \
+            --output /tmp/iris-sep-prospective-preflight \
+            | tee /tmp/iris-sep-prospective-preflight.stdout.json
+
+      - name: Enforce fail-closed forecast boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/iris-sep-prospective-preflight')
+          d=json.loads((root/'prospective_preflight.json').read_text())
+          assert d['forecast_probability_emitted'] is False
+          assert d['no_missing_value_fill_used'] is True
+          assert d['no_definitive_to_nrt_substitution_used'] is True
+          assert d['no_runtime_training_used'] is True
+          print(json.dumps({
+              'successful_receipt_count':d['successful_receipt_count'],
+              'prospective_skill_forecast_admissible':d['prospective_skill_forecast_admissible'],
+              'blockers':d['blockers'],
+              'failures':d['failures'],
+              'jsoc_nrt_missing_required_keywords':d['jsoc_nrt_missing_required_keywords'],
+              'source_authentication':d['source_authentication'],
+          },indent=2,sort_keys=True))
+          PY
+
+      - name: Bind runtime and head
+        run: |
+          python - <<'PY'
+          import hashlib,json,platform
+          from pathlib import Path
+          import astropy,drms,numpy,pandas,requests,sunpy
+          root=Path('/tmp/iris-sep-prospective-preflight')
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          payload={
+            'format':'IRIS_SEP_PROSPECTIVE_SOURCE_PREFLIGHT_RUNTIME_V1',
+            'git_head':'${{ github.sha }}',
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'requests':requests.__version__,
+            'drms':drms.__version__,
+            'astropy':astropy.__version__,
+            'sunpy':sunpy.__version__,
+            'preflight_sha256':h(root/'prospective_preflight.json'),
+            'acquisition_receipts_sha256':h(root/'acquisition_receipts.json'),
+            'forecast_probability_emitted':False,
+            'skill_claim_emitted':False,
+          }
+          (root/'runtime.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable preflight evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-prospective-source-preflight-${{ github.sha }}
+          path: /tmp/iris-sep-prospective-preflight
+          if-no-files-found: error
+          retention-days: 30
