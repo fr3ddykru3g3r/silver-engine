@@ -1,0 +1,77 @@
+{
+  "format": "IRIS_V3_ALERT_DECISION_FILTER_FREEZE_V1",
+  "frozen_at_date": "2026-09-08",
+  "selection_status": "POST_HOC_DEVELOPMENT_SELECTION_SCORE_ALREADY_INSPECTED",
+  "architecture": "IRIS_V3_ALERT_DECISION_FILTER_V1",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "purpose": "Reduce false alerts from missing-feed V3 states without replacing or recalibrating the V3 probability.",
+  "states": {
+    "NO_XRS": {
+      "available_context_family": "PROTON",
+      "model": {
+        "max_depth": 2,
+        "n_estimators": 20,
+        "learning_rate": 0.08,
+        "min_child_weight": 10,
+        "subsample": 0.85,
+        "colsample_bytree": 0.85,
+        "reg_lambda": 8.0,
+        "reg_alpha": 1.0,
+        "scale_pos_weight": 50.0,
+        "random_state": 7
+      }
+    },
+    "NO_PROTON": {
+      "available_context_family": "XRS",
+      "model": {
+        "max_depth": 2,
+        "n_estimators": 30,
+        "learning_rate": 0.10,
+        "min_child_weight": 40,
+        "subsample": 0.85,
+        "colsample_bytree": 0.85,
+        "reg_lambda": 8.0,
+        "reg_alpha": 1.0,
+        "scale_pos_weight": 50.0,
+        "random_state": 7
+      }
+    }
+  },
+  "meta_feature_count": 17,
+  "meta_features": [
+    "logit_v3_probability",
+    "logit_v1_probability",
+    "logit_solar_only_probability",
+    "logit_raw_solar_probability",
+    "logit_raw_remaining_context_probability",
+    "v3_probability",
+    "v1_probability",
+    "solar_only_probability",
+    "raw_solar_probability",
+    "raw_remaining_context_probability",
+    "solar_seed_range",
+    "solar_seed_std",
+    "remaining_context_seed_range",
+    "remaining_context_seed_std",
+    "logit_v3_minus_logit_v1",
+    "logit_v3_minus_logit_solar_only",
+    "logit_v1_minus_logit_solar_only"
+  ],
+  "training_role": "calibration",
+  "threshold_selection_role": "threshold",
+  "evaluation_role": "score_already_inspected",
+  "max_threshold_role_true_positive_loss": 1,
+  "large_development_improvement_gate": {
+    "score_true_positives_must_not_decrease": true,
+    "minimum_false_positive_reduction_fraction": 0.20
+  },
+  "v3_probability_replacement_allowed": false,
+  "v3_recalibration_allowed": false,
+  "missing_family_reconstruction_allowed": false,
+  "imputation_allowed": false,
+  "runtime_retraining_allowed": false,
+  "locked_test_access_allowed": false,
+  "monitor_use_allowed": false,
+  "prospective_claim_rule": "This exact development-selected layer may become a candidate for future witnessed comparison only if both one-feed states reproduce the frozen large-improvement gate. Development score results are not independent validation.",
+  "claim_boundary": "Post-hoc development architecture selection. The score cohort was already inspected before exact configurations were frozen."
+}
