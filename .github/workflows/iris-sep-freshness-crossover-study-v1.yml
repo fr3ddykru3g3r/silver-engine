@@ -9,8 +9,7 @@ on:
       - 'iris_report/iris_sep/config/freshness_crossover_study_v1_implementation_freeze_2026-09-09.json'
       - 'iris_report/iris_sep/config/freshness_crossover_study_v1_policy_pooling_clarification_2026-09-09.json'
       - 'iris_report/iris_sep/config/freshness_crossover_study_v1_statistical_and_control_clarification_2026-09-09.json'
-      - 'iris_report/iris_sep/tools/run_freshness_crossover_study_v1_payload.py'
-      - 'iris_report/iris_sep/tools/freshness_crossover_v1_payload/**'
+      - 'iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py'
       - '.github/workflows/iris-sep-freshness-crossover-study-v1.yml'
   workflow_dispatch:
 
@@ -40,37 +39,48 @@ jobs:
             'scikit-learn<2' \
             'xgboost<4' \
             'netCDF4<2' \
-            'matplotlib<4' \
             'requests<3'
 
-      - name: Validate exact decoded source before any data access
+      - name: Validate direct source before data access
         run: |
+          python -m py_compile iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py
+          sha256sum iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py
           python - <<'PY'
-          from iris_report.iris_sep.tools.run_freshness_crossover_study_v1_payload import reconstruct, EXPECTED_SOURCE_SHA256
-          import hashlib
-          raw = reconstruct()
-          observed = hashlib.sha256(raw).hexdigest()
-          assert observed == EXPECTED_SOURCE_SHA256
-          compile(raw, '/tmp/run_freshness_crossover_study_v1.py', 'exec')
-          print({'decoded_bytes': len(raw), 'sha256': observed, 'compile': 'PASS'})
+          import json
+          from pathlib import Path
+          base=Path('iris_report/iris_sep/config')
+          files=[
+            'freshness_crossover_study_v1_preregistration_2026-09-09.json',
+            'freshness_crossover_study_v1_implementation_freeze_2026-09-09.json',
+            'freshness_crossover_study_v1_policy_pooling_clarification_2026-09-09.json',
+            'freshness_crossover_study_v1_statistical_and_control_clarification_2026-09-09.json',
+          ]
+          for f in files: json.loads((base/f).read_text())
+          print('contracts: PASS; no data accessed')
           PY
 
       - name: Execute frozen retrospective study
         run: |
           rm -rf /tmp/iris-sep-freshness-crossover-v1 /tmp/freshness_raw_cache
-          python -m iris_report.iris_sep.tools.run_freshness_crossover_study_v1_payload \
+          python -m iris_report.iris_sep.tools.run_freshness_crossover_study_v1 \
             --output /tmp/iris-sep-freshness-crossover-v1
 
-      - name: Bind exact source and commit to evidence artifact
+      - name: Bind exact source, runtime and contracts
         if: always()
         run: |
           mkdir -p /tmp/iris-sep-freshness-crossover-v1
-          python - <<'PY'
-          from pathlib import Path
-          from iris_report.iris_sep.tools.run_freshness_crossover_study_v1_payload import reconstruct
-          Path('/tmp/iris-sep-freshness-crossover-v1/EXECUTED_SOURCE.py').write_bytes(reconstruct())
-          PY
+          cp iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py /tmp/iris-sep-freshness-crossover-v1/EXECUTED_SOURCE.py
           git rev-parse HEAD > /tmp/iris-sep-freshness-crossover-v1/git_head.txt
+          python - <<'PY'
+          import json, platform
+          import numpy,pandas,scipy,sklearn,xgboost,netCDF4,requests
+          from pathlib import Path
+          Path('/tmp/iris-sep-freshness-crossover-v1/runtime.json').write_text(json.dumps({
+            'python':platform.python_version(),'numpy':numpy.__version__,'pandas':pandas.__version__,
+            'scipy':scipy.__version__,'sklearn':sklearn.__version__,'xgboost':xgboost.__version__,
+            'netCDF4':netCDF4.__version__,'requests':requests.__version__
+          },indent=2,sort_keys=True)+'\n')
+          PY
           cp iris_report/iris_sep/config/freshness_crossover_study_v1_preregistration_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
           cp iris_report/iris_sep/config/freshness_crossover_study_v1_implementation_freeze_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
           cp iris_report/iris_sep/config/freshness_crossover_study_v1_policy_pooling_clarification_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
