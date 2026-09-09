@@ -1,107 +1,121 @@
 # SOL continuation prompt
 
-Continue IRIS-SEP in https://github.com/fr3ddykru3g3r/silver-engine on
-`codex/iris-sep-continuation-20260905`. Inspect PR #3 and the branch head first;
-do not assume these changes are on main and do not restart completed work.
+Continue IRIS-SEP on `codex/iris-sep-continuation-20260905`. Inspect PR #3 and the branch head first. Do not assume main contains this work.
 
-Read first:
+## Current scientific direction
+
+The freshness-crossover route is closed negative evidence and must not be rescued or retuned.
+
+The authorized design direction is now:
+
+`IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1`
+
+Central question:
+
+> How much do repeated positive windows from the same physical SEP episode, already-active persistence states, and issue-time proton-history information alter apparent 24-hour SEP forecasting skill and model ranking?
+
+Read these first:
 
 - `CURRENT_STATUS.md`
-- `architecture/FRESHNESS_CROSSOVER_V1_RESULT_2026-09-09.md`
+- `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_2026-09-09.md`
+- `architecture/NOVELTY_BOUNDARY_EPISODE_NORMALIZED_BENCHMARK_2026-09-09.md`
+- `architecture/LITERATURE_GAP_EPISODE_NORMALIZED_EVALUATION_2026-09-09.md`
+- `architecture/JUDGE_9_OF_10_UPGRADE_PLAN_2026-09-09.md`
+- `config/episode_normalized_causal_benchmark_v1_preregistration_2026-09-09.json`
+- `config/inspected_evidence_registry_v2.json`
 - `architecture/FRESHNESS_CROSSOVER_V1_CLOSURE_2026-09-09.md`
 - `architecture/ONSET_CONTINUATION_FEASIBILITY_2026-09-09.md`
-- `config/inspected_evidence_registry_v2.json`
-- `architecture/IRIS_EVIDENCE_DOSSIER_2026-09-08.md`
-- active benchmark/evaluation contracts and `evidence_checkpoint/INDEX.json`.
 
-## Objective and claim boundary
+## What is already implemented
 
-Objective remains a scientifically defensible daily probability of a **NEW >10 MeV, >=10 pfu crossing within 24 hours**, with evidence relevant to a human analyst.
+Core evaluator:
 
-No award, breakthrough, economic-savings, company-superiority, operational-certification, full-MHD, or independent-skill promise may be made without corresponding evidence.
+- `tools/episode_normalized_benchmark.py`
 
-## Current scientific decision
+Tests:
 
-### V3
+- `tests/test_episode_normalized_benchmark.py`
+- `tests/test_episode_normalized_benchmark_contract.py`
 
-`IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3` remains retrospective-only for skill until the exact prospective interface is established. `CMASKL`, `MEANGBL`, and `USFLUXL` are missing from the examined CEA-NRT interface and affect **18 frozen feature-vector positions**. The prospective preflight correctly emitted **no forecast probability**.
+The evaluator currently provides:
 
-Do not zero-fill, backcast, silently substitute definitive quantities, or call a reduced feature interface the same frozen V3 model.
+- validation of terminal eligibility states;
+- episode-normalized positive weights where each physical positive episode totals 1;
+- Episode Multiplicity Factor;
+- weighted confusion/TSS/FAR/POD scoring for onset-eligible rows;
+- deterministic shared bootstrap draw-tensor generation;
+- episode/quiet-block bootstrap unit construction;
+- model ranking and pairwise rank-reversal detection.
 
-### Freshness crossover V1 — CLOSED
+## Protected-outcome rule — critical
 
-Frozen execution:
+Post-`2025-09-10T00:00:00Z` candidate data remain `PROTECTED_NOT_INSPECTED` under `config/inspected_evidence_registry_v2.json`.
 
-- commit `ed3aba1def18bb022382efa4afaaf251c76e6cff`;
-- run `34341335588`;
-- artifact `10100069342`;
-- artifact SHA-256 `ba907ffae86301c22b1afb3a41a0bf98c825b562b90b5319ce347a4af1db7868`.
+Do NOT query, count, inspect, score, stratify, or reveal:
 
-The result is negative:
+- protected candidate identities;
+- labels/outcomes;
+- event counts;
+- episode durations;
+- model scores;
+- class balance.
 
-- only 3 positives in the 2017 retrospective score cohort;
-- clean joint TSS `0.2692`, XRS-only `0.3157`, proton-only `0.5096`;
-- proton-only detected 3/3 but produced 102 false alerts (FAR about 97.1%);
-- reduced models were already competitive/superior at zero delay, so no freshness-induced model-order crossover was observed;
-- no switching policy passed the practical gate;
-- fixed TTL collapsed to 0;
-- XRS state-dependent policy increased pooled replay false alerts from 816 to 988.
+Do not use protected data to decide power, thresholds, hypotheses, or study design.
 
-Do **not** tune thresholds, delay grids, models, features, eligibility, or switching policies on the exposed V1 outcome as a route to a positive freshness claim.
+Historical development/exposed data may be used to debug mechanics only. Never call it untouched final evidence.
 
-The original evidence package lacks per-issue predictions and fitted models. Any later reconstruction must be explicitly labelled forensic/reconstructed and cannot be called the original artifact. The executed bootstrap pairs methods within each delay but redraws units across delays, so it is not simultaneous curve evidence.
+## Next engineering milestone
 
-### Exposure guard
+Build the causal episode constructor and attrition-ledger pipeline on already-exposed development data only.
 
-`config/inspected_evidence_registry_v2.json` is authoritative for exposure control.
+Required behavior before any model comparison:
 
-- historical development before the fixed monitor was already used for development;
-- the 2023-07-31 through 2025-09-10 monitor is exposed;
-- freshness V1 exposed 2011–2017 roles/outcomes;
-- do not relabel 2018–2022 or any other historical development slice as untouched;
-- data after 2025-09-10 are a **protected candidate**: development must not inspect identities, labels, event counts, strata, or scores merely to design or rescue a study.
+1. construct physical threshold-crossing episodes deterministically;
+2. classify issue times into the frozen terminal eligibility codes;
+3. prove already-active cases never enter onset-positive scoring;
+4. persist one prediction/eligibility row per issue time;
+5. make attrition counts reconcile exactly;
+6. generate one bootstrap draw tensor and reuse it for every paired comparison;
+7. hash predictions, attrition ledger, config, environment and bootstrap draws;
+8. add boundary tests for exact issue+24h endpoint, gaps, duplicates, immature windows and long events;
+9. only then run the fixed comparator set on already-exposed development data as a mechanics/diagnostic result.
 
-A final untouched claim requires an independent custodian to choose/hash the cohort, check overlap against the exposure registry, and attest non-exposure before outcome release.
+Fixed model families for V1:
 
-### Onset-versus-continuation candidate — NOT AUTHORIZED TO SCORE
+- climatology;
+- causally permitted persistence diagnostic;
+- fixed elastic-net logistic regression;
+- fixed XGBoost;
+- existing frozen IRIS candidate only if the exact development feature interface is available.
 
-The candidate scientific question is whether event-overlap/continuation performance can look useful while **new-onset** warning adds little beyond a simple past-only proton persistence/trend baseline.
+No architecture expansion or hyperparameter rescue after observing episode-normalization shifts.
 
-This is operationally meaningful, but onset versus persistence is not itself novel. Do not describe it as a breakthrough.
+## Scientific claim boundary
 
-Do not open the protected post-2025 period to count positives. Exposed monitor evidence may be used only for planning. The current feasibility record concludes that a short prospective period is unlikely to support the required detection-harm precision; a new study is authorized only after a development-only power/precision plan and independent-custodian cohort assignment.
+Do not claim that existing SEP papers are biased or wrong before the frozen benchmark demonstrates a robust effect.
 
-## Immediate work order
+The candidate originality is the combined evaluation framework:
 
-1. **Preserve the negative result.** Keep the freshness closure and all failed/intermediate results visible.
-2. **Verify repo integrity.** Run source-only CI and JSON-contract checks for any new docs/config changes. Software passes do not become forecasting evidence.
-3. **Complete evidence provenance.** Locate any genuinely existing prediction-level/model artifacts before considering reconstruction. Do not regenerate them and call them original.
-4. **Maintain exposure ledger.** Every viewed cohort, comparator output, reconstruction, or policy-selection dataset must be appended before it can influence development.
-5. **Do not inspect protected future outcomes.** No development-side event counts or score peeking after 2025-09-10.
-6. **Resolve fair eligibility with real people.** A written IRIS ruling is needed on newly executed computational research using older archival observations. Do not send external messages without explicit user authorization and do not invent approvals/signatures.
-7. **Respect student authorship.** Competition abstract/paper/poster/pitch must comply with the applicable AI rules. AI can audit, coach, test, and help refine permitted student work, but should not be misrepresented as student-authored initial scientific prose.
-8. **Only then consider a new experiment.** Freeze target, baseline, episode/reset rule, eligibility, evidence persistence, resampling, practical effect size, and precision/stop rule before any protected outcomes are released.
-9. If independent support cannot meet the preregistered precision requirement in time, **stop** rather than manufacture another underpowered positive claim.
+- quantify repeated positive-window multiplicity;
+- equalize total positive weight per physical SEP episode;
+- separate new onset from already-active persistence;
+- test model-rank stability;
+- use identical episode-level paired bootstrap draws;
+- persist complete per-issue eligibility/attrition evidence.
 
-## Technical requirements for any future study
+Recent work already includes proton/XRS forecasting, XGBoost, deep learning, multimodality, 24-hour forecasts and operational onset/persistence concepts. Those are not novelty claims.
 
-Persist from the first run:
+## Existing V3/fail-closed evidence
 
-- issue IDs and role/cohort hashes;
-- labels and eligibility/exclusion reasons;
-- per-issue probabilities/actions;
-- fitted-model native exports/hashes and ordered feature schema;
-- calibrated thresholds;
-- source/provenance hashes;
-- common bootstrap/event-block draw matrix shared across every matched condition;
-- runtime/dependency receipt.
+Preserve all prior V3 package, replay, missingness, filter, source-readiness and fail-closed results. They are historical evidence, not the new centerpiece.
 
-Eligibility must use information available strictly before issue time. Repeated delays, seeds, daily rows, or threshold crossings are not automatically independent physical events.
+The exact prospective V3 interface remains blocked by unavailable `CMASKL`, `MEANGBL`, and `USFLUXL` quantities affecting 18 frozen feature-vector positions. The prior prospective preflight emitted no forecast probability. Do not silently substitute or zero-fill them.
 
-## Execution rules
+## Before ending any continuation
 
-No computer-use/browser automation or delegated agents. Use direct GitHub/API/tooling only. Never store any personal registration email in code, reports, notebooks, configs, receipts, or evidence.
-
-No force push, history rewrite, auto-merge, blind staging, or full-history clone. Preserve immutable evidence and negative results. Large data/models stay outside ordinary Git with provenance hashes.
-
-Before ending any continuation: verify the exact remote head and changed paths, verify applicable CI for that exact head, update authoritative status/handoff, and state remaining blockers precisely. Do not claim artifacts, tests, skill, or eligibility that were not actually established.
+- run source-only CI/test suite on the exact published head;
+- preserve null and negative evidence;
+- update CURRENT_STATUS and this handoff with exact commit/test receipts;
+- do not merge PR #3 automatically;
+- do not access protected final outcomes;
+- do not claim award outcome, operational superiority, economic impact, state-of-the-art performance, or breakthrough without independent evidence.
