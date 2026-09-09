@@ -1,0 +1,80 @@
+{
+  "format": "IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1_EXPANDING_OOF",
+  "study_id": "IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1",
+  "status": "FROZEN_BEFORE_MODEL_SCORE_INSPECTION",
+  "purpose": "Increase development-side physical-episode support for the evaluation-mechanism test without relabelling exposed history as untouched evidence. Every scored year is predicted only from earlier years.",
+  "claim_boundary": {
+    "development_only": true,
+    "independent_final_evidence": false,
+    "protected_post_2025_outcomes_accessed": false,
+    "strict_2017_role_still_reported_separately": true
+  },
+  "folds": [
+    {
+      "name": "EXPAND_2014",
+      "fit_start": "2011-01-01",
+      "fit_end_exclusive": "2013-01-01",
+      "threshold_start": "2013-01-01",
+      "threshold_end_exclusive": "2014-01-01",
+      "score_start": "2014-01-01",
+      "score_end_exclusive": "2015-01-01"
+    },
+    {
+      "name": "EXPAND_2015",
+      "fit_start": "2011-01-01",
+      "fit_end_exclusive": "2014-01-01",
+      "threshold_start": "2014-01-01",
+      "threshold_end_exclusive": "2015-01-01",
+      "score_start": "2015-01-01",
+      "score_end_exclusive": "2016-01-01"
+    },
+    {
+      "name": "EXPAND_2016",
+      "fit_start": "2011-01-01",
+      "fit_end_exclusive": "2015-01-01",
+      "threshold_start": "2015-01-01",
+      "threshold_end_exclusive": "2016-01-01",
+      "score_start": "2016-01-01",
+      "score_end_exclusive": "2017-01-01"
+    },
+    {
+      "name": "EXPAND_2017",
+      "fit_start": "2011-01-01",
+      "fit_end_exclusive": "2016-01-01",
+      "threshold_start": "2016-01-01",
+      "threshold_end_exclusive": "2017-01-01",
+      "score_start": "2017-01-01",
+      "score_end_exclusive": "2017-12-01"
+    }
+  ],
+  "training_target": "WINDOW_OCCURRENCE_STANDARD",
+  "probability_calibration": "none in expanding OOF sensitivity; preserve raw model probabilities to avoid fitting calibration and threshold on the same prior-year block",
+  "threshold_policy": "MAX_TSS on the immediately preceding threshold year only",
+  "models": [
+    "elastic_net_joint_fixed",
+    "xgboost_joint_fixed",
+    "xgboost_proton_blind_fixed",
+    "current_proton_active_persistence_diagnostic",
+    "fit_prevalence_climatology"
+  ],
+  "combined_oof_period": "2014-01-01 through 2017-11-30",
+  "combined_oof_rule": "concatenate each fold's untouched-with-respect-to-that-fold score predictions; never refit thresholds after concatenation",
+  "uncertainty": {
+    "bootstrap_replicates": 10000,
+    "shared_draws": true,
+    "positive_unit": "physical SEP episode",
+    "negative_unit": "calendar-aligned seven-day quiet block",
+    "fold_identity_preserved_in_prediction_rows": true
+  },
+  "underpowered_reporting": {
+    "minimum_distinct_positive_episodes_for_non_underpowered_development_mechanism_claim": 20,
+    "if_below": "UNDERPOWERED_DEVELOPMENT_MECHANISM_RESULT"
+  },
+  "forbidden": [
+    "changing folds after scores",
+    "training on future years for an earlier score year",
+    "combining OOF rows and calling them untouched final evidence",
+    "post-concatenation threshold optimization",
+    "opening post-2025 protected outcomes"
+  ]
+}
