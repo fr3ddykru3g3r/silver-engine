@@ -27,7 +27,7 @@ jobs:
       - name: Install requests
         run: python -m pip install requests==2.32.5
 
-      - name: Capture bounded NCEI directory listings
+      - name: Capture bounded NCEI GOES-15 directory listings
         run: |
           rm -rf /tmp/ncei-xrs-layout
           mkdir -p /tmp/ncei-xrs-layout
@@ -46,8 +46,8 @@ jobs:
           months=['2011/01','2014/06','2017/06']
           out=[]
           for month in months:
-              url=f'https://www.ncei.noaa.gov/data/goes-space-environment-monitor/access/avg/{month}/'
-              r=requests.get(url,timeout=60,headers={'User-Agent':'IRIS-SEP-XRS-layout-diagnostic/1.0'})
+              url=f'https://www.ncei.noaa.gov/data/goes-space-environment-monitor/access/avg/{month}/goes15/'
+              r=requests.get(url,timeout=60,headers={'User-Agent':'IRIS-SEP-XRS-layout-diagnostic/2.0'})
               r.raise_for_status()
               if len(r.content) > 3_000_000: raise RuntimeError('listing exceeded bound')
               p=Links(); p.feed(r.text)
@@ -58,13 +58,15 @@ jobs:
                   'bytes':len(r.content),
                   'sha256':hashlib.sha256(r.content).hexdigest(),
                   'links':links,
-                  'links_containing_g15': [x for x in links if 'g15' in x.lower()],
-                  'links_containing_xrs': [x for x in links if 'xrs' in x.lower()],
+                  'netcdf_links':[x for x in links if x.lower().endswith('.nc')],
+                  'csv_links':[x for x in links if x.lower().endswith('.csv')],
+                  'xrs_links':[x for x in links if 'xrs' in x.lower()],
+                  'one_minute_links':[x for x in links if '1m' in x.lower() or '1min' in x.lower()],
               }
               out.append(entry)
-              pathlib.Path(f'/tmp/ncei-xrs-layout/{month.replace("/", "-")}.html').write_bytes(r.content)
+              pathlib.Path(f'/tmp/ncei-xrs-layout/{month.replace("/", "-")}-goes15.html').write_bytes(r.content)
           receipt={
-              'format':'IRIS_SEP_NCEI_XRS_DIRECTORY_DIAGNOSTIC_V1',
+              'format':'IRIS_SEP_NCEI_XRS_DIRECTORY_DIAGNOSTIC_V2',
               'git_head':'${{ github.sha }}',
               'training_performed':False,
               'labels_derived':False,
@@ -73,7 +75,7 @@ jobs:
               'directories':out,
           }
           pathlib.Path('/tmp/ncei-xrs-layout/directory_links.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
-          print(json.dumps([{k:v for k,v in e.items() if k not in ('links',)} for e in out],indent=2))
+          print(json.dumps([{k:v for k,v in e.items() if k != 'links'} for e in out],indent=2))
           PY
 
       - name: Upload diagnostic evidence
