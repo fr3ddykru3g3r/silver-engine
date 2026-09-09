@@ -1,0 +1,36 @@
+{
+  "format": "IRIS_SEP_FRESHNESS_CROSSOVER_SOURCE_PROBE_V1",
+  "study_id": "IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1",
+  "status": "FROZEN_BEFORE_BOUNDED_FILE_PROBE",
+  "proton": {
+    "annual_url_template": "https://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/omni_5min{year}.asc",
+    "format_document": "https://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/hroformat.txt",
+    "sample_years": [2011, 2014, 2017],
+    "expected_last_columns": [
+      "proton_flux_gt10mev",
+      "proton_flux_gt30mev",
+      "proton_flux_gt60mev"
+    ],
+    "fill_value": 99999.99,
+    "expected_units": "1/(cm^2 s sr)"
+  },
+  "xrs": {
+    "monthly_directory_template": "https://www.ncei.noaa.gov/data/goes-space-environment-monitor/access/avg/{year}/{month}/",
+    "sample_months": ["2011-01", "2014-06", "2017-06"],
+    "satellite": 15,
+    "preferred_extension": ".nc",
+    "required_tokens": ["g15", "xrs", "1m"],
+    "archive_scaling": {
+      "A_divisor": 0.85,
+      "B_divisor": 0.7
+    }
+  },
+  "probe_boundaries": {
+    "training_performed": false,
+    "labels_derived": false,
+    "forecast_skill_computed": false,
+    "locked_test_accessed": false,
+    "maximum_single_download_bytes": 45000000,
+    "claim_boundary": "Source readiness only; this study remains retrospective development evidence and not an independent final test."
+  }
+}
