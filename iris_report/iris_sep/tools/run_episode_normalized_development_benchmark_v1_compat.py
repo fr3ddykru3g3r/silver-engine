@@ -1,13 +1,18 @@
 """Runtime compatibility wrapper for the frozen episode benchmark V1.
 
-Scientific definitions are unchanged. This wrapper replaces only the legacy
-Pandas timezone indexing path used by the reused freshness feature helper.
+Scientific definitions are unchanged. This wrapper replaces only:
+1. the legacy Pandas timezone indexing path used by the reused freshness
+   feature helper; and
+2. sklearn-wrapper XGBoost serialization with direct Booster serialization.
+Neither change alters fitting, probabilities, thresholds, cohorts or metrics.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 
@@ -44,8 +49,36 @@ def family_features_compat(df: pd.DataFrame, issue: pd.Timestamp, delay: int, fa
     return out
 
 
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save_strict_models_compat(out: Path, models):
+    """Persist fitted models without invoking XGBClassifier.save_model.
+
+    XGBoost 3.0.4's sklearn wrapper calls an estimator-type method that is
+    incompatible with scikit-learn 1.8. The underlying Booster is the fitted
+    predictive object, so serializing it directly preserves the exact trees.
+    """
+    model_dir = out / "strict_models"
+    model_dir.mkdir(exist_ok=True)
+    manifest = []
+    for name, model in models.items():
+        if name.startswith("xgb_"):
+            for idx, member in enumerate(model):
+                path = model_dir / f"{name}_seed_member_{idx}.json"
+                member.get_booster().save_model(path)
+                manifest.append({"model": name, "member": idx, "serialization": "xgboost.Booster.save_model", "path": str(path.relative_to(out)), "sha256": _sha256(path)})
+        elif name == "elastic_net_joint":
+            path = model_dir / f"{name}.joblib"
+            joblib.dump(model, path)
+            manifest.append({"model": name, "serialization": "joblib", "path": str(path.relative_to(out)), "sha256": _sha256(path)})
+    return manifest
+
+
 def install_compatibility_patch() -> None:
     fresh.family_features = family_features_compat
+    benchmark.save_strict_models = save_strict_models_compat
 
 
 def main() -> int:
