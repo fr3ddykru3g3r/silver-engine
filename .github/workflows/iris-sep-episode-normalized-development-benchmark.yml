@@ -1,0 +1,123 @@
+name: IRIS-SEP episode-normalized development benchmark
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-episode-benchmark-v1-20260909
+    paths:
+      - 'iris_report/iris_sep/config/episode_normalized_causal_benchmark_v1_preregistration_2026-09-09.json'
+      - 'iris_report/iris_sep/config/episode_normalized_causal_benchmark_v1_mechanism_decomposition_2026-09-09.json'
+      - 'iris_report/iris_sep/config/episode_normalized_causal_benchmark_v1_expanding_oof_2026-09-09.json'
+      - 'iris_report/iris_sep/tools/episode_semantics.py'
+      - 'iris_report/iris_sep/tools/episode_normalized_benchmark.py'
+      - 'iris_report/iris_sep/tools/episode_benchmark_statistics.py'
+      - 'iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1.py'
+      - 'iris_report/iris_sep/tests/test_episode_semantics.py'
+      - 'iris_report/iris_sep/tests/test_episode_normalized_benchmark.py'
+      - '.github/workflows/iris-sep-episode-normalized-development-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  development-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out benchmark branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+
+      - name: Install pinned benchmark environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            requests==2.32.5 \
+            scipy==1.16.2 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4 \
+            netCDF4==1.7.2 \
+            matplotlib==3.10.6 \
+            joblib==1.5.2 \
+            pytest==8.4.2
+
+      - name: Compile all benchmark sources
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/episode_semantics.py
+          python -m py_compile iris_report/iris_sep/tools/episode_normalized_benchmark.py
+          python -m py_compile iris_report/iris_sep/tools/episode_benchmark_statistics.py
+          python -m py_compile iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1.py
+          python -m py_compile iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py
+
+      - name: Run synthetic and property tests
+        env:
+          PYTHONPATH: iris_report/iris_sep
+        run: |
+          python -m pytest -q \
+            iris_report/iris_sep/tests/test_episode_semantics.py \
+            iris_report/iris_sep/tests/test_episode_normalized_benchmark.py
+
+      - name: Validate frozen contracts before data access
+        env:
+          PYTHONPATH: iris_report/iris_sep
+        run: |
+          python - <<'PY'
+          from tools.run_episode_normalized_development_benchmark_v1 import load_contracts
+          pre, mech, oof = load_contracts()
+          assert pre['protected_candidate']['development_side_may_access_labels'] is False
+          assert pre['uncertainty']['shared_draws_across_all_models_views_delays_ablations_and_contrasts'] is True
+          assert oof['status'] == 'FROZEN_BEFORE_MODEL_SCORE_INSPECTION'
+          assert mech['status'] == 'FROZEN_BEFORE_NEW_REAL_DATA_SCORING'
+          print('Frozen contracts validated; protected post-2025 outcomes remain inaccessible.')
+          PY
+
+      - name: Run frozen development benchmark
+        env:
+          PYTHONPATH: iris_report/iris_sep
+          MPLBACKEND: Agg
+        run: |
+          rm -rf /tmp/episode-development-benchmark
+          python -m tools.run_episode_normalized_development_benchmark_v1 \
+            --output /tmp/episode-development-benchmark
+
+      - name: Record exact runtime and claim boundary
+        if: always()
+        run: |
+          mkdir -p /tmp/episode-development-benchmark
+          python - <<'PY'
+          import json, platform
+          from pathlib import Path
+          import joblib, matplotlib, netCDF4, numpy, pandas, requests, scipy, sklearn, xgboost
+          Path('/tmp/episode-development-benchmark/runtime.json').write_text(json.dumps({
+            'git_head': '${{ github.sha }}',
+            'python': platform.python_version(),
+            'numpy': numpy.__version__,
+            'pandas': pandas.__version__,
+            'requests': requests.__version__,
+            'scipy': scipy.__version__,
+            'scikit_learn': sklearn.__version__,
+            'xgboost': xgboost.__version__,
+            'netCDF4': netCDF4.__version__,
+            'matplotlib': matplotlib.__version__,
+            'joblib': joblib.__version__,
+            'protected_post_2025_outcomes_accessed': False,
+            'development_only': True,
+            'independent_final_evidence': False,
+          }, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Upload immutable development benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-episode-development-benchmark-${{ github.sha }}
+          path: /tmp/episode-development-benchmark
+          if-no-files-found: warn
+          retention-days: 30
