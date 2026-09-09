@@ -1,197 +1,102 @@
 # IRIS-SEP authoritative current status
 
-**Status date:** 2026-09-08  
-**Decision update:** 2026-09-09  
+**Status date:** 2026-09-09  
 **Work branch:** `codex/iris-sep-continuation-20260905`  
-**Purpose:** single authoritative human-readable status pointer. Historical reports remain preserved for audit continuity. Machine-readable historical delivery state remains `config/eight_issue_status_2026-09-08.json`; exposure control is now extended by `config/inspected_evidence_registry_v2.json`.
+**Purpose:** current scientific source of truth for the continuation branch. Historical development results remain preserved but cannot be relabelled as untouched evidence.
 
 ## Project in one sentence
 
-Estimate the probability of a **NEW >10 MeV, >=10 pfu solar energetic-particle threshold crossing within the next 24 hours** and separately decide whether the evidence justifies exposing that probability normally, as `DEGRADED`, or not at all (`ABSTAIN`).
+Test whether conventional daily-window SEP forecasting metrics overstate genuine onset-forecasting skill because one physical SEP episode can contribute multiple correlated positive windows, already-active/persistence states can remain in the cohort, and issue-time proton information can leak persistence into a nominal 24-hour forecast; then evaluate models with an episode-normalized, causally eligible benchmark.
 
-The intended demonstrated user is a human analyst. Spacecraft autonomous control, financial savings, operational certification, company superiority, guaranteed award outcome, and a full-physics/MHD solar simulation are outside the demonstrated scope.
+## Scientific pivot — authorized as a design, not yet as a result
 
-## Current scientific disposition
+The former freshness-crossover route is closed negative evidence. It is not to be tuned or rescued.
 
-IRIS-SEP is a **RETROSPECTIVE reliability research program with a prospective fail-closed validation framework**. It does not currently contain a demonstrated first-place-standard forecasting discovery.
+The new central question is methodological rather than architectural:
 
-Two conclusions now control all further work:
+> **How much do event persistence, repeated positive windows from the same physical SEP episode, and issue-time availability choices change the apparent skill and ranking of 24-hour SEP forecasting systems?**
 
-1. the frozen V3 model remains retrospective-only for forecast skill because its exact live causal interface is unavailable;
-2. the separate freshness-crossover study is now closed as a negative result and is not a route for further post-result rescue tuning.
+This is motivated by a concrete benchmark property: modern rolling-window SEP datasets can assign multiple positive windows to the same physical event when an event lasts longer than 24 hours. A window-level score can therefore give a long event more influence than a short event. In addition, proton-history features can encode that an event is already underway or recently active unless eligibility is defined causally.
 
-## Frozen development model and live-interface blocker
+The intended contribution is not “onset and persistence are different.” Operational agencies already distinguish them. The contribution to test is whether **standard evaluation choices materially change measured model skill, uncertainty, and model ranking**, and whether an episode-normalized causal evaluation provides a more defensible estimate of pre-onset warning ability.
 
-The frozen missing-feed candidate remains `IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3`.
+## New candidate benchmark
 
-Runtime semantics remain:
+Working name: `IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1`.
 
-| State | Evidence | Permission |
-|---|---|---|
-| `FULL` | solar + XRS + proton | normal only if provenance/interface gate passes |
-| `NO_XRS` | solar + proton | `DEGRADED` |
-| `NO_PROTON` | solar + XRS | `DEGRADED` |
-| `NO_XRS_OR_PROTON` | solar only | `ABSTAIN` |
+Required paired evaluations on the same frozen prediction files:
 
-The V3 package contains 15 serialized XGBoost specialists and has deterministic package/replay evidence. Package integrity does **not** establish independent prospective forecasting skill.
+1. `WINDOW_OCCURRENCE_STANDARD` — ordinary 24-hour window-level occurrence scoring retained as a literature-compatible reference.
+2. `NEW_ONSET_CAUSAL` — issue time must be below the operational proton threshold and the next 24 hours must contain the first eligible threshold crossing.
+3. `EPISODE_NORMALIZED_ONSET` — same onset eligibility, but every distinct physical SEP episode has total positive weight 1 regardless of duration or number of candidate windows.
+4. `PROTON_STATE_BLIND_ONSET` — onset-eligible scoring with issue-time/in-window proton state variables removed from the learned feature set to quantify how much ranking depends on direct particle-history evidence.
+5. `PERSISTENCE_DIAGNOSTIC` — already-active cases are scored separately and never mixed into onset skill.
 
-The exact 259-position V3 interface still cannot be reproduced from `hmi.sharp_cea_720s_nrt` because three required frozen SHARP quantities are unavailable:
+Primary scientific outputs:
 
-- `CMASKL`;
-- `MEANGBL`;
-- `USFLUXL`.
-
-They affect **18 frozen feature-vector positions**.
-
-Frozen disposition remains:
-
-`FROZEN_MODEL_RETROSPECTIVE_ONLY_FOR_SKILL_UNTIL_SOURCE_EQUIVALENCE_IS_ESTABLISHED`
-
-Zero-fill, similarly named replacements, retrospective backcasts, silent definitive-to-NRT substitution, or calling a reduced feature interface the same V3 model remain forbidden.
-
-The prospective preflight therefore emitted **no forecast probability**. That is correct fail-closed behavior, not a skill result.
-
-## Development performance remains development-only
-
-Previously inspected evidence includes:
-
-- older diagnostic-policy score TSS about `0.5120`;
-- 2023–2025 development-monitor TSS about `0.2359`;
-- development-monitor POD about `83.3%`;
-- development-monitor FAR about `95.5%`;
-- late-fusion monitor TSS about `0.1894`, with paired advantage inconclusive;
-- `NO_XRS` V3 point estimate about `0.368087 -> 0.430492`, with uncertainty crossing zero and slightly worse Brier;
-- `NO_PROTON` V3 about `0.507371 -> 0.512999`, retaining `16/21` detections and reducing false positives `814 -> 796`.
-
-The high false-alarm burden must remain visible.
-
-The rejected decision filter and monotone veto remain rejected. The monotone veto reduced false positives by about 25–29% but lost detections. Plain V3 remains frozen; no more post-hoc alert-filter tuning is allowed on exposed score evidence.
-
-## Freshness crossover V1 — CLOSED NEGATIVE RESULT
-
-Execution identity:
-
-- study: `IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1`;
-- executed commit: `ed3aba1def18bb022382efa4afaaf251c76e6cff`;
-- run: `34341335588`;
-- artifact: `10100069342`;
-- artifact SHA-256: `ba907ffae86301c22b1afb3a41a0bf98c825b562b90b5319ce347a4af1db7868`.
-
-The study used a documented two-satellite retrospective definition: GOES-13 NASA/SPDF OMNI five-minute `Av >10 MeV` proton measurements and GOES-15 NOAA/NCEI operational XRS. Historical SWPC-primary-stream equivalence was not established.
-
-Role support was sparse:
-
-| Role | Issues | Positives |
-|---|---:|---:|
-| Fit 2011–2014 | 968 | 30 |
-| Calibration 2015 | 225 | 2 |
-| Threshold selection 2016 | 250 | 1 |
-| Retrospective score 2017 | 211 | 3 |
-
-2017 clean controls were:
-
-| Model | TP | FP | FN | TN | TSS | FAR |
-|---|---:|---:|---:|---:|---:|---:|
-| Joint | 3 | 152 | 0 | 56 | 0.269231 | 98.06% |
-| XRS-only | 2 | 73 | 1 | 135 | 0.315705 | 97.33% |
-| Proton-only | 3 | 102 | 0 | 106 | 0.509615 | 97.14% |
-
-The proposed freshness-induced model-order crossover was **not demonstrated**. Proton-only already exceeded the joint model at zero XRS delay; XRS-only also had a higher point-estimate TSS than joint at zero proton delay. No evaluated delay produced the required sign reversal.
-
-No switching policy passed the practical gate. Fixed TTL selection collapsed to zero minutes and produced no false-alert improvement over the reduced reference. The XRS state-dependent policy increased pooled replay false-alert executions from 816 to 988 (`+21.08%`).
-
-The result is closed under `architecture/FRESHNESS_CROSSOVER_V1_CLOSURE_2026-09-09.md`.
-
-### Freshness evidence limitations
-
-The closure record preserves all major limitations:
-
-- only three 2017 positive opportunities;
-- proton-only 3/3 detection accompanied by 102 false alerts;
-- per-issue predictions and fitted models were not packaged, so ranking metrics and paired uncertainty cannot be independently regenerated from aggregate counts alone;
-- the executed bootstrap paired methods within each delay but redrew underlying units across delays, so it does not provide simultaneous curve inference;
-- simulated proton-delay eligibility still used contemporaneous proton information, making the experiment a conditional retrospective population rather than an implementable availability-aware replay;
-- increasing delay changed both information age and retained window coverage;
-- repeated delay variants do not create new independent solar events.
-
-The strongest permitted claim is that this frozen experiment **failed to demonstrate** the proposed freshness crossover or a beneficial switching intervention. It does not establish that XRS is harmful, that fewer sensors are generally better, or that freshness never matters.
-
-## Novelty boundary
-
-Broad novelty claims are closed. Daily GOES proton/X-ray features, XGBoost/SVM SEP forecasting, proton-dominant predictors, calibrated multimodal forecasting, onset forecasting, and 24-hour multi-source SEP prediction all have close precedent.
-
-The distinctive contribution of freshness V1 is the controlled-delay protocol plus its negative result—not a field-leading architecture or successful warning policy.
-
-## Exposure state and future data protection
-
-`config/inspected_evidence_registry_v2.json` is now the active exposure guard.
-
-Important consequences:
-
-- all eligible historical development rows before the fixed monitor were already used for development;
-- the 2023-07-31 through 2025-09-10 monitor is already inspected development evidence;
-- freshness V1 exposed its 2011–2017 roles and outcomes;
-- no convenient 2018–2022 slice may be relabelled as untouched merely because a new question is proposed;
-- observations after 2025-09-10 are reserved as a **protected candidate**, with identities, labels, event counts, and scores not authorized for development-side inspection.
-
-A genuinely untouched claim requires an independent custodian to define/hash the cohort and attest non-exposure against the complete registry before outcomes are released.
-
-## Onset-versus-continuation candidate — NOT AUTHORIZED TO RUN YET
-
-A separate question has been considered: whether headline SEP forecasting skill can be decomposed into warning of a **new onset** versus recognition of **continuation/persistence** of an event already in progress.
-
-This distinction is operationally meaningful but not itself novel; NOAA/SWPC already distinguishes expected proton-event onset from expected persistence.
-
-Feasibility is recorded in `architecture/ONSET_CONTINUATION_FEASIBILITY_2026-09-09.md`.
-
-The current decision is:
-
-`DO_NOT_RUN_AS_AN_INDEPENDENT_CLAIM_STUDY_YET`
-
-Reasons:
-
-1. historical periods are development-exposed;
-2. the only plausible post-monitor period must remain protected until a contract and custodian-controlled cohort exist;
-3. exposed-data planning indicates sparse positive support relative to the precision needed for a strong detection-harm claim;
-4. the novelty claim must be narrower than the onset/persistence distinction itself;
-5. a new experiment must persist issue-level predictions/models, an exclusion ledger, and shared resampling objects from the start.
-
-Do not inspect post-2025 outcomes merely to learn whether the proposed study has enough positives.
-
-## Immediate research priority
-
-The immediate priority is **evidence completion and eligibility**, not another model-development cycle:
-
-1. preserve the immutable negative freshness result and its audit;
-2. recover any genuinely original per-issue prediction/model evidence only if it already exists; otherwise label any reconstruction explicitly and never tune on 2017;
-3. maintain the complete exposure ledger;
-4. obtain a written IRIS ruling on eligibility of newly executed computational research using older archival observations;
-5. complete authentic sponsor/student/parent and AI-assistance documentation as required;
-6. have the student authors independently understand, interpret, and write the competition material under the applicable AI rules;
-7. reserve future/prospective data rather than consuming it in another underpowered exploratory score run.
-
-If no admissible independent cohort can meet a preregistered precision requirement in time, stop rather than manufacture a positive discovery claim.
-
-## What is established
-
-- deterministic V3 package/replay integrity;
-- explicit `FULL`/`DEGRADED`/`ABSTAIN` semantics;
-- fail-closed refusal to expose a skill forecast when the exact V3 live interface is invalid;
-- negative missingness/outage and alert-filter evidence retained rather than hidden;
-- a completed controlled-delay freshness experiment with verified aggregate arithmetic;
-- failure of the freshness-crossover and switching-policy hypotheses on that experiment;
-- a stronger exposure guard protecting candidate future evidence.
-
-## What is not established
-
-- independent prospective forecasting skill;
-- low false-alarm operation;
-- operational or company superiority;
-- causal benefit of stale-to-fresh switching;
-- a novel onset-versus-continuation discovery;
-- sufficient independent support for a new prospective claim;
-- full-physics simulation, economic impact, certification, or award outcome.
+- delta in TSS between standard window scoring and episode-normalized onset scoring;
+- delta in FAR at a matched episode-level detection target;
+- model-rank changes across evaluation definitions;
+- effective number of independent positive SEP episodes versus positive prediction windows;
+- shared paired episode/bootstrap intervals using the same resampled episodes across all compared models/conditions;
+- calibration at the episode/onset level;
+- a full cohort/attrition ledger showing exactly why each candidate issue time is included or excluded.
 
 ## Claim boundary
 
-Passing software tests establishes software consistency, not forecasting usefulness. Development results remain development evidence. Negative results remain part of the record. Protected future data must remain protected. No superiority, breakthrough, operational-readiness, economic-impact, full-physics-simulation, or competition-outcome claim is permitted without corresponding independent evidence.
+No current result establishes that conventional SEP papers are wrong or that their published skill is inflated. The project is testing that hypothesis.
+
+A competition-level claim is authorized only if the effect is large, stable across multiple fixed model families, and survives episode-level paired uncertainty. A null result is still publishable as a benchmark result if the methodology is complete and the result is retained without tuning.
+
+## Protected evidence rule
+
+`config/inspected_evidence_registry_v2.json` is authoritative for exposure control.
+
+All historical periods already used for fitting, threshold selection, monitoring, diagnostics, freshness experiments, or policy selection remain development evidence. They may be used to build and debug the benchmark mechanics but never called untouched final evidence.
+
+The candidate period after `2025-09-10T00:00:00Z` remains protected. Development-side code must not query, count, inspect, score, stratify, or otherwise reveal its outcomes for power rescue. Any independent final evaluation requires a custodian-controlled cohort/hash and pre-outcome contract freeze.
+
+## Why this direction is stronger than another model
+
+The current literature already contains deep neural networks, XGBoost, multimodal solar observations, proton/X-ray histories, and operational 24-hour SEP probabilities. Building another architecture is unlikely to supply competition-level creativity by itself.
+
+A rigorous evaluation-bias study can instead contribute:
+
+- a falsifiable scientific hypothesis about what forecast skill actually represents;
+- a mathematical weighting correction for repeated windows from the same event;
+- an operationally meaningful decomposition of onset versus persistence;
+- reproducible paired uncertainty at the physical-episode level;
+- a benchmark that can be applied to simple and sophisticated models alike.
+
+## Existing frozen assets retained
+
+The existing V3 package, missing-feed state machine, fail-closed interface checks, source receipts, negative filter experiments, and freshness closure remain part of the evidence history. They are not discarded, but they are no longer the centerpiece of the research question.
+
+The prospective V3 interface still cannot be represented exactly because `CMASKL`, `MEANGBL`, and `USFLUXL` are absent from the required near-real-time interface, affecting 18 frozen feature-vector positions. The prior prospective run therefore emitted no forecast probability. This remains a valid fail-closed engineering result, not a forecast-skill result.
+
+## What must be built before any new scoring
+
+1. Freeze exact event/episode construction from proton flux without looking at protected outcomes.
+2. Freeze causal eligibility at issue time, including treatment of already-active and recently ended episodes.
+3. Persist one row per prediction with issue timestamp, episode identifier (only when labels are legally available for that cohort), eligibility reason, observed state, model probability, and threshold decision.
+4. Implement episode-normalized weights and prove each positive episode sums to weight 1.
+5. Implement a shared-resample episode bootstrap; every contrast and every model must use identical bootstrap draws.
+6. Implement a complete attrition ledger.
+7. Use fixed simple models before considering any architecture expansion: climatology, persistence diagnostic, elastic-net logistic regression, and frozen XGBoost.
+8. Run synthetic/unit tests that establish the evaluator behaves correctly under deliberately constructed long-duration versus short-duration events.
+9. Run only on already-exposed development data to debug mechanics; mark those outputs development-only.
+10. Do not release protected final labels until an independent custodian verifies the frozen contract and cohort.
+
+## 9/10 target rubric
+
+The project should not be described as 9/10 until the evidence supports it. The engineering target is:
+
+- **Scientific thought:** one sharply falsifiable hypothesis, physical-episode evaluation, causal eligibility, proper uncertainty, explicit failure conditions.
+- **Creativity:** contribution is the episode-normalized causal benchmark and quantification of evaluation-induced skill/rank changes, not a generic new classifier.
+- **Thoroughness:** complete prediction persistence, attrition ledger, multiple fixed comparators, shared bootstrap draws, sensitivity analyses, and preserved null/negative results.
+- **Skill:** reproducible software contract, exact receipts/hashes, unit/property tests, episode-disjoint statistics, deterministic outputs, and independent replay where possible.
+- **Clarity:** one judge-facing story: “Are we forecasting a new radiation storm, or partly recognizing one that is already happening?” followed by a single evaluation framework and a small set of decisive figures.
+
+## Immediate next action
+
+Implement and test the benchmark mechanics **without accessing protected outcomes**. The first milestone is a synthetic/property-tested evaluator proving that long-duration events cannot receive extra positive weight simply because they span more 24-hour windows, and that already-active cases are separated from new-onset cases before any model score is computed.
