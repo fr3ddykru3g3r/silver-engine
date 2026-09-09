@@ -1,9 +1,8 @@
 """Bounded source-readiness probe for IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1.
 
-The probe does no model fitting, derives no labels, and computes no forecast
-skill. It checks three predeclared years/months against the frozen source
-contract, records file hashes and metadata, and fails closed if the archive
-schema contradicts the preregistered study.
+No model fitting, label derivation, or forecast-skill computation occurs here.
+The probe checks predeclared years/months against the frozen source contract,
+records hashes and metadata, and fails closed on schema disagreement.
 """
 from __future__ import annotations
 
@@ -18,12 +17,11 @@ from urllib.parse import urljoin
 
 import requests
 
-
 ROOT = Path(__file__).resolve().parents[1]
 STUDY = ROOT / "config" / "freshness_crossover_study_v1_preregistration_2026-09-09.json"
 PROBE = ROOT / "config" / "freshness_crossover_source_probe_v1_2026-09-09.json"
 FORMAT = "IRIS_SEP_FRESHNESS_CROSSOVER_SOURCE_READINESS_V1"
-USER_AGENT = "IRIS-SEP-freshness-source-readiness/1.0"
+USER_AGENT = "IRIS-SEP-freshness-source-readiness/1.1"
 TIMEOUT = 60
 
 
@@ -57,16 +55,12 @@ def _doy_datetime(year: int, doy: int, hour: int, minute: int) -> datetime:
 
 
 def inspect_omni_5min_ascii(body: bytes, *, expected_year: int, fill_value: float) -> dict[str, Any]:
-    text = body.decode("ascii", errors="strict")
-    lines = [line for line in text.splitlines() if line.strip()]
+    lines = [line for line in body.decode("ascii", errors="strict").splitlines() if line.strip()]
     if not lines:
         raise SourceProbeError("OMNI annual file has no records")
-
-    first = lines[0].split()
-    last = lines[-1].split()
+    first, last = lines[0].split(), lines[-1].split()
     if len(first) < 4 or len(last) < 4:
         raise SourceProbeError("OMNI records lack timestamp fields")
-
     first_time = _doy_datetime(*(int(first[i]) for i in range(4)))
     last_time = _doy_datetime(*(int(last[i]) for i in range(4)))
     if first_time.year != expected_year or last_time.year != expected_year:
@@ -75,7 +69,6 @@ def inspect_omni_5min_ascii(body: bytes, *, expected_year: int, fill_value: floa
     widths: set[int] = set()
     nonfill_gt10 = 0
     negative_gt10 = 0
-    parsed_rows = 0
     for line in lines:
         fields = line.split()
         widths.add(len(fields))
@@ -85,7 +78,6 @@ def inspect_omni_5min_ascii(body: bytes, *, expected_year: int, fill_value: floa
             gt10, gt30, gt60 = map(float, fields[-3:])
         except ValueError as exc:
             raise SourceProbeError("OMNI appended proton columns are not numeric") from exc
-        parsed_rows += 1
         if gt10 != fill_value:
             nonfill_gt10 += 1
             if gt10 < 0:
@@ -93,16 +85,14 @@ def inspect_omni_5min_ascii(body: bytes, *, expected_year: int, fill_value: floa
         for value in (gt30, gt60):
             if value != fill_value and value < 0:
                 raise SourceProbeError("negative non-fill integral proton flux")
-
     if len(widths) != 1:
         raise SourceProbeError(f"OMNI annual file has inconsistent record widths: {sorted(widths)}")
     if nonfill_gt10 == 0:
         raise SourceProbeError("OMNI annual file contains no non-fill >10 MeV values")
     if negative_gt10:
         raise SourceProbeError("OMNI annual file contains negative non-fill >10 MeV values")
-
     return {
-        "rows": parsed_rows,
+        "rows": len(lines),
         "record_columns": next(iter(widths)),
         "first_timestamp": first_time.isoformat(),
         "last_timestamp": last_time.isoformat(),
@@ -112,12 +102,21 @@ def inspect_omni_5min_ascii(body: bytes, *, expected_year: int, fill_value: floa
     }
 
 
-def parse_xrs_candidates(html: str, *, satellite: int, preferred_extension: str) -> list[str]:
+def parse_xrs_candidates(
+    html: str,
+    *,
+    satellite: int,
+    preferred_extension: str,
+    exclude_tokens: Iterable[str] = (),
+) -> list[str]:
     links = re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.I)
     required = (f"g{satellite}", "xrs", "1m")
-    candidates = []
+    excluded = tuple(str(token).lower() for token in exclude_tokens)
+    candidates: list[str] = []
     for link in links:
         name = Path(link).name.lower()
+        if excluded and any(token in name for token in excluded):
+            continue
         if all(token in name for token in required) and name.endswith(preferred_extension.lower()):
             candidates.append(link)
     return sorted(set(candidates))
@@ -149,6 +148,22 @@ def _text_blob(name: str, attrs: dict[str, Any]) -> str:
     return " ".join(values).lower()
 
 
+def _is_xrs_a(name: str, meta: dict[str, Any]) -> bool:
+    text = _text_blob(name, meta)
+    compact = re.sub(r"[^a-z0-9]", "", text)
+    if name.upper() == "A_AVG":
+        return "short wavelength channel irradiance" in text and ("0.05 - 0.4 nm" in text or "0.05-0.4 nm" in text)
+    return any(token in compact for token in ("xrsa", "xraychannela")) and any(token in text for token in ("flux", "irradiance"))
+
+
+def _is_xrs_b(name: str, meta: dict[str, Any]) -> bool:
+    text = _text_blob(name, meta)
+    compact = re.sub(r"[^a-z0-9]", "", text)
+    if name.upper() == "B_AVG":
+        return "long wavelength channel irradiance" in text and ("0.1-0.8 nm" in text or "0.1 - 0.8 nm" in text)
+    return any(token in compact for token in ("xrsb", "xraychannelb")) and any(token in text for token in ("flux", "irradiance"))
+
+
 def inspect_xrs_netcdf(path: Path) -> dict[str, Any]:
     try:
         import netCDF4
@@ -171,7 +186,7 @@ def inspect_xrs_netcdf(path: Path) -> dict[str, Any]:
                 "flag_values": attrs.get("flag_values"),
                 "flag_meanings": attrs.get("flag_meanings"),
             }
-        globals_out = {name: ds.getncattr(name) for name in ds.ncattrs()}
+        global_names = sorted(ds.ncattrs())
 
     xrs_a: list[str] = []
     xrs_b: list[str] = []
@@ -179,10 +194,9 @@ def inspect_xrs_netcdf(path: Path) -> dict[str, Any]:
     quality: list[str] = []
     for name, meta in variables.items():
         text = _text_blob(name, meta)
-        compact = re.sub(r"[^a-z0-9]", "", text)
-        if any(token in compact for token in ("xrsa", "xraychannela")) and any(token in text for token in ("flux", "irradiance")):
+        if _is_xrs_a(name, meta):
             xrs_a.append(name)
-        if any(token in compact for token in ("xrsb", "xraychannelb")) and any(token in text for token in ("flux", "irradiance")):
+        if _is_xrs_b(name, meta):
             xrs_b.append(name)
         units = str(meta.get("units") or "").lower()
         if name.lower() == "time" or "time" in str(meta.get("standard_name") or "").lower() or " since " in units:
@@ -190,13 +204,24 @@ def inspect_xrs_netcdf(path: Path) -> dict[str, Any]:
         if any(token in text for token in ("quality", "flag", "status")):
             quality.append(name)
 
+    expected_quality = {"A_QUAL_FLAG", "B_QUAL_FLAG"}
+    expected_time = "time_tag"
+    units_ok = all(str(variables[name].get("units") or "").lower().replace(" ", "") in {"w/m^2", "w/m2"} for name in set(xrs_a + xrs_b))
     return {
-        "global_attribute_names": sorted(globals_out),
+        "global_attribute_names": global_names,
         "variable_count": len(variables),
         "xrs_a_candidates": sorted(set(xrs_a)),
         "xrs_b_candidates": sorted(set(xrs_b)),
         "time_candidates": sorted(set(times)),
         "quality_candidates": sorted(set(quality)),
+        "exact_operational_schema": {
+            "A_AVG": "A_AVG" in xrs_a,
+            "B_AVG": "B_AVG" in xrs_b,
+            "time_tag": expected_time in times,
+            "A_QUAL_FLAG": "A_QUAL_FLAG" in quality,
+            "B_QUAL_FLAG": "B_QUAL_FLAG" in quality,
+            "irradiance_units_w_per_m2": units_ok,
+        },
         "variables": variables,
     }
 
@@ -208,33 +233,34 @@ def probe_xrs_month(
     month: str,
     satellite: int,
     preferred_extension: str,
+    exclude_tokens: Iterable[str],
     maximum: int,
     output_dir: Path,
 ) -> dict[str, Any]:
     year, mon = month.split("-")
     directory = directory_template.format(year=year, month=mon)
     listing = fetch_bytes(session, directory, maximum=3_000_000).decode("utf-8", errors="replace")
-    candidates = parse_xrs_candidates(listing, satellite=satellite, preferred_extension=preferred_extension)
+    candidates = parse_xrs_candidates(
+        listing,
+        satellite=satellite,
+        preferred_extension=preferred_extension,
+        exclude_tokens=exclude_tokens,
+    )
     if len(candidates) != 1:
         return {
             "month": month,
             "directory": directory,
             "candidate_files": candidates,
             "passed": False,
-            "reason": "EXACTLY_ONE_GOES15_XRS_1M_NETCDF_REQUIRED",
+            "reason": "EXACTLY_ONE_GOES15_XRS_1M_OPERATIONAL_NETCDF_REQUIRED",
         }
-
     url = urljoin(directory, candidates[0])
     body = fetch_bytes(session, url, maximum=maximum)
     local = output_dir / Path(candidates[0]).name
     local.write_bytes(body)
     inventory = inspect_xrs_netcdf(local)
-    passed = bool(
-        inventory["xrs_a_candidates"]
-        and inventory["xrs_b_candidates"]
-        and inventory["time_candidates"]
-        and inventory["quality_candidates"]
-    )
+    exact = inventory["exact_operational_schema"]
+    passed = all(bool(v) for v in exact.values())
     return {
         "month": month,
         "directory": directory,
@@ -244,7 +270,7 @@ def probe_xrs_month(
         "sha256": sha256_bytes(body),
         "inventory": inventory,
         "passed": passed,
-        "reason": "XRS_A_B_TIME_QUALITY_METADATA_PRESENT" if passed else "REQUIRED_XRS_METADATA_MISSING",
+        "reason": "EXACT_GOES15_XRS_A_B_TIME_QUALITY_SCHEMA_PRESENT" if passed else "REQUIRED_XRS_METADATA_MISSING",
     }
 
 
@@ -269,14 +295,7 @@ def run(output: Path) -> dict[str, Any]:
         url = probe["proton"]["annual_url_template"].format(year=year)
         body = fetch_bytes(session, url, maximum=maximum)
         summary = inspect_omni_5min_ascii(body, expected_year=int(year), fill_value=float(probe["proton"]["fill_value"]))
-        proton_rows.append({
-            "year": int(year),
-            "url": url,
-            "bytes": len(body),
-            "sha256": sha256_bytes(body),
-            "summary": summary,
-            "passed": True,
-        })
+        proton_rows.append({"year": int(year), "url": url, "bytes": len(body), "sha256": sha256_bytes(body), "summary": summary, "passed": True})
 
     xrs_rows = []
     for month in probe["xrs"]["sample_months"]:
@@ -287,6 +306,7 @@ def run(output: Path) -> dict[str, Any]:
                 month=month,
                 satellite=int(probe["xrs"]["satellite"]),
                 preferred_extension=str(probe["xrs"]["preferred_extension"]),
+                exclude_tokens=probe["xrs"].get("exclude_filename_tokens", []),
                 maximum=maximum,
                 output_dir=sample_dir,
             )
