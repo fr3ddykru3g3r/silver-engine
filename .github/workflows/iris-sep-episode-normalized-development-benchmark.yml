@@ -8,14 +8,18 @@ on:
       - 'iris_report/iris_sep/config/episode_normalized_causal_benchmark_v1_preregistration_2026-09-09.json'
       - 'iris_report/iris_sep/config/episode_normalized_causal_benchmark_v1_mechanism_decomposition_2026-09-09.json'
       - 'iris_report/iris_sep/config/episode_normalized_causal_benchmark_v1_expanding_oof_2026-09-09.json'
+      - 'iris_report/iris_sep/architecture/EPISODE_BENCHMARK_POST_RESULT_AUDIT_CORRECTION_2026-09-09.md'
       - 'iris_report/iris_sep/tools/episode_semantics.py'
       - 'iris_report/iris_sep/tools/episode_normalized_benchmark.py'
       - 'iris_report/iris_sep/tools/episode_benchmark_statistics.py'
       - 'iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1.py'
       - 'iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1_compat.py'
+      - 'iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1_auditfix.py'
+      - 'iris_report/iris_sep/tools/verify_episode_development_artifact_v2.py'
       - 'iris_report/iris_sep/tests/test_episode_semantics.py'
       - 'iris_report/iris_sep/tests/test_episode_normalized_benchmark.py'
       - 'iris_report/iris_sep/tests/test_episode_feature_compat.py'
+      - 'iris_report/iris_sep/tests/test_episode_audit_correction.py'
       - '.github/workflows/iris-sep-episode-normalized-development-benchmark.yml'
   workflow_dispatch:
 
@@ -50,51 +54,56 @@ jobs:
             joblib==1.5.2 \
             pytest==8.4.2
 
-      - name: Compile all benchmark sources
+      - name: Compile all benchmark and verifier sources
         run: |
           python -m py_compile iris_report/iris_sep/tools/episode_semantics.py
           python -m py_compile iris_report/iris_sep/tools/episode_normalized_benchmark.py
           python -m py_compile iris_report/iris_sep/tools/episode_benchmark_statistics.py
           python -m py_compile iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1.py
           python -m py_compile iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1_compat.py
+          python -m py_compile iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1_auditfix.py
+          python -m py_compile iris_report/iris_sep/tools/verify_episode_development_artifact_v2.py
           python -m py_compile iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py
 
-      - name: Run synthetic and property tests
+      - name: Run synthetic, property, compatibility, and audit-correction tests
         env:
           PYTHONPATH: iris_report/iris_sep
         run: |
           python -m pytest -q \
             iris_report/iris_sep/tests/test_episode_semantics.py \
             iris_report/iris_sep/tests/test_episode_normalized_benchmark.py \
-            iris_report/iris_sep/tests/test_episode_feature_compat.py
+            iris_report/iris_sep/tests/test_episode_feature_compat.py \
+            iris_report/iris_sep/tests/test_episode_audit_correction.py
 
-      - name: Validate frozen contracts before data access
+      - name: Validate frozen scientific contracts before data access
         env:
           PYTHONPATH: iris_report/iris_sep
         run: |
           python - <<'PY'
+          from pathlib import Path
           from tools.run_episode_normalized_development_benchmark_v1 import load_contracts
           pre, mech, oof = load_contracts()
           assert pre['protected_candidate']['development_side_may_access_labels'] is False
           assert pre['uncertainty']['shared_draws_across_all_models_views_delays_ablations_and_contrasts'] is True
           assert oof['status'] == 'FROZEN_BEFORE_MODEL_SCORE_INSPECTION'
           assert mech['status'] == 'FROZEN_BEFORE_NEW_REAL_DATA_SCORING'
-          print('Frozen contracts validated; protected post-2025 outcomes remain inaccessible.')
+          correction = Path('iris_report/iris_sep/architecture/EPISODE_BENCHMARK_POST_RESULT_AUDIT_CORRECTION_2026-09-09.md').read_text()
+          assert 'FROZEN_POST_RESULT_ESTIMATOR_AND_EVIDENCE_CORRECTION_ONLY' in correction
+          assert 'No model refitting or threshold reselection is justified' in correction
+          print('Scientific contracts and post-result correction boundary validated; protected post-2025 outcomes remain inaccessible.')
           PY
 
-      - name: Run frozen development benchmark through compatibility wrapper
+      - name: Run frozen benchmark and audit-corrected estimator
         env:
           PYTHONPATH: iris_report/iris_sep
           MPLBACKEND: Agg
         run: |
           rm -rf /tmp/episode-development-benchmark
-          python -m tools.run_episode_normalized_development_benchmark_v1_compat \
+          python -m tools.run_episode_normalized_development_benchmark_v1_auditfix \
             --output /tmp/episode-development-benchmark
 
       - name: Record exact runtime and claim boundary
-        if: always()
         run: |
-          mkdir -p /tmp/episode-development-benchmark
           python - <<'PY'
           import json, platform
           from pathlib import Path
@@ -111,18 +120,53 @@ jobs:
             'netCDF4': netCDF4.__version__,
             'matplotlib': matplotlib.__version__,
             'joblib': joblib.__version__,
-            'compatibility_wrapper': 'timezone-aware DatetimeIndex.asi8 only; scientific feature definitions unchanged',
+            'compatibility_wrapper': 'timezone-aware DatetimeIndex.asi8 and Booster serialization only',
+            'audit_correction': 'row-specific frozen OOF alerts; mapped physical-unit bootstrap sensitivity; final evidence hashing',
             'protected_post_2025_outcomes_accessed': False,
             'development_only': True,
             'independent_final_evidence': False,
           }, indent=2, sort_keys=True) + '\n')
           PY
 
-      - name: Upload immutable development benchmark evidence
+      - name: Independently verify corrected artifact from persisted evidence
+        env:
+          PYTHONPATH: iris_report/iris_sep
+        run: |
+          python -m tools.verify_episode_development_artifact_v2 \
+            /tmp/episode-development-benchmark \
+            --output /tmp/episode-development-benchmark/independent_verification_v2.json
+
+      - name: Finalize evidence hashes including runtime and verifier receipt
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('/tmp/episode-development-benchmark')
+          def sha(path):
+              h = hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda: f.read(1 << 20), b''):
+                      h.update(block)
+              return h.hexdigest()
+          manifest = {}
+          for path in sorted(root.rglob('*')):
+              if path.is_file() and path.name != 'evidence_hashes.json':
+                  manifest[str(path.relative_to(root))] = sha(path)
+          (root / 'evidence_hashes.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
+          print(f'Final evidence manifest contains {len(manifest)} files.')
+          PY
+
+      - name: Verify final evidence manifest again
+        env:
+          PYTHONPATH: iris_report/iris_sep
+        run: |
+          python -m tools.verify_episode_development_artifact_v2 /tmp/episode-development-benchmark
+
+      - name: Upload immutable corrected development benchmark evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: iris-sep-episode-development-benchmark-${{ github.sha }}
+          name: iris-sep-episode-development-benchmark-audit-corrected-${{ github.sha }}
           path: /tmp/episode-development-benchmark
           if-no-files-found: warn
           retention-days: 30
