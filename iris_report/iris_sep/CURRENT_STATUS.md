@@ -1,295 +1,197 @@
 # IRIS-SEP authoritative current status
 
 **Status date:** 2026-09-08  
+**Decision update:** 2026-09-09  
 **Work branch:** `codex/iris-sep-continuation-20260905`  
-**Purpose:** this is the single authoritative human-readable status pointer. Historical reports remain preserved for audit continuity but must not be treated as current if they conflict with this page. The machine-readable source of truth is `config/eight_issue_status_2026-09-08.json`.
+**Purpose:** single authoritative human-readable status pointer. Historical reports remain preserved for audit continuity. Machine-readable historical delivery state remains `config/eight_issue_status_2026-09-08.json`; exposure control is now extended by `config/inspected_evidence_registry_v2.json`.
 
 ## Project in one sentence
 
-Estimate the probability of a **NEW >10 MeV, >=10 pfu solar energetic-particle threshold crossing within the next 24 hours** and separately decide whether the available evidence justifies exposing that probability normally, as `DEGRADED`, or not at all (`ABSTAIN`).
+Estimate the probability of a **NEW >10 MeV, >=10 pfu solar energetic-particle threshold crossing within the next 24 hours** and separately decide whether the evidence justifies exposing that probability normally, as `DEGRADED`, or not at all (`ABSTAIN`).
 
 The intended demonstrated user is a human analyst. Spacecraft autonomous control, financial savings, operational certification, company superiority, guaranteed award outcome, and a full-physics/MHD solar simulation are outside the demonstrated scope.
 
-## Current scientific framing
+## Current scientific disposition
 
-The project is now best described as a **retrospective reliability study with a prospective fail-closed validation framework**.
+IRIS-SEP is a **RETROSPECTIVE reliability research program with a prospective fail-closed validation framework**. It does not currently contain a demonstrated first-place-standard forecasting discovery.
 
-The central reliability question is:
+Two conclusions now control all further work:
 
-> A forecasting system can continue producing a plausible-looking probability after an input feed disappears. When is that number still trustworthy enough to expose, and when should the system refuse to guess?
+1. the frozen V3 model remains retrospective-only for forecast skill because its exact live causal interface is unavailable;
+2. the separate freshness-crossover study is now closed as a negative result and is not a route for further post-result rescue tuning.
 
-The strongest concise lesson supported by the development work is:
+## Frozen development model and live-interface blocker
 
-> **A stable-looking probability does not imply a reliable warning.**
+The frozen missing-feed candidate remains `IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3`.
 
-## Frozen development model
+Runtime semantics remain:
 
-### Full-data architecture
+| State | Evidence | Permission |
+|---|---|---|
+| `FULL` | solar + XRS + proton | normal only if provenance/interface gate passes |
+| `NO_XRS` | solar + proton | `DEGRADED` |
+| `NO_PROTON` | solar + XRS | `DEGRADED` |
+| `NO_XRS_OR_PROTON` | solar only | `ABSTAIN` |
 
-`IRIS_CROSSFIT_EVIDENCE_STACK_V1`
+The V3 package contains 15 serialized XGBoost specialists and has deterministic package/replay evidence. Package integrity does **not** establish independent prospective forecasting skill.
 
-- five-seed-median XGBoost specialists for solar/context, XRS, and historical-proton evidence;
-- chronological expanding out-of-fold fit-era evidence construction;
-- non-negative evidence stack;
-- calibration separated from fitting;
-- operating-threshold selection separated from fitting and calibration;
-- frozen benchmark primary threshold policy: `MAX_TSS`;
-- `POD80_MIN_FAR` retained only as a diagnostic policy.
-
-### Missing-feed runtime
-
-`IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3` remains the frozen missing-feed candidate.
-
-| State | Available evidence | Runtime path | Permission |
-|---|---|---|---|
-| `FULL` | solar + XRS + proton | full frozen stack | normal only if provenance/interface gate passes |
-| `NO_XRS` | solar + proton | pre-trained reduced-input fallback | `DEGRADED` |
-| `NO_PROTON` | solar + XRS | pre-trained reduced-input fallback | `DEGRADED` |
-| `NO_XRS_OR_PROTON` | solar only | diagnostic only | `ABSTAIN` |
-
-No missing feed is reconstructed, fabricated, or retrained at runtime by V3.
-
-## Package and replay status — complete
-
-The frozen V3 package is now exported, reloadable, and independently replayed.
-
-Verified package facts:
-
-- 15 serialized XGBoost specialists;
-- exact ZIP SHA-256: `69be4a5d79c17e452d2fe6115c6447995f22297002a6b25e2dc692c760495a75`;
-- manifest SHA-256: `88c1a73f73f9c3b48c7b5b3c59cdc42dd3d80421ec7b47829f8ab4036e8790a7`;
-- self-replay maximum absolute probability difference: `0.0`;
-- separate black-box replay maximum absolute probability difference: approximately `2.22e-16`;
-- ordered feature schema is position-bound;
-- runtime retraining/recalibration/rethresholding is forbidden;
-- the solar-only `ABSTAIN` state cannot emit an alert.
-
-Original package workflow run: `34141515134`, artifact `10026120558`.
-
-The exact raw package ZIP is also durably archived outside short-lived GitHub Actions storage in Google Drive, file ID `1u7GdhAXusiDNojJ-ARrKRCmqogR5Oi8z`, while preserving the same ZIP digest.
-
-See `architecture/BLACK_BOX_VALIDATION_2026-09-07.md` and `config/eight_issue_status_2026-09-08.json`.
-
-## Development evidence already inspected
-
-These results are development evidence and cannot be relabelled as fresh final evidence.
-
-Previously inspected full-stack context includes:
-
-- older score TSS approximately `0.5120` under the diagnostic POD80/minimum-FAR policy;
-- later 2023–2025 development monitor TSS approximately `0.2359`;
-- later monitor detection/POD approximately `83.3%`;
-- later monitor FAR approximately `95.5%`;
-- previous late-fusion monitor TSS approximately `0.1894`;
-- paired monitor advantage over late fusion remains inconclusive because the paired uncertainty interval crosses zero.
-
-The high FAR must remain visible in any scientific presentation.
-
-### V3 missing-feed point estimates
-
-Development-only evidence includes:
-
-- `NO_XRS`: TSS point estimate about `0.368087 -> 0.430492`, but the stratified unit-bootstrap interval crosses zero and Brier score is slightly worse;
-- `NO_PROTON`: TSS about `0.507371 -> 0.512999`, with `16/21` detections retained and false positives reduced from `814` to `796`.
-
-These are promising/inconclusive point estimates, not established superiority.
-
-## Missingness/outage conclusion
-
-Three experiment classes remain explicitly separate:
-
-1. random observed-cell deletion;
-2. daily model-input modality outage over 1/3/7 daily cycles;
-3. true upstream sensor outage at native cadence.
-
-The third cannot be reproduced faithfully by deleting rows from the daily aggregate table.
-
-The random-missingness work showed that causal forward-fill could preserve probabilities comparatively well while decision quality still degraded. At 40% random observed-cell loss, frozen diagnostic-policy TSS fell by roughly `0.227`.
-
-Therefore probability similarity is not evidence of safe warning behavior.
-
-## Alert-filter experiments — closed, rejected
-
-Two post-V3 attempts to obtain a large false-alarm reduction were tested on an already-inspected development score block.
-
-### First decision filter
-
-Run `34206898291` was rejected because the meta-model could create alerts outside the original frozen V3 alert set. It was therefore not a pure suppression layer.
-
-### Monotone veto
-
-Run `34216432375` fixed that structural problem: the layer could only suppress an existing V3 alert.
-
-Development score results:
-
-- `NO_XRS`: `13 TP / 603 FP -> 12 TP / 431 FP`, a `28.5%` FP reduction but one lost detection;
-- `NO_PROTON`: `16 TP / 796 FP -> 13 TP / 594 FP`, a `25.4%` FP reduction but three lost detections.
-
-The veto was rejected because the false-positive improvement came with detection loss.
-
-**Final decision:** keep plain V3 and stop further post-hoc alert-filter tuning on the inspected score block. Further tuning would increase overfitting risk.
-
-## Historical aggregate provenance limitation
-
-The retrospective aggregate table remains useful for development, but its preprocessing includes interpolation, overlap-era mapping/backcasting, nearest-time SHARP/SMARP matching, and fitted SHARP<-SMARP transformations.
-
-Therefore a finite historical aggregate cell is not automatically evidence that the value was natively available at forecast issue time.
-
-This means retrospective skill cannot automatically be promoted to prospective causal skill.
-
-## Prospective source preflight — implemented and executed
-
-The all-source preflight now attempts and receipts seven registered source families:
-
-1. NOAA/SWPC primary proton;
-2. NOAA/SWPC primary XRS;
-3. NOAA/SWPC GOES instrument-source routing;
-4. JSOC HMI SHARP CEA-NRT;
-5. LMSAL HEK GOES flares;
-6. NASA CCMC DONKI CME;
-7. NASA GSFC CDAW CME.
-
-Final hardened run: `34217607075`  
-Artifact: `10052465094`  
-Artifact ZIP SHA-256: `95ae852fb005674fcac555bc7c741bd1becab04ac2829823819ea6c0575ed5e3`
-
-### Acquisition result
-
-Six of seven source families authenticated successfully.
-
-CDAW remained unavailable because the external provider reset the HTTPS connection after five bounded retries. No silent catalogue substitution was made.
-
-Authentication receipt SHA-256: `b6fd5156a91dfb54c13d1255e059ab82f3e245f5c84751580605150429a6932b`.
-
-## Current primary scientific blocker — exact frozen live interface
-
-Even if CDAW were available, the frozen V3 skill forecast remains scientifically inadmissible prospectively because the exact 259-position feature interface cannot currently be reproduced from `hmi.sharp_cea_720s_nrt`.
-
-The frozen vector contains:
-
-- 251 solar/context positions;
-- 4 XRS positions;
-- 4 proton positions.
-
-CEA-NRT does not expose three required frozen SHARP keywords:
+The exact 259-position V3 interface still cannot be reproduced from `hmi.sharp_cea_720s_nrt` because three required frozen SHARP quantities are unavailable:
 
 - `CMASKL`;
 - `MEANGBL`;
 - `USFLUXL`.
 
-Those missing quantities affect 18 frozen feature-vector positions.
+They affect **18 frozen feature-vector positions**.
 
-Frozen disposition:
+Frozen disposition remains:
 
 `FROZEN_MODEL_RETROSPECTIVE_ONLY_FOR_SKILL_UNTIL_SOURCE_EQUIVALENCE_IS_ESTABLISHED`
 
-Forbidden workarounds include zero-fill, similarly named substitution, retrospective backcast, silent definitive-to-NRT replacement, or calling a reduced interface the same frozen model.
+Zero-fill, similarly named replacements, retrospective backcasts, silent definitive-to-NRT substitution, or calling a reduced feature interface the same V3 model remain forbidden.
 
-The prospective preflight therefore emitted **no forecast probability**.
+The prospective preflight therefore emitted **no forecast probability**. That is correct fail-closed behavior, not a skill result.
 
-That no-forecast outcome is the correct fail-closed behavior; it is not a skill result.
+## Development performance remains development-only
 
-See `architecture/prospective_causal_interface_disposition_2026-09-08.json`.
+Previously inspected evidence includes:
 
-## Prospective evaluation framework — implemented, awaiting an admissible live case
+- older diagnostic-policy score TSS about `0.5120`;
+- 2023–2025 development-monitor TSS about `0.2359`;
+- development-monitor POD about `83.3%`;
+- development-monitor FAR about `95.5%`;
+- late-fusion monitor TSS about `0.1894`, with paired advantage inconclusive;
+- `NO_XRS` V3 point estimate about `0.368087 -> 0.430492`, with uncertainty crossing zero and slightly worse Brier;
+- `NO_PROTON` V3 about `0.507371 -> 0.512999`, retaining `16/21` detections and reducing false positives `814 -> 796`.
 
-### Forecast seal and external witness
+The high false-alarm burden must remain visible.
 
-Implemented:
+The rejected decision filter and monotone veto remain rejected. The monotone veto reduced false positives by about 25–29% but lost detections. Plain V3 remains frozen; no more post-hoc alert-filter tuning is allowed on exposed score evidence.
 
-- `IRIS_SEP_SEALED_FORECAST_V2`;
-- semantic probability/horizon validation;
-- maximum seal delay of 300 seconds;
-- GitHub-server witness for pre-outcome digest existence.
+## Freshness crossover V1 — CLOSED NEGATIVE RESULT
 
-A witness proves only that the digest existed before the outcome, not that the source data or forecast was scientifically valid.
+Execution identity:
 
-### Fair comparator
+- study: `IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1`;
+- executed commit: `ed3aba1def18bb022382efa4afaaf251c76e6cff`;
+- run: `34341335588`;
+- artifact: `10100069342`;
+- artifact SHA-256: `ba907ffae86301c22b1afb3a41a0bf98c825b562b90b5319ce347a4af1db7868`.
 
-Implemented:
+The study used a documented two-satellite retrospective definition: GOES-13 NASA/SPDF OMNI five-minute `Av >10 MeV` proton measurements and GOES-15 NOAA/NCEI operational XRS. Historical SWPC-primary-stream equivalence was not established.
 
-- `IRIS_SEP_SEALED_COMPARISON_V1`;
-- no caller-supplied duplicate IRIS probability;
-- one forecast / one comparison / one label linkage;
-- no post-outcome comparator selection;
-- frozen fit-role-prevalence climatology comparator.
+Role support was sparse:
 
-No live comparison result exists because no admissible prospective V3 skill forecast has been emitted.
+| Role | Issues | Positives |
+|---|---:|---:|
+| Fit 2011–2014 | 968 | 30 |
+| Calibration 2015 | 225 | 2 |
+| Threshold selection 2016 | 250 | 1 |
+| Retrospective score 2017 | 211 | 3 |
 
-### Correct 24-hour outcome evaluator
+2017 clean controls were:
 
-Implemented:
+| Model | TP | FP | FN | TN | TSS | FAR |
+|---|---:|---:|---:|---:|---:|---:|
+| Joint | 3 | 152 | 0 | 56 | 0.269231 | 98.06% |
+| XRS-only | 2 | 73 | 1 | 135 | 0.315705 | 97.33% |
+| Proton-only | 3 | 102 | 0 | 106 | 0.509615 | 97.14% |
 
-- `IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V2`;
-- exact issue+24h endpoint requirement;
-- maximum 300-second observation gap;
-- finite, non-negative flux requirement;
-- duplicate timestamps rejected;
-- immature/gappy windows -> `UNRESOLVED`;
-- already-active issue time -> `INELIGIBLE` for a new-crossing label.
+The proposed freshness-induced model-order crossover was **not demonstrated**. Proton-only already exceeded the joint model at zero XRS delay; XRS-only also had a higher point-estimate TSS than joint at zero proton delay. No evaluated delay produced the required sign reversal.
 
-No live V3 outcome has been labelled because there is no scientifically admissible prospective V3 forecast to label.
+No switching policy passed the practical gate. Fixed TTL selection collapsed to zero minutes and produced no false-alert improvement over the reduced reference. The XRS state-dependent policy increased pooled replay false-alert executions from 816 to 988 (`+21.08%`).
 
-## Eight-item delivery state
+The result is closed under `architecture/FRESHNESS_CROSSOVER_V1_CLOSURE_2026-09-09.md`.
 
-The current machine contract is `config/eight_issue_status_2026-09-08.json`.
+### Freshness evidence limitations
 
-| # | Item | Status |
-|---|---|---|
-| 1 | immutable V3 package | `PASS` |
-| 2 | fresh trusted source acquisition | `CLOSED_WITH_EXTERNAL_BLOCKER` — CDAW unavailable after bounded retries |
-| 3 | exact causal 259-feature interface | `CLOSED_WITH_SCIENTIFIC_BLOCKER` — 3 missing CEA-NRT fields / 18 affected positions |
-| 4 | load-only inference and provenance | `PASS` |
-| 5 | forecast seal and external witness | engineering complete; no admissible live forecast to witness |
-| 6 | fair comparator | engineering complete; no admissible live case |
-| 7 | correct 24h outcome evaluator | engineering complete; no admissible live forecast to label |
-| 8 | evidence and paper-generation support | `PASS_INTERNAL_EVIDENCE_PACKAGE` |
+The closure record preserves all major limitations:
 
-No item is being hidden behind an `IN_PROGRESS` label.
+- only three 2017 positive opportunities;
+- proton-only 3/3 detection accompanied by 102 false alerts;
+- per-issue predictions and fitted models were not packaged, so ranking metrics and paired uncertainty cannot be independently regenerated from aggregate counts alone;
+- the executed bootstrap paired methods within each delay but redrew underlying units across delays, so it does not provide simultaneous curve inference;
+- simulated proton-delay eligibility still used contemporaneous proton information, making the experiment a conditional retrospective population rather than an implementable availability-aware replay;
+- increasing delay changed both information age and retained window coverage;
+- repeated delay variants do not create new independent solar events.
 
-## Evidence-writing package
+The strongest permitted claim is that this frozen experiment **failed to demonstrate** the proposed freshness crossover or a beneficial switching intervention. It does not establish that XRS is harmful, that fewer sensors are generally better, or that freshness never matters.
 
-Created and bound into item 8:
+## Novelty boundary
 
-- `architecture/IRIS_EVIDENCE_DOSSIER_2026-09-08.md` — receipt-backed internal scientific evidence source;
-- `architecture/STUDENT_PAPER_WRITING_TEMPLATE_2026-09-08.md` — structured template for the student authors to write the final fair material themselves.
+Broad novelty claims are closed. Daily GOES proton/X-ray features, XGBoost/SVM SEP forecasting, proton-dominant predictors, calibrated multimodal forecasting, onset forecasting, and 24-hour multi-source SEP prediction all have close precedent.
 
-The evidence dossier includes positive, negative, inconclusive, and blocked results. The template intentionally does not provide submission-ready prose.
+The distinctive contribution of freshness V1 is the controlled-delay protocol plus its negative result—not a field-leading architecture or successful warning policy.
+
+## Exposure state and future data protection
+
+`config/inspected_evidence_registry_v2.json` is now the active exposure guard.
+
+Important consequences:
+
+- all eligible historical development rows before the fixed monitor were already used for development;
+- the 2023-07-31 through 2025-09-10 monitor is already inspected development evidence;
+- freshness V1 exposed its 2011–2017 roles and outcomes;
+- no convenient 2018–2022 slice may be relabelled as untouched merely because a new question is proposed;
+- observations after 2025-09-10 are reserved as a **protected candidate**, with identities, labels, event counts, and scores not authorized for development-side inspection.
+
+A genuinely untouched claim requires an independent custodian to define/hash the cohort and attest non-exposure against the complete registry before outcomes are released.
+
+## Onset-versus-continuation candidate — NOT AUTHORIZED TO RUN YET
+
+A separate question has been considered: whether headline SEP forecasting skill can be decomposed into warning of a **new onset** versus recognition of **continuation/persistence** of an event already in progress.
+
+This distinction is operationally meaningful but not itself novel; NOAA/SWPC already distinguishes expected proton-event onset from expected persistence.
+
+Feasibility is recorded in `architecture/ONSET_CONTINUATION_FEASIBILITY_2026-09-09.md`.
+
+The current decision is:
+
+`DO_NOT_RUN_AS_AN_INDEPENDENT_CLAIM_STUDY_YET`
+
+Reasons:
+
+1. historical periods are development-exposed;
+2. the only plausible post-monitor period must remain protected until a contract and custodian-controlled cohort exist;
+3. exposed-data planning indicates sparse positive support relative to the precision needed for a strong detection-harm claim;
+4. the novelty claim must be narrower than the onset/persistence distinction itself;
+5. a new experiment must persist issue-level predictions/models, an exclusion ledger, and shared resampling objects from the start.
+
+Do not inspect post-2025 outcomes merely to learn whether the proposed study has enough positives.
+
+## Immediate research priority
+
+The immediate priority is **evidence completion and eligibility**, not another model-development cycle:
+
+1. preserve the immutable negative freshness result and its audit;
+2. recover any genuinely original per-issue prediction/model evidence only if it already exists; otherwise label any reconstruction explicitly and never tune on 2017;
+3. maintain the complete exposure ledger;
+4. obtain a written IRIS ruling on eligibility of newly executed computational research using older archival observations;
+5. complete authentic sponsor/student/parent and AI-assistance documentation as required;
+6. have the student authors independently understand, interpret, and write the competition material under the applicable AI rules;
+7. reserve future/prospective data rather than consuming it in another underpowered exploratory score run.
+
+If no admissible independent cohort can meet a preregistered precision requirement in time, stop rather than manufacture a positive discovery claim.
 
 ## What is established
 
-- deterministic V3 packaging and load-only replay;
-- exact ordered-schema binding;
-- explicit full/degraded/abstain runtime semantics;
-- missing-feed fallbacks that do not fabricate a runtime feed;
-- solar-only `ABSTAIN` cannot emit an alert;
-- development missingness/outage evidence showing that probability similarity does not guarantee decision safety;
-- trusted prospective acquisition receipt machinery;
-- six-of-seven final source-family authentication in the hardened preflight;
-- exact prospective feature-interface blocker identified;
-- fail-closed refusal to emit a scientifically inadmissible prospective skill forecast;
-- prospective forecast sealing, witnessing, comparator, and 24h outcome machinery.
+- deterministic V3 package/replay integrity;
+- explicit `FULL`/`DEGRADED`/`ABSTAIN` semantics;
+- fail-closed refusal to expose a skill forecast when the exact V3 live interface is invalid;
+- negative missingness/outage and alert-filter evidence retained rather than hidden;
+- a completed controlled-delay freshness experiment with verified aggregate arithmetic;
+- failure of the freshness-crossover and switching-policy hypotheses on that experiment;
+- a stronger exposure guard protecting candidate future evidence.
 
 ## What is not established
 
-- independent prospective V3 forecast skill;
-- superiority over a same-date operational forecast;
-- a causally equivalent live source for the 18 unavailable frozen feature positions;
-- full authentication of all seven registered source families in the final preflight;
+- independent prospective forecasting skill;
 - low false-alarm operation;
-- operational certification;
-- economic impact;
-- full-physics simulation;
-- award outcome.
-
-## Next scientific move
-
-Do **not** tune V3 further on the inspected retrospective score/monitor evidence.
-
-The next legitimate skill experiment should use a new feature interface designed from quantities demonstrably available at forecast time, freeze that interface before evaluating outcomes, and reserve a genuinely untouched cohort for final assessment. It should be treated as a new prospective-compatible experiment rather than a silent modification of the frozen 259-feature model.
-
-Until then, V3 remains a retrospective reliability candidate with a validated fail-closed prospective boundary.
+- operational or company superiority;
+- causal benefit of stale-to-fresh switching;
+- a novel onset-versus-continuation discovery;
+- sufficient independent support for a new prospective claim;
+- full-physics simulation, economic impact, certification, or award outcome.
 
 ## Claim boundary
 
-Passing software tests establishes software consistency, not forecast usefulness. Development performance establishes development evidence only. The current prospective preflight establishes source/interface behavior and a correct refusal to forecast, not independent skill. No superiority, operational-readiness, economic-impact, full-physics-simulation, breakthrough, or competition-outcome claim is permitted without corresponding independent evidence.
+Passing software tests establishes software consistency, not forecasting usefulness. Development results remain development evidence. Negative results remain part of the record. Protected future data must remain protected. No superiority, breakthrough, operational-readiness, economic-impact, full-physics-simulation, or competition-outcome claim is permitted without corresponding independent evidence.
