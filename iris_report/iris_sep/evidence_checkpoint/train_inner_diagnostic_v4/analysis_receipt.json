@@ -1,0 +1,221 @@
+{
+  "status": "TRAIN_ONLY_LEGACY_TARGET_DIAGNOSTIC",
+  "locked_test_accessed": false,
+  "outer_monitor_scored": false,
+  "new_crossing_evidence": false,
+  "source_receipt_sha256": "b3a05f54dc544bd535f114d7abd1e3242ae702de0d1e7fe183404c8eb4a2147d",
+  "prediction_sha256": "5192fd6b632b73a99da5ab304d0fc4985151864d82807131bd471034e591979d",
+  "fold_metrics": [
+    {
+      "fold": 0,
+      "arm": "climatology",
+      "rows": 493,
+      "positives": 63,
+      "TSS": 0.0,
+      "FAR": 0.8722109533468559,
+      "BRIER": 0.12064154728827384
+    },
+    {
+      "fold": 0,
+      "arm": "compact",
+      "rows": 493,
+      "positives": 63,
+      "TSS": -0.06651901070505717,
+      "FAR": 0.8801742919389978,
+      "BRIER": 0.11754515477093713
+    },
+    {
+      "fold": 0,
+      "arm": "compact_signed_log",
+      "rows": 493,
+      "positives": 63,
+      "TSS": -0.14706533776301223,
+      "FAR": 0.8993288590604027,
+      "BRIER": 0.11884606940323418
+    },
+    {
+      "fold": 0,
+      "arm": "elastic_net",
+      "rows": 493,
+      "positives": 63,
+      "TSS": -0.08006644518272432,
+      "FAR": 0.8818380743982495,
+      "BRIER": 0.1433274297507686
+    },
+    {
+      "fold": 0,
+      "arm": "xgboost",
+      "rows": 493,
+      "positives": 63,
+      "TSS": 0.012550756736803281,
+      "FAR": 0.8705882352941177,
+      "BRIER": 0.11964160947199642
+    },
+    {
+      "fold": 1,
+      "arm": "climatology",
+      "rows": 661,
+      "positives": 96,
+      "TSS": 0.0,
+      "FAR": 0.8547655068078669,
+      "BRIER": 0.12449773614888733
+    },
+    {
+      "fold": 1,
+      "arm": "compact",
+      "rows": 661,
+      "positives": 96,
+      "TSS": 0.4110988200589971,
+      "FAR": 0.5535714285714286,
+      "BRIER": 0.10589666914211233
+    },
+    {
+      "fold": 1,
+      "arm": "compact_signed_log",
+      "rows": 661,
+      "positives": 96,
+      "TSS": 0.3989122418879056,
+      "FAR": 0.5625,
+      "BRIER": 0.10512839668091328
+    },
+    {
+      "fold": 1,
+      "arm": "elastic_net",
+      "rows": 661,
+      "positives": 96,
+      "TSS": 0.41170722713864305,
+      "FAR": 0.4835164835164835,
+      "BRIER": 0.10553583767777493
+    },
+    {
+      "fold": 1,
+      "arm": "xgboost",
+      "rows": 661,
+      "positives": 96,
+      "TSS": 0.4324852507374631,
+      "FAR": 0.6258064516129033,
+      "BRIER": 0.10543173687976774
+    },
+    {
+      "fold": 2,
+      "arm": "climatology",
+      "rows": 424,
+      "positives": 16,
+      "TSS": 0.0,
+      "FAR": 0.9622641509433962,
+      "BRIER": 0.10707765301823277
+    },
+    {
+      "fold": 2,
+      "arm": "compact",
+      "rows": 424,
+      "positives": 16,
+      "TSS": 0.2977941176470588,
+      "FAR": 0.5454545454545454,
+      "BRIER": 0.03254075966374712
+    },
+    {
+      "fold": 2,
+      "arm": "compact_signed_log",
+      "rows": 424,
+      "positives": 16,
+      "TSS": 0.24019607843137256,
+      "FAR": 0.5,
+      "BRIER": 0.032641053478385654
+    },
+    {
+      "fold": 2,
+      "arm": "elastic_net",
+      "rows": 424,
+      "positives": 16,
+      "TSS": 0.2806372549019608,
+      "FAR": 0.7222222222222222,
+      "BRIER": 0.03343258525702746
+    },
+    {
+      "fold": 2,
+      "arm": "xgboost",
+      "rows": 424,
+      "positives": 16,
+      "TSS": 0.29534313725490197,
+      "FAR": 0.5833333333333334,
+      "BRIER": 0.08489030915847266
+    },
+    {
+      "fold": 3,
+      "arm": "climatology",
+      "rows": 863,
+      "positives": 173,
+      "TSS": 0.0,
+      "FAR": 0.7995365005793743,
+      "BRIER": 0.16278125595572124
+    },
+    {
+      "fold": 3,
+      "arm": "compact_signed_log",
+      "rows": 863,
+      "positives": 173,
+      "TSS": 0.036231884057971064,
+      "FAR": 0.7935560859188544,
+      "BRIER": 0.16595954080070485
+    },
+    {
+      "fold": 3,
+      "arm": "elastic_net",
+      "rows": 863,
+      "positives": 173,
+      "TSS": 0.07392979810672695,
+      "FAR": 0.7868649318463445,
+      "BRIER": 0.2072897728163757
+    },
+    {
+      "fold": 3,
+      "arm": "xgboost",
+      "rows": 863,
+      "positives": 173,
+      "TSS": 0.020289855072463725,
+      "FAR": 0.7962308598351001,
+      "BRIER": 0.15593731085744017
+    }
+  ],
+  "comparisons": [
+    {
+      "candidate": "elastic_net",
+      "baseline": "xgboost",
+      "paired_rows": 2441,
+      "paired_units": 427,
+      "TSS_difference": -0.011078252082749818,
+      "paired_unit_bootstrap_replicates": 10000,
+      "difference_95_CI": [
+        -0.045113677941829175,
+        0.022548513708188382
+      ],
+      "selection_gate_passed": false
+    },
+    {
+      "candidate": "compact_signed_log",
+      "baseline": "xgboost",
+      "paired_rows": 2441,
+      "paired_units": 427,
+      "TSS_difference": -0.028907249671867252,
+      "paired_unit_bootstrap_replicates": 10000,
+      "difference_95_CI": [
+        -0.09279383428205111,
+        0.028508980560979655
+      ],
+      "selection_gate_passed": false
+    }
+  ],
+  "retained_failures": [
+    {
+      "fold": 3,
+      "arm": "compact",
+      "status": "FAILED_NONFINITE_LOGITS",
+      "seed": 7,
+      "finite_logits": 1062,
+      "total_logits": 2120,
+      "artifact_sha256": "68daf463bb3092b22fab09fe65480e5b46a136cf0fe71e9413ebeeb01eeed7d7"
+    }
+  ],
+  "conclusion": "No tested candidate shows a positive paired advantage over XGBoost."
+}

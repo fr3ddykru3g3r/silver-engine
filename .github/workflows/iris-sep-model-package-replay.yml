@@ -1,0 +1,180 @@
+name: IRIS-SEP reloadable model package replay
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/src/iris_sep/model_package.py'
+      - 'iris_report/iris_sep/tools/export_availability_model_package.py'
+      - 'iris_report/iris_sep/tools/predict_availability_model_package.py'
+      - 'iris_report/iris_sep/tests/test_model_package.py'
+      - '.github/workflows/iris-sep-model-package-replay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  package-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install frozen dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.18.1 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Compile and test package source
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/model_package.py \
+            iris_report/iris_sep/tools/export_availability_model_package.py \
+            iris_report/iris_sep/tools/predict_availability_model_package.py \
+            iris_report/iris_sep/tests/test_model_package.py
+          python -m unittest iris_report.iris_sep.tests.test_model_package -v
+
+      - name: Acquire exact hash-pinned public inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Export frozen 15-specialist package
+        run: |
+          python -m iris_report.iris_sep.tools.export_availability_model_package \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-sep-package
+          test "$(find /tmp/iris-sep-package/models -type f -name '*.json' | wc -l)" -eq 15
+
+      - name: Run load-only inference in a separate process
+        run: |
+          python -m iris_report.iris_sep.tools.predict_availability_model_package \
+            --package /tmp/iris-sep-package \
+            --input /tmp/iris-sep-package/replay_input.csv \
+            --output /tmp/reloaded_predictions.csv
+
+      - name: Verify reload reproduces exporter probabilities
+        run: |
+          python - <<'PY'
+          import json
+          import numpy as np
+          import pandas as pd
+          from pathlib import Path
+          ref = pd.read_csv('/tmp/iris-sep-package/export_reference_predictions.csv')
+          got = pd.read_csv('/tmp/reloaded_predictions.csv')
+          if len(ref) != len(got):
+              raise SystemExit('row count mismatch')
+          rt = pd.to_datetime(ref['issue_time'], utc=True)
+          gt = pd.to_datetime(got['issue_time'], utc=True)
+          if not np.array_equal(rt.astype('int64'), gt.astype('int64')):
+              raise SystemExit('issue-time mismatch')
+          maxima = {}
+          for state in ('FULL','NO_XRS','NO_PROTON','NO_XRS_OR_PROTON'):
+              a = ref[f'p_{state}'].to_numpy(float)
+              b = got[f'p_{state}'].to_numpy(float)
+              d = float(np.max(np.abs(a-b)))
+              maxima[state] = d
+              if d > 1e-12:
+                  raise SystemExit(f'reload mismatch {state}: {d}')
+          Path('/tmp/iris-sep-package/reload_verification.json').write_text(json.dumps({
+              'status':'PASSED',
+              'maximum_absolute_probability_difference':maxima,
+              'tolerance':1e-12,
+              'training_or_calibration_in_load_only_process':False,
+              'specialist_model_count':15,
+              'git_head':'${{ github.sha }}'
+          }, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Download prior independently audited availability predictions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/prior-availability
+          gh run download 34083153471 \
+            --repo '${{ github.repository }}' \
+            --name 'iris-sep-availability-fallback-a43e059d04cdc112e773807219a3cc32b7142979' \
+            --dir /tmp/prior-availability
+          test -f /tmp/prior-availability/predictions.csv
+
+      - name: Verify package reproduces audited development architecture
+        run: |
+          python - <<'PY'
+          import json
+          import numpy as np
+          import pandas as pd
+          from pathlib import Path
+          old = pd.read_csv('/tmp/prior-availability/predictions.csv')
+          new = pd.read_csv('/tmp/reloaded_predictions.csv')
+          ot = pd.to_datetime(old['issue_time'], utc=True)
+          nt = pd.to_datetime(new['issue_time'], utc=True)
+          old = old.assign(_t=ot).set_index('_t')
+          new = new.assign(_t=nt).set_index('_t')
+          common = old.index.intersection(new.index)
+          if len(common) != len(old) or len(common) != len(new):
+              raise SystemExit(f'identity mismatch: old={len(old)} new={len(new)} common={len(common)}')
+          maxima = {}
+          decision_mismatches = {}
+          for state in ('FULL','NO_XRS','NO_PROTON','NO_XRS_OR_PROTON'):
+              a = old.loc[common, f'p_{state}'].to_numpy(float)
+              b = new.loc[common, f'p_{state}'].to_numpy(float)
+              maxima[state] = float(np.max(np.abs(a-b)))
+              if maxima[state] > 1e-6:
+                  raise SystemExit(f'prior architecture mismatch {state}: {maxima[state]}')
+          manifest = json.load(open('/tmp/iris-sep-package/manifest.json'))
+          for state in ('FULL','NO_XRS','NO_PROTON','NO_XRS_OR_PROTON'):
+              for policy in ('MAX_TSS','POD80_MIN_FAR'):
+                  threshold = float(manifest['states'][state]['thresholds'][policy])
+                  a = old.loc[common, f'p_{state}'].to_numpy(float) >= threshold
+                  b = new.loc[common, f'p_{state}'].to_numpy(float) >= threshold
+                  decision_mismatches[f'{state}_{policy}'] = int(np.sum(a != b))
+          if any(decision_mismatches.values()):
+              raise SystemExit(f'decision mismatch: {decision_mismatches}')
+          Path('/tmp/iris-sep-package/historical_reproduction.json').write_text(json.dumps({
+              'status':'PASSED',
+              'prior_run_id':34083153471,
+              'prior_artifact_sha256':'583cd505ae9e676dadb43b852a18a9fe26547f0cf57efc036ca208722d0297e6',
+              'maximum_absolute_probability_difference':maxima,
+              'probability_tolerance':1e-6,
+              'decision_mismatches':decision_mismatches,
+              'locked_test_accessed':False
+          }, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Create package archive and digest
+        run: |
+          tar -C /tmp -czf /tmp/iris-sep-availability-package-${{ github.sha }}.tar.gz iris-sep-package
+          sha256sum /tmp/iris-sep-availability-package-${{ github.sha }}.tar.gz > /tmp/package.sha256
+          cp /tmp/package.sha256 /tmp/iris-sep-package/package_archive.sha256
+
+      - name: Upload reloadable package and verification receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-reloadable-package-${{ github.sha }}
+          path: |
+            /tmp/iris-sep-package
+            /tmp/reloaded_predictions.csv
+            /tmp/iris-sep-availability-package-${{ github.sha }}.tar.gz
+            /tmp/package.sha256
+          if-no-files-found: error
+          retention-days: 30

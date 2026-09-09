@@ -1,0 +1,26 @@
+{
+  "receipt_type": "IRIS_SEP_AARP_HMI_IDENTITY_BRIDGE",
+  "schema_version": "iris-sep-luna-d-identity-bridge-v1",
+  "workstream": "luna_d",
+  "status": "REJECT",
+  "fusion_allowed": false,
+  "decision_scope": "current_recorded_state",
+  "accepted_mappings": [],
+  "rejections": [
+    {
+      "reason_code": "NO_AUTHORITATIVE_CROSSWALK",
+      "detail": "No authoritative AARP-to-HMI crosswalk is present in the reviewed artifacts; AIA/HMI fusion remains disabled."
+    }
+  ],
+  "reviewed_artifacts": [
+    "../../../../architecture/ADR-002-aarp-aia-feature-expert.md",
+    "../../../../source_snapshot/iris-model/flare_system/aarp.py"
+  ],
+  "scientific_boundaries": {
+    "date_only_join": "REJECTED",
+    "nearest_timestamp_join": "REJECTED",
+    "numeric_aarp_harp_equality": "REJECTED",
+    "locked_test_outcomes_accessed": false,
+    "raw_aia_archive_downloaded": false
+  }
+}

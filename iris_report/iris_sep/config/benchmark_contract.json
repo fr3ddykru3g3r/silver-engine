@@ -1,0 +1,93 @@
+{
+  "contract_id": "iris-sep-sepval-v1",
+  "status": "FROZEN_BEFORE_DATA_ACCESS",
+  "forecast": {
+    "issue_cadence_hours": 1,
+    "horizon_hours": 24,
+    "primary_target": {
+      "name": "new_sep_10mev_10pfu_within_24h",
+      "energy_threshold_mev": 10,
+      "flux_threshold_pfu": 10,
+      "exclude_already_above_threshold": true
+    },
+    "secondary_targets": [
+      "new_sep_100mev_1pfu_within_24h",
+      "log_peak_proton_flux",
+      "time_to_onset"
+    ]
+  },
+  "causality": {
+    "inputs_end_at_issue_time": true,
+    "source_publication_latency_required": true,
+    "new_crossings_only": true,
+    "ambiguous_or_duplicate_issue_ids": "REJECT"
+  },
+  "partitioning": {
+    "method": "chronological_episode_disjoint",
+    "purge_hours": 24,
+    "keep_complete_sep_episodes_together": true,
+    "roles": [
+      "train",
+      "validation_monitor",
+      "validation_calibration",
+      "validation_threshold",
+      "locked_test"
+    ]
+  },
+  "fitting_permissions": {
+    "train": [
+      "imputation",
+      "scaling",
+      "feature_selection",
+      "dimensionality_reduction",
+      "model_parameters"
+    ],
+    "validation_monitor": ["early_stopping"],
+    "validation_calibration": ["probability_calibration"],
+    "validation_threshold": ["operating_threshold"],
+    "locked_test": ["single_final_evaluation"]
+  },
+  "selection": {
+    "primary_metric": "TSS",
+    "seed_count": 5,
+    "test_labels_available_during_tuning": false,
+    "test_predictions_available_during_tuning": false
+  },
+  "required_baselines": [
+    "climatology",
+    "persistence",
+    "elastic_net_logistic_regression",
+    "xgboost",
+    "sepnet_published",
+    "sepnet_o_recalibrated",
+    "hmi_flare_expert_only",
+    "iris_sep_no_aia_pretraining",
+    "iris_sep_no_image_embeddings",
+    "iris_sep_no_auxiliary_tasks",
+    "iris_sep_full"
+  ],
+  "winning_gate": {
+    "comparison": "iris_sep_full_minus_sepnet_o_recalibrated",
+    "higher_median_tss": true,
+    "paired_bootstrap_replicates": 10000,
+    "paired_bootstrap_unit": "complete_sep_episode_or_quiet_block",
+    "paired_tss_difference_ci": 0.95,
+    "paired_tss_difference_ci_lower_must_exceed": 0.0,
+    "lower_false_alarm_ratio_at_matched_detection": true,
+    "no_material_calibration_degradation": true,
+    "no_material_warning_lead_time_degradation": true,
+    "identical_frozen_cohort": true,
+    "all_contract_audits_must_pass": true,
+    "stretch_tss": 0.41
+  },
+  "receipt_requirements": [
+    "contract_sha256",
+    "source_manifest_sha256",
+    "cohort_manifest_sha256",
+    "partition_manifest_sha256",
+    "feature_manifest_sha256",
+    "configuration_sha256",
+    "prediction_file_sha256",
+    "environment_manifest_sha256"
+  ]
+}

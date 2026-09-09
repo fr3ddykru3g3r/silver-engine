@@ -1,0 +1,108 @@
+{
+  "format": "IRIS_SEP_PROSPECTIVE_MISSING_FEED_PROTOCOL_V1",
+  "frozen_on": "2026-09-08",
+  "status": "PREREGISTERED_BEFORE_NEW_OUTCOME_SCORING",
+  "target": "NEW_GT10MEV_GE10PFU_CROSSING_WITHIN_24H",
+  "scientific_question": "When an XRS or proton-context feed is unavailable, does the frozen V3 remaining-sensor fallback preserve useful event discrimination better than simpler no-invention alternatives?",
+  "architecture_freeze": {
+    "full_model": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+    "missing_feed_candidate": "IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3",
+    "v4_or_backbone_search_allowed": false,
+    "runtime_training_allowed": false,
+    "runtime_recalibration_allowed": false,
+    "runtime_rethresholding_allowed": false
+  },
+  "causal_interface_boundary": {
+    "disposition_file": "config/prospective_causal_interface_disposition_2026-09-08.json",
+    "current_frozen_model_prospective_skill_allowed": false,
+    "integration_cases_can_be_counted_as_skill": false
+  },
+  "comparison_cases": [
+    {
+      "id": "V3_REMAINING_SENSOR_FALLBACK",
+      "role": "candidate",
+      "states": ["NO_XRS", "NO_PROTON"],
+      "runtime_reconstruction_allowed": false
+    },
+    {
+      "id": "V1_REMAINING_SENSOR_FALLBACK",
+      "role": "development_baseline",
+      "states": ["NO_XRS", "NO_PROTON"],
+      "runtime_reconstruction_allowed": false
+    },
+    {
+      "id": "NO_FILL_SAME_REMAINING_SENSOR_INFORMATION",
+      "role": "simple_baseline",
+      "definition": "Use only measurements actually available to the state; do not synthesize, backfill, zero-fill or substitute the missing feed."
+    },
+    {
+      "id": "SIMPLE_ABSTENTION_POLICY",
+      "role": "safety_baseline",
+      "definition": "Emit no alert whenever the tested critical feed is unavailable."
+    },
+    {
+      "id": "FULL_DATA_TEACHER",
+      "role": "unavailable_information_reference_only",
+      "eligible_for_missing_feed_superiority_claim": false
+    },
+    {
+      "id": "FIT_ROLE_PREVALENCE_CLIMATOLOGY",
+      "role": "probability_baseline",
+      "frozen_on_evaluation_cohort": false
+    }
+  ],
+  "cohort_rules": {
+    "same_issue_times_required_for_all_compared_methods": true,
+    "duplicate_forecast_issue_times_allowed": false,
+    "duplicate_forecast_digests_allowed": false,
+    "package_change_within_cohort_allowed": false,
+    "post_outcome_comparator_addition_allowed": false,
+    "unresolved_outcomes_counted_but_not_scored": true,
+    "already_active_issues_counted_as_ineligible_not_scored": true,
+    "minimum_positive_rows_is_independence_proof": false,
+    "overlapping_or_duplicate_event_windows_may_be_counted_as_independent_events": false
+  },
+  "outcome_contract": {
+    "label_format": "IRIS_SEP_SEALED_NEW_CROSSING_LABELS_V2",
+    "primary_source": "NOAA/SWPC primary >=10 MeV proton observations",
+    "fresh_issue_support_required": true,
+    "maximum_sample_gap_seconds": 300,
+    "exact_24h_horizon_endpoint_required": true,
+    "finite_nonnegative_samples_required": true,
+    "duplicate_timestamps_allowed": false,
+    "incomplete_positive_window_may_be_called_positive": false,
+    "sampled_crossing_equivalence_to_catalogue_definition_established": false
+  },
+  "primary_reported_metrics": [
+    "coverage / abstention fraction",
+    "permission-filtered TP, FN, FP, TN",
+    "POD",
+    "FAR",
+    "TSS",
+    "Brier score",
+    "paired difference in TSS",
+    "paired difference in Brier score",
+    "95% uncertainty intervals using independent event/quiet units rather than iid rows"
+  ],
+  "decision_interpretation": {
+    "arbitrary_brier_noninferiority_margin_allowed": false,
+    "historical_plus_0_005_brier_retention_gate_interpreted_as_material_noninferiority": false,
+    "future_noninferiority_claim_requires_prejustified_margin_and_interval": true,
+    "without_justified_margin_report_estimates_and_intervals_without_noninferiority_label": true,
+    "full_teacher_is_not_a_fair_missing_feed_operational_baseline": true
+  },
+  "analyst_budget": {
+    "future_top_fraction_selected_after_entire_cohort_is_known_allowed": false,
+    "retrospective_top_5_percent_ranking_is_primary_operational_metric": false,
+    "prospective_workload_rule_must_be_fixed_from_prior_data_before issue": true,
+    "status": "SECONDARY_DIAGNOSTIC_ONLY_UNTIL_A_FIXED_PRIOR_RULE_IS_SEPARATELY_FROZEN"
+  },
+  "independence": {
+    "self_reported_timestamp_is_external_witness": false,
+    "git_author_or_committer_date_is_external_witness": false,
+    "server_side_pre_outcome_publication_record_required_for_forecast_digest": true,
+    "custodian_control_required_for_blind_final_evaluation_claim": true,
+    "no_custodian_reply_means_final_blind_test_is_assumed": false
+  },
+  "paper_rule": "Report negative, inconclusive and blocked results alongside successful checks. Do not infer award outcome, operational certification or industry superiority from internal engineering evidence."
+}

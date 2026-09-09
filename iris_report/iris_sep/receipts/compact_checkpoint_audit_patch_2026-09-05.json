@@ -1,0 +1,26 @@
+{
+  "receipt_type": "IRIS_SEP_SOURCE_ONLY_COMPACT_CHECKPOINT_AUDIT_PATCH",
+  "date": "2026-09-05",
+  "runtime": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "torch": "2.10.0+cpu"
+  },
+  "execution_environment": "isolated source-only tree hydrated from the verified GitHub branch because shell DNS could not resolve github.com",
+  "source_changes": [
+    "compact replay now audits every loaded checkpoint parameter tensor for nonfinite values before interpreting layer outputs",
+    "feature-support reports now include zero-support feature counts",
+    "regressions cover nonfinite checkpoint parameters and nonbinary missing masks"
+  ],
+  "command": "python3 -m py_compile <hydrated tabular_multibranch.py> <hydrated compact_layer_replay.py> <hydrated compact replay tests> && python3 -m unittest iris_report.iris_sep.tests.test_compact_layer_replay -v",
+  "focused_tests_executed": 3,
+  "failures": 0,
+  "errors": 0,
+  "full_artifact_verification": "NOT_RUN_MISSING_LOCAL_ARTIFACTS",
+  "original_fold3_replay": "NOT_RUN_MISSING_LOCAL_ARTIFACTS",
+  "causal_conclusion": null,
+  "locked_test_accessed": false,
+  "mixed_training_test_table_downloaded": false,
+  "external_messages_sent": false,
+  "note": "This focused post-patch verification supplements, and does not replace, the earlier 17-test source-only receipt. It does not diagnose the retained fold-3 failure; the exact preserved checkpoint/data replay is still required."
+}

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Prospective source preflight and fail-closed frozen-interface result</title>
+  <desc id="desc">Six of seven source families authenticated, CDAW failed externally, and three CEA-NRT keywords were unavailable, affecting 18 frozen feature positions and causing the system to emit no skill forecast.</desc>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="60" y="62" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#111827">Prospective preflight: acquire first, authenticate, then decide whether forecasting is allowed</text>
+  <text x="60" y="100" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#4b5563">Final hardened run 34217607075 · no missing-value substitution · no runtime training.</text>
+
+  <text x="60" y="155" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Registered source families</text>
+
+  <g font-family="Arial" font-size="16">
+    <rect x="60" y="180" width="245" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="78" y="215" fill="#065f46" font-weight="700">✓ NOAA proton</text>
+    <rect x="325" y="180" width="245" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="343" y="215" fill="#065f46" font-weight="700">✓ NOAA XRS</text>
+    <rect x="590" y="180" width="245" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="608" y="215" fill="#065f46" font-weight="700">✓ GOES routing</text>
+    <rect x="855" y="180" width="285" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="873" y="215" fill="#065f46" font-weight="700">✓ JSOC SHARP CEA-NRT</text>
+
+    <rect x="60" y="255" width="245" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="78" y="290" fill="#065f46" font-weight="700">✓ HEK flares</text>
+    <rect x="325" y="255" width="245" height="58" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="343" y="290" fill="#065f46" font-weight="700">✓ DONKI CME</text>
+    <rect x="590" y="255" width="550" height="58" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="608" y="290" fill="#991b1b" font-weight="700">✕ CDAW CME — connection reset after five bounded retries</text>
+  </g>
+
+  <rect x="60" y="345" width="1080" height="72" rx="16" fill="#f9fafb" stroke="#6b7280" stroke-width="2"/>
+  <text x="600" y="375" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#111827">Source authentication result</text>
+  <text x="600" y="402" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">6 of 7 authenticated · full registry authentication remains false</text>
+
+  <line x1="600" y1="417" x2="600" y2="455" stroke="#6b7280" stroke-width="4"/>
+  <polygon points="600,468 589,450 611,450" fill="#6b7280"/>
+
+  <rect x="170" y="470" width="860" height="150" rx="18" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
+  <text x="600" y="505" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#9a3412">Exact frozen-interface gate</text>
+  <text x="600" y="538" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">CEA-NRT does not expose three required frozen SHARP quantities:</text>
+  <text x="600" y="570" text-anchor="middle" font-family="Arial" font-size="21" font-weight="700" fill="#9a3412">CMASKL · MEANGBL · USFLUXL</text>
+  <text x="600" y="601" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">These affect 18 positions in the frozen 259-position feature vector.</text>
+
+  <line x1="600" y1="620" x2="600" y2="650" stroke="#dc2626" stroke-width="4"/>
+  <polygon points="600,664 589,646 611,646" fill="#dc2626"/>
+
+  <rect x="330" y="665" width="540" height="60" rx="16" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+  <text x="600" y="703" text-anchor="middle" font-family="Arial" font-size="25" font-weight="700" fill="#991b1b">NO PROSPECTIVE SKILL FORECAST EMITTED</text>
+
+  <text x="60" y="748" font-family="Arial" font-size="15" fill="#6b7280">Source: workflow run 34217607075, artifact 10052465094 · no silent substitution for missing CEA-NRT quantities.</text>
+</svg>

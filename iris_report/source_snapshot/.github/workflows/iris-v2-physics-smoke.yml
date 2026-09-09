@@ -1,0 +1,69 @@
+name: IRIS v2 Physics-Transfer Smoke
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - 'iris-model/physics_v2.py'
+      - 'iris-model/train_generator_v2.py'
+      - '.github/workflows/iris-v2-physics-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        condition: [base, hj, pil, hj_pil]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Compile v2
+        run: python -m compileall -q iris-model/physics_v2.py iris-model/train_generator_v2.py
+      - name: Run two-step real-data v2 smoke
+        run: |
+          python iris-model/train_generator_v2.py \
+            --evidence-dir evidence \
+            --cache-dir cache/${{ matrix.condition }} \
+            --out-dir outputs \
+            --condition ${{ matrix.condition }} \
+            --seed 2026 \
+            --batch-size 8 \
+            --physics-batch-size 8 \
+            --epochs 1 \
+            --max-steps 2 \
+            --diffusion-steps 40 \
+            --base-channels 16 \
+            --per-group 1 \
+            --positive-slots 1 \
+            --download-workers 16 \
+            --physics-warmup-steps 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-smoke-${{ matrix.condition }}
+          path: outputs/${{ matrix.condition }}
+          retention-days: 14

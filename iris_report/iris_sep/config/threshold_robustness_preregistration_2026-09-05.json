@@ -1,0 +1,57 @@
+{
+  "status": "PRE_RESULT_PREREGISTRATION_FOR_THRESHOLD_ROBUSTNESS",
+  "scope": "DEVELOPMENT_ONLY_PREMONITOR_THRESHOLD_STABILITY_NOT_FINAL_EVIDENCE",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "parent_rolling_run": 33982118817,
+  "parent_rolling_head": "d3fce04f1854ddf95a60a2724fe820cf98211242",
+  "results_seen_before_this_preregistration": {
+    "BASE_SOLAR_pooled_TSS": 0.3793427767319243,
+    "LATE_FUSION_SOLAR_XRS_pooled_TSS": 0.4709228596252417,
+    "LATE_FUSION_SOLAR_XRS_minus_BASE_SOLAR_pooled_95_CI": [-0.05772833573648355, 0.23975150035376602],
+    "LATE_FUSION_SOLAR_XRS_fold_differences": [-0.17327613267761854, 0.39500591970724364, 0.14803260541410895, -0.218586033428896],
+    "LATE_FUSION_SOLAR_XRS_PROTON_pooled_AUROC": 0.836,
+    "LATE_FUSION_SOLAR_XRS_PROTON_pooled_AUPRC": 0.080,
+    "interpretation": "Ranking is stronger than frozen thresholded skill, and threshold values vary sharply across chronological folds. Threshold-estimation noise is now the bounded hypothesis."
+  },
+  "data_and_fold_contract": {
+    "same_as": "late_fusion_rolling_preregistration_2026-09-05.json",
+    "monitor_rows_accessed": false,
+    "fold_count": 4,
+    "score_blocks_disjoint": true,
+    "purge_hours": 24
+  },
+  "models": [
+    "BASE_SOLAR",
+    "LATE_FUSION_SOLAR_XRS",
+    "LATE_FUSION_SOLAR_XRS_PROTON"
+  ],
+  "model_contract": {
+    "xgboost_hyperparameters": "unchanged from run_public_new_crossing_benchmark.py",
+    "xgboost_seeds": [7, 13, 26, 42, 73],
+    "seed_aggregation": "median probability",
+    "late_fusion_stacker": "L2 logistic regression C=1.0 on calibration-role component logits only",
+    "model_or_calibration_hyperparameter_sweep": false
+  },
+  "threshold_policies": {
+    "MAX_TSS": "maximum TSS on threshold role; lowest-threshold tie break, existing policy",
+    "POD80_MIN_FAR": "among threshold-role thresholds achieving POD >= 0.80, choose the threshold with minimum FAR; highest threshold tie break",
+    "BOOTSTRAP_MEDIAN_MAX_TSS": "1000 deterministic complete-unit bootstrap resamples of the threshold role; compute MAX_TSS threshold in each valid resample; deploy the median bootstrap threshold"
+  },
+  "bootstrap_threshold_seed": 20260905,
+  "evaluation": {
+    "per_fold_primary": "TSS",
+    "pooled_decision_metrics": true,
+    "matched_detection_primary_POD": 0.8,
+    "paired_score_bootstrap_replicates": 10000,
+    "paired_score_bootstrap_unit": "complete event or quiet unit"
+  },
+  "decision_rule": "A threshold policy may replace MAX_TSS in a future versioned benchmark only if it improves median fold TSS and pooled TSS for the same model without materially worsening pooled FAR or matched-detection FAR. Any benchmark-policy change must be versioned before locked-test access; this diagnostic itself cannot justify a final superiority claim.",
+  "forbidden": [
+    "monitor or locked-test rows",
+    "choosing a fourth threshold policy after seeing results",
+    "dropping unfavorable folds",
+    "changing model hyperparameters within this experiment",
+    "retroactively altering the current frozen benchmark contract without a new version"
+  ]
+}

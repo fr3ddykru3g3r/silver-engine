@@ -1,0 +1,44 @@
+{
+  "status": "BLOCKED_PENDING_TRAINING_ONLY_ARTIFACT",
+  "locked_test_accessed": false,
+  "large_archive_downloaded": false,
+  "current_evidence": {
+    "v2_lfs_table_pointer_sha256_prefix": "4691cedd",
+    "v2_lfs_table_pointer_size_bytes": 34861986,
+    "zenodo_delivery": "single approximately 4.9 GB SEP-PRISM archive",
+    "safe_v1_scope": "development smoke tests on publisher legacy operational label only"
+  },
+  "blocking_provenance_gaps": [
+    "no publisher-generated immutable V2/CLEAR training-only table",
+    "CLEAR v1 versus v2 lineage disagreement",
+    "no row-level raw-source lineage and units dictionary",
+    "no modality publication-time or latency manifest",
+    "no audited already-above-threshold exclusion receipt",
+    "no training-only cohort manifest proving separation from locked identities",
+    "reuse terms for repository data and CLEAR-derived files are unresolved"
+  ],
+  "accepted_resolution": {
+    "artifact": "publisher-generated training-only export or controlled-enclave export",
+    "required_fields": [
+      "immutable release or commit",
+      "sha256 and byte size",
+      "row count and ordered schema with units",
+      "window anchor and exact target semantics",
+      "CLEAR version",
+      "already-enhanced exclusion logic",
+      "raw-source lineage",
+      "publication-latency metadata"
+    ]
+  },
+  "prohibited_workarounds": [
+    "download the full table and inspect or locally filter locked rows",
+    "derive a training split from SEPVAL or CLEAR held-out event identities",
+    "treat the V1 legacy operational label as the final new-crossing target"
+  ],
+  "claims_forbidden": [
+    "FINAL_BENCHMARK_READY",
+    "FINAL_NEW_CROSSING_SCORE",
+    "BREAKTHROUGH",
+    "OPERATIONAL_CERTIFICATION"
+  ]
+}

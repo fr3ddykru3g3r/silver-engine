@@ -1,0 +1,56 @@
+{
+  "status": "PREREGISTERED_BEFORE_RESULT_CAPABLE_IMPLEMENTATION",
+  "scope": "DEVELOPMENT_ONLY_DIRECT_REMAINING_SENSOR_SPECIALIST_V2",
+  "purpose": "Reduce performance loss under one-feed outages without reconstructing or imputing the missing feed. Train a dedicated classifier directly on the raw causal feature families that remain available, preserving cross-family interactions that scalar expert fusion can discard.",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "monitor_used": false,
+  "prior_results_disclosed": [
+    "availability-conditioned fallback v1",
+    "operator review budget diagnostic",
+    "published-architecture comparator"
+  ],
+  "availability_states": {
+    "FULL": ["SOLAR", "XRS", "PROTON"],
+    "NO_XRS": ["SOLAR", "PROTON"],
+    "NO_PROTON": ["SOLAR", "XRS"],
+    "NO_XRS_OR_PROTON": ["SOLAR"]
+  },
+  "architecture": {
+    "FULL": "unchanged promoted positive-evidence stack; not retuned",
+    "NO_XRS": "five-seed direct XGBoost ensemble on SOLAR+PROTON raw causal predictors",
+    "NO_PROTON": "five-seed direct XGBoost ensemble on SOLAR+XRS raw causal predictors",
+    "NO_XRS_OR_PROTON": "five-seed direct XGBoost ensemble on SOLAR raw causal predictors",
+    "seed_aggregation": "median probability",
+    "seeds": [7, 13, 26, 42, 73],
+    "xgboost_recipe": "exact public NEW-crossing benchmark XGBoost hyperparameters",
+    "imputation": false,
+    "reconstruction": false,
+    "runtime_retraining": false
+  },
+  "roles": {
+    "fit": "model fitting only",
+    "calibration": "logit-intercept calibration only",
+    "threshold": "MAX_TSS and POD80_MIN_FAR threshold selection only",
+    "score": "development score only; already inspected",
+    "monitor": "excluded before any fitting, calibration, thresholding, prediction export, or metric calculation"
+  },
+  "primary_comparison": {
+    "NO_XRS": "direct raw-feature specialist v2 versus scalar-fusion fallback v1 on identical score rows",
+    "NO_PROTON": "direct raw-feature specialist v2 versus scalar-fusion fallback v1 on identical score rows",
+    "NO_XRS_OR_PROTON": "direct solar specialist v2 versus solar-family fallback v1 on identical score rows"
+  },
+  "promotion_logic": {
+    "per_state_architecture_or_weight_selection_on_score_forbidden": true,
+    "normal_status_from_development_forbidden": true,
+    "development_score_is_used_only_for_one_predeclared_v2_keep_or_reject_decision": true,
+    "keep_v2_for_final_locked_evaluation_only_if": [
+      "whole-score primary MAX_TSS is not lower than v1 by more than 0.02",
+      "whole-score Brier score is not worse than v1 by more than 0.005",
+      "whole-score ECE is not worse than v1 by more than 0.01",
+      "5-percent operator-review enrichment is not lower than v1 by more than 1.0x",
+      "probabilities are finite and no unavailable family is silently substituted"
+    ]
+  },
+  "claim_boundary": "A favorable development result only freezes v2 as the candidate to be taken to the untouched evaluation. It does not establish NORMAL trust, final superiority, operational certification, or missing-sensor reconstruction accuracy."
+}

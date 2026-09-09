@@ -1,0 +1,144 @@
+{
+  "study_id": "IRIS_FORECAST_INTEGRITY_GATE_V1",
+  "status": "PREREGISTERED_BEFORE_ANY_PROTECTED_COHORT_ACCESS_OR_RESULT",
+  "created_utc_date": "2026-09-09",
+  "primary_target_family": "new_sep_10mev_10pfu_within_24h",
+  "research_question": "Can an issue-time, source-provenance integrity gate identify when a solar-particle forecast should be withheld or degraded more reliably than the model's own confidence under source outages, staleness, non-equivalent schemas, and other evidence failures?",
+  "core_scientific_claim_if_supported": "Forecast confidence and forecast evidential validity are distinct quantities. A model-agnostic gate built only from issue-time source integrity can identify high-confidence forecasts whose evidential support is insufficient, and can improve selective reliability relative to confidence-only abstention under preregistered degradation conditions.",
+  "novelty_boundary": {
+    "not_claimed_novel": [
+      "SEP forecasting with proton or soft-X-ray inputs",
+      "XGBoost for SEP prediction",
+      "multimodal SEP forecasting",
+      "abstention or selective prediction in machine learning",
+      "missing-data handling in time-series forecasting"
+    ],
+    "candidate_contribution": "A source-provenance-driven, model-output-independent forecast-integrity gate for SEP warning that treats causal availability, authentication, schema equivalence, freshness, and declared quality as separate from predictive confidence, and evaluates integrity-confidence discordance under space-weather source failures.",
+    "no_breakthrough_claim_without_literature_and_result_support": true
+  },
+  "protected_data": {
+    "registry": "config/inspected_evidence_registry_v2.json",
+    "post_2025_09_10_candidate_status": "PROTECTED_NOT_INSPECTED",
+    "identities_must_not_be_accessed": true,
+    "labels_must_not_be_accessed": true,
+    "event_counts_must_not_be_accessed": true,
+    "scores_must_not_be_accessed": true,
+    "this_study_may_not_use_protected_data_for_design_power_or_tuning": true
+  },
+  "allowed_development_evidence": [
+    "already-inspected retrospective aggregate development roles",
+    "already-inspected 2023-2025 development monitor",
+    "already-inspected missingness and outage prediction artifacts",
+    "already-inspected freshness-crossover negative result",
+    "prospective source-preflight receipts that emitted no forecast probability",
+    "SHARP NRT equivalence/source-availability receipts"
+  ],
+  "candidate_selector": {
+    "name": "EVIDENCE_INTEGRITY",
+    "label_free": true,
+    "model_output_free": true,
+    "hard_zero_conditions": [
+      "required source unavailable",
+      "required source unauthenticated",
+      "required source schema not equivalent",
+      "required source not issue-time causal",
+      "required source stale at or beyond its frozen maximum age",
+      "required source declared zero quality"
+    ],
+    "continuous_score_when_admissible": "minimum across required sources of min(normalized remaining freshness margin, declared quality fraction)",
+    "source_weight_learning_from_outcomes": false,
+    "rationale": "weakest-link aggregation avoids outcome-fitted source weights and makes a hard provenance failure impossible to hide behind strong values from other sources"
+  },
+  "comparators": [
+    {
+      "name": "FORECAST_CONFIDENCE",
+      "score": "2*abs(p-0.5)",
+      "issue_time_available": true
+    },
+    {
+      "name": "AVAILABILITY_ONLY",
+      "score": "predeclared binary/ordinal availability state without model confidence",
+      "issue_time_available": true
+    },
+    {
+      "name": "SEEDED_RANDOM",
+      "purpose": "coverage-matched negative control"
+    }
+  ],
+  "coverage_grid": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+  "degradation_families": [
+    "daily XRS outage",
+    "daily proton outage",
+    "daily joint XRS+proton outage",
+    "event-bearing terminal outage where existing receipts permit",
+    "schema non-equivalence/live-interface failure",
+    "source staleness or freshness-margin degradation where timestamp receipts permit"
+  ],
+  "frozen_models": {
+    "minimum_distinct_model_outputs_for_primary_generalization_claim": 3,
+    "preferred": [
+      "frozen full-stack or V3-family output",
+      "frozen XGBoost specialist/baseline output",
+      "frozen logistic or other non-tree baseline if prediction-level outputs exist"
+    ],
+    "no_new_hyperparameter_search": true,
+    "no_post_result_model_changes": true
+  },
+  "primary_endpoints": [
+    "TSS among non-abstained rows at each coverage",
+    "FAR among non-abstained alerts at each coverage",
+    "POD among non-abstained eligible positives",
+    "Brier score among non-abstained rows",
+    "unsafe-confidence rate: confidence>=0.8 while evidence_integrity<=0.2",
+    "integrity-confidence discordance distribution"
+  ],
+  "primary_success_gate": {
+    "coverage_floor": 0.8,
+    "comparison": "EVIDENCE_INTEGRITY versus FORECAST_CONFIDENCE",
+    "required_direction": "lower FAR and/or Brier with no more than 0.05 absolute POD loss, evaluated on identical rows and identical frozen predictions",
+    "generalization_requirement": "direction must hold across at least two degradation families and at least two distinct frozen model outputs",
+    "uncertainty_requirement": "paired shared-cluster bootstrap for every selector contrast; no selector-specific, delay-specific, or coverage-specific resampling tables",
+    "strong_claim_requirement": "for any claim of statistically established advantage, the preregistered paired 95% interval for the primary contrast must exclude zero"
+  },
+  "falsification_conditions": [
+    "confidence-only abstention matches or outperforms evidence-integrity selection across preregistered coverage levels",
+    "integrity selection improves FAR only by losing more than 0.05 absolute POD",
+    "results reverse across frozen model families",
+    "source-integrity ranking requires outcome-fitted weights or post-result threshold changes",
+    "prediction-level evidence is insufficient to reproduce every primary endpoint"
+  ],
+  "statistical_contract": {
+    "bootstrap_replicates": 10000,
+    "bootstrap_seed": 20260909,
+    "bootstrap_unit": "complete SEP episode or preregistered quiet block",
+    "single_shared_draw_table_for_all_contrasts": true,
+    "simultaneous_delay_or_coverage_claim_requires_shared_draws": true,
+    "positive_count_and_interval_width_must_be_reported": true,
+    "small_positive_counts_forbid_reliable_population_detection_claims": true
+  },
+  "causality_contract": {
+    "selector_may_not_use_labels": true,
+    "selector_may_not_use_future_measurements": true,
+    "eligibility_may_not_use_a_delayed_or_missing_source_at_issue_time": true,
+    "degradation_cohort_membership_must_be_computable_from_information_available_under_that_degradation": true,
+    "model_confidence_comparator_may_use_only_the_issue-time_model_probability": true
+  },
+  "mandatory_evidence_package": [
+    "per_issue_predictions.csv with issue_time unit_id label frozen probabilities selector scores and scenario identifiers",
+    "per_issue_source_integrity.csv with source-level blockers ages quality and schema/causality flags",
+    "attrition_ledger.json with counts and reasons at every exclusion step",
+    "bootstrap_draws or reproducible bootstrap seed+ordered-unit manifest shared across all contrasts",
+    "model/config/source/cohort hashes",
+    "full environment manifest",
+    "independent recomputation audit",
+    "negative and inconclusive results preserved"
+  ],
+  "claim_boundary": {
+    "development_results_are_final_independent_evidence": false,
+    "operational_certification": false,
+    "economic_savings": false,
+    "industry_superiority": false,
+    "award_outcome": false,
+    "student_authorship_and_understanding_required": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "receipt_type": "IRIS_SEP_HEADER_ONLY_SCHEMA_INSPECTION",
+  "generated_at_utc": "2026-09-04T11:45:00Z",
+  "status": "PASS",
+  "source": {
+    "repository": "https://github.com/yuyian/SEP-Prediction-V2",
+    "commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+    "path": "Data/rolling_combinded_seq_24hours.csv",
+    "expected_full_blob_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "expected_full_blob_bytes": 34861986,
+    "retrieval": "HTTP_RANGE_FIRST_65536_BYTES",
+    "retrieved_chunk_sha256": "4ee8f155131c2a271330d82a2b0c1ceba1952b750c99a6b6ddd63d80bd489b1d"
+  },
+  "inspection_scope": {
+    "header_only": true,
+    "data_rows_opened": false,
+    "identity_values_opened": false,
+    "label_values_opened": false,
+    "locked_sep_test_accessed": false
+  },
+  "schema_counts": {
+    "total_columns": 274,
+    "sharp_columns": 214,
+    "flare_columns": 11,
+    "cme_columns": 26,
+    "proton_flux_columns": 4,
+    "xrs_columns": 4,
+    "future_target_or_auxiliary_columns": 11,
+    "other_columns": 4
+  },
+  "architecture_decision": "TABULAR_MULTIBRANCH_PRIMARY_NOT_TEMPORAL_CONVOLUTION"
+}

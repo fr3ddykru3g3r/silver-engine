@@ -1,0 +1,58 @@
+name: IRIS Model Smoke Train
+
+on:
+  push:
+    branches: [iris-model-v1]
+    paths:
+      - 'iris-model/**'
+      - '.github/workflows/iris-model-smoke.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: iris-model-smoke-v1
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-model-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install model dependencies
+        run: pip install -r iris-model/requirements.txt
+      - name: Download frozen Gate-0 evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32932755426 -n iris-gate0-evidence -D evidence_bundle
+          tar -xzf evidence_bundle/iris-gate0-evidence.tar.gz -C evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+          test -f evidence/data/derived/sharp_metadata.csv.gz
+      - name: Compile model code
+        run: python -m compileall -q iris-model
+      - name: Smoke-train real-only CNN
+        run: |
+          cd iris-model
+          python train_forecaster.py --evidence-dir ../evidence --cache-dir ../cache/shared --out-dir ../model_outputs/forecaster --smoke --epochs 2 --batch-size 16 --workers 0
+      - name: Smoke-train all generator ablations
+        run: |
+          cd iris-model
+          for c in base hj pil hj_pil; do
+            python train_generator.py --evidence-dir ../evidence --cache-dir ../cache/shared --out-dir ../model_outputs/generator --condition "$c" --smoke
+          done
+      - name: Package smoke results
+        run: tar -czf iris-model-smoke-results.tar.gz model_outputs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-model-smoke-results
+          path: iris-model-smoke-results.tar.gz
+          retention-days: 30

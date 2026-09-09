@@ -1,0 +1,50 @@
+{
+  "status": "PREREGISTERED_BEFORE_SWPC_ARCHIVE_PROBABILITIES_READ",
+  "scope": "DEVELOPMENT_ONLY_SAME_DATE_OPERATIONAL_COMPARATOR",
+  "purpose": "Compare frozen IRIS NEW-crossing probabilities with NOAA/SWPC day-1 operational S1 proton-event probabilities on identical eligible daily issue dates.",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "target_semantics": "Eligible only when >=10 pfu is not already active at 00:00 UTC; positive only if a new operational >=10 MeV, >=10 pfu event starts in the next 24 hours.",
+  "swpc_product": {
+    "name": "Joint USAF/NOAA Report of Solar and Geophysical Activity (RSGA/SGARF)",
+    "archive_base": "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/reports_solar_geophysical_activity",
+    "issue_time": "22:00 UTC nominal on prior calendar day",
+    "validity_alignment": "RSGA is valid from 00:00 UTC of the following day; use only the first PROTON probability in Section III for that following day.",
+    "physical_event": "GOES >=10 MeV integral proton flux exceeding 10 pfu (S1 threshold)",
+    "parser_rule": "Case-insensitive line beginning PROTON followed by three slash-separated integer percentages; day-1 is first integer.",
+    "missing_file_policy": "ABSTAIN_NO_SWPC_FORECAST; never impute an operational forecast.",
+    "ambiguous_parse_policy": "ABSTAIN_PARSE_FAILURE; preserve filename and reason."
+  },
+  "iris_predictions": {
+    "source_run_id": 33981729019,
+    "source_artifact": "iris-sep-context-stability-88711650ac88430e540770af294d0b583f554f9e",
+    "scope": "ALL_HISTORY",
+    "candidate": "LATE_FUSION_SOLAR_XRS_PROTON",
+    "baseline": "BASE_SOLAR",
+    "already_inspected_monitor_disclosed": true
+  },
+  "roles": {
+    "threshold": "Use existing IRIS ALL_HISTORY threshold role only for any data-derived decision threshold.",
+    "score": "2014-2023 development score block; already inspected in prior diagnostics.",
+    "monitor": "2023-2025 development monitor; already inspected in prior diagnostics.",
+    "locked_test": "FORBIDDEN"
+  },
+  "swpc_decision_policies": {
+    "FIXED_50_PERCENT": "Historical published contingency convention; threshold=0.50 fixed before archive inspection.",
+    "MAX_TSS": "Choose on common threshold-role dates only; lowest-probability tie break.",
+    "POD80_MIN_FAR": "Choose on common threshold-role dates only; minimum FAR among thresholds achieving POD>=0.80."
+  },
+  "iris_decision_policies": {
+    "MAX_TSS": "Existing IRIS threshold-role selection.",
+    "POD80_MIN_FAR": "Existing IRIS threshold-role minimum-FAR at POD>=0.80 selection."
+  },
+  "probability_evaluation": ["BRIER", "BRIER_SKILL", "ECE", "AUPRC", "AUROC"],
+  "decision_evaluation": ["TSS", "HSS", "POD", "FPR", "FAR"],
+  "paired_bootstrap": {
+    "replicates": 10000,
+    "unit": "complete SEP episode / predeclared quiet block",
+    "common_rows_only": true
+  },
+  "coverage_rule": "Report archive coverage separately for threshold, score, and monitor. Never remove an IRIS miss/false alarm because SWPC is unavailable; paired metrics are explicitly common-row metrics and unpaired IRIS full-coverage metrics remain separately reported.",
+  "claim_rule": "This is a retrospective same-date comparison to an archived operational forecast on development periods already used during IRIS development. It is stronger external evidence but not a fresh final superiority test. No claim that IRIS beats NOAA operational forecasting unless exact alignment, coverage, parser audit, and uncertainty are reported; no operational-readiness claim.",
+  "locked_test_accessed": false
+}

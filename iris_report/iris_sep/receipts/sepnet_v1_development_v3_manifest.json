@@ -1,0 +1,79 @@
+{
+  "allowed_uses": [
+    "baseline_reproduction",
+    "pipeline_smoke_test",
+    "development_only_model_selection"
+  ],
+  "cadence_contract": "POSITIVE_MULTIPLES_OF_24_HOURS_WITH_GAPS_ALLOWED",
+  "excluded_future_columns": [
+    "future_CME_donki_HalfAngle_avg",
+    "future_CME_donki_HalfAngle_max",
+    "future_CME_donki_HalfAngle_min",
+    "future_CME_donki_Latitude_avg",
+    "future_CME_donki_Latitude_max",
+    "future_CME_donki_Latitude_min",
+    "future_CME_donki_Longitude_avg",
+    "future_CME_donki_Longitude_max",
+    "future_CME_donki_Longitude_min",
+    "future_CME_donki_Speed_avg",
+    "future_CME_donki_Speed_max",
+    "future_CME_donki_Speed_min",
+    "future_CME_label",
+    "future_CME_num",
+    "future_Operational_SEP_label",
+    "future_SEP_MaxFlux",
+    "future_SEP_label",
+    "future_flare_duration_minutes_avg",
+    "future_flare_duration_minutes_max",
+    "future_flare_duration_minutes_min",
+    "future_flare_label",
+    "future_flare_num",
+    "future_flare_peak_duration_minutes_avg",
+    "future_flare_peak_duration_minutes_max",
+    "future_flare_peak_duration_minutes_min",
+    "future_flare_strength_log_avg",
+    "future_flare_strength_log_max",
+    "future_flare_strength_log_min"
+  ],
+  "feature_columns": 98,
+  "forbidden_claims": [
+    "final_new_crossing_score",
+    "SEPVAL_score",
+    "operational_certification",
+    "breakthrough"
+  ],
+  "locked_test_rows_present": false,
+  "output_sha256": "ab2bef52a80ebce5c27d2312f031b410843b3fa8e6b351d07a02f3e0ded010ef",
+  "positive_episode_units_before_purge": 194,
+  "purge_boundary": "STRICTLY_GREATER_THAN_INCLUSIVE_24H_TARGET_ENDPOINT",
+  "purge_hours": 24,
+  "purged_units": 2,
+  "quiet_block_days": 7,
+  "role_counts": {
+    "train": {
+      "positive_windows": 1318,
+      "rows": 7812,
+      "units": 1382
+    },
+    "validation_calibration": {
+      "positive_windows": 65,
+      "rows": 1584,
+      "units": 329
+    },
+    "validation_monitor": {
+      "positive_windows": 112,
+      "rows": 1530,
+      "units": 244
+    },
+    "validation_threshold": {
+      "positive_windows": 192,
+      "rows": 776,
+      "units": 111
+    }
+  },
+  "source_sha256": "59e9e659798798047728cf85a59f2e182dbbff87c5becdae068b27a5b9ed2454",
+  "split_policy": "CHRONOLOGICAL_70_10_10_10_POSITIVE_EPISODE_QUOTAS",
+  "status": "DEVELOPMENT_ONLY_NOT_FINAL_BENCHMARK",
+  "target": "future_Operational_SEP_label",
+  "target_semantics": "PUBLISHER_LEGACY_FUTURE_OPERATIONAL_WINDOW_LABEL_NOT_AUDITED_NEW_CROSSING"
+}

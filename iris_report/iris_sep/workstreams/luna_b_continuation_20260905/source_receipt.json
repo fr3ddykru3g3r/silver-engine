@@ -1,0 +1,104 @@
+{
+  "receipt_type": "IRIS_SEP_LUNA_B_CONTINUATION_SOURCE_REVIEW",
+  "schema_version": "1.0",
+  "reviewed_date": "2026-09-05",
+  "reviewed_time_utc": "UNKNOWN",
+  "scope": "published SEP comparator fidelity and bounded training-side research proposal",
+  "locked_test_accessed": false,
+  "locked_test_identities_accessed": false,
+  "locked_test_outcomes_accessed": false,
+  "locked_test_predictions_accessed": false,
+  "monitor_reused_as_fresh_evidence": false,
+  "new_sources": [
+    {
+      "id": "sepnet_prism_2026",
+      "url": "https://arxiv.org/html/2606.14440",
+      "version": "v2",
+      "role": "newest direct 24-hour operational comparator",
+      "observations": [
+        "14,464 non-overlapping samples and 650 operational positives",
+        "24-hour >10 MeV, >10 pfu operational target",
+        "SMHARP, flare, CME, XRSB, and historical proton inputs",
+        "two summarized daily steps with BiLSTM, Transformer, and tabular MLP",
+        "random iid 20 percent test and validation threshold chosen to maximize min(TSS,HSS)",
+        "best table TSS 0.6784 and FAR 0.3027 for S+PF+X+F; S+PF+F FAR 0.2743",
+        "authors identify chronological testing and input availability as open limitations"
+      ]
+    },
+    {
+      "id": "sepnet_jgr_2026",
+      "url": "https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2026JH001247",
+      "role": "published SEPNET/SEPNET-O protocol and historical results",
+      "observations": [
+        "568 general events, 267 operational events, 11,773 predictor windows, and 1,726 operational-positive windows",
+        "SEPVAL panel has 33 SEP and 30 non-event periods from 2011 to 2023",
+        "operational threshold is re-optimized on operational labels in the training/validation pool",
+        "reported operational SEPNET-TS TSS is approximately 0.36 on random split",
+        "near-real-time section documents mismatch between definitive and NRT SHARP products"
+      ]
+    },
+    {
+      "id": "ccmc_sepnet",
+      "url": "https://ccmc.gsfc.nasa.gov/models/SEPNET~1/",
+      "role": "official live input/output contract",
+      "observations": [
+        "preceding 24-hour HMI SHARP NRT and SWPC flare-list inputs",
+        "next 24-hour probability, symmetric uncertainty, all-clear flag",
+        "no peak-flux or time-of-peak output documented"
+      ]
+    },
+    {
+      "id": "mempsep_i",
+      "url": "https://doi.org/10.1029/2023SW003568",
+      "role": "incompatible event-triggered uncertainty comparator",
+      "observations": [
+        "CNN ensemble targets >10 MeV 5 pfu within 6 hours of flare onset",
+        "SHINE validation used 8 events and 14 non-events",
+        "reported Brier score is 0.2"
+      ]
+    },
+    {
+      "id": "sadykov_2021",
+      "url": "https://arxiv.org/abs/2107.03911",
+      "role": "daily all-clear and physical-input hypothesis source",
+      "observations": [
+        "daily prediction uses magnetic, soft X-ray, proton, and radio context",
+        "preceding proton characteristics are reported as the most valuable input group",
+        "small training set is reported as 2,222 negatives and 66 positives"
+      ]
+    },
+    {
+      "id": "ali_2025",
+      "url": "https://doi.org/10.1038/s41598-025-92207-1",
+      "role": "classical multi-source event-focused comparator",
+      "observations": [
+        "1997 to 2022 flare, CME, radio, and SEP sources",
+        "imbalanced RF reports sweep-frequency POD 0.85, FAR 0.30, TSS 0.78",
+        "dataset-specific resampling and event settings prevent direct IRIS comparison"
+      ]
+    },
+    {
+      "id": "clear_science",
+      "url": "https://clear.engin.umich.edu/science/",
+      "role": "official benchmark provenance context",
+      "observations": [
+        "CLEAR spans more than four decades and emphasizes cross-mission calibration and reproducible validation"
+      ]
+    }
+  ],
+  "local_comparator_binding": {
+    "adapter": "iris_report/iris_sep/tools/train_corrected_sepnet_o_v5.py",
+    "adapter_sha256": "0708f48521357a8e9445752fd1c61040829ed190820ef4cab67b9d97be0d423e",
+    "receipt": "iris_report/iris_sep/receipts/corrected_comparator_v5_selection.json",
+    "development_only": true,
+    "published_sepnet_o_equivalence": false,
+    "target_equivalence": false,
+    "known_selection_side_value": "general-episode weighting monitor TSS 0.0739849889179931 versus row-weighted 0.23672677815837195; already inspected and not fresh evidence"
+  },
+  "limitations": [
+    "Published FAR/TSS values use incompatible event processes, base rates, thresholds, and cohorts.",
+    "PRISM reports no IRIS-style calibration receipt and uses random iid evaluation.",
+    "No publication-latency manifest was available from the reviewed papers.",
+    "The matrix is a source review, not a rerun or reproduction receipt."
+  ]
+}

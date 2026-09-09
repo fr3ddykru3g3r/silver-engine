@@ -1,0 +1,1298 @@
+{
+  "scope": "SYNTHETIC_COMPOUND_SOFTWARE_VALIDITY_NOT_SEP_SKILL",
+  "trials": 10000,
+  "seed": 20260905,
+  "unique_fault_combinations": 299,
+  "status_errors": 0,
+  "unsafe_valid_outputs": 0,
+  "recovery_sequences": 12,
+  "recovery_failures": 0,
+  "combination_counts": {
+    "nonfinite_output+schema+source_revision": 13,
+    "nonfinite_output+optional_missing+schema": 8,
+    "none": 2403,
+    "unsupported_era": 192,
+    "source_revision+unsupported_era": 50,
+    "magnitude_shift+optional_missing": 42,
+    "evidence+uncertainty": 37,
+    "schema+uncertainty": 42,
+    "model_binding": 204,
+    "critical_missing": 196,
+    "critical_missing+schema+source_revision": 14,
+    "evidence": 219,
+    "optional_missing": 205,
+    "future_publication+magnitude_shift+source_revision": 8,
+    "magnitude_shift+nonfinite_output": 37,
+    "stale+unsupported_era": 43,
+    "model_binding+schema+uncertainty": 8,
+    "nonfinite_output": 228,
+    "future_publication+optional_missing": 42,
+    "future_publication": 221,
+    "critical_missing+evidence+optional_missing": 10,
+    "evidence+future_publication+unsupported_era": 12,
+    "evidence+model_binding+nonfinite_output": 8,
+    "schema": 213,
+    "future_publication+uncertainty": 35,
+    "source_revision+uncertainty": 33,
+    "future_publication+source_revision": 44,
+    "critical_missing+schema": 57,
+    "model_binding+uncertainty+unsupported_era": 14,
+    "future_publication+stale": 41,
+    "model_binding+optional_missing+schema": 18,
+    "evidence+source_revision+stale": 9,
+    "critical_missing+nonfinite_output+stale": 11,
+    "evidence+magnitude_shift": 39,
+    "source_revision": 206,
+    "future_publication+nonfinite_output+stale": 10,
+    "evidence+optional_missing": 40,
+    "evidence+schema+uncertainty": 11,
+    "future_publication+magnitude_shift": 40,
+    "uncertainty": 193,
+    "magnitude_shift+nonfinite_output+stale": 12,
+    "critical_missing+model_binding+unsupported_era": 13,
+    "stale": 209,
+    "future_publication+model_binding+source_revision": 12,
+    "nonfinite_output+stale+unsupported_era": 15,
+    "magnitude_shift": 207,
+    "magnitude_shift+nonfinite_output+unsupported_era": 11,
+    "model_binding+source_revision": 47,
+    "critical_missing+schema+stale": 11,
+    "nonfinite_output+stale": 35,
+    "critical_missing+source_revision+stale": 11,
+    "evidence+future_publication+model_binding": 13,
+    "critical_missing+model_binding+nonfinite_output": 14,
+    "nonfinite_output+source_revision": 39,
+    "evidence+magnitude_shift+unsupported_era": 13,
+    "critical_missing+source_revision": 31,
+    "model_binding+optional_missing+unsupported_era": 13,
+    "critical_missing+evidence+source_revision": 7,
+    "evidence+model_binding+schema": 14,
+    "evidence+schema+source_revision": 15,
+    "magnitude_shift+stale": 37,
+    "optional_missing+uncertainty+unsupported_era": 14,
+    "model_binding+uncertainty": 38,
+    "model_binding+optional_missing+source_revision": 12,
+    "uncertainty+unsupported_era": 38,
+    "evidence+magnitude_shift+source_revision": 13,
+    "nonfinite_output+optional_missing+source_revision": 12,
+    "evidence+model_binding": 44,
+    "critical_missing+model_binding": 39,
+    "optional_missing+schema+source_revision": 13,
+    "magnitude_shift+model_binding+optional_missing": 14,
+    "evidence+nonfinite_output": 37,
+    "nonfinite_output+uncertainty": 35,
+    "critical_missing+evidence": 45,
+    "model_binding+nonfinite_output+source_revision": 11,
+    "magnitude_shift+optional_missing+schema": 9,
+    "nonfinite_output+optional_missing": 27,
+    "future_publication+model_binding+stale": 9,
+    "critical_missing+unsupported_era": 44,
+    "source_revision+stale": 39,
+    "evidence+optional_missing+source_revision": 11,
+    "critical_missing+model_binding+optional_missing": 14,
+    "schema+stale": 33,
+    "critical_missing+future_publication+optional_missing": 13,
+    "future_publication+source_revision+stale": 11,
+    "evidence+model_binding+unsupported_era": 14,
+    "evidence+schema+stale": 17,
+    "model_binding+nonfinite_output": 36,
+    "critical_missing+nonfinite_output+unsupported_era": 19,
+    "future_publication+optional_missing+unsupported_era": 13,
+    "optional_missing+source_revision": 38,
+    "magnitude_shift+uncertainty": 35,
+    "future_publication+magnitude_shift+uncertainty": 12,
+    "evidence+nonfinite_output+source_revision": 16,
+    "magnitude_shift+schema+stale": 7,
+    "future_publication+model_binding+unsupported_era": 13,
+    "nonfinite_output+optional_missing+stale": 17,
+    "critical_missing+magnitude_shift": 45,
+    "future_publication+magnitude_shift+nonfinite_output": 8,
+    "model_binding+schema": 34,
+    "evidence+future_publication+nonfinite_output": 8,
+    "future_publication+nonfinite_output": 37,
+    "model_binding+stale": 40,
+    "magnitude_shift+schema+unsupported_era": 15,
+    "model_binding+unsupported_era": 45,
+    "critical_missing+uncertainty+unsupported_era": 16,
+    "schema+uncertainty+unsupported_era": 11,
+    "critical_missing+nonfinite_output": 27,
+    "evidence+future_publication": 48,
+    "model_binding+optional_missing": 36,
+    "model_binding+schema+unsupported_era": 8,
+    "evidence+model_binding+source_revision": 13,
+    "evidence+future_publication+uncertainty": 9,
+    "future_publication+magnitude_shift+schema": 9,
+    "optional_missing+stale": 41,
+    "future_publication+schema+stale": 12,
+    "magnitude_shift+unsupported_era": 42,
+    "optional_missing+source_revision+unsupported_era": 16,
+    "future_publication+schema+uncertainty": 13,
+    "evidence+magnitude_shift+uncertainty": 14,
+    "magnitude_shift+model_binding+source_revision": 16,
+    "critical_missing+future_publication+magnitude_shift": 14,
+    "model_binding+nonfinite_output+unsupported_era": 15,
+    "critical_missing+future_publication+stale": 10,
+    "critical_missing+evidence+nonfinite_output": 12,
+    "critical_missing+model_binding+uncertainty": 15,
+    "magnitude_shift+optional_missing+unsupported_era": 16,
+    "critical_missing+future_publication": 29,
+    "schema+source_revision+uncertainty": 11,
+    "optional_missing+schema": 38,
+    "critical_missing+schema+uncertainty": 10,
+    "future_publication+source_revision+uncertainty": 9,
+    "evidence+unsupported_era": 38,
+    "future_publication+magnitude_shift+stale": 12,
+    "magnitude_shift+model_binding": 34,
+    "model_binding+source_revision+stale": 9,
+    "critical_missing+nonfinite_output+optional_missing": 13,
+    "evidence+magnitude_shift+stale": 14,
+    "evidence+nonfinite_output+schema": 13,
+    "nonfinite_output+unsupported_era": 58,
+    "model_binding+source_revision+uncertainty": 21,
+    "critical_missing+nonfinite_output+uncertainty": 18,
+    "optional_missing+unsupported_era": 37,
+    "future_publication+schema": 35,
+    "evidence+stale+unsupported_era": 18,
+    "model_binding+nonfinite_output+optional_missing": 15,
+    "magnitude_shift+source_revision": 44,
+    "critical_missing+optional_missing": 30,
+    "evidence+schema": 42,
+    "schema+unsupported_era": 37,
+    "future_publication+optional_missing+stale": 6,
+    "nonfinite_output+schema": 40,
+    "magnitude_shift+nonfinite_output+source_revision": 12,
+    "model_binding+nonfinite_output+stale": 18,
+    "critical_missing+uncertainty": 40,
+    "critical_missing+evidence+future_publication": 10,
+    "evidence+stale": 30,
+    "optional_missing+schema+uncertainty": 9,
+    "evidence+magnitude_shift+nonfinite_output": 13,
+    "evidence+magnitude_shift+optional_missing": 11,
+    "model_binding+nonfinite_output+uncertainty": 13,
+    "magnitude_shift+schema": 36,
+    "evidence+nonfinite_output+unsupported_era": 14,
+    "magnitude_shift+nonfinite_output+uncertainty": 12,
+    "critical_missing+magnitude_shift+schema": 16,
+    "critical_missing+magnitude_shift+nonfinite_output": 7,
+    "schema+source_revision+unsupported_era": 12,
+    "magnitude_shift+schema+source_revision": 5,
+    "magnitude_shift+nonfinite_output+optional_missing": 16,
+    "future_publication+model_binding": 35,
+    "evidence+stale+uncertainty": 8,
+    "critical_missing+evidence+unsupported_era": 9,
+    "optional_missing+stale+unsupported_era": 16,
+    "magnitude_shift+source_revision+unsupported_era": 20,
+    "future_publication+unsupported_era": 46,
+    "evidence+source_revision": 39,
+    "schema+stale+unsupported_era": 15,
+    "critical_missing+source_revision+uncertainty": 11,
+    "critical_missing+magnitude_shift+unsupported_era": 11,
+    "optional_missing+stale+uncertainty": 11,
+    "magnitude_shift+model_binding+nonfinite_output": 11,
+    "schema+source_revision": 38,
+    "model_binding+optional_missing+stale": 7,
+    "stale+uncertainty": 33,
+    "evidence+model_binding+stale": 16,
+    "magnitude_shift+model_binding+stale": 10,
+    "critical_missing+schema+unsupported_era": 10,
+    "optional_missing+source_revision+uncertainty": 6,
+    "critical_missing+stale": 44,
+    "model_binding+schema+source_revision": 19,
+    "critical_missing+future_publication+uncertainty": 18,
+    "magnitude_shift+optional_missing+stale": 8,
+    "evidence+model_binding+optional_missing": 7,
+    "critical_missing+future_publication+unsupported_era": 11,
+    "schema+stale+uncertainty": 11,
+    "nonfinite_output+schema+uncertainty": 11,
+    "future_publication+magnitude_shift+unsupported_era": 10,
+    "magnitude_shift+stale+uncertainty": 12,
+    "nonfinite_output+optional_missing+uncertainty": 9,
+    "model_binding+source_revision+unsupported_era": 9,
+    "magnitude_shift+stale+unsupported_era": 17,
+    "evidence+future_publication+source_revision": 16,
+    "model_binding+schema+stale": 13,
+    "critical_missing+model_binding+source_revision": 9,
+    "nonfinite_output+schema+stale": 4,
+    "critical_missing+future_publication+model_binding": 10,
+    "critical_missing+optional_missing+unsupported_era": 12,
+    "nonfinite_output+source_revision+unsupported_era": 12,
+    "nonfinite_output+optional_missing+unsupported_era": 8,
+    "source_revision+stale+uncertainty": 11,
+    "evidence+source_revision+uncertainty": 11,
+    "critical_missing+optional_missing+source_revision": 15,
+    "nonfinite_output+schema+unsupported_era": 13,
+    "evidence+magnitude_shift+model_binding": 15,
+    "future_publication+stale+unsupported_era": 9,
+    "future_publication+optional_missing+source_revision": 19,
+    "future_publication+magnitude_shift+optional_missing": 8,
+    "future_publication+nonfinite_output+source_revision": 11,
+    "critical_missing+optional_missing+schema": 10,
+    "critical_missing+model_binding+schema": 13,
+    "future_publication+optional_missing+schema": 14,
+    "future_publication+nonfinite_output+schema": 9,
+    "optional_missing+source_revision+stale": 14,
+    "critical_missing+future_publication+nonfinite_output": 16,
+    "evidence+nonfinite_output+optional_missing": 10,
+    "optional_missing+schema+stale": 15,
+    "critical_missing+nonfinite_output+source_revision": 7,
+    "evidence+future_publication+stale": 12,
+    "critical_missing+optional_missing+stale": 7,
+    "critical_missing+evidence+stale": 15,
+    "evidence+uncertainty+unsupported_era": 8,
+    "critical_missing+model_binding+stale": 15,
+    "future_publication+nonfinite_output+unsupported_era": 13,
+    "nonfinite_output+stale+uncertainty": 14,
+    "evidence+nonfinite_output+stale": 13,
+    "evidence+optional_missing+stale": 12,
+    "magnitude_shift+optional_missing+uncertainty": 15,
+    "future_publication+schema+unsupported_era": 8,
+    "critical_missing+magnitude_shift+source_revision": 17,
+    "nonfinite_output+uncertainty+unsupported_era": 13,
+    "critical_missing+stale+unsupported_era": 11,
+    "future_publication+optional_missing+uncertainty": 9,
+    "critical_missing+magnitude_shift+optional_missing": 7,
+    "model_binding+nonfinite_output+schema": 8,
+    "magnitude_shift+uncertainty+unsupported_era": 9,
+    "future_publication+model_binding+optional_missing": 4,
+    "evidence+future_publication+magnitude_shift": 8,
+    "future_publication+nonfinite_output+uncertainty": 15,
+    "evidence+nonfinite_output+uncertainty": 11,
+    "critical_missing+stale+uncertainty": 10,
+    "magnitude_shift+schema+uncertainty": 12,
+    "future_publication+nonfinite_output+optional_missing": 12,
+    "critical_missing+nonfinite_output+schema": 10,
+    "magnitude_shift+optional_missing+source_revision": 12,
+    "optional_missing+schema+unsupported_era": 7,
+    "nonfinite_output+source_revision+stale": 7,
+    "magnitude_shift+model_binding+unsupported_era": 12,
+    "future_publication+uncertainty+unsupported_era": 14,
+    "critical_missing+magnitude_shift+stale": 11,
+    "magnitude_shift+source_revision+uncertainty": 11,
+    "future_publication+magnitude_shift+model_binding": 11,
+    "future_publication+schema+source_revision": 11,
+    "stale+uncertainty+unsupported_era": 9,
+    "optional_missing+uncertainty": 48,
+    "magnitude_shift+source_revision+stale": 7,
+    "critical_missing+evidence+schema": 9,
+    "critical_missing+future_publication+source_revision": 9,
+    "source_revision+stale+unsupported_era": 8,
+    "model_binding+stale+unsupported_era": 11,
+    "future_publication+model_binding+nonfinite_output": 10,
+    "evidence+future_publication+schema": 5,
+    "evidence+optional_missing+unsupported_era": 11,
+    "future_publication+source_revision+unsupported_era": 14,
+    "critical_missing+magnitude_shift+model_binding": 10,
+    "evidence+optional_missing+uncertainty": 7,
+    "critical_missing+source_revision+unsupported_era": 13,
+    "critical_missing+optional_missing+uncertainty": 11,
+    "evidence+model_binding+uncertainty": 9,
+    "future_publication+stale+uncertainty": 12,
+    "evidence+optional_missing+schema": 13,
+    "future_publication+model_binding+uncertainty": 11,
+    "critical_missing+evidence+magnitude_shift": 16,
+    "magnitude_shift+nonfinite_output+schema": 11,
+    "magnitude_shift+model_binding+uncertainty": 12,
+    "critical_missing+evidence+model_binding": 7,
+    "evidence+future_publication+optional_missing": 9,
+    "evidence+magnitude_shift+schema": 10,
+    "critical_missing+evidence+uncertainty": 11,
+    "model_binding+optional_missing+uncertainty": 7,
+    "model_binding+stale+uncertainty": 10,
+    "evidence+schema+unsupported_era": 7,
+    "source_revision+uncertainty+unsupported_era": 6,
+    "magnitude_shift+model_binding+schema": 7,
+    "evidence+source_revision+unsupported_era": 4,
+    "critical_missing+magnitude_shift+uncertainty": 5,
+    "nonfinite_output+source_revision+uncertainty": 10,
+    "schema+source_revision+stale": 7,
+    "critical_missing+future_publication+schema": 5,
+    "future_publication+model_binding+schema": 6
+  },
+  "examples": [
+    {
+      "faults": [
+        "nonfinite_output",
+        "schema",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "SCHEMA_FAILURE",
+        "SOURCE_REVISION_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "nonfinite_output",
+        "optional_missing",
+        "schema"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "source_revision",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SOURCE_REVISION_FAILURE",
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "magnitude_shift",
+        "optional_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [
+        "evidence",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "schema",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SCHEMA_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "model_binding"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "critical_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "schema",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING",
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "evidence"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "optional_missing"
+      ],
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication",
+        "magnitude_shift",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "OUT_OF_DISTRIBUTION",
+        "SOURCE_REVISION_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "magnitude_shift",
+        "nonfinite_output"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [
+        "stale",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "model_binding",
+        "schema",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH",
+        "SCHEMA_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "nonfinite_output"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication",
+        "optional_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "evidence",
+        "optional_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING",
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "evidence",
+        "future_publication",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "evidence",
+        "model_binding",
+        "nonfinite_output"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "schema"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "UNCERTAINTY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "source_revision",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SOURCE_REVISION_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "SOURCE_REVISION_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "schema"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING",
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "model_binding",
+        "uncertainty",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH",
+        "UNCERTAINTY_FAILURE",
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "model_binding",
+        "optional_missing",
+        "schema"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH",
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "evidence",
+        "source_revision",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "SOURCE_REVISION_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "nonfinite_output",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING",
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [
+        "evidence",
+        "magnitude_shift"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SOURCE_REVISION_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "evidence",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication",
+        "nonfinite_output",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "OUT_OF_DISTRIBUTION",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "evidence",
+        "optional_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "evidence",
+        "schema",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "EVIDENCE_RECEIPT_FAILURE",
+        "SCHEMA_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "optional_missing"
+      ],
+      "expected": "DEGRADED",
+      "observed": "DEGRADED",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication",
+        "magnitude_shift"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "OUT_OF_DISTRIBUTION",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "critical_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "faults": [
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "magnitude_shift",
+        "nonfinite_output",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication",
+        "magnitude_shift"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "OUT_OF_DISTRIBUTION",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "future_publication",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "SOURCE_REVISION_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "model_binding",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING",
+        "MODEL_OR_POLICY_VERSION_MISMATCH",
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "future_publication",
+        "model_binding",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "INPUT_AVAILABILITY_FAILURE",
+        "MODEL_OR_POLICY_VERSION_MISMATCH",
+        "SOURCE_REVISION_FAILURE",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "nonfinite_output",
+        "stale",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "schema",
+        "uncertainty"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "SCHEMA_FAILURE",
+        "UNCERTAINTY_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "critical_missing"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "faults": [
+        "magnitude_shift"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION"
+      ]
+    },
+    {
+      "faults": [
+        "magnitude_shift",
+        "nonfinite_output",
+        "unsupported_era"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "UNSUPPORTED_SOURCE_ERA",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "model_binding",
+        "source_revision"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "MODEL_OR_POLICY_VERSION_MISMATCH",
+        "SOURCE_REVISION_FAILURE"
+      ]
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "schema",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING",
+        "SCHEMA_FAILURE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "nonfinite_output",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "critical_missing",
+        "source_revision",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "CRITICAL_INPUT_MISSING"
+      ]
+    },
+    {
+      "faults": [
+        "nonfinite_output",
+        "stale"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION",
+        "INPUT_TOO_STALE"
+      ]
+    },
+    {
+      "faults": [],
+      "expected": "VALID",
+      "observed": "VALID",
+      "reasons": []
+    },
+    {
+      "faults": [
+        "nonfinite_output"
+      ],
+      "expected": "ABSTAIN",
+      "observed": "ABSTAIN",
+      "reasons": [
+        "OUT_OF_DISTRIBUTION"
+      ]
+    }
+  ],
+  "locked_test_accessed": false,
+  "scientific_superiority_established": false,
+  "claim_boundary": "Synthetic contract and recovery behavior only; no named competitor comparison."
+}

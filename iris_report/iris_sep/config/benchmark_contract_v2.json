@@ -1,0 +1,92 @@
+{
+  "contract_id": "iris-sep-sepval-v2-daily-primary",
+  "status": "FROZEN_AFTER_SCHEMA_METADATA_BEFORE_LOCKED_TEST_ACCESS",
+  "supersedes": "iris-sep-sepval-v1",
+  "amendment_reason": "Publisher benchmark rows are non-overlapping daily 24-hour predictor windows; hourly rows are not present.",
+  "forecast": {
+    "issue_cadence_hours": 24,
+    "missing_day_gaps_allowed": true,
+    "horizon_hours": 24,
+    "primary_target": {
+      "name": "new_sep_10mev_10pfu_within_24h",
+      "energy_threshold_mev": 10,
+      "flux_threshold_pfu": 10,
+      "exclude_already_above_threshold": true
+    },
+    "secondary_targets": "DISABLED_PENDING_INDEPENDENT_DATA_AND_VALIDATION_CONTRACTS"
+  },
+  "causality": {
+    "inputs_end_at_issue_time": true,
+    "source_publication_latency_required": true,
+    "new_crossings_only": true,
+    "ambiguous_or_duplicate_issue_ids": "REJECT"
+  },
+  "partitioning": {
+    "method": "chronological_episode_disjoint",
+    "purge_hours": 24,
+    "purge_boundary": "STRICTLY_GREATER_THAN_INCLUSIVE_TARGET_ENDPOINT",
+    "keep_complete_sep_episodes_together": true,
+    "roles": ["train", "validation_monitor", "validation_calibration", "validation_threshold", "locked_test"]
+  },
+  "fitting_permissions": {
+    "train": ["imputation", "scaling", "feature_selection", "dimensionality_reduction", "model_parameters"],
+    "validation_monitor": ["early_stopping"],
+    "validation_calibration": ["probability_calibration"],
+    "validation_threshold": ["operating_threshold"],
+    "locked_test": ["single_final_evaluation"]
+  },
+  "selection": {
+    "primary_metric": "TSS",
+    "seed_count": 5,
+    "test_labels_available_during_tuning": false,
+    "test_predictions_available_during_tuning": false
+  },
+  "required_same_cohort_models": [
+    "climatology",
+    "persistence_if_causally_available",
+    "elastic_net_logistic_regression",
+    "xgboost",
+    "sepnet_published",
+    "sepnet_o_recalibrated",
+    "iris_sep_primary"
+  ],
+  "excluded_from_first_gate": [
+    "aia_pretraining",
+    "hmi_image_embeddings",
+    "auxiliary_prediction_heads",
+    "peak_flux_head",
+    "time_to_onset_head",
+    "100mev_head"
+  ],
+  "winning_gate": {
+    "comparison": "iris_sep_primary_minus_sepnet_o_recalibrated",
+    "higher_median_tss": true,
+    "paired_bootstrap_replicates": 10000,
+    "paired_bootstrap_unit": "complete_sep_episode_or_predeclared_quiet_block",
+    "paired_tss_difference_ci": 0.95,
+    "paired_tss_difference_ci_lower_must_exceed": 0.0,
+    "lower_false_alarm_ratio_at_matched_detection": true,
+    "no_material_calibration_degradation": true,
+    "no_material_warning_lead_time_degradation": true,
+    "identical_frozen_cohort": true,
+    "all_contract_audits_must_pass": true,
+    "stretch_tss": 0.41
+  },
+  "receipt_requirements": [
+    "contract_sha256",
+    "source_manifest_sha256",
+    "cohort_manifest_sha256",
+    "partition_manifest_sha256",
+    "feature_manifest_sha256",
+    "latency_manifest_sha256",
+    "configuration_sha256",
+    "prediction_file_sha256",
+    "environment_manifest_sha256"
+  ],
+  "claim_boundary": {
+    "retrospective_cadence": "DAILY_AVAILABLE_WINDOWS",
+    "hourly_operational_claim": false,
+    "legacy_v1_target_is_final": false,
+    "negative_or_inconclusive_results_required": true
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "status": "PREREGISTERED_BEFORE_DAILY_MODALITY_OUTAGE_RESULTS",
+  "scope": "DEVELOPMENT_ONLY_ALREADY_INSPECTED_SCORE_DAILY_AGGREGATE_INTERFACE",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "purpose": "Measure how the frozen promoted forecast changes when complete XRS/proton input families are unavailable for consecutive daily forecast cycles, and compare existing simple handling arms without retraining or outcome-driven scenario movement.",
+  "model": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+  "model_frozen_before_outage": true,
+  "score_role_already_inspected": true,
+  "monitor_used": false,
+  "locked_test_accessed": false,
+  "interface_semantics": {
+    "source": "hash-pinned released SEP-Prediction-V2 daily model-ready table",
+    "one_issue_row": "one UTC daily forecast-input cycle summarizing the preceding 24 hours",
+    "outage_interpretation": "aggregate forecast-input family unavailable at consecutive daily issue cycles",
+    "not_claimed": "raw five-minute sensor-stream outage or causal high-cadence reaggregation"
+  },
+  "source_provenance": {
+    "contract": "config/source_provenance_contract_v1.json",
+    "finite_cell_means_native_observation": false,
+    "aggregate_cell_default_provenance": "UNKNOWN_UNLESS_SEPARATELY_DEMONSTRATED",
+    "hidden_finite_value_semantics": "released aggregate-interface reference value only",
+    "native_sensor_reconstruction_truth_claim_allowed": false
+  },
+  "modalities": [
+    "XRS",
+    "PROTON",
+    "XRS_AND_PROTON"
+  ],
+  "durations": [
+    {
+      "hours": 24,
+      "daily_cycles": 1
+    },
+    {
+      "hours": 72,
+      "daily_cycles": 3
+    },
+    {
+      "hours": 168,
+      "daily_cycles": 7
+    }
+  ],
+  "blocks_per_scenario": 5,
+  "block_placement": {
+    "fractions": [0.1, 0.3, 0.5, 0.7, 0.9],
+    "rule": "Choose deterministic positions over admissible contiguous daily source-clock starts bounded by the score-role time span.",
+    "uses_labels_or_outcomes": false,
+    "blocks_within_scenario_must_not_overlap": true,
+    "post_outcome_repick_or_shift": false,
+    "zero_exposure_rule": "Preserve the declared block and report it as unevaluable/zero-exposure; never move it after seeing labels, availability or forecast outcomes."
+  },
+  "cell_eligibility": "Within a declared outage interval, hide only modality cells finite at the released aggregate interface. Pre-existing unavailable cells remain unavailable and are not counted as hidden reference values.",
+  "recovery_arms": [
+    "MASK_AWARE_NO_FILL",
+    "TRAIN_FIT_MEDIAN",
+    "CAUSAL_FORWARD_FILL"
+  ],
+  "recovery_arm_disclosure": "Causal forward-fill previously minimized probability drift in an already-inspected random finite-cell stress test. All three existing arms are retained here; this experiment is not an independent recovery-arm discovery test.",
+  "fit_policy": {
+    "retrain_after_outage": false,
+    "recalibrate_after_outage": false,
+    "rethreshold_after_outage": false,
+    "fit_recovery_statistics_on_score_rows": false,
+    "meta_weights_from_outage_rows": false
+  },
+  "threshold_policies": {
+    "benchmark_primary": "MAX_TSS",
+    "secondary_reliability": "POD80_MIN_FAR",
+    "selection_data": "existing dedicated threshold role only",
+    "policy_reconciliation": "architecture/THRESHOLD_POLICY_RECONCILIATION_2026-09-06.md"
+  },
+  "required_exposure_reporting_per_scenario": [
+    "affected_score_rows",
+    "affected_score_positives",
+    "affected_positive_event_units",
+    "baseline_finite_modality_cells_on_affected_rows",
+    "finite_interface_cells_hidden",
+    "evaluable_blocks"
+  ],
+  "required_performance_reporting": {
+    "whole_score": [
+      "TSS",
+      "HSS",
+      "POD",
+      "FPR",
+      "FAR",
+      "BRIER",
+      "ECE",
+      "AUPRC",
+      "AUROC",
+      "matched_detection"
+    ],
+    "affected_rows": [
+      "TSS_when_both_classes_exist",
+      "HSS",
+      "POD",
+      "FPR",
+      "FAR",
+      "BRIER",
+      "ECE",
+      "AUPRC_when_both_classes_exist",
+      "AUROC_when_both_classes_exist"
+    ],
+    "probability_drift_is_secondary": true,
+    "full_cohort_must_not_be_replaced_by_selective_subset": true
+  },
+  "paired_uncertainty": {
+    "replicates": 10000,
+    "bootstrap_unit": "complete NEW-crossing event episode or predeclared quiet block",
+    "bootstrap_seed": 20260906,
+    "whole_score_required": true,
+    "affected_rows_only_if_both_classes_present": true
+  },
+  "selection_rule": "Report every modality x duration x recovery-arm scenario. Do not omit scenarios, blocks or policies based on outcomes, exposure or apparent favorability.",
+  "software_gate_before_data_execution": {
+    "required": true,
+    "source_only_ci": "must pass on pandas 2.3.2 and pandas 3.0.1",
+    "dedicated_daily_outage_tests": true,
+    "preregistration_must_be_git_ancestor_of_result_run": true
+  },
+  "claim_boundary": "Development-only aggregate-interface reliability experiment on already-inspected score identities. It cannot establish raw-sensor outage robustness, native-sensor reconstruction accuracy, strict prospective predictor causality, untouched final robustness, operational readiness, economic savings, company superiority, award outcome or a breakthrough."
+}

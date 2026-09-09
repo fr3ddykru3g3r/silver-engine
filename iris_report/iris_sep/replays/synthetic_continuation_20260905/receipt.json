@@ -1,0 +1,15 @@
+{
+  "scope": "SYNTHETIC_FIXTURE_ONLY_NOT_FINAL_RESULTS",
+  "locked_test_accessed": false,
+  "cases": 11,
+  "all_expected_statuses_pass": true,
+  "files": {
+    "fixture_replays.json": "10bccd460b8fd78bb80c69d3cf16e26a8ce0a34a37c6537aeda1f470169b48d9",
+    "fixture_replays.svg": "5f085fd1a55288fb5cd0026e55cf673ff0f6cb44b3c9ddd1ded023db0f07cf8b"
+  },
+  "source_sha256": {
+    "/Users/Kyrosah/Documents/ChatGPT/La Liga 38-0/iris_report/iris_sep/tools/build_fixture_replays.py": "c0867d6f8e08f856cd18e1a9ad65096210c1ff3ee4fd0c542cb4d90c17f12f67",
+    "iris_report/iris_sep/src/iris_sep/pilot_replay.py": "07506af899438f5df257c785291ad9ea638c82fa7062ad72ba53c26cbc55a3d0",
+    "iris_report/iris_sep/tests/test_pilot_replay.py": "8795c9809b08ee68333f157fac1dde59a3d8645e44968750e327000946b81fe4"
+  }
+}

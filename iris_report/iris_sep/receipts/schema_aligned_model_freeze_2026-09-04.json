@@ -1,0 +1,30 @@
+{
+  "receipt_type": "IRIS_SEP_SCHEMA_ALIGNED_MODEL_FREEZE",
+  "generated_at_utc": "2026-09-04T11:46:54Z",
+  "status": "STATIC_PASS_PYTORCH_RUNTIME_PENDING",
+  "header_inspection_receipt": "receipts/sep_prism_header_inspection_2026-09-04.json",
+  "architecture_decision": {
+    "path": "architecture/ADR-003-schema-aligned-tabular-primary.md",
+    "sha256": "3358010f7e5c573b77b7b35d86b0a4c4548f3da8539a95a67837f7f2c75073e1"
+  },
+  "model": {
+    "path": "src/iris_sep/modeling/tabular_multibranch.py",
+    "sha256": "ea3bd22c5864328398c43733f30910f00f9692a2e3439abed6a2e5a2e86267b6",
+    "input_representation": "24H_AGGREGATE_FEATURE_BRANCHES",
+    "branches": ["magnetic", "eruption", "particle_context"],
+    "heads": ["primary_occurrence"],
+    "temporal_convolution": false,
+    "aia": false
+  },
+  "tests": {
+    "static_path": "tests/test_tabular_model_static.py",
+    "static_sha256": "f34382fa54c5ce059a104f632c777a5337842943e080d276cc15033ec65e9783",
+    "runtime_path": "tests/test_tabular_model_runtime.py",
+    "runtime_sha256": "3c4dff6e4669e8a58cd488a81fac3e96851419273a668f82ca9cea884a2b5820",
+    "static_result": "1/1 PASS",
+    "pytorch_runtime_result": "SKIPPED_LOCAL_PYTORCH_UNAVAILABLE"
+  },
+  "data_rows_accessed": false,
+  "locked_sep_test_accessed": false,
+  "benchmark_result_claimed": false
+}

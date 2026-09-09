@@ -1,0 +1,88 @@
+name: IRIS-SEP cross-fitted evidence stack diagnostic
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/src/iris_sep/modeling/positive_evidence_stack.py'
+      - 'iris_report/iris_sep/tests/test_positive_evidence_stack.py'
+      - 'iris_report/iris_sep/tools/run_crossfit_evidence_stack_diagnostic.py'
+      - 'iris_report/iris_sep/config/crossfit_evidence_stack_preregistration_2026-09-06.json'
+      - '.github/workflows/iris-sep-crossfit-evidence-stack.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  crossfit-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install frozen dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.18.1 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Unit test and compile
+        run: |
+          python -m unittest iris_report.iris_sep.tests.test_positive_evidence_stack -v
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/modeling/positive_evidence_stack.py \
+            iris_report/iris_sep/tools/run_crossfit_evidence_stack_diagnostic.py
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/iris-crossfit/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/iris-crossfit/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/iris-crossfit/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/iris-crossfit/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/iris-crossfit/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run one-shot cross-fitted architecture diagnostic
+        run: |
+          python -m iris_report.iris_sep.tools.run_crossfit_evidence_stack_diagnostic \
+            --features /tmp/iris-crossfit/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/iris-crossfit/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-crossfit-result
+
+      - name: Bind runtime and source
+        run: |
+          python - <<'PY'
+          import json, platform
+          import numpy, pandas, scipy, sklearn, xgboost
+          from pathlib import Path
+          Path('/tmp/iris-crossfit-result/runtime.json').write_text(json.dumps({
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scipy': scipy.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'locked_test_accessed': False,
+              'development_only': True,
+          }, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable development result
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-crossfit-stack-${{ github.sha }}
+          path: /tmp/iris-crossfit-result
+          if-no-files-found: error
+          retention-days: 30

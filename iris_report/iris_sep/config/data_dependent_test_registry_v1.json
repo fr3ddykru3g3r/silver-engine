@@ -1,0 +1,28 @@
+{
+  "registry_id": "iris-sep-data-dependent-tests-v1",
+  "purpose": "Separate tests that require gitignored or locally materialized development datasets from source-only CI without hiding source-only tests that live in the same modules.",
+  "required_data_not_committed_to_git": true,
+  "ignore_files": [
+    "iris_report/iris_sep/tests/test_prepare_sepnet_v1_dual_target.py",
+    "iris_report/iris_sep/tests/test_prepare_sepnet_v1_dual_target_v5.py",
+    "iris_report/iris_sep/tests/test_prepare_sepnet_v1_dual_target_v6.py"
+  ],
+  "deselect_nodeids": [
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v1.py::CorrectedSEPNetOV1Tests::test_v6_only_and_role_contract_is_static",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v3.py::CorrectedSEPNetOV3Tests::test_adversarial_validation_features_do_not_change_train_preprocessing",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v3.py::CorrectedSEPNetOV3Tests::test_interrupted_resume_is_bitwise_equivalent",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v3.py::CorrectedSEPNetOV3Tests::test_v6_only_and_role_contract_is_static",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v4.py::CorrectedSEPNetOV3Tests::test_adversarial_validation_features_do_not_change_train_preprocessing",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v4.py::CorrectedSEPNetOV3Tests::test_interrupted_resume_is_bitwise_equivalent",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v4.py::CorrectedSEPNetOV3Tests::test_v6_only_and_role_contract_is_static",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v5.py::CorrectedSEPNetOV3Tests::test_adversarial_validation_features_do_not_change_train_preprocessing",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v5.py::CorrectedSEPNetOV3Tests::test_interrupted_resume_is_bitwise_equivalent",
+    "iris_report/iris_sep/tests/test_corrected_sepnet_o_v5.py::CorrectedSEPNetOV3Tests::test_v6_only_and_role_contract_is_static"
+  ],
+  "known_required_artifacts": [
+    "iris_report/iris_sep/data_external/",
+    "iris_report/iris_sep/data_processed/sepnet_v1_development_v3.csv",
+    "iris_report/iris_sep/data_processed/sepnet_v1_development_v6_dual_target.csv"
+  ],
+  "ci_rule": "Source-only CI must validate every registry path/nodeid and print the excluded inventory. Missing local data must never be presented as a software-test failure. Data-dependent tests remain required when their hash-pinned inputs are intentionally materialized."
+}

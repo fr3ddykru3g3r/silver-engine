@@ -1,0 +1,28 @@
+{
+  "receipt_type": "IRIS_SEP_PRODUCT_CONTRACT_FREEZE",
+  "generated_at_utc": "2026-09-04T05:57:15Z",
+  "status": "FROZEN_BEFORE_MODEL_TRAINING",
+  "product_contract": {
+    "path": "config/product_contract_v1.json",
+    "sha256": "6b2577aed36d45e6fcf35e34375423c59e96f6acf34cb2b27573c0f5d8c82bee"
+  },
+  "architecture_decision": {
+    "path": "architecture/ADR-002-primary-first-operator-pilot.md",
+    "sha256": "e595182c553d122d8697faccd810dd414e12081f26d58da6929a4da9d2b830c6"
+  },
+  "winner_ready_gate": {
+    "path": "architecture/WINNER_READY_GATE.md",
+    "sha256": "a2d92734ba9500d4a1647f738354c9c05b652de9b18f825276baef70a356f9c2"
+  },
+  "decisions": {
+    "validated_headline_output": "p_new_sep_10mev_10pfu_within_24h",
+    "default_training_objective": "PRIMARY_ONLY",
+    "aia_enabled": false,
+    "secondary_outputs_enabled": false,
+    "operator_product_class": "RESEARCH_DECISION_SUPPORT_NOT_OPERATIONALLY_CERTIFIED",
+    "spacecraft_control": false,
+    "fail_closed_abstention": true
+  },
+  "locked_sep_test_accessed": false,
+  "benchmark_result_claimed": false
+}

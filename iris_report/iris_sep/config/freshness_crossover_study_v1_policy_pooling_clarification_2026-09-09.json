@@ -1,0 +1,27 @@
+{
+  "format": "IRIS_SEP_FRESHNESS_CROSSOVER_POLICY_POOLING_CLARIFICATION_V1",
+  "study_id": "IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1",
+  "status": "FROZEN_BEFORE_LABEL_DERIVATION_OR_MODEL_SCORE_INSPECTION",
+  "reason": "The implementation freeze specified policy candidates over the delay grid but did not explicitly state how delay conditions are pooled when selecting one deployable rule. This clarification resolves that ambiguity before outcome inspection and does not change the delay grid, model family, cohort, target, or success gate.",
+  "selection_unit": {
+    "per_delayed_family": true,
+    "pool_nonzero_delay_conditions_minutes": [5, 15, 30, 60, 120, 360, 720, 1440],
+    "each_issue_appears_once_per_delay_condition": true,
+    "repeated_delay_conditions_are_experimental_variants_not_independent_solar_events": true
+  },
+  "policy_selection": {
+    "select_one_nonabstaining_reference_per_delayed_family": true,
+    "select_one_fixed_ttl_per_delayed_family": true,
+    "select_one_confidence_margin_per_delayed_family": true,
+    "select_state_bin_ttls_per_delayed_family": true,
+    "selection_role": "2016 threshold_and_rule_selection",
+    "application_role": "2017 retrospective_score"
+  },
+  "uncertainty": {
+    "resample_base_issue_or_quiet_block_units": true,
+    "keep_all_delay_variants_of_a_resampled_base_issue_together": true,
+    "do_not_treat_pooled_delay_rows_as_independent": true
+  },
+  "labels_inspected_before_clarification": false,
+  "model_scores_inspected_before_clarification": false
+}

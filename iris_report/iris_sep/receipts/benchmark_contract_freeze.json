@@ -1,0 +1,7 @@
+{
+  "contract_id": "iris-sep-sepval-v1",
+  "contract_sha256": "0490fca6f6293a7473dda6b57e665b7d4f5f607bff3ee3faf3417476db621af8",
+  "receipt_type": "IRIS_SEP_BENCHMARK_CONTRACT_FREEZE",
+  "status": "PASS",
+  "test_outcomes_accessed": false
+}

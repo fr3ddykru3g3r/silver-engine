@@ -1,0 +1,114 @@
+IRIS_SEP_CONTRACT_PASS ae2b17add2cda2129e3af8c3d64dda216af447dbb0e889b0af051fc8d2e4f3e2
+test_future_or_label_feature_names_are_rejected (test_baseline_interface.BaselineInterfaceTests.test_future_or_label_feature_names_are_rejected) ... ok
+test_locked_test_is_rejected_even_without_a_label (test_baseline_interface.BaselineInterfaceTests.test_locked_test_is_rejected_even_without_a_label) ... ok
+test_prediction_frame_passes (test_baseline_interface.BaselineInterfaceTests.test_prediction_frame_passes) ... ok
+test_prediction_frame_rejects_duplicate_row_and_seed (test_baseline_interface.BaselineInterfaceTests.test_prediction_frame_rejects_duplicate_row_and_seed) ... ok
+test_prediction_frame_rejects_test_partition_and_outcome (test_baseline_interface.BaselineInterfaceTests.test_prediction_frame_rejects_test_partition_and_outcome) ... ok
+test_run_spec_is_tuning_only (test_baseline_interface.BaselineInterfaceTests.test_run_spec_is_tuning_only) ... ok
+test_tuning_rows_pass_without_locked_test (test_baseline_interface.BaselineInterfaceTests.test_tuning_rows_pass_without_locked_test) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.000s
+
+OK
+test_aarp_fixed_width_identity_contract (test_flare_system.DataContractTests.test_aarp_fixed_width_identity_contract) ... ok
+test_feature_scaler_is_train_fitted_and_finite (test_flare_system.DataContractTests.test_feature_scaler_is_train_fitted_and_finite) ... ok
+test_group_subset_is_balanced_deterministic_and_bounded (test_flare_system.DataContractTests.test_group_subset_is_balanced_deterministic_and_bounded) ... ok
+test_locked_test_selection_is_label_blind (test_flare_system.DataContractTests.test_locked_test_selection_is_label_blind) ... ok
+test_channel_and_model_shapes (test_flare_system.ModelContractTests.test_channel_and_model_shapes) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.019s
+
+OK
+test_authoritative_exact_crosswalk_is_accepted_with_provenance (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_authoritative_exact_crosswalk_is_accepted_with_provenance) ... ok
+test_date_nearest_and_numeric_equality_methods_are_rejected (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_date_nearest_and_numeric_equality_methods_are_rejected) ... ok
+test_missing_crosswalk_row_keeps_aia_external_only (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_missing_crosswalk_row_keeps_aia_external_only) ... ok
+test_no_crosswalk_is_fail_closed (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_no_crosswalk_is_fail_closed) ... ok
+test_one_hmi_key_cannot_be_reused (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_one_hmi_key_cannot_be_reused) ... ok
+test_outcome_fields_and_locked_test_are_rejected (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_outcome_fields_and_locked_test_are_rejected) ... ok
+test_receipt_is_hashed_and_declares_rules (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_receipt_is_hashed_and_declares_rules) ... ok
+test_two_candidates_for_one_aarp_are_ambiguous (iris_report.iris_sep.workstreams.luna_d.test_identity_bridge.IdentityBridgeTests.test_two_candidates_for_one_aarp_are_ambiguous) ... ok
+test_default_spec_is_label_free_and_archive_download_is_prohibited (iris_report.iris_sep.workstreams.luna_d.test_aia_pretraining.AIApretrainingTests.test_default_spec_is_label_free_and_archive_download_is_prohibited) ... ok
+test_interface_declares_encoder_only_transfer (iris_report.iris_sep.workstreams.luna_d.test_aia_pretraining.AIApretrainingTests.test_interface_declares_encoder_only_transfer) ... ok
+test_locked_test_and_observed_target_leak_are_rejected (iris_report.iris_sep.workstreams.luna_d.test_aia_pretraining.AIApretrainingTests.test_locked_test_and_observed_target_leak_are_rejected) ... ok
+test_sep_labels_and_hmi_keys_are_rejected (iris_report.iris_sep.workstreams.luna_d.test_aia_pretraining.AIApretrainingTests.test_sep_labels_and_hmi_keys_are_rejected) ... ok
+test_shape_and_duplicate_identity_are_rejected (iris_report.iris_sep.workstreams.luna_d.test_aia_pretraining.AIApretrainingTests.test_shape_and_duplicate_identity_are_rejected) ... ok
+test_valid_small_feature_batch_passes (iris_report.iris_sep.workstreams.luna_d.test_aia_pretraining.AIApretrainingTests.test_valid_small_feature_batch_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.021s
+
+OK
+test_atomic_pair_failure_removes_only_own_output (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_atomic_pair_failure_removes_only_own_output) ... ok
+test_duplicate_non24h_and_bad_cadence_fail (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_duplicate_non24h_and_bad_cadence_fail) ... ok
+test_empty_and_single_class_roles_fail (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_empty_and_single_class_roles_fail) ... ok
+test_inode_or_hash_change_prevents_cleanup (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_inode_or_hash_change_prevents_cleanup) ... ok
+test_manifest_recomputes_all_hashes_and_forbids_claims (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_manifest_recomputes_all_hashes_and_forbids_claims) ... ok
+test_mapping_mutation_and_exact_boundary_fail (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_mapping_mutation_and_exact_boundary_fail) ... ok
+test_missing_and_extra_predictor_fail (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_missing_and_extra_predictor_fail) ... ok
+test_missing_each_required_target_fails (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_missing_each_required_target_fails) ... ok
+test_null_nonbinary_and_inconsistent_labels_fail (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_null_nonbinary_and_inconsistent_labels_fail) ... ok
+test_wrong_source_hash_fails (iris_report.iris_sep.tests.test_prepare_sepnet_v1_dual_target_v6.DualTargetV6Tests.test_wrong_source_hash_fails) ... ok
+test_architecture_and_single_shared_forward (iris_report.iris_sep.tests.test_corrected_sepnet_o_v1.CorrectedSEPNetOV1Tests.test_architecture_and_single_shared_forward) ... ok
+test_backprop_precedes_gradient_clipping (iris_report.iris_sep.tests.test_corrected_sepnet_o_v1.CorrectedSEPNetOV1Tests.test_backprop_precedes_gradient_clipping) ... ok
+test_claims_and_modes_are_separate_in_smoke_receipt_contract (iris_report.iris_sep.tests.test_corrected_sepnet_o_v1.CorrectedSEPNetOV1Tests.test_claims_and_modes_are_separate_in_smoke_receipt_contract) ... ok
+test_episode_balance_equalizes_unit_contribution (iris_report.iris_sep.tests.test_corrected_sepnet_o_v1.CorrectedSEPNetOV1Tests.test_episode_balance_equalizes_unit_contribution) ... ok
+test_loss_has_both_heads_and_finite_gradients (iris_report.iris_sep.tests.test_corrected_sepnet_o_v1.CorrectedSEPNetOV1Tests.test_loss_has_both_heads_and_finite_gradients) ... ok
+test_v6_only_and_role_contract_is_static (iris_report.iris_sep.tests.test_corrected_sepnet_o_v1.CorrectedSEPNetOV1Tests.test_v6_only_and_role_contract_is_static) ... ok
+test_adversarial_validation_features_do_not_change_train_preprocessing (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_adversarial_validation_features_do_not_change_train_preprocessing) ... ok
+test_architecture_and_single_shared_forward (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_architecture_and_single_shared_forward) ... ok
+test_backprop_precedes_gradient_clipping (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_backprop_precedes_gradient_clipping) ... ok
+test_claims_and_modes_are_separate_in_smoke_receipt_contract (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_claims_and_modes_are_separate_in_smoke_receipt_contract) ... ok
+test_episode_balance_equalizes_unit_contribution (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_episode_balance_equalizes_unit_contribution) ... ok
+test_integrity_contract_is_present (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_integrity_contract_is_present) ... ok
+test_interrupted_resume_is_bitwise_equivalent (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_interrupted_resume_is_bitwise_equivalent) ... ok
+test_loss_has_both_heads_and_finite_gradients (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_loss_has_both_heads_and_finite_gradients) ... ok
+test_v6_only_and_role_contract_is_static (iris_report.iris_sep.tests.test_corrected_sepnet_o_v5.CorrectedSEPNetOV3Tests.test_v6_only_and_role_contract_is_static) ... ok
+test_near_or_partial_time_match_is_rejected (iris_report.iris_sep.tests.test_seal_training_split.SealTrainingSplitTests.test_near_or_partial_time_match_is_rejected) ... ok
+test_only_exact_allowlisted_rows_are_written (iris_report.iris_sep.tests.test_seal_training_split.SealTrainingSplitTests.test_only_exact_allowlisted_rows_are_written) ... ok
+test_failure_replays (iris_report.iris_sep.tests.test_pilot_replay.ReplayTests.test_failure_replays) ... ok
+test_fixture_receipt_cannot_be_promoted (iris_report.iris_sep.tests.test_pilot_replay.ReplayTests.test_fixture_receipt_cannot_be_promoted) ... ok
+test_primary_model_is_schema_aligned_and_has_no_secondary_heads (iris_report.iris_sep.tests.test_tabular_model_static.TabularModelStaticTests.test_primary_model_is_schema_aligned_and_has_no_secondary_heads) ... ok
+test_backward_checkpoint_restore_and_seed_replay (iris_report.iris_sep.tests.test_tabular_model_runtime.TabularModelRuntimeTests.test_backward_checkpoint_restore_and_seed_replay) ... ok
+test_fractional_and_nonbinary_integer_masks_fail_closed (iris_report.iris_sep.tests.test_tabular_model_runtime.TabularModelRuntimeTests.test_fractional_and_nonbinary_integer_masks_fail_closed) ... ok
+test_ordered_feature_schema_is_bound_into_config (iris_report.iris_sep.tests.test_tabular_model_runtime.TabularModelRuntimeTests.test_ordered_feature_schema_is_bound_into_config) ... ok
+test_shapes_masks_and_all_missing (iris_report.iris_sep.tests.test_tabular_model_runtime.TabularModelRuntimeTests.test_shapes_masks_and_all_missing) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 77.642s
+
+OK
+{"dataset_accessed": false, "files_checked": ["model.py", "checkpoint.py", "smoke_test.py", "test_model.py", "test_unittest.py"], "imported_torch": false, "locked_test_accessed": false, "note": "AST/interface/data-agnostic checks only; PyTorch execution remains a Colab gate.", "status": "PASS"}
+test_below_threshold_sample_separates_physical_episodes (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_below_threshold_sample_separates_physical_episodes) ... ok
+test_feature_must_be_published_by_issue_time (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_feature_must_be_published_by_issue_time) ... ok
+test_manifest_hash_detects_mutation_and_write_is_immutable (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_manifest_hash_detects_mutation_and_write_is_immutable) ... ok
+test_new_crossing_and_already_enhanced_are_distinct (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_new_crossing_and_already_enhanced_are_distinct) ... ok
+test_partition_drops_later_boundary_unit_inside_purge (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_partition_drops_later_boundary_unit_inside_purge) ... ok
+test_partition_drops_unit_at_inclusive_horizon_endpoint (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_partition_drops_unit_at_inclusive_horizon_endpoint) ... ok
+test_partition_keeps_units_whole_and_enforces_purge (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_partition_keeps_units_whole_and_enforces_purge) ... ok
+test_transform_fit_is_train_only_and_retains_missing_mask (iris_report.iris_sep.workstreams.luna_g_data_pipeline.test_pipeline_unittest.PipelineTests.test_transform_fit_is_train_only_and_retains_missing_mask) ... ok
+test_dropout_fallback_never_invents_unavailable_feed (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_dropout_fallback_never_invents_unavailable_feed) ... ok
+test_ensemble_uses_median_and_abstains_when_all_missing (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_ensemble_uses_median_and_abstains_when_all_missing) ... ok
+test_event_hazard_does_not_pay_survival_after_event (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_event_hazard_does_not_pay_survival_after_event) ... ok
+test_feature_masks_preserve_which_feature_is_missing (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_feature_masks_preserve_which_feature_is_missing) ... ok
+test_fusion_ignores_missing_and_flags_all_missing (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_fusion_ignores_missing_and_flags_all_missing) ... ok
+test_peak_loss_is_event_conditional (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_peak_loss_is_event_conditional) ... ok
+test_primary_only_default_and_masked_auxiliaries (iris_report.iris_sep.workstreams.luna_h_model_hardening.test_contract_unittest.ModelContractTests.test_primary_only_default_and_masked_auxiliaries) ... ok
+test_calibration_and_threshold_roles_fail_closed (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_calibration_and_threshold_roles_fail_closed) ... ok
+test_matched_pod_is_deterministic (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_matched_pod_is_deterministic) ... ok
+test_operator_abstains_on_schema_mismatch_or_stale_input (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_operator_abstains_on_schema_mismatch_or_stale_input) ... ok
+test_operator_output_abstains_on_critical_missing_input (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_operator_output_abstains_on_critical_missing_input) ... ok
+test_paired_bootstrap_uses_units_and_detects_superior_scores (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_paired_bootstrap_uses_units_and_detects_superior_scores) ... ok
+test_perfect_classifier_metrics (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_perfect_classifier_metrics) ... ok
+test_probability_metrics_are_invariant_to_order_with_tied_scores (iris_report.iris_sep.workstreams.luna_i_eval_ops.test_eval_ops_unittest.EvaluationTests.test_probability_metrics_are_invariant_to_order_with_tied_scores) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.063s
+
+OK
+CORRECTED_SEPNET_V5_ARTIFACTS_VERIFIED_DEVELOPMENT_ONLY
+IRIS_SEP_LOCAL_VERIFICATION_PASS
+PYTORCH_CPU_FORWARD_BACKWARD_CHECKPOINT_TESTS_PASS
+COLAB_GPU_FULL_TRAINING_NOT_RUN
+LOCKED_TEST_NOT_ACCESSED

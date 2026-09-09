@@ -1,0 +1,64 @@
+{
+  "receipt_type": "IRIS_SEP_SOL_CONTINUATION_SOURCE_ONLY_V2",
+  "date": "2026-09-05",
+  "initial_remote_head_sha": "0a06c8a82b9a60d6801e052ea3c0378ae44e2ab8",
+  "branch": "codex/iris-sep-continuation-20260905",
+  "pull_request": 3,
+  "execution_runtime": {
+    "python": "3.13.5",
+    "python_executable": "/opt/pyvenv/bin/python3",
+    "platform": "Linux",
+    "numpy": "2.3.5",
+    "torch": "2.10.0+cpu",
+    "scikit_learn": "1.8.0"
+  },
+  "source_only_unittest": {
+    "command": "PYTHONPATH=/mnt/data/iris_sep_hydrated /opt/pyvenv/bin/python3 -m unittest iris_report.iris_sep.tests.test_pilot_replay iris_report.iris_sep.tests.test_pilot_admission_v2 iris_report.iris_sep.tests.test_validity_envelope_benchmark iris_report.iris_sep.tests.test_compound_validity_benchmark iris_report.iris_sep.tests.test_inference_bundle iris_report.iris_sep.tests.test_compact_layer_replay -v",
+    "tests_run": 17,
+    "failures": 0,
+    "errors": 0,
+    "status": "PASS",
+    "elapsed_seconds": 0.287
+  },
+  "syntax_verification": {
+    "method": "python -m py_compile",
+    "status": "PASS",
+    "files": [
+      "src/iris_sep/inference_bundle.py",
+      "src/iris_sep/modeling/compact_layer_replay.py",
+      "tools/run_compact_nonfinite_replay.py",
+      "tests/test_inference_bundle.py",
+      "tests/test_compact_layer_replay.py"
+    ]
+  },
+  "full_artifact_verification": {
+    "status": "NOT_RUN",
+    "reason": "The execution environment did not contain the preserved development datasets, model checkpoints, folds, notebooks, or complete dependency/artifact layout required by verify_local. Missing local artifacts are not a scientific failure."
+  },
+  "compact_failure_replay": {
+    "status": "NOT_RUN_MISSING_LOCAL_ARTIFACTS",
+    "receipt": "receipts/compact_nonfinite_replay_2026-09-05_sol.json",
+    "causal_conclusion": null
+  },
+  "published_source_commits_before_this_receipt": [
+    {"path": "src/iris_sep/inference_bundle.py", "commit_sha": "b66a2163544aaa7a32e132b7dd341334f7c1ac6e"},
+    {"path": "src/iris_sep/modeling/compact_layer_replay.py", "commit_sha": "197d2c9fa291588cf1324d8361a06a9f6f94e4f6"},
+    {"path": "tools/run_compact_nonfinite_replay.py", "commit_sha": "0eae25a5795bb804a16fae5532c09ccf520ba23e"},
+    {"path": "tests/test_inference_bundle.py", "commit_sha": "297e20975adee7e2db8796fc665119fd808b1ab9"},
+    {"path": "tests/test_compact_layer_replay.py", "commit_sha": "87c5e8b95a68ac84cd56a4b5d4829b8c5f974321"},
+    {"path": "workstreams/sol_adversarial_bundle_20260905/RED_TEAM_PLAN.md", "commit_sha": "9aa77d412b583beeb6c2238066c5e8e90095cfdb"},
+    {"path": "receipts/cleanup_manifest_2026-09-05_sol.json", "commit_sha": "46adb596047cecc6d02130108c8143f9d3e54c0a"},
+    {"path": "receipts/compact_nonfinite_replay_2026-09-05_sol.json", "commit_sha": "38ca6358528f5105d415b5a7f005d4c2436614ff"}
+  ],
+  "scientific_boundaries": {
+    "locked_test_accessed": false,
+    "outer_monitor_scored": false,
+    "new_model_training_run": false,
+    "mixed_training_test_table_downloaded": false,
+    "publisher_request_resent": false,
+    "external_message_sent": false,
+    "scientific_superiority_established": false,
+    "operational_readiness_established": false
+  },
+  "claim": "Source-only hardening and reproducibility tooling passed their bounded tests. The original compact fold-3 nonfinite root cause remains unknown until exact local artifacts permit a hash-matched replay."
+}

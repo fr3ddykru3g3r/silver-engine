@@ -1,0 +1,71 @@
+{
+  "status": "PREREGISTERED_BEFORE_DAILY_OUTAGE_RESULTS_WERE_READ",
+  "scope": "DEVELOPMENT_ONLY_OPERATOR_HANDLING_POLICY_DIAGNOSTIC",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "input_evidence": "Immutable preregistered daily-modality-outage artifact whose independent_audit.json status must be PASSED",
+  "locked_test_accessed": false,
+  "monitor_used": false,
+  "score_role_already_inspected": true,
+  "no_new_model_training": true,
+  "no_recalibration": true,
+  "no_rethresholding": true,
+  "no_post_result_recovery_arm_selection": true,
+  "recovery_arms": [
+    "MASK_AWARE_NO_FILL",
+    "TRAIN_FIT_MEDIAN",
+    "CAUSAL_FORWARD_FILL"
+  ],
+  "threshold_policies": [
+    "MAX_TSS",
+    "POD80_MIN_FAR"
+  ],
+  "handling_policies": {
+    "ALWAYS_EXPOSE_NORMAL": {
+      "affected_rows": "Expose the recovery-arm probability and label the forecast NORMAL despite the declared outage.",
+      "unaffected_rows": "Expose the recovery-arm probability and label NORMAL.",
+      "probability_transform": "none"
+    },
+    "ABSTAIN_ON_DECLARED_OUTAGE": {
+      "affected_rows": "Do not expose a probability; status ABSTAIN with the declared missing modality/duration as reason.",
+      "unaffected_rows": "Expose the same recovery-arm probability and label NORMAL.",
+      "probability_transform": "none on covered rows"
+    },
+    "EXPOSE_DEGRADED_ON_DECLARED_OUTAGE": {
+      "affected_rows": "Expose the same recovery-arm probability but label DEGRADED with the declared missing modality/duration as reason.",
+      "unaffected_rows": "Expose the same recovery-arm probability and label NORMAL.",
+      "probability_transform": "none"
+    }
+  },
+  "affected_row_definition": "Exactly the union of the preregistered outage block intervals projected onto score-role issue times. It does not depend on labels, predictions, hidden-cell count or outcome favorability.",
+  "matched_coverage_comparison": {
+    "required": true,
+    "rule": "For each scenario and recovery arm, evaluate ALWAYS_EXPOSE_NORMAL and EXPOSE_DEGRADED_ON_DECLARED_OUTAGE on exactly the non-affected rows exposed by ABSTAIN_ON_DECLARED_OUTAGE. This matched-row result is reported only to show what selection alone does; it cannot replace the whole-cohort result."
+  },
+  "full_cohort_reporting": {
+    "required": true,
+    "metrics": [
+      "coverage_fraction",
+      "covered_rows",
+      "abstained_rows",
+      "total_positives",
+      "covered_positives",
+      "abstained_positives",
+      "covered_negative_rows",
+      "abstained_negative_rows",
+      "true_alerts",
+      "false_alerts",
+      "covered_false_negatives",
+      "coverage_adjusted_missed_positives",
+      "coverage_adjusted_detection_fraction"
+    ],
+    "abstention_rule": "An abstained positive is counted as lost positive coverage and in coverage_adjusted_missed_positives; it may not be removed from the denominator."
+  },
+  "probability_metrics": {
+    "whole_probability_metrics_for_full_coverage_policies": true,
+    "covered_row_probability_metrics_for_abstention": true,
+    "matched_coverage_metrics_for_all_policies": true
+  },
+  "degraded_policy_interpretation": "DEGRADED is an auditable status, not a learned probability correction. This avoids inventing an outcome-tuned shrinkage rule after inspecting outage results.",
+  "selection_rule": "Report all 3 modalities x 3 durations x 3 recovery arms x 2 frozen thresholds x 3 handling policies. Omit none based on outcomes.",
+  "claim_boundary": "Development-only handling-policy diagnostic on already-inspected score identities. It can quantify coverage, missed-event and false-alert tradeoffs but cannot establish operator benefit, prospective causality, locked-test robustness, operational readiness or superiority."
+}

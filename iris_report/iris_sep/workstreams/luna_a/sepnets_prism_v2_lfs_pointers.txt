@@ -1,0 +1,17 @@
+Source: https://github.com/yuyian/SEP-Prediction-V2
+Pinned commit: e138dcd72c1952a00e11e1a0b025337f9e7c93fb
+Status: filtered Git metadata only; no Git LFS data blobs checked out.
+
+Data/rolling_combinded_seq_24hours.csv
+version https://git-lfs.github.com/spec/v1
+oid sha256:4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb
+size 34861986
+
+GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+version https://git-lfs.github.com/spec/v1
+oid sha256:0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0
+size 1632454
+
+This file records LFS pointer metadata only. The pointer OID for the primary
+table is an acquisition lead, not a project test hash or a substitute for
+the exact Zenodo SEP-PRISM archive/table receipt.

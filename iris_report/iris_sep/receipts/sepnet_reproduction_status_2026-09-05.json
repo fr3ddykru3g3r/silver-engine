@@ -1,0 +1,34 @@
+{
+  "status": "NOT_REPRODUCED",
+  "scope": "SAFE_DEVELOPMENT_DATA_ONLY",
+  "locked_test_accessed": false,
+  "archived_source": {
+    "directory": "workstreams/luna_a/sources/sepnets_v1",
+    "model_file": "multitask_model.py",
+    "data_construction_file": "Data-Construct.R",
+    "checkpoint_available": false
+  },
+  "blocking_discrepancies": [
+    "the archived trainer increments val_loss before initialization",
+    "gradient clipping occurs before backpropagation",
+    "two stochastic dropout forward passes are used for the two losses",
+    "the batch-first transformer receives a sequence-first permutation",
+    "SelectKBest receives no Python-side imputation despite missing SHARP values",
+    "the archived R construction references variables before assignment and has timestamp-case and fallback-field inconsistencies",
+    "the selected safe V1 development table retains only the legacy operational target, so it cannot reproduce general-target training followed by operational-target threshold selection"
+  ],
+  "allowed_next_step": "implement a corrected, explicitly versioned development adapter on a newly sealed safe split retaining both legacy targets; document every deviation",
+  "final_reproduction_requirements": [
+    "same frozen new-crossing cohort as IRIS-SEP",
+    "publisher architecture and preprocessing reproduced or deviations explicitly justified",
+    "operational threshold selected without test outcomes",
+    "predictions and source configuration hashed",
+    "locked outcomes accessed only after all model selection is frozen"
+  ],
+  "claims_forbidden": [
+    "SEPNET_REPRODUCED",
+    "SEPVAL_SCORE",
+    "BREAKTHROUGH",
+    "SUPERIORITY"
+  ]
+}

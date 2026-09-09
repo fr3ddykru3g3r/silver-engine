@@ -1,0 +1,147 @@
+{
+  "registry_id": "iris-sep-inspected-evidence-v2",
+  "supersedes": "iris-sep-inspected-evidence-v1",
+  "status": "ACTIVE_DEVELOPMENT_GUARD",
+  "updated_utc_date": "2026-09-09",
+  "purpose": "Prevent any cohort, identity, label, result artifact, comparator output or policy-selection dataset that has informed development from later being relabelled as fresh final evidence, and explicitly protect candidate future data from development-side outcome access.",
+  "target_family": "IRIS-SEP",
+  "primary_target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test": {
+    "status": "FORBIDDEN_DURING_DEVELOPMENT",
+    "identity_or_outcome_accessed": false,
+    "claim_rule": "No final untouched claim may be made without independent custodian attestation and an overlap check against every registry version."
+  },
+  "inspected_sets": [
+    {
+      "name": "public_new_crossing_development_roles",
+      "status": "INSPECTED",
+      "description": "Fit/calibration/threshold/score roles constructed from the public SEP-Prediction-V2 aggregate table and CLEAR event catalogue were repeatedly used for development, threshold selection and diagnostics.",
+      "source_feature_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+      "source_event_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "all_history_development_before_fixed_monitor",
+      "status": "INSPECTED_OR_USED_FOR_DEVELOPMENT",
+      "source": "config/context_stability_preregistration_2026-09-05.json",
+      "description": "ALL_HISTORY training scope used all eligible development rows before the fixed monitor start; no subperiod inside that history may later be relabelled untouched merely because a new target decomposition is proposed.",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "context_stability_fixed_monitor",
+      "status": "INSPECTED",
+      "start_inclusive": "2023-07-31T00:00:00Z",
+      "end_inclusive": "2025-09-10T00:00:00Z",
+      "source": "config/context_stability_preregistration_2026-09-05.json",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "crossfit_evidence_stack_development_result",
+      "status": "INSPECTED",
+      "run_id": 33985243824,
+      "git_head": "5d90a177462401d1486891e06c6fa6794ea4fbdb",
+      "artifact_digest": "sha256:ed04d5b34df094e2eb7f7db3f07b426619494b38987f1993c0faddca90d58f99",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "random_missingness_promoted_stack",
+      "status": "INSPECTED",
+      "run_id": 33987312162,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "two_state_architecture_diagnostic",
+      "status": "INSPECTED",
+      "run_id": 33985567816,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "residual_expert_architecture_diagnostic",
+      "status": "INSPECTED",
+      "run_id": 33984943106,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "contiguous_outage_failed_runs",
+      "status": "INSPECTED_FAILURES",
+      "runs": [33987778788, 34043978773],
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "freshness_crossover_v1_2011_2017",
+      "status": "INSPECTED_NEGATIVE_RESULT",
+      "roles": {
+        "fit": "2011-01-01/2014-12-31",
+        "calibration": "2015-01-01/2015-12-31",
+        "threshold_selection": "2016-01-01/2016-12-31",
+        "retrospective_score": "2017-01-01/2017-11-30"
+      },
+      "run_id": 34341335588,
+      "executed_git_head": "ed3aba1def18bb022382efa4afaaf251c76e6cff",
+      "artifact_id": 10100069342,
+      "artifact_digest": "sha256:ba907ffae86301c22b1afb3a41a0bf98c825b562b90b5319ce347a4af1db7868",
+      "result": "NO_FRESHNESS_CROSSOVER_DEMONSTRATED_AND_NO_POLICY_GATE_PASS",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "freshness_crossover_v1_post_result_audit",
+      "status": "INSPECTED_AUDIT",
+      "branch_head_at_conformance_record": "b3a3de249f9bea5be1ccd7ac24017a161ce44b7c",
+      "findings": [
+        "aggregate arithmetic verified",
+        "three score positives are inadequate for reliable population detection inference",
+        "per_issue_predictions_and_fitted_models_missing_from_original_artifact",
+        "bootstrap_draws_not_shared_across_delays",
+        "proton_delay_eligibility_uses_issue_time_proton_information",
+        "broad_proton_xrs_xgboost_novelty_not_supported"
+      ],
+      "fresh_final_evidence": false
+    }
+  ],
+  "protected_candidate_sets": [
+    {
+      "name": "post_monitor_prospective_candidate_after_2025_09_10",
+      "status": "PROTECTED_NOT_INSPECTED",
+      "starts_after": "2025-09-10T00:00:00Z",
+      "candidate_end": "UNASSIGNED_BY_DEVELOPMENT_SIDE",
+      "identities_accessed": false,
+      "labels_accessed": false,
+      "event_counts_accessed": false,
+      "model_scores_accessed": false,
+      "authorized_for_development": false,
+      "authorized_for_onset_continuation_scoring": false,
+      "required_custodian_action": "An independent custodian must choose and hash an admissible cohort, verify non-overlap/exposure against this registry, and attest that identities/outcomes were not exposed before the new contract and precision gate are frozen.",
+      "development_side_rule": "Do not query, count, inspect, score, or stratify outcomes in this candidate period for study design or power rescue."
+    }
+  ],
+  "onset_continuation_candidate": {
+    "status": "NOT_AUTHORIZED_TO_RUN_AS_INDEPENDENT_CLAIM_STUDY",
+    "reason": [
+      "historical candidate periods are already development-exposed",
+      "post-2025 candidate data must remain protected",
+      "exposed-data planning suggests sparse positive support relative to desired detection-harm precision",
+      "onset-versus-persistence distinction is operationally meaningful but not itself novel",
+      "a separate frozen contract and custodian-controlled cohort are required"
+    ],
+    "feasibility_record": "architecture/ONSET_CONTINUATION_FEASIBILITY_2026-09-09.md"
+  },
+  "freshness_crossover_v1": {
+    "status": "CLOSED_NEGATIVE_RESULT_NOT_A_WINNING_CLAIM_ROUTE",
+    "closure_record": "architecture/FRESHNESS_CROSSOVER_V1_CLOSURE_2026-09-09.md",
+    "no_post_result_rescue_tuning": true
+  },
+  "future_untouched_rule": {
+    "required_before_label_untouched": true,
+    "attestation_producer": "independent_custodian_or_publisher",
+    "development_side_must_not_receive_protected_identities_or_outcomes": true,
+    "minimum_attestation": [
+      "candidate cohort identifier/hash",
+      "statement that identities/outcomes were not exposed to development",
+      "overlap check against every inspected registry version",
+      "attestation timestamp and producer",
+      "statement that the scientific contract and precision gate were frozen before outcome release"
+    ],
+    "if_attestation_unavailable": "Describe evaluation as retrospective/development, not untouched or final superiority evidence."
+  },
+  "maintenance_rule": "Append every subsequently inspected cohort, comparator output, outage result, reconstruction, policy-selection dataset or protected-candidate access before it can influence development decisions. Never delete an inspected entry because a result is negative, obsolete or inconvenient."
+}

@@ -1,0 +1,75 @@
+name: IRIS-SEP NOAA reduced-input source readiness
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/noaa_causal_reduced_input_v1_preregistration_2026-09-09.json'
+      - 'iris_report/iris_sep/config/noaa_causal_reduced_input_v1_data_contract_2026-09-09.json'
+      - 'iris_report/iris_sep/tools/run_noaa_reduced_input_source_probe.py'
+      - 'iris_report/iris_sep/tests/test_noaa_reduced_input_source_probe.py'
+      - '.github/workflows/iris-sep-noaa-reduced-source-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+
+      - name: Install bounded probe dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests==2.32.5 netCDF4==1.7.2 pytest==8.4.2
+
+      - name: Compile and run offline source-contract tests
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/run_noaa_reduced_input_source_probe.py
+          python -m pytest -q iris_report/iris_sep/tests/test_noaa_reduced_input_source_probe.py
+
+      - name: Run frozen NOAA source-readiness probe
+        run: |
+          rm -rf /tmp/noaa-reduced-input-source-readiness
+          python -m iris_report.iris_sep.tools.run_noaa_reduced_input_source_probe \
+            --output /tmp/noaa-reduced-input-source-readiness
+
+      - name: Bind runtime and commit
+        if: always()
+        run: |
+          mkdir -p /tmp/noaa-reduced-input-source-readiness
+          python - <<'PY'
+          import json, platform
+          from pathlib import Path
+          import netCDF4, requests
+          p=Path('/tmp/noaa-reduced-input-source-readiness/runtime.json')
+          p.write_text(json.dumps({
+            'git_head': '${{ github.sha }}',
+            'python': platform.python_version(),
+            'requests': requests.__version__,
+            'netCDF4': netCDF4.__version__,
+            'training_performed': False,
+            'labels_derived': False,
+            'forecast_skill_computed': False,
+            'locked_test_accessed': False,
+          }, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable source-readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-noaa-reduced-source-readiness-${{ github.sha }}
+          path: /tmp/noaa-reduced-input-source-readiness
+          if-no-files-found: warn
+          retention-days: 30

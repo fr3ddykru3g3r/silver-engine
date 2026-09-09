@@ -1,0 +1,9 @@
+{
+  "amendment_basis": "Publisher schema and cadence metadata showed non-overlapping daily windows; no locked-test identity, outcome, prediction, or score informed the amendment.",
+  "contract_id": "iris-sep-sepval-v2-daily-primary",
+  "contract_sha256": "ae2b17add2cda2129e3af8c3d64dda216af447dbb0e889b0af051fc8d2e4f3e2",
+  "locked_test_accessed": false,
+  "receipt_type": "IRIS_SEP_BENCHMARK_CONTRACT_AMENDMENT_FREEZE",
+  "status": "PASS",
+  "superseded_contract_id": "iris-sep-sepval-v1"
+}

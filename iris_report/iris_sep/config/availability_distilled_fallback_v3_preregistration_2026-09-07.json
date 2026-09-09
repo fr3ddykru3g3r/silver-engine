@@ -1,0 +1,45 @@
+{
+  "status": "PREREGISTERED_BEFORE_RESULT_CAPABLE_IMPLEMENTATION",
+  "scope": "DEVELOPMENT_ONLY_DISTILLED_AVAILABILITY_FALLBACK_V3",
+  "purpose": "Reduce avoidable one-feed performance loss while preserving the low-variance family-specialist architecture. Train each missing-feed fusion stack on hard NEW-SEP labels plus a fixed soft target from the fit-only full three-expert stack.",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "monitor_used": false,
+  "prior_results_disclosed": [
+    "availability-conditioned fallback v1",
+    "direct remaining-sensor specialist v2 rejected on development",
+    "operator review budget diagnostic"
+  ],
+  "architecture": {
+    "FULL": "unchanged PositiveEvidenceStack on SOLAR+XRS+PROTON cross-fitted evidence",
+    "NO_XRS": "DistilledPositiveEvidenceStack on SOLAR+PROTON cross-fitted evidence",
+    "NO_PROTON": "DistilledPositiveEvidenceStack on SOLAR+XRS cross-fitted evidence",
+    "NO_XRS_OR_PROTON": "unchanged solar-only fallback from v1",
+    "teacher": "fit-only full PositiveEvidenceStack probability on the same cross-fitted OOF evidence rows",
+    "teacher_weight": 0.35,
+    "hard_label_weight": 0.65,
+    "l2_weight": 0.03,
+    "nonnegative_student_evidence_weights": true,
+    "hyperparameter_sweep": false,
+    "imputation": false,
+    "reconstruction": false,
+    "runtime_retraining": false
+  },
+  "roles": {
+    "fit": "family experts, full teacher, and distilled student fusion fitting only",
+    "calibration": "logit-intercept calibration only",
+    "threshold": "MAX_TSS and POD80_MIN_FAR threshold selection only",
+    "score": "development score only; already inspected",
+    "monitor": "excluded before modeling"
+  },
+  "primary_comparison": "V3 distilled missing-feed stack versus V1 scalar missing-feed stack on identical score rows; V2 is retained as a negative development result but is not a candidate.",
+  "keep_v3_for_future_untouched_evaluation_only_if": [
+    "NO_XRS and NO_PROTON each have MAX_TSS no lower than V1 by more than 0.02",
+    "NO_XRS and NO_PROTON each have Brier no worse than V1 by more than 0.005",
+    "NO_XRS and NO_PROTON each have ECE no worse than V1 by more than 0.01",
+    "NO_XRS and NO_PROTON each have 5-percent review enrichment no lower than V1 by more than 1.0x",
+    "all probabilities are finite and no missing family is used at runtime"
+  ],
+  "normal_status_from_development_forbidden": true,
+  "claim_boundary": "V3 can only become the frozen candidate for untouched evaluation. NORMAL/VALID trust still requires independent evidence through the separate availability trust gate."
+}

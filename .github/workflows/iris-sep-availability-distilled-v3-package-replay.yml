@@ -1,0 +1,164 @@
+name: IRIS-SEP distilled V3 availability package replay
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/src/iris_sep/feature_schema_binding.py'
+      - 'iris_report/iris_sep/src/iris_sep/model_package.py'
+      - 'iris_report/iris_sep/tools/export_availability_model_package_v3.py'
+      - 'iris_report/iris_sep/tools/export_availability_model_package_v3_replay.py'
+      - 'iris_report/iris_sep/tools/predict_availability_model_package.py'
+      - 'iris_report/iris_sep/tests/test_model_package.py'
+      - '.github/workflows/iris-sep-availability-distilled-v3-package-replay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  distilled-v3-package-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out continuation branch with ancestry
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify V3 preregistration and first implementation ancestry
+        run: |
+          git merge-base --is-ancestor 5a76da0e92fa2688112a58bf91d7ddb13fef4921 HEAD
+          git merge-base --is-ancestor ee29c105b9fbefb6e5a6838d13f8bca274f1bf88 HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            scipy==1.18.1 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4
+
+      - name: Compile package runtime and run source contracts
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/feature_schema_binding.py \
+            iris_report/iris_sep/src/iris_sep/model_package.py \
+            iris_report/iris_sep/tools/export_availability_model_package_v3.py \
+            iris_report/iris_sep/tools/export_availability_model_package_v3_replay.py \
+            iris_report/iris_sep/tools/predict_availability_model_package.py
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_model_package.py' -v
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_distilled_evidence_stack.py' -v
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Export and self-replay frozen V3 package
+        run: |
+          python -m iris_report.iris_sep.tools.export_availability_model_package_v3_replay \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/distilled-v3-package \
+            > /tmp/distilled-v3-package.stdout.json
+
+      - name: Verify package receipt and trust policy
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/distilled-v3-package')
+          receipt=json.loads((root/'package_receipt.json').read_text())
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert receipt['self_replay_passed'] is True
+          assert receipt['self_replay_tolerance'] == 1e-6
+          assert max(receipt['self_replay_max_abs_difference_by_state'].values()) <= 1e-6
+          assert receipt['locked_test_accessed'] is False
+          assert receipt['monitor_used'] is False
+          assert receipt['runtime_training_allowed'] is False
+          assert manifest['architecture'] == 'IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3'
+          assert manifest['operator_permissions']['NO_XRS'] == 'DEGRADED'
+          assert manifest['operator_permissions']['NO_PROTON'] == 'DEGRADED'
+          assert manifest['operator_permissions']['NO_XRS_OR_PROTON'] == 'ABSTAIN'
+          assert manifest['distillation']['teacher_weight'] == 0.35
+          assert manifest['distillation']['hard_label_weight'] == 0.65
+          print(json.dumps({
+            'self_replay_max_abs_difference_by_state':receipt['self_replay_max_abs_difference_by_state'],
+            'operator_permissions':manifest['operator_permissions'],
+            'state_feature_schema_sha256':{k:v['sha256'] for k,v in manifest['state_feature_schemas'].items()},
+          },indent=2,sort_keys=True))
+          PY
+
+      - name: Exercise load-only prediction CLI and enforce abstention
+        run: |
+          python -m iris_report.iris_sep.tools.predict_availability_model_package \
+            --package /tmp/distilled-v3-package \
+            --input /tmp/distilled-v3-package/replay_input.csv \
+            --output /tmp/distilled-v3-package/load_only_predictions.csv
+          python - <<'PY'
+          import numpy as np
+          import pandas as pd
+          from pathlib import Path
+          root=Path('/tmp/distilled-v3-package')
+          got=pd.read_csv(root/'load_only_predictions.csv')
+          ref=pd.read_csv(root/'export_reference_predictions.csv')
+          for state in ('FULL','NO_XRS','NO_PROTON','NO_XRS_OR_PROTON'):
+              delta=float(np.max(np.abs(got[f'p_{state}'].to_numpy()-ref[f'p_{state}'].to_numpy())))
+              assert delta <= 1e-6, (state,delta)
+          for policy in ('MAX_TSS','POD80_MIN_FAR'):
+              assert int(got[f'alert_NO_XRS_OR_PROTON_{policy}'].sum()) == 0
+          print('load-only CLI reproduces V3 probabilities; solar-only alerts are suppressed by ABSTAIN')
+          PY
+
+      - name: Bind runtime
+        run: |
+          python - <<'PY'
+          import hashlib,json,platform
+          from pathlib import Path
+          import numpy,pandas,scipy,sklearn,xgboost
+          root=Path('/tmp/distilled-v3-package')
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          payload={
+            'git_head':'${{ github.sha }}',
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'scipy':scipy.__version__,
+            'scikit_learn':sklearn.__version__,
+            'xgboost':xgboost.__version__,
+            'preregistration_ancestor_commit':'5a76da0e92fa2688112a58bf91d7ddb13fef4921',
+            'first_v3_run_commit':'ee29c105b9fbefb6e5a6838d13f8bca274f1bf88',
+            'manifest_sha256':h(root/'manifest.json'),
+            'package_receipt_sha256':h(root/'package_receipt.json'),
+            'reference_predictions_sha256':h(root/'export_reference_predictions.csv'),
+            'load_only_predictions_sha256':h(root/'load_only_predictions.csv'),
+            'locked_test_accessed':False,
+            'monitor_used':False,
+          }
+          (root/'runtime.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable V3 package evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-distilled-v3-package-${{ github.sha }}
+          path: /tmp/distilled-v3-package
+          if-no-files-found: error
+          retention-days: 30

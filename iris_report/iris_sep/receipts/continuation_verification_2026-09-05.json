@@ -1,0 +1,25 @@
+{
+  "scope": "LOCAL_ENGINEERING_AND_PINNED_DEVELOPMENT_VERIFICATION",
+  "command": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=/private/tmp/iris_sep_pydeps python3 -m iris_report.iris_sep.tests.verify_local",
+  "exit_code": 0,
+  "pass_marker": "IRIS_SEP_LOCAL_VERIFICATION_PASS",
+  "log_sha256": "cbbf90dc25b66147728cdb0c90b6866cc84ceade2029189c70e918ddf2ddefac",
+  "test_groups": [
+    7,
+    5,
+    14,
+    34,
+    22
+  ],
+  "fixture_cases": 11,
+  "locked_test_accessed": false,
+  "new_model_training": false,
+  "evaluation_policy_sha256": "137b6c4ba6f8f1f83d216a4d64abc8645be1786f4fae0450726210eb0d26c5de",
+  "benchmark_contract_v2_sha256": "ae2b17add2cda2129e3af8c3d64dda216af447dbb0e889b0af051fc8d2e4f3e2",
+  "replay_receipt_sha256": "036e3d39a2f6e68a6924bf373d6596b17f3195aa940719d46f61f52b1e80f38a",
+  "limitations": [
+    "Replay tool accepts synthetic fixtures only",
+    "No final benchmark performed",
+    "Full artifact verification requires preserved local artifacts excluded from ordinary Git"
+  ]
+}

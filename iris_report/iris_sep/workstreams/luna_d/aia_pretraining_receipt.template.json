@@ -1,0 +1,22 @@
+{
+  "receipt_type": "IRIS_SEP_AIA_AUXILIARY_PRETRAINING",
+  "schema_version": "iris-sep-luna-d-aia-pretraining-v1",
+  "workstream": "luna_d",
+  "generated_at_utc": null,
+  "status": "NOT_RUN",
+  "target_namespace": "aia_self_supervised",
+  "validation": {
+    "sep_labels_used": false,
+    "locked_test_accessed": false,
+    "raw_aia_archive_downloaded": false,
+    "fusion_or_hmi_join_performed": false
+  },
+  "archive_policy": {
+    "raw_archive_download": "PROHIBITED",
+    "raw_aia_archive_size_is_approximate": true
+  },
+  "transfer_contract": {
+    "not_transferable": ["sep_prediction_head", "sep_labels", "sep_calibration", "sep_threshold"]
+  },
+  "receipt_sha256": null
+}

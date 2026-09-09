@@ -1,0 +1,20 @@
+name: JSOC HARP Debug
+on:
+  push:
+    branches: [iris-gate0-data]
+    paths: ['.github/workflows/jsoc-debug.yml']
+  workflow_dispatch:
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query failed HARPs
+        shell: bash
+        run: |
+          set +e
+          for h in 13694 13730 14045 14054 14361 14364 14577 14593 14790 14791; do
+            echo "===== HARP $h ====="
+            url="http://jsoc.stanford.edu/cgi-bin/ajax/jsoc_info?op=rs_list&ds=hmi.sharp_cea_720s%5B${h}%5D%5B2025.08.25_00%3A00%3A00_TAI%2F8736h%401h%5D&key=T_REC%2CHARPNUM%2CNOAA_ARS%2CLON_FWT%2CLAT_FWT%2CQUALITY&seg=magnetogram"
+            curl -L --max-time 40 -sS -w '\nHTTP=%{http_code}\n' "$url" | head -c 1500
+            echo
+          done

@@ -1,0 +1,216 @@
+{
+  "status": "CURRENT_DEVELOPMENT_SYSTEM_ARCHITECTURE",
+  "name": "IRIS_SEP_RELIABILITY_AWARE_SYSTEM_V2",
+  "scope": "DEVELOPMENT_ONLY_NOT_OPERATIONALLY_CERTIFIED",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "full_data_predictor": {
+    "architecture": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+    "specialists": {
+      "SOLAR": "five_seed_median_xgboost",
+      "XRS": "five_seed_median_xgboost",
+      "PROTON": "five_seed_median_xgboost"
+    },
+    "fusion": "nonnegative_prevalence_centered_evidence_stack",
+    "fusion_training": "four_expanding_chronological_outer_fit_crossfit",
+    "calibration": "single_logit_intercept_calibration_role_only",
+    "threshold_primary": "MAX_TSS_threshold_role_only",
+    "threshold_secondary": "POD80_MIN_FAR_diagnostic_only",
+    "source_of_truth": "config/current_development_architecture_v1.json"
+  },
+  "availability_runtime": {
+    "architecture": "IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3",
+    "FULL": {
+      "experts": [
+        "SOLAR",
+        "XRS",
+        "PROTON"
+      ],
+      "stack_kind": "POSITIVE_EVIDENCE_STACK_TEACHER",
+      "permission": "NORMAL_ONLY_IF_ADMISSION_PASSES"
+    },
+    "NO_XRS": {
+      "experts": [
+        "SOLAR",
+        "PROTON"
+      ],
+      "stack_kind": "DISTILLED_POSITIVE_EVIDENCE_STACK",
+      "permission": "DEGRADED"
+    },
+    "NO_PROTON": {
+      "experts": [
+        "SOLAR",
+        "XRS"
+      ],
+      "stack_kind": "DISTILLED_POSITIVE_EVIDENCE_STACK",
+      "permission": "DEGRADED"
+    },
+    "NO_XRS_OR_PROTON": {
+      "experts": [
+        "SOLAR"
+      ],
+      "stack_kind": "SOLAR_ONLY",
+      "permission": "ABSTAIN",
+      "threshold_crossing_may_not_emit_alert": true
+    },
+    "distillation": {
+      "teacher_weight": 0.35,
+      "hard_label_weight": 0.65,
+      "l2_weight": 0.03,
+      "missing_expert_available_to_student_at_runtime": false
+    }
+  },
+  "trust_and_integrity": {
+    "input_lineage": "IRIS_SEP_FORECAST_INPUT_PROVENANCE_GATE_V1",
+    "ordered_vector_schema": "IRIS_SEP_ORDERED_FEATURE_VECTOR_SCHEMA_V1",
+    "prospective_bundle": "IRIS_SEP_PROSPECTIVE_INFERENCE_BUNDLE_V2",
+    "availability_package": "IRIS_SEP_AVAILABILITY_MODEL_PACKAGE_V2",
+    "runtime_training_allowed": false,
+    "finite_value_is_not_native_observation": true,
+    "schema_or_lineage_failure": "FAIL_CLOSED",
+    "no_supported_input_state": "ABSTAIN",
+    "source_revision_string_is_authenticated_source_identity": false,
+    "trusted_source_registry_status": "NOT_YET_ESTABLISHED"
+  },
+  "runtime_observability": {
+    "promoted_specialist_seed_disagreement": "population_std_across_five_fixed_seed_probabilities",
+    "seed_disagreement_changes_probability": false,
+    "xrs_data_quality": "finite_fraction_at_issue",
+    "proton_data_quality": "finite_fraction_at_issue",
+    "independent_development_check": "seed_disagreement_correlates_with_absolute_error_but_is_not_yet_calibrated_into_a_trust_policy"
+  },
+  "verified_development_evidence": {
+    "full_stack_run_id": 33985243824,
+    "full_stack_artifact_sha256": "ed04d5b34df094e2eb7f7db3f07b426619494b38987f1993c0faddca90d58f99",
+    "v3_replay_run_id": 34138370215,
+    "v3_replay_artifact_sha256": "0d6c38cc34d1d55604bade0611f37d5635620ad6112d35a9f193ef51b39b2390",
+    "v3_package_replay_run_id": 34141515134,
+    "v3_package_artifact_sha256": "69be4a5d79c17e452d2fe6115c6447995f22297002a6b25e2dc692c760495a75",
+    "v3_package_self_replay_max_abs_difference": 0.0,
+    "v3_package_specialist_model_count": 15,
+    "v3_oof_rows": 4297,
+    "v3_oof_positives": 87,
+    "locked_test_accessed": false
+  },
+  "black_box_validation": {
+    "report": "architecture/BLACK_BOX_VALIDATION_2026-09-07.md",
+    "validation_kind": "INDEPENDENT_IMPLEMENTATION_BLACK_BOX_NOT_EXTERNAL_THIRD_PARTY",
+    "v3_package_zip_sha256_recomputed": "69be4a5d79c17e452d2fe6115c6447995f22297002a6b25e2dc692c760495a75",
+    "v3_replay_zip_sha256_recomputed": "0d6c38cc34d1d55604bade0611f37d5635620ad6112d35a9f193ef51b39b2390",
+    "full_stack_zip_sha256_recomputed": "ed04d5b34df094e2eb7f7db3f07b426619494b38987f1993c0faddca90d58f99",
+    "specialist_model_hashes_verified": 15,
+    "feature_vector_schema_hashes_verified": 4,
+    "independent_xgboost_version": "3.1.3",
+    "package_xgboost_version": "3.0.4",
+    "independent_probability_reconstruction_max_abs_difference": 2.22e-16,
+    "solar_only_threshold_crossings": {
+      "MAX_TSS": 5830,
+      "POD80_MIN_FAR": 8873
+    },
+    "solar_only_emitted_alerts": {
+      "MAX_TSS": 0,
+      "POD80_MIN_FAR": 0
+    },
+    "role_partition_checks": {
+      "strict_chronology": true,
+      "cross_role_unit_overlap_count": 0,
+      "duplicate_issue_time_count": 0
+    }
+  },
+  "full_predictor_independent_red_team": {
+    "primary_policy": "MAX_TSS",
+    "score": {
+      "IRIS_TSS": 0.4257124988832306,
+      "late_fusion_TSS": 0.4605110336817654,
+      "IRIS_minus_late_fusion_TSS": -0.0347985347985348,
+      "paired_unit_bootstrap_95pct_ci_approx": [
+        -0.1338,
+        0.0182
+      ],
+      "IRIS_BRIER": 0.006347556664014628,
+      "late_fusion_BRIER": 0.006657115307931754
+    },
+    "monitor": {
+      "IRIS_TSS": 0.22066386161757828,
+      "late_fusion_TSS": 0.17800374006545117,
+      "IRIS_minus_late_fusion_TSS": 0.04266012155212711,
+      "paired_unit_bootstrap_95pct_ci_approx": [
+        -0.0488,
+        0.1720
+      ]
+    },
+    "disposition": "COMPARATIVE_SKILL_SUPERIORITY_INCONCLUSIVE"
+  },
+  "development_only_v3_results": {
+    "development_score_already_inspected": true,
+    "brier_skill_reference": "FIT_ROLE_PREVALENCE",
+    "brier_skill_reference_probability": 0.021624868598888722,
+    "score_prevalence": 0.006523765144454799,
+    "NO_XRS": {
+      "v1_TSS": 0.36808719735549006,
+      "v3_TSS": 0.4304922719556866,
+      "delta_TSS": 0.06240507460019656,
+      "paired_stratified_unit_bootstrap_95pct_ci_approx": [
+        -0.0356,
+        0.2057
+      ],
+      "v1_BRIER": 0.006422954687965309,
+      "v3_BRIER": 0.006434312514196317,
+      "top_5pct_event_capture_v1": "8/21",
+      "top_5pct_event_capture_v3": "8/21",
+      "disposition": "PROMISING_NOT_ESTABLISHED"
+    },
+    "NO_PROTON": {
+      "v1_TSS": 0.5073706781023855,
+      "v3_TSS": 0.5129991959260252,
+      "delta_TSS": 0.00562851782363971,
+      "paired_stratified_unit_bootstrap_95pct_ci_approx": [
+        0.0031,
+        0.0087
+      ],
+      "v1_BRIER": 0.006415824074880846,
+      "v3_BRIER": 0.006417693397774553,
+      "v1_false_positives": 814,
+      "v3_false_positives": 796,
+      "v1_detections": "16/21",
+      "v3_detections": "16/21",
+      "top_5pct_event_capture_v1": "6/21",
+      "top_5pct_event_capture_v3": "6/21",
+      "disposition": "SMALL_INTERNALLY_STABLE_DEVELOPMENT_GAIN_NOT_FINAL_EVIDENCE"
+    }
+  },
+  "rejected_or_nonpromoted_architectures": [
+    "IRISSEPTabularModel_softmax_gated_compact_fusion",
+    "IRIS_RESIDUAL_EXPERT_V1_hard_solar_anchor",
+    "IRIS_TWO_STATE_CROSSFIT_STACK_V1",
+    "availability_direct_raw_feature_specialist_V2",
+    "SEPNET_PRISM_hybrid_as_primary",
+    "SEPNET_O_dense_as_primary"
+  ],
+  "future_only_until_richer_causal_observations": [
+    "causal_multimodal_temporal_convolution",
+    "LSTM_or_Transformer_sequence_encoder",
+    "magnetogram_spatial_encoder_for_SEP_primary"
+  ],
+  "blocking_scientific_gates": [
+    "complete_forecast_time_causal_feature_reconstruction_from_upstream_sources",
+    "trusted_source_registry_or_equivalent_authenticated_acquisition_receipts",
+    "independent_untouched_final_evaluation",
+    "fair_same_date_operational_comparison",
+    "independent_evidence_before_NORMAL_trust_for_missing_feed_states"
+  ],
+  "independent_component_assessment": {
+    "ordered_schema_and_package_integrity": 9.5,
+    "runtime_reproducibility_and_portability": 9.5,
+    "fail_safe_availability_behavior": 9.5,
+    "runtime_observability": 8.5,
+    "chronology_and_role_isolation": 9.0,
+    "full_predictor_comparative_skill_evidence": 6.5,
+    "NO_XRS_skill_evidence": 6.5,
+    "NO_PROTON_skill_evidence": 7.5,
+    "source_provenance_and_causality_evidence": 6.0,
+    "untouched_final_evaluation": 5.0,
+    "summary": "roughly_9_of_10_engineering_maturity_but_6p5_to_7_of_10_scientific_evidence_maturity"
+  },
+  "architecture_rule": "Do not add capacity to the daily aggregate predictor merely to increase apparent sophistication. New predictive architecture requires richer verified causal information or preregistered evidence that the added degrees of freedom improve chronological decision performance.",
+  "claim_rule": "This contract records the development system plus independent-implementation black-box checks. It does not establish external third-party validation, operational certification, external superiority, prospective causality for unresolved aggregate predictors, authenticated source identity, or final locked-test performance."
+}

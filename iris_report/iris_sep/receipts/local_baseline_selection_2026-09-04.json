@@ -1,0 +1,52 @@
+{
+  "authoritative_development_artifact": {
+    "path": "artifacts/local_baselines_v4/receipt.json",
+    "receipt_sha256": "3c2ffc72de523cf0292477cf7a6a52b67df29b9d27fca0284212b9a819dcf711",
+    "reasons": [
+      "bound to the strict-purge development-v3 cohort and manifest",
+      "bound to the ordered 98-feature allowlist",
+      "metrics recomputed from round-trip-parsed saved probabilities",
+      "solver convergence recorded for all five seeds",
+      "bound to benchmark contract v2 daily cadence"
+    ]
+  },
+  "locked_test_accessed": false,
+  "authoritative_ensemble_artifact": {
+    "path": "artifacts/local_baseline_ensembles_v1/receipt.json",
+    "receipt_sha256": "b3a4228079ed58bf4abcebe431e6babd41f724138d294fa1e27487f6af96ca5d",
+    "aggregation": "median of five seed-calibrated probabilities",
+    "development_monitor_summary": {
+      "elastic_net_TSS": 0.1656885956074955,
+      "elastic_net_Brier_skill": -0.08042634620125466,
+      "xgboost_TSS": 0.2573418295385855,
+      "xgboost_Brier_skill": 0.14068891550066243
+    }
+  },
+  "authoritative_xgboost_artifact": {
+    "path": "artifacts/local_xgboost_v1/receipt.json",
+    "receipt_sha256": "968b9d98412fd0933080ac7fa178d85cc220e4e8ac7d15b4635adc7629729347",
+    "configuration": "fixed before result; monitor role used only for early stopping"
+  },
+  "status": "DEVELOPMENT_ONLY_NOT_HEADLINE_ELIGIBLE",
+  "superseded_artifacts": [
+    {
+      "path": "artifacts/local_baselines_v1/receipt.json",
+      "receipt_sha256": "20dfcab12c231a8efa602e91a2b427e9bdcb254dce0f366894dde84534460cd1",
+      "reason": "older cohort and threshold-edge serialization mismatch"
+    },
+    {
+      "path": "artifacts/local_baselines_v2/receipt.json",
+      "receipt_sha256": "c8626b4699d105cb74cc7fe888dd5d481e39487cc8b41b9f05a5e0de76ccae77",
+      "reason": "default CSV float parsing moved one threshold-edge prediction"
+    },
+    {
+      "path": "artifacts/local_baselines_v3/receipt.json",
+      "receipt_sha256": "0cb91b8c2c9328ec71f4d91ba9aecaef6b8b56eff8b78c4d7fa0e58b83b299e3",
+      "reason": "correct probabilities but bound to superseded hourly benchmark contract"
+    }
+  ],
+  "result_summary": {
+    "interpretation": "XGBoost is the stronger local development floor, but false alarms remain high and no selection-side metric is headline eligible."
+  },
+  "claims_forbidden": ["SEPVAL_SCORE", "FINAL_NEW_CROSSING_SCORE", "BREAKTHROUGH", "OPERATIONAL_CERTIFICATION"]
+}

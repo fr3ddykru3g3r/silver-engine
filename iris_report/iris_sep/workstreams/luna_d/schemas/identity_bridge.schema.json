@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iris.local/schemas/iris-sep-luna-d-identity-bridge-v1.json",
+  "title": "IRIS-SEP Luna D exact AARP/HMI identity bridge",
+  "type": "object",
+  "required": ["schema_version", "status", "fusion_allowed", "accepted_mappings", "rejections", "test_outcomes_accessed"],
+  "properties": {
+    "schema_version": {"const": "iris-sep-luna-d-identity-bridge-v1"},
+    "status": {"enum": ["PASS", "PARTIAL_PASS", "REJECT", "NOT_RUN"]},
+    "fusion_allowed": {"type": "boolean"},
+    "test_outcomes_accessed": {"const": false},
+    "accepted_mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["mapping_id", "aarp_source_id", "aarp_number", "aarp_issue_time_utc", "hmi_key", "provenance", "record_sha256", "mapping_method"],
+        "properties": {
+          "mapping_method": {"const": "authoritative_crosswalk"},
+          "hmi_key": {"type": "object", "required": ["harpnum", "t_rec_tai"]},
+          "record_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "rejections": {"type": "array"}
+  }
+}

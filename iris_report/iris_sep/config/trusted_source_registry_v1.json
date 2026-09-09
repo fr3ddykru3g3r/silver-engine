@@ -1,0 +1,99 @@
+{
+  "registry_id": "iris-sep-trusted-source-registry-v1",
+  "status": "ACTIVE_RESEARCH_TRUST_REGISTRY",
+  "purpose": "Bind prospective IRIS-SEP acquisition receipts to predeclared official providers/endpoints. Historical retrieval after forecast issue cannot be upgraded to prospective availability merely because the source is official.",
+  "rules": {
+    "https_required": true,
+    "receipt_sha256_required": true,
+    "retrieved_at_must_not_exceed_issue_time": true,
+    "source_id_must_exist_in_registry": true,
+    "host_must_match_registry": true,
+    "query_or_series_must_match_registry_when_declared": true,
+    "historical_backfill_is_prospective_proof": false,
+    "caller_supplied_source_identity_is_trusted_without_registry": false
+  },
+  "sources": {
+    "NOAA_SWPC_PRIMARY_PROTON_7D": {
+      "provider": "NOAA Space Weather Prediction Center",
+      "host": "services.swpc.noaa.gov",
+      "transport": "HTTPS_JSON",
+      "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/integral-protons-7-day.json",
+      "family": "PROTON",
+      "prospective_admissibility": "SNAPSHOT_BEFORE_ISSUE_ONLY",
+      "expected_time_field": "time_tag",
+      "expected_value_field": "flux",
+      "expected_channel_rule": ">=10 MeV"
+    },
+    "NOAA_SWPC_PRIMARY_XRS_7D": {
+      "provider": "NOAA Space Weather Prediction Center",
+      "host": "services.swpc.noaa.gov",
+      "transport": "HTTPS_JSON",
+      "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json",
+      "family": "XRS",
+      "prospective_admissibility": "SNAPSHOT_BEFORE_ISSUE_ONLY",
+      "expected_time_field": "time_tag",
+      "expected_value_field": "flux",
+      "expected_band_rule": "1-8 Angstrom / XRS-B"
+    },
+    "NOAA_SWPC_GOES_INSTRUMENT_SOURCES": {
+      "provider": "NOAA Space Weather Prediction Center",
+      "host": "services.swpc.noaa.gov",
+      "transport": "HTTPS_JSON",
+      "endpoint": "https://services.swpc.noaa.gov/json/goes/instrument-sources.json",
+      "family": "SOURCE_ROUTING",
+      "prospective_admissibility": "SNAPSHOT_BEFORE_ISSUE_ONLY"
+    },
+    "JSOC_HMI_SHARP_DEFINITIVE": {
+      "provider": "Stanford Joint Science Operations Center",
+      "host": "jsoc.stanford.edu",
+      "transport": "DRMS_QUERY",
+      "series": "hmi.sharp_cea_720s",
+      "family": "MAGNETIC_SHARP",
+      "prospective_admissibility": "QUERY_COMPLETED_BEFORE_ISSUE_ONLY",
+      "expected_time_field": "T_REC"
+    },
+    "JSOC_HMI_SHARP_NRT": {
+      "provider": "Stanford Joint Science Operations Center",
+      "host": "jsoc.stanford.edu",
+      "transport": "DRMS_QUERY",
+      "series": "hmi.sharp_cea_720s_nrt",
+      "family": "MAGNETIC_SHARP",
+      "prospective_admissibility": "QUERY_COMPLETED_BEFORE_ISSUE_ONLY",
+      "expected_time_field": "T_REC"
+    },
+    "LMSAL_HEK_GOES_FLARES": {
+      "provider": "Heliophysics Event Knowledgebase / LMSAL",
+      "host": "www.lmsal.com",
+      "transport": "SUNPY_FIDO_HEK",
+      "query_identity": "event_type=FL;observatory=GOES",
+      "family": "FLARE",
+      "prospective_admissibility": "QUERY_COMPLETED_BEFORE_ISSUE_ONLY",
+      "expected_fields": [
+        "event_starttime",
+        "event_peaktime",
+        "event_endtime",
+        "fl_goescls",
+        "ar_noaanum"
+      ]
+    },
+    "NASA_CCMC_DONKI_CME": {
+      "provider": "NASA Community Coordinated Modeling Center DONKI",
+      "host": "kauai.ccmc.gsfc.nasa.gov",
+      "transport": "HTTPS_JSON",
+      "endpoint": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME",
+      "family": "DONKI_CME",
+      "prospective_admissibility": "SNAPSHOT_BEFORE_ISSUE_ONLY",
+      "expected_time_field": "startTime"
+    },
+    "NASA_GSFC_CDAW_CME": {
+      "provider": "NASA GSFC CDAW CME Catalog",
+      "host": "cdaw.gsfc.nasa.gov",
+      "transport": "HTTPS_HTML",
+      "endpoint_template": "https://cdaw.gsfc.nasa.gov/CME_list/UNIVERSAL_ver2/{YYYY}_{MM}/univ{YYYY}_{MM}.html",
+      "family": "CDAW_CME",
+      "prospective_admissibility": "SNAPSHOT_BEFORE_ISSUE_ONLY",
+      "expected_time_fields": ["date", "time"]
+    }
+  },
+  "claim_boundary": "A receipt can authenticate that IRIS queried a predeclared official source and bind the exact bytes/query result. It does not retroactively prove forecast-time availability for data retrieved after the forecast issue time."
+}

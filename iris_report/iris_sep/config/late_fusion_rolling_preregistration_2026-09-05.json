@@ -1,0 +1,67 @@
+{
+  "status": "PRE_RESULT_PREREGISTRATION_FOR_ROLLING_REPLICATION",
+  "scope": "DEVELOPMENT_ONLY_PREMONITOR_TEMPORAL_REPLICATION_NOT_FINAL_LOCKED_EVIDENCE",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "parent_context_stability_run": 33981729019,
+  "parent_context_stability_head": "88711650ac88430e540770af294d0b583f554f9e",
+  "results_seen_before_this_preregistration": {
+    "ALL_HISTORY_LATE_FUSION_SOLAR_XRS_inner_score_TSS": 0.2695429960391407,
+    "ALL_HISTORY_LATE_FUSION_SOLAR_XRS_monitor_TSS": 0.2879852734922861,
+    "ALL_HISTORY_LATE_FUSION_SOLAR_XRS_minus_BASE_SOLAR_monitor_bootstrap_95_CI": [0.08221937108235752, 0.5632236350960321],
+    "ALL_HISTORY_LATE_FUSION_SOLAR_XRS_minus_BASE_SOLAR_inner_score_bootstrap_95_CI": [-0.18566815520986674, 0.3861726901681973],
+    "interpretation": "Recent monitor improvement is encouraging but not replicated strongly enough on the single pre-monitor inner block. Temporal replication is required before candidate freeze."
+  },
+  "data_contract": {
+    "SEP_PRISM_commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+    "feature_table_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "event_catalogue_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+    "monitor_start_exclusive_from_replication": "2023-07-31T00:00:00Z",
+    "already_active_issue_times_excluded": true,
+    "future_columns_excluded": true,
+    "CLEAR_OSEP_GSEP_catalogue_labels_excluded_from_learned_models": true
+  },
+  "rolling_fold_contract": {
+    "positive_event_units_used_for_score_replication": "last 80 chronological positive units before monitor",
+    "fold_count": 4,
+    "score_positive_units_per_fold": 20,
+    "calibration_positive_units_before_each_score": 10,
+    "threshold_positive_units_before_each_score": 10,
+    "fit": "all earlier eligible units before the calibration block",
+    "score_blocks": "chronological and positive-episode-disjoint",
+    "quiet_units": "hardened contiguous negative blocks, max seven days, broken by events and long gaps",
+    "purge_hours": 24,
+    "purge_boundary": "strictly greater than 24 hours at fit/calibration/threshold/score boundaries"
+  },
+  "arms": [
+    "BASE_SOLAR",
+    "BASE_PLUS_XRS",
+    "LATE_FUSION_SOLAR_XRS",
+    "LATE_FUSION_SOLAR_XRS_PROTON"
+  ],
+  "model_contract": {
+    "xgboost_hyperparameters": "identical to run_public_new_crossing_benchmark.py",
+    "xgboost_seeds": [7, 13, 26, 42, 73],
+    "seed_aggregation": "median probability",
+    "direct_calibration": "logit intercept fit only on calibration role",
+    "late_fusion_stacker": "L2 logistic regression C=1.0 on calibration-role component logits only",
+    "threshold_selection": "maximum TSS on threshold role with lowest-threshold tie break",
+    "no_hyperparameter_sweep": true
+  },
+  "evaluation": {
+    "per_fold_primary": "TSS",
+    "secondary": ["FAR", "POD", "FPR", "HSS", "AUPRC", "AUROC", "BRIER", "ECE"],
+    "matched_detection_primary_POD": 0.8,
+    "pooled_score_decision": "concatenate disjoint fold score rows using each fold's frozen threshold",
+    "paired_bootstrap_replicates": 10000,
+    "paired_bootstrap_unit": "complete event or quiet unit"
+  },
+  "candidate_rule": "LATE_FUSION_SOLAR_XRS is eligible for candidate freeze only if its median fold TSS difference versus BASE_SOLAR is positive, its pooled TSS difference is positive, and the pooled paired 95% bootstrap interval does not support a clear harmful effect. A strictly positive pooled lower confidence bound is preferred but not required for development continuation. Monitor results are not part of this rule.",
+  "forbidden": [
+    "2023-2025 monitor rows in fitting, calibration, thresholding, or rolling-fold selection",
+    "locked-test access",
+    "post-result hyperparameter changes within this replication",
+    "dropping unfavorable folds",
+    "award, operational, or superiority claim from this diagnostic"
+  ]
+}

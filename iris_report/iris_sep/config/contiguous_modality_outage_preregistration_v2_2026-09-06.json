@@ -1,0 +1,85 @@
+{
+  "status": "PREREGISTERED_BEFORE_CONTIGUOUS_MODALITY_OUTAGE_V2_RESULTS",
+  "scope": "DEVELOPMENT_ONLY_PROMOTED_STACK_CONTIGUOUS_MODALITY_OUTAGE_V2",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "model": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+  "frozen_before_outage": true,
+  "monitor_used": false,
+  "locked_test_access": false,
+  "prior_result_disclosure": {
+    "random_missingness_transfer_inspected": true,
+    "v1_contiguous_outage_scientific_result_seen": false,
+    "v1_failure": "Run 33987778788 failed before scientific scoring because V1 incorrectly required filtered eligible score identities to themselves form an hourly-contiguous instrument clock.",
+    "reason_for_v2": "Repair outage placement semantics only. Do not alter model, recovery arms, durations, block count, evaluation policies, thresholds, calibration or bootstrap because of an observed scientific result."
+  },
+  "implementation": {
+    "runner": "tools/run_contiguous_modality_outage_v2.py",
+    "runner_initial_commit": "ffefb94faa9be1bda21386fdae7a7e0206d1a548",
+    "test": "tests/test_contiguous_modality_outage_v2.py",
+    "v1_runner_preserved": "tools/run_contiguous_modality_outage.py",
+    "v1_preregistration_preserved": "config/contiguous_modality_outage_preregistration_2026-09-06.json"
+  },
+  "outage_semantics": {
+    "clock": "complete unique hourly window_end clock from the hash-pinned public feature table before target eligibility and purge filtering",
+    "cadence_required_within_each_outage": "exactly 1 hour",
+    "interval": "[issue_start, issue_start + duration_hours)",
+    "projection": "after deterministic source-clock placement, hide genuinely observed cells of the specified modality only on eligible score-role rows whose issue time falls inside the interval",
+    "not_claimed": "This is a whole-modality forecast-input outage on the public feature-table issue clock; it does not reconstruct or reaggregate minute-scale raw instrument samples."
+  },
+  "outage_role": "score",
+  "modalities": [
+    "XRS",
+    "PROTON",
+    "XRS_AND_PROTON"
+  ],
+  "durations_hours": [
+    24,
+    72,
+    168
+  ],
+  "blocks_per_scenario": 5,
+  "block_placement": {
+    "fractions": [0.10, 0.30, 0.50, 0.70, 0.90],
+    "candidate_range": "all source-clock starts inside the frozen score-role time extent for which every required hourly source timestamp exists",
+    "selection": "nearest integer positions at the declared fractions of the ordered admissible-start list",
+    "outcome_blind": true,
+    "uses_labels": false,
+    "uses_event_identity": false,
+    "uses_number_of_positive_rows_in_interval": false,
+    "nonoverlap_required_within_scenario": true,
+    "zero_support_rule": "If a selected source-clock block maps to zero eligible score decisions or zero genuinely observed target-modality cells, report that block as non-evaluable with zero support; never select a replacement block."
+  },
+  "cell_eligibility": "hide only cells that were finite/observed before synthetic outage; pre-existing missing or structurally unavailable cells remain unavailable and are never counted as hidden truth",
+  "recovery_arms": [
+    "MASK_AWARE_NO_FILL",
+    "TRAIN_FIT_MEDIAN",
+    "CAUSAL_FORWARD_FILL"
+  ],
+  "fit_policy": {
+    "retrain_after_outage": false,
+    "recalibrate_after_outage": false,
+    "rethreshold_after_outage": false,
+    "meta_weights_from_outage_rows": false,
+    "model_selection_from_outage_rows": false
+  },
+  "evaluation": {
+    "policies": [
+      "MAX_TSS",
+      "POD80_MIN_FAR"
+    ],
+    "primary": "paired change in whole-score-role TSS at the frozen clean threshold after injecting all five predeclared source-clock outage blocks for that modality-duration scenario",
+    "secondary": [
+      "Brier",
+      "ECE",
+      "probability absolute drift across score role",
+      "probability absolute drift on affected eligible rows",
+      "matched-detection FAR"
+    ],
+    "paired_bootstrap_replicates": 10000,
+    "bootstrap_unit": "complete NEW-crossing event episode or predeclared quiet block",
+    "bootstrap_seed": 20260906,
+    "selection_rule": "report every modality x duration x recovery-arm scenario and every predeclared block regardless of result or support"
+  },
+  "promotion_rule": "This development diagnostic can reject a recovery strategy or motivate a future validity/admission hypothesis. It cannot by itself validate an abstention threshold because the score identities and earlier random-missingness result have already been inspected.",
+  "claim_boundary": "Development-only realism diagnostic. It cannot establish locked-test robustness, operational certification, physics advantage, named-competitor superiority, economic savings, award outcome or breakthrough."
+}

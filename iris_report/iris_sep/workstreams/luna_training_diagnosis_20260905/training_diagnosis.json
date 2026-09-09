@@ -1,0 +1,1679 @@
+{
+  "chronological_quarters": [
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.4117647058823529,
+      "positive_rows": 14,
+      "quarter": "1986Q1",
+      "quiet_units": 8,
+      "rows": 34,
+      "units": 11
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1986Q2",
+      "quiet_units": 11,
+      "rows": 34,
+      "units": 11
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1986Q3",
+      "quiet_units": 9,
+      "rows": 26,
+      "units": 9
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1986Q4",
+      "quiet_units": 13,
+      "rows": 45,
+      "units": 13
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1987Q1",
+      "quiet_units": 12,
+      "rows": 34,
+      "units": 12
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1987Q2",
+      "quiet_units": 15,
+      "rows": 63,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1987Q3",
+      "quiet_units": 16,
+      "rows": 71,
+      "units": 16
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.06818181818181818,
+      "positive_rows": 6,
+      "quarter": "1987Q4",
+      "quiet_units": 16,
+      "rows": 88,
+      "units": 17
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.14942528735632185,
+      "positive_rows": 13,
+      "quarter": "1988Q1",
+      "quiet_units": 14,
+      "rows": 87,
+      "units": 16
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.011363636363636364,
+      "positive_rows": 1,
+      "quarter": "1988Q2",
+      "quiet_units": 14,
+      "rows": 88,
+      "units": 15
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.04395604395604396,
+      "positive_rows": 4,
+      "quarter": "1988Q3",
+      "quiet_units": 13,
+      "rows": 91,
+      "units": 14
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.09782608695652174,
+      "positive_rows": 9,
+      "quarter": "1988Q4",
+      "quiet_units": 13,
+      "rows": 92,
+      "units": 14
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.25555555555555554,
+      "positive_rows": 23,
+      "quarter": "1989Q1",
+      "quiet_units": 11,
+      "rows": 90,
+      "units": 12
+    },
+    {
+      "event_units": 5,
+      "positive_prevalence": 0.3448275862068966,
+      "positive_rows": 30,
+      "quarter": "1989Q2",
+      "quiet_units": 11,
+      "rows": 87,
+      "units": 16
+    },
+    {
+      "event_units": 5,
+      "positive_prevalence": 0.42857142857142855,
+      "positive_rows": 39,
+      "quarter": "1989Q3",
+      "quiet_units": 9,
+      "rows": 91,
+      "units": 14
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.6739130434782609,
+      "positive_rows": 62,
+      "quarter": "1989Q4",
+      "quiet_units": 5,
+      "rows": 92,
+      "units": 8
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.13333333333333333,
+      "positive_rows": 12,
+      "quarter": "1990Q1",
+      "quiet_units": 12,
+      "rows": 90,
+      "units": 14
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.5168539325842697,
+      "positive_rows": 46,
+      "quarter": "1990Q2",
+      "quiet_units": 9,
+      "rows": 89,
+      "units": 12
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.18478260869565216,
+      "positive_rows": 17,
+      "quarter": "1990Q3",
+      "quiet_units": 12,
+      "rows": 92,
+      "units": 13
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1990Q4",
+      "quiet_units": 14,
+      "rows": 92,
+      "units": 14
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.24719101123595505,
+      "positive_rows": 22,
+      "quarter": "1991Q1",
+      "quiet_units": 10,
+      "rows": 89,
+      "units": 13
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.5666666666666667,
+      "positive_rows": 51,
+      "quarter": "1991Q2",
+      "quiet_units": 8,
+      "rows": 90,
+      "units": 11
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.30434782608695654,
+      "positive_rows": 28,
+      "quarter": "1991Q3",
+      "quiet_units": 10,
+      "rows": 92,
+      "units": 13
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.11956521739130435,
+      "positive_rows": 11,
+      "quarter": "1991Q4",
+      "quiet_units": 13,
+      "rows": 92,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.13333333333333333,
+      "positive_rows": 12,
+      "quarter": "1992Q1",
+      "quiet_units": 13,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.18888888888888888,
+      "positive_rows": 17,
+      "quarter": "1992Q2",
+      "quiet_units": 12,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.0989010989010989,
+      "positive_rows": 9,
+      "quarter": "1992Q3",
+      "quiet_units": 13,
+      "rows": 91,
+      "units": 15
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.16483516483516483,
+      "positive_rows": 15,
+      "quarter": "1992Q4",
+      "quiet_units": 13,
+      "rows": 91,
+      "units": 14
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.13636363636363635,
+      "positive_rows": 12,
+      "quarter": "1993Q1",
+      "quiet_units": 13,
+      "rows": 88,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1993Q2",
+      "quiet_units": 15,
+      "rows": 89,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1993Q3",
+      "quiet_units": 16,
+      "rows": 79,
+      "units": 16
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1993Q4",
+      "quiet_units": 14,
+      "rows": 89,
+      "units": 14
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.06896551724137931,
+      "positive_rows": 6,
+      "quarter": "1994Q1",
+      "quiet_units": 14,
+      "rows": 87,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1994Q2",
+      "quiet_units": 17,
+      "rows": 65,
+      "units": 17
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1994Q3",
+      "quiet_units": 19,
+      "rows": 69,
+      "units": 19
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.041666666666666664,
+      "positive_rows": 3,
+      "quarter": "1994Q4",
+      "quiet_units": 16,
+      "rows": 72,
+      "units": 17
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1995Q1",
+      "quiet_units": 14,
+      "rows": 77,
+      "units": 14
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1995Q2",
+      "quiet_units": 17,
+      "rows": 54,
+      "units": 17
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1995Q3",
+      "quiet_units": 16,
+      "rows": 41,
+      "units": 16
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.19444444444444445,
+      "positive_rows": 7,
+      "quarter": "1995Q4",
+      "quiet_units": 14,
+      "rows": 36,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1996Q1",
+      "quiet_units": 6,
+      "rows": 21,
+      "units": 6
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1996Q2",
+      "quiet_units": 10,
+      "rows": 23,
+      "units": 10
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1996Q3",
+      "quiet_units": 12,
+      "rows": 39,
+      "units": 12
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1996Q4",
+      "quiet_units": 8,
+      "rows": 34,
+      "units": 8
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1997Q1",
+      "quiet_units": 13,
+      "rows": 29,
+      "units": 13
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1997Q2",
+      "quiet_units": 16,
+      "rows": 42,
+      "units": 16
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1997Q3",
+      "quiet_units": 17,
+      "rows": 67,
+      "units": 17
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.14285714285714285,
+      "positive_rows": 12,
+      "quarter": "1997Q4",
+      "quiet_units": 15,
+      "rows": 84,
+      "units": 16
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1998Q1",
+      "quiet_units": 14,
+      "rows": 83,
+      "units": 14
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.25287356321839083,
+      "positive_rows": 22,
+      "quarter": "1998Q2",
+      "quiet_units": 13,
+      "rows": 87,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.23595505617977527,
+      "positive_rows": 21,
+      "quarter": "1998Q3",
+      "quiet_units": 12,
+      "rows": 89,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.3516483516483517,
+      "positive_rows": 32,
+      "quarter": "1998Q4",
+      "quiet_units": 10,
+      "rows": 91,
+      "units": 13
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.19318181818181818,
+      "positive_rows": 17,
+      "quarter": "1999Q1",
+      "quiet_units": 13,
+      "rows": 88,
+      "units": 14
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.2857142857142857,
+      "positive_rows": 26,
+      "quarter": "1999Q2",
+      "quiet_units": 11,
+      "rows": 91,
+      "units": 14
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1999Q3",
+      "quiet_units": 15,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "1999Q4",
+      "quiet_units": 15,
+      "rows": 91,
+      "units": 15
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.05555555555555555,
+      "positive_rows": 5,
+      "quarter": "2000Q1",
+      "quiet_units": 14,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.17582417582417584,
+      "positive_rows": 16,
+      "quarter": "2000Q2",
+      "quiet_units": 13,
+      "rows": 91,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.31521739130434784,
+      "positive_rows": 29,
+      "quarter": "2000Q3",
+      "quiet_units": 12,
+      "rows": 92,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.5,
+      "positive_rows": 45,
+      "quarter": "2000Q4",
+      "quiet_units": 9,
+      "rows": 90,
+      "units": 12
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.1111111111111111,
+      "positive_rows": 10,
+      "quarter": "2001Q1",
+      "quiet_units": 12,
+      "rows": 90,
+      "units": 14
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.45054945054945056,
+      "positive_rows": 41,
+      "quarter": "2001Q2",
+      "quiet_units": 8,
+      "rows": 91,
+      "units": 11
+    },
+    {
+      "event_units": 4,
+      "positive_prevalence": 0.38461538461538464,
+      "positive_rows": 35,
+      "quarter": "2001Q3",
+      "quiet_units": 10,
+      "rows": 91,
+      "units": 14
+    },
+    {
+      "event_units": 4,
+      "positive_prevalence": 0.717391304347826,
+      "positive_rows": 66,
+      "quarter": "2001Q4",
+      "quiet_units": 5,
+      "rows": 92,
+      "units": 9
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.5168539325842697,
+      "positive_rows": 46,
+      "quarter": "2002Q1",
+      "quiet_units": 7,
+      "rows": 89,
+      "units": 10
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.25274725274725274,
+      "positive_rows": 23,
+      "quarter": "2002Q2",
+      "quiet_units": 11,
+      "rows": 91,
+      "units": 13
+    },
+    {
+      "event_units": 4,
+      "positive_prevalence": 0.5978260869565217,
+      "positive_rows": 55,
+      "quarter": "2002Q3",
+      "quiet_units": 9,
+      "rows": 92,
+      "units": 13
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.07608695652173914,
+      "positive_rows": 7,
+      "quarter": "2002Q4",
+      "quiet_units": 13,
+      "rows": 92,
+      "units": 14
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2003Q1",
+      "quiet_units": 13,
+      "rows": 88,
+      "units": 13
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.08888888888888889,
+      "positive_rows": 8,
+      "quarter": "2003Q2",
+      "quiet_units": 13,
+      "rows": 90,
+      "units": 14
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2003Q3",
+      "quiet_units": 14,
+      "rows": 88,
+      "units": 14
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.32222222222222224,
+      "positive_rows": 29,
+      "quarter": "2003Q4",
+      "quiet_units": 11,
+      "rows": 90,
+      "units": 13
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2004Q1",
+      "quiet_units": 14,
+      "rows": 87,
+      "units": 14
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.05555555555555555,
+      "positive_rows": 5,
+      "quarter": "2004Q2",
+      "quiet_units": 14,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.18604651162790697,
+      "positive_rows": 16,
+      "quarter": "2004Q3",
+      "quiet_units": 13,
+      "rows": 86,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.23255813953488372,
+      "positive_rows": 20,
+      "quarter": "2004Q4",
+      "quiet_units": 12,
+      "rows": 86,
+      "units": 14
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.15584415584415584,
+      "positive_rows": 12,
+      "quarter": "2005Q1",
+      "quiet_units": 14,
+      "rows": 77,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.1411764705882353,
+      "positive_rows": 12,
+      "quarter": "2005Q2",
+      "quiet_units": 13,
+      "rows": 85,
+      "units": 15
+    },
+    {
+      "event_units": 4,
+      "positive_prevalence": 0.5555555555555556,
+      "positive_rows": 45,
+      "quarter": "2005Q3",
+      "quiet_units": 10,
+      "rows": 81,
+      "units": 14
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2005Q4",
+      "quiet_units": 16,
+      "rows": 66,
+      "units": 16
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2006Q1",
+      "quiet_units": 12,
+      "rows": 40,
+      "units": 12
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2006Q2",
+      "quiet_units": 18,
+      "rows": 67,
+      "units": 18
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2006Q3",
+      "quiet_units": 17,
+      "rows": 68,
+      "units": 17
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.25,
+      "positive_rows": 16,
+      "quarter": "2006Q4",
+      "quiet_units": 14,
+      "rows": 64,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2007Q1",
+      "quiet_units": 13,
+      "rows": 36,
+      "units": 13
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2007Q2",
+      "quiet_units": 11,
+      "rows": 50,
+      "units": 11
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2007Q3",
+      "quiet_units": 13,
+      "rows": 25,
+      "units": 13
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2007Q4",
+      "quiet_units": 7,
+      "rows": 19,
+      "units": 7
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2008Q1",
+      "quiet_units": 6,
+      "rows": 17,
+      "units": 6
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2008Q2",
+      "quiet_units": 5,
+      "rows": 10,
+      "units": 5
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2008Q4",
+      "quiet_units": 5,
+      "rows": 8,
+      "units": 5
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2009Q1",
+      "quiet_units": 4,
+      "rows": 4,
+      "units": 4
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2009Q3",
+      "quiet_units": 3,
+      "rows": 11,
+      "units": 3
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2009Q4",
+      "quiet_units": 9,
+      "rows": 27,
+      "units": 9
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2010Q1",
+      "quiet_units": 14,
+      "rows": 66,
+      "units": 14
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2010Q2",
+      "quiet_units": 13,
+      "rows": 62,
+      "units": 13
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.05434782608695652,
+      "positive_rows": 5,
+      "quarter": "2010Q3",
+      "quiet_units": 14,
+      "rows": 92,
+      "units": 15
+    },
+    {
+      "event_units": 0,
+      "positive_prevalence": 0.0,
+      "positive_rows": 0,
+      "quarter": "2010Q4",
+      "quiet_units": 14,
+      "rows": 92,
+      "units": 14
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.16853932584269662,
+      "positive_rows": 15,
+      "quarter": "2011Q1",
+      "quiet_units": 12,
+      "rows": 89,
+      "units": 15
+    },
+    {
+      "event_units": 2,
+      "positive_prevalence": 0.056179775280898875,
+      "positive_rows": 5,
+      "quarter": "2011Q2",
+      "quiet_units": 14,
+      "rows": 89,
+      "units": 16
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.2,
+      "positive_rows": 18,
+      "quarter": "2011Q3",
+      "quiet_units": 12,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.16304347826086957,
+      "positive_rows": 15,
+      "quarter": "2011Q4",
+      "quiet_units": 13,
+      "rows": 92,
+      "units": 16
+    },
+    {
+      "event_units": 4,
+      "positive_prevalence": 0.3176470588235294,
+      "positive_rows": 27,
+      "quarter": "2012Q1",
+      "quiet_units": 10,
+      "rows": 85,
+      "units": 14
+    },
+    {
+      "event_units": 5,
+      "positive_prevalence": 0.2159090909090909,
+      "positive_rows": 19,
+      "quarter": "2012Q2",
+      "quiet_units": 14,
+      "rows": 88,
+      "units": 19
+    },
+    {
+      "event_units": 6,
+      "positive_prevalence": 0.5568181818181818,
+      "positive_rows": 49,
+      "quarter": "2012Q3",
+      "quiet_units": 7,
+      "rows": 88,
+      "units": 13
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.021739130434782608,
+      "positive_rows": 2,
+      "quarter": "2012Q4",
+      "quiet_units": 13,
+      "rows": 92,
+      "units": 14
+    },
+    {
+      "event_units": 1,
+      "positive_prevalence": 0.06666666666666667,
+      "positive_rows": 6,
+      "quarter": "2013Q1",
+      "quiet_units": 14,
+      "rows": 90,
+      "units": 15
+    },
+    {
+      "event_units": 3,
+      "positive_prevalence": 0.34,
+      "positive_rows": 17,
+      "quarter": "2013Q2",
+      "quiet_units": 6,
+      "rows": 50,
+      "units": 9
+    }
+  ],
+  "era_missingness": {
+    "early": {
+      "feature_missingness_top10": [
+        {
+          "feature": "sharp_MEANPOT_min",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_MEANJZH_min",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_TOTPOT_avg",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_TOTPOT_max",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_TOTPOT_min",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_MEANPOT_avg",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_MEANPOT_max",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_LAT_MIN_min",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_SAVNCPP_avg",
+          "missing_rate": 1.0
+        },
+        {
+          "feature": "sharp_SAVNCPP_max",
+          "missing_rate": 1.0
+        }
+      ],
+      "modality_missing_rate": {
+        "cme": 0.0,
+        "eruption_flare": 0.0,
+        "magnetic_sharp": 0.0
+      },
+      "rows": 4002,
+      "window_end_max": "1999-09-27T07:05:00+00:00",
+      "window_end_min": "1986-02-03T07:05:00+00:00"
+    },
+    "late": {
+      "feature_missingness_top10": [
+        {
+          "feature": "sharp_MEANPOT_min",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_MEANJZH_min",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_TOTPOT_avg",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_TOTPOT_max",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_TOTPOT_min",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_MEANPOT_avg",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_MEANPOT_max",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_LAT_MIN_min",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_SAVNCPP_avg",
+          "missing_rate": 0.7188976377952756
+        },
+        {
+          "feature": "sharp_SAVNCPP_max",
+          "missing_rate": 0.7188976377952756
+        }
+      ],
+      "modality_missing_rate": {
+        "cme": 0.0,
+        "eruption_flare": 0.0,
+        "magnetic_sharp": 0.0
+      },
+      "rows": 3810,
+      "window_end_max": "2013-05-21T07:05:00+00:00",
+      "window_end_min": "1999-09-28T07:05:00+00:00"
+    }
+  },
+  "exact_duplicate_predictor_groups": {},
+  "feature_manifest_sha256": "7bca82f223f1be0adbd8afc6e30aed238ed52b3bb2339a98fa9c9cbd944436b5",
+  "feature_missingness_top20": [
+    {
+      "feature": "sharp_MEANPOT_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANJZH_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_TOTPOT_avg",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_TOTPOT_max",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_TOTPOT_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANPOT_avg",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANPOT_max",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_LAT_MIN_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_SAVNCPP_avg",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_SAVNCPP_max",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_SAVNCPP_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_ABSNJZH_avg",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_ABSNJZH_max",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_ABSNJZH_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_TOTUSJH_max",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_TOTUSJH_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANJZH_avg",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANSHR_min",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANSHR_max",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    },
+    {
+      "feature": "sharp_MEANSHR_avg",
+      "missing_count": 6741,
+      "missing_rate": 0.8629032258064516
+    }
+  ],
+  "label_like_feature_counts": {
+    "CME_label": {
+      "0": 7346,
+      "1": 466
+    },
+    "flare_label": {
+      "0": 122,
+      "1": 7690
+    },
+    "sharp_label": {
+      "0": 6741,
+      "1": 1071
+    }
+  },
+  "label_summary": {
+    "event_units": 135,
+    "negative_rows": 6494,
+    "positive_rows": 1318,
+    "prevalence": 0.1687147977470558,
+    "quiet_units": 1247
+  },
+  "limitations": [
+    "The legacy future_Operational_SEP_label is a publisher window label, not the audited NEW crossing target.",
+    "This describes training coverage and structure only; it contains no model fit, tuning, score, or causal attribution.",
+    "The table has magnetic SHARP, flare, and CME-derived predictors but no particle-context branch; era-dependent missingness may limit a single stationary model."
+  ],
+  "locked_test_accessed": false,
+  "modality_missingness": {
+    "cme": {
+      "feature_count": 14,
+      "feature_missing_rate": {
+        "CME_donki_HalfAngle_avg": 0.0,
+        "CME_donki_HalfAngle_max": 0.0,
+        "CME_donki_HalfAngle_min": 0.0,
+        "CME_donki_Latitude_avg": 0.0,
+        "CME_donki_Latitude_max": 0.0,
+        "CME_donki_Latitude_min": 0.0,
+        "CME_donki_Longitude_avg": 0.0,
+        "CME_donki_Longitude_max": 0.0,
+        "CME_donki_Longitude_min": 0.0,
+        "CME_donki_Speed_avg": 0.0,
+        "CME_donki_Speed_max": 0.0,
+        "CME_donki_Speed_min": 0.0,
+        "CME_label": 0.0,
+        "CME_num": 0.0
+      },
+      "quarter_missing_rate": {
+        "1986Q1": 0.0,
+        "1986Q2": 0.0,
+        "1986Q3": 0.0,
+        "1986Q4": 0.0,
+        "1987Q1": 0.0,
+        "1987Q2": 0.0,
+        "1987Q3": 0.0,
+        "1987Q4": 0.0,
+        "1988Q1": 0.0,
+        "1988Q2": 0.0,
+        "1988Q3": 0.0,
+        "1988Q4": 0.0,
+        "1989Q1": 0.0,
+        "1989Q2": 0.0,
+        "1989Q3": 0.0,
+        "1989Q4": 0.0,
+        "1990Q1": 0.0,
+        "1990Q2": 0.0,
+        "1990Q3": 0.0,
+        "1990Q4": 0.0,
+        "1991Q1": 0.0,
+        "1991Q2": 0.0,
+        "1991Q3": 0.0,
+        "1991Q4": 0.0,
+        "1992Q1": 0.0,
+        "1992Q2": 0.0,
+        "1992Q3": 0.0,
+        "1992Q4": 0.0,
+        "1993Q1": 0.0,
+        "1993Q2": 0.0,
+        "1993Q3": 0.0,
+        "1993Q4": 0.0,
+        "1994Q1": 0.0,
+        "1994Q2": 0.0,
+        "1994Q3": 0.0,
+        "1994Q4": 0.0,
+        "1995Q1": 0.0,
+        "1995Q2": 0.0,
+        "1995Q3": 0.0,
+        "1995Q4": 0.0,
+        "1996Q1": 0.0,
+        "1996Q2": 0.0,
+        "1996Q3": 0.0,
+        "1996Q4": 0.0,
+        "1997Q1": 0.0,
+        "1997Q2": 0.0,
+        "1997Q3": 0.0,
+        "1997Q4": 0.0,
+        "1998Q1": 0.0,
+        "1998Q2": 0.0,
+        "1998Q3": 0.0,
+        "1998Q4": 0.0,
+        "1999Q1": 0.0,
+        "1999Q2": 0.0,
+        "1999Q3": 0.0,
+        "1999Q4": 0.0,
+        "2000Q1": 0.0,
+        "2000Q2": 0.0,
+        "2000Q3": 0.0,
+        "2000Q4": 0.0,
+        "2001Q1": 0.0,
+        "2001Q2": 0.0,
+        "2001Q3": 0.0,
+        "2001Q4": 0.0,
+        "2002Q1": 0.0,
+        "2002Q2": 0.0,
+        "2002Q3": 0.0,
+        "2002Q4": 0.0,
+        "2003Q1": 0.0,
+        "2003Q2": 0.0,
+        "2003Q3": 0.0,
+        "2003Q4": 0.0,
+        "2004Q1": 0.0,
+        "2004Q2": 0.0,
+        "2004Q3": 0.0,
+        "2004Q4": 0.0,
+        "2005Q1": 0.0,
+        "2005Q2": 0.0,
+        "2005Q3": 0.0,
+        "2005Q4": 0.0,
+        "2006Q1": 0.0,
+        "2006Q2": 0.0,
+        "2006Q3": 0.0,
+        "2006Q4": 0.0,
+        "2007Q1": 0.0,
+        "2007Q2": 0.0,
+        "2007Q3": 0.0,
+        "2007Q4": 0.0,
+        "2008Q1": 0.0,
+        "2008Q2": 0.0,
+        "2008Q4": 0.0,
+        "2009Q1": 0.0,
+        "2009Q3": 0.0,
+        "2009Q4": 0.0,
+        "2010Q1": 0.0,
+        "2010Q2": 0.0,
+        "2010Q3": 0.0,
+        "2010Q4": 0.0,
+        "2011Q1": 0.0,
+        "2011Q2": 0.0,
+        "2011Q3": 0.0,
+        "2011Q4": 0.0,
+        "2012Q1": 0.0,
+        "2012Q2": 0.0,
+        "2012Q3": 0.0,
+        "2012Q4": 0.0,
+        "2013Q1": 0.0,
+        "2013Q2": 0.0
+      },
+      "row_available": 7812,
+      "row_missing": 0,
+      "row_missing_rate": 0.0
+    },
+    "eruption_flare": {
+      "feature_count": 11,
+      "feature_missing_rate": {
+        "flare_duration_minutes_avg": 0.0,
+        "flare_duration_minutes_max": 0.0,
+        "flare_duration_minutes_min": 0.0,
+        "flare_label": 0.0,
+        "flare_num": 0.0,
+        "flare_peak_duration_minutes_avg": 0.0,
+        "flare_peak_duration_minutes_max": 0.0,
+        "flare_peak_duration_minutes_min": 0.0,
+        "flare_strength_log_avg": 0.0,
+        "flare_strength_log_max": 0.0,
+        "flare_strength_log_min": 0.0
+      },
+      "quarter_missing_rate": {
+        "1986Q1": 0.0,
+        "1986Q2": 0.0,
+        "1986Q3": 0.0,
+        "1986Q4": 0.0,
+        "1987Q1": 0.0,
+        "1987Q2": 0.0,
+        "1987Q3": 0.0,
+        "1987Q4": 0.0,
+        "1988Q1": 0.0,
+        "1988Q2": 0.0,
+        "1988Q3": 0.0,
+        "1988Q4": 0.0,
+        "1989Q1": 0.0,
+        "1989Q2": 0.0,
+        "1989Q3": 0.0,
+        "1989Q4": 0.0,
+        "1990Q1": 0.0,
+        "1990Q2": 0.0,
+        "1990Q3": 0.0,
+        "1990Q4": 0.0,
+        "1991Q1": 0.0,
+        "1991Q2": 0.0,
+        "1991Q3": 0.0,
+        "1991Q4": 0.0,
+        "1992Q1": 0.0,
+        "1992Q2": 0.0,
+        "1992Q3": 0.0,
+        "1992Q4": 0.0,
+        "1993Q1": 0.0,
+        "1993Q2": 0.0,
+        "1993Q3": 0.0,
+        "1993Q4": 0.0,
+        "1994Q1": 0.0,
+        "1994Q2": 0.0,
+        "1994Q3": 0.0,
+        "1994Q4": 0.0,
+        "1995Q1": 0.0,
+        "1995Q2": 0.0,
+        "1995Q3": 0.0,
+        "1995Q4": 0.0,
+        "1996Q1": 0.0,
+        "1996Q2": 0.0,
+        "1996Q3": 0.0,
+        "1996Q4": 0.0,
+        "1997Q1": 0.0,
+        "1997Q2": 0.0,
+        "1997Q3": 0.0,
+        "1997Q4": 0.0,
+        "1998Q1": 0.0,
+        "1998Q2": 0.0,
+        "1998Q3": 0.0,
+        "1998Q4": 0.0,
+        "1999Q1": 0.0,
+        "1999Q2": 0.0,
+        "1999Q3": 0.0,
+        "1999Q4": 0.0,
+        "2000Q1": 0.0,
+        "2000Q2": 0.0,
+        "2000Q3": 0.0,
+        "2000Q4": 0.0,
+        "2001Q1": 0.0,
+        "2001Q2": 0.0,
+        "2001Q3": 0.0,
+        "2001Q4": 0.0,
+        "2002Q1": 0.0,
+        "2002Q2": 0.0,
+        "2002Q3": 0.0,
+        "2002Q4": 0.0,
+        "2003Q1": 0.0,
+        "2003Q2": 0.0,
+        "2003Q3": 0.0,
+        "2003Q4": 0.0,
+        "2004Q1": 0.0,
+        "2004Q2": 0.0,
+        "2004Q3": 0.0,
+        "2004Q4": 0.0,
+        "2005Q1": 0.0,
+        "2005Q2": 0.0,
+        "2005Q3": 0.0,
+        "2005Q4": 0.0,
+        "2006Q1": 0.0,
+        "2006Q2": 0.0,
+        "2006Q3": 0.0,
+        "2006Q4": 0.0,
+        "2007Q1": 0.0,
+        "2007Q2": 0.0,
+        "2007Q3": 0.0,
+        "2007Q4": 0.0,
+        "2008Q1": 0.0,
+        "2008Q2": 0.0,
+        "2008Q4": 0.0,
+        "2009Q1": 0.0,
+        "2009Q3": 0.0,
+        "2009Q4": 0.0,
+        "2010Q1": 0.0,
+        "2010Q2": 0.0,
+        "2010Q3": 0.0,
+        "2010Q4": 0.0,
+        "2011Q1": 0.0,
+        "2011Q2": 0.0,
+        "2011Q3": 0.0,
+        "2011Q4": 0.0,
+        "2012Q1": 0.0,
+        "2012Q2": 0.0,
+        "2012Q3": 0.0,
+        "2012Q4": 0.0,
+        "2013Q1": 0.0,
+        "2013Q2": 0.0
+      },
+      "row_available": 7812,
+      "row_missing": 0,
+      "row_missing_rate": 0.0
+    },
+    "magnetic_sharp": {
+      "feature_count": 73,
+      "feature_missing_rate": {
+        "sharp_ABSNJZH_avg": 0.8629032258064516,
+        "sharp_ABSNJZH_max": 0.8629032258064516,
+        "sharp_ABSNJZH_min": 0.8629032258064516,
+        "sharp_LAT_MAX_avg": 0.8629032258064516,
+        "sharp_LAT_MAX_max": 0.8629032258064516,
+        "sharp_LAT_MAX_min": 0.8629032258064516,
+        "sharp_LAT_MIN_avg": 0.8629032258064516,
+        "sharp_LAT_MIN_max": 0.8629032258064516,
+        "sharp_LAT_MIN_min": 0.8629032258064516,
+        "sharp_LON_MAX_avg": 0.8629032258064516,
+        "sharp_LON_MAX_max": 0.8629032258064516,
+        "sharp_LON_MAX_min": 0.8629032258064516,
+        "sharp_LON_MIN_avg": 0.8629032258064516,
+        "sharp_LON_MIN_max": 0.8629032258064516,
+        "sharp_LON_MIN_min": 0.8629032258064516,
+        "sharp_MEANALP_avg": 0.8629032258064516,
+        "sharp_MEANALP_max": 0.8629032258064516,
+        "sharp_MEANALP_min": 0.8629032258064516,
+        "sharp_MEANGAM_avg": 0.8629032258064516,
+        "sharp_MEANGAM_max": 0.8629032258064516,
+        "sharp_MEANGAM_min": 0.8629032258064516,
+        "sharp_MEANGBH_avg": 0.8629032258064516,
+        "sharp_MEANGBH_max": 0.8629032258064516,
+        "sharp_MEANGBH_min": 0.8629032258064516,
+        "sharp_MEANGBT_avg": 0.8629032258064516,
+        "sharp_MEANGBT_max": 0.8629032258064516,
+        "sharp_MEANGBT_min": 0.8629032258064516,
+        "sharp_MEANGBZ_avg": 0.8629032258064516,
+        "sharp_MEANGBZ_max": 0.8629032258064516,
+        "sharp_MEANGBZ_min": 0.8629032258064516,
+        "sharp_MEANJZD_avg": 0.8629032258064516,
+        "sharp_MEANJZD_max": 0.8629032258064516,
+        "sharp_MEANJZD_min": 0.8629032258064516,
+        "sharp_MEANJZH_avg": 0.8629032258064516,
+        "sharp_MEANJZH_max": 0.8629032258064516,
+        "sharp_MEANJZH_min": 0.8629032258064516,
+        "sharp_MEANPOT_avg": 0.8629032258064516,
+        "sharp_MEANPOT_max": 0.8629032258064516,
+        "sharp_MEANPOT_min": 0.8629032258064516,
+        "sharp_MEANSHR_avg": 0.8629032258064516,
+        "sharp_MEANSHR_max": 0.8629032258064516,
+        "sharp_MEANSHR_min": 0.8629032258064516,
+        "sharp_NACR_avg": 0.8629032258064516,
+        "sharp_NACR_max": 0.8629032258064516,
+        "sharp_NACR_min": 0.8629032258064516,
+        "sharp_NPIX_avg": 0.8629032258064516,
+        "sharp_NPIX_max": 0.8629032258064516,
+        "sharp_NPIX_min": 0.8629032258064516,
+        "sharp_SAVNCPP_avg": 0.8629032258064516,
+        "sharp_SAVNCPP_max": 0.8629032258064516,
+        "sharp_SAVNCPP_min": 0.8629032258064516,
+        "sharp_SHRGT45_avg": 0.8629032258064516,
+        "sharp_SHRGT45_max": 0.8629032258064516,
+        "sharp_SHRGT45_min": 0.8629032258064516,
+        "sharp_SIZE_ACR_avg": 0.8629032258064516,
+        "sharp_SIZE_ACR_max": 0.8629032258064516,
+        "sharp_SIZE_ACR_min": 0.8629032258064516,
+        "sharp_SIZE_avg": 0.8629032258064516,
+        "sharp_SIZE_max": 0.8629032258064516,
+        "sharp_SIZE_min": 0.8629032258064516,
+        "sharp_TOTPOT_avg": 0.8629032258064516,
+        "sharp_TOTPOT_max": 0.8629032258064516,
+        "sharp_TOTPOT_min": 0.8629032258064516,
+        "sharp_TOTUSJH_avg": 0.8629032258064516,
+        "sharp_TOTUSJH_max": 0.8629032258064516,
+        "sharp_TOTUSJH_min": 0.8629032258064516,
+        "sharp_TOTUSJZ_avg": 0.8629032258064516,
+        "sharp_TOTUSJZ_max": 0.8629032258064516,
+        "sharp_TOTUSJZ_min": 0.8629032258064516,
+        "sharp_USFLUX_avg": 0.8629032258064516,
+        "sharp_USFLUX_max": 0.8629032258064516,
+        "sharp_USFLUX_min": 0.8629032258064516,
+        "sharp_label": 0.0
+      },
+      "quarter_missing_rate": {
+        "1986Q1": 0.0,
+        "1986Q2": 0.0,
+        "1986Q3": 0.0,
+        "1986Q4": 0.0,
+        "1987Q1": 0.0,
+        "1987Q2": 0.0,
+        "1987Q3": 0.0,
+        "1987Q4": 0.0,
+        "1988Q1": 0.0,
+        "1988Q2": 0.0,
+        "1988Q3": 0.0,
+        "1988Q4": 0.0,
+        "1989Q1": 0.0,
+        "1989Q2": 0.0,
+        "1989Q3": 0.0,
+        "1989Q4": 0.0,
+        "1990Q1": 0.0,
+        "1990Q2": 0.0,
+        "1990Q3": 0.0,
+        "1990Q4": 0.0,
+        "1991Q1": 0.0,
+        "1991Q2": 0.0,
+        "1991Q3": 0.0,
+        "1991Q4": 0.0,
+        "1992Q1": 0.0,
+        "1992Q2": 0.0,
+        "1992Q3": 0.0,
+        "1992Q4": 0.0,
+        "1993Q1": 0.0,
+        "1993Q2": 0.0,
+        "1993Q3": 0.0,
+        "1993Q4": 0.0,
+        "1994Q1": 0.0,
+        "1994Q2": 0.0,
+        "1994Q3": 0.0,
+        "1994Q4": 0.0,
+        "1995Q1": 0.0,
+        "1995Q2": 0.0,
+        "1995Q3": 0.0,
+        "1995Q4": 0.0,
+        "1996Q1": 0.0,
+        "1996Q2": 0.0,
+        "1996Q3": 0.0,
+        "1996Q4": 0.0,
+        "1997Q1": 0.0,
+        "1997Q2": 0.0,
+        "1997Q3": 0.0,
+        "1997Q4": 0.0,
+        "1998Q1": 0.0,
+        "1998Q2": 0.0,
+        "1998Q3": 0.0,
+        "1998Q4": 0.0,
+        "1999Q1": 0.0,
+        "1999Q2": 0.0,
+        "1999Q3": 0.0,
+        "1999Q4": 0.0,
+        "2000Q1": 0.0,
+        "2000Q2": 0.0,
+        "2000Q3": 0.0,
+        "2000Q4": 0.0,
+        "2001Q1": 0.0,
+        "2001Q2": 0.0,
+        "2001Q3": 0.0,
+        "2001Q4": 0.0,
+        "2002Q1": 0.0,
+        "2002Q2": 0.0,
+        "2002Q3": 0.0,
+        "2002Q4": 0.0,
+        "2003Q1": 0.0,
+        "2003Q2": 0.0,
+        "2003Q3": 0.0,
+        "2003Q4": 0.0,
+        "2004Q1": 0.0,
+        "2004Q2": 0.0,
+        "2004Q3": 0.0,
+        "2004Q4": 0.0,
+        "2005Q1": 0.0,
+        "2005Q2": 0.0,
+        "2005Q3": 0.0,
+        "2005Q4": 0.0,
+        "2006Q1": 0.0,
+        "2006Q2": 0.0,
+        "2006Q3": 0.0,
+        "2006Q4": 0.0,
+        "2007Q1": 0.0,
+        "2007Q2": 0.0,
+        "2007Q3": 0.0,
+        "2007Q4": 0.0,
+        "2008Q1": 0.0,
+        "2008Q2": 0.0,
+        "2008Q4": 0.0,
+        "2009Q1": 0.0,
+        "2009Q3": 0.0,
+        "2009Q4": 0.0,
+        "2010Q1": 0.0,
+        "2010Q2": 0.0,
+        "2010Q3": 0.0,
+        "2010Q4": 0.0,
+        "2011Q1": 0.0,
+        "2011Q2": 0.0,
+        "2011Q3": 0.0,
+        "2011Q4": 0.0,
+        "2012Q1": 0.0,
+        "2012Q2": 0.0,
+        "2012Q3": 0.0,
+        "2012Q4": 0.0,
+        "2013Q1": 0.0,
+        "2013Q2": 0.0
+      },
+      "row_available": 7812,
+      "row_missing": 0,
+      "row_missing_rate": 0.0
+    }
+  },
+  "nearconstant_features": [],
+  "outer_validation_values_inspected": false,
+  "source_csv_sha256": "ab2bef52a80ebce5c27d2312f031b410843b3fa8e6b351d07a02f3e0ded010ef",
+  "source_manifest_sha256": "18c10d4fc76a2ce5e03b9a271951003f274435aa00180fcb90e4f2947eedaebb",
+  "status": "PASS_TRAINING_ONLY_DIAGNOSIS",
+  "target_semantics": "PUBLISHER_LEGACY_FUTURE_OPERATIONAL_WINDOW_LABEL_NOT_AUDITED_NEW_CROSSING",
+  "train_rows": 7812,
+  "train_units": 1382,
+  "train_window_end": {
+    "max": "2013-05-21T07:05:00+00:00",
+    "min": "1986-02-03T07:05:00+00:00"
+  }
+}

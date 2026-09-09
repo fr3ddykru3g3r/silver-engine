@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iris.local/schemas/iris-sep-luna-d-aia-pretraining-v1.json",
+  "title": "IRIS-SEP label-free AIA auxiliary pretraining",
+  "type": "object",
+  "required": ["schema_version", "task_id", "input_schema", "target_kind", "target_namespace", "sep_labels_used", "locked_test_accessed", "archive_policy", "transfer_contract"],
+  "properties": {
+    "schema_version": {"const": "iris-sep-luna-d-aia-pretraining-v1"},
+    "target_kind": {"enum": ["masked_feature_reconstruction", "next_aia_observation", "instrument_quality_control"]},
+    "target_namespace": {"const": "aia_self_supervised"},
+    "sep_labels_used": {"const": false},
+    "locked_test_accessed": {"const": false},
+    "archive_policy": {
+      "type": "object",
+      "required": ["raw_aia_archive_approx_bytes", "raw_aia_archive_size_is_approximate", "raw_archive_download"],
+      "properties": {
+        "raw_archive_download": {"const": "PROHIBITED"},
+        "raw_aia_archive_size_is_approximate": {"const": true}
+      }
+    },
+    "transfer_contract": {"type": "object", "required": ["transferable", "not_transferable"]}
+  }
+}

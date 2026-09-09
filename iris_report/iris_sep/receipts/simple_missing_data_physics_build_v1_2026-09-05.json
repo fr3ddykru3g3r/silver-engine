@@ -1,0 +1,105 @@
+{
+  "receipt_id": "IRIS_SEP_SIMPLE_MISSING_DATA_PHYSICS_BUILD_V1_2026_09_05",
+  "scope": "SOURCE_ONLY_EXECUTABLE_MISSING_DATA_AND_REDUCED_PHYSICS_BUILD_NOT_A_REAL_DATA_RESULT",
+  "repository": "fr3ddykru3g3r/silver-engine",
+  "branch": "codex/iris-sep-continuation-20260905",
+  "pull_request": 3,
+  "starting_verified_head": "f7eccaf0863c359fd2645c12fbc7f565945eea2e",
+  "source_tested_head": "c7135b3a0bba84cfb39431c2be7ac6834b23e507",
+  "github_actions": {
+    "run_id": 33978887134,
+    "job_id": 101340379074,
+    "runner_os": "Ubuntu 24.04.4",
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "pytorch": "2.10.0+cpu",
+    "scikit_learn": "1.8.0",
+    "unittest_executions": 81,
+    "unittest_failures": 0,
+    "unittest_errors": 0,
+    "unittest_elapsed_seconds": 0.477,
+    "unittest_status": "PASS",
+    "py_compile_status": "PASS",
+    "project_source_futurewarning_present": false,
+    "runner_node_deprecation_notices_present": true
+  },
+  "plain_language_question": "When solar measurements temporarily go missing, can physics fill the gap well enough to keep a 24-hour solar-radiation-storm forecast useful?",
+  "implemented": {
+    "reduced_physics": {
+      "method_id": "ROTATE_SPREAD_2D_V1",
+      "equation_family": "2-D advection plus diffusion on an explicitly declared map grid",
+      "plain_language": "Take the last real magnetic map, move it sideways according to the declared solar-map rotation rate, and let the magnetic pattern spread slightly.",
+      "full_mhd": false,
+      "future_observation_input": false,
+      "no_prior_real_map_behavior": "ABSTAIN",
+      "comparison": "last real map persistence",
+      "source_path": "iris_report/iris_sep/src/iris_sep/simple_physics.py"
+    },
+    "hidden_map_experiment": {
+      "source_path": "iris_report/iris_sep/src/iris_sep/physics_gap_experiment.py",
+      "runner": "iris_report/iris_sep/tools/run_simple_physics_gap_benchmark.py",
+      "package_contract": "iris_report/iris_sep/config/magnetic_map_gap_package_v1.json",
+      "rules": [
+        "artificially hide only real nonstructural train-only score-role maps",
+        "use only the most recent earlier real map",
+        "do not chain one synthetic reconstruction into the next hidden reconstruction",
+        "compare persistence and reduced physics on identical hidden maps",
+        "pixel-space improvement alone is insufficient for downstream admission"
+      ]
+    },
+    "forecast_robustness_experiment": {
+      "source_paths": [
+        "iris_report/iris_sep/src/iris_sep/missingness_experiment.py",
+        "iris_report/iris_sep/src/iris_sep/fixed_forecast_benchmark.py"
+      ],
+      "runner": "iris_report/iris_sep/tools/run_missingness_forecast_benchmark.py",
+      "package_contract": "iris_report/iris_sep/config/missingness_experiment_package_v1.json",
+      "reference_forecaster": "fixed L2 logistic reference with train fit, calibration-role intercept calibration and threshold-role TSS threshold",
+      "recovery_arms": [
+        "MASK_AWARE_NO_FILL",
+        "TRAIN_FIT_MEDIAN",
+        "CAUSAL_FORWARD_FILL"
+      ],
+      "rules": [
+        "fit and freeze the reference forecaster before artificial score-time outage",
+        "artificially hide only observed nonstructural cells in the train-only score role",
+        "never read hidden truth through a false observed mask",
+        "features with zero fit-era support are excluded from artificial outage rather than invented",
+        "rescore reference and recovery arm on identical retained identities",
+        "charge abstention as lost coverage",
+        "reject locked/test roles before fitting or scoring"
+      ]
+    }
+  },
+  "real_data_execution_status": {
+    "verified_train_only_new_crossing_package_present_in_git": false,
+    "verified_train_only_magnetic_map_package_present_in_git": false,
+    "real_new_crossing_missingness_experiment": "NOT_RUN",
+    "real_hidden_magnetic_map_physics_experiment": "NOT_RUN",
+    "downstream_physics_sep_experiment": "NOT_RUN",
+    "reason": "The safe verified training-only NEW-crossing cohort/source manifest and a verified train-only magnetic-map package with authoritative geometry are not present in ordinary Git. They were not replaced with mixed or locked data."
+  },
+  "scientific_status": {
+    "new_model_training": false,
+    "final_new_crossing_improvement_established": false,
+    "physics_reconstruction_advantage_established": false,
+    "accurate_solar_flare_simulation_established": false,
+    "full_mhd_simulation_established": false,
+    "operational_readiness_established": false,
+    "named_company_superiority_established": false,
+    "economic_savings_established": false,
+    "breakthrough_established": false,
+    "award_outcome_established": false
+  },
+  "data_and_evaluation_safety": {
+    "mixed_train_test_table_downloaded": false,
+    "locked_test_identity_accessed": false,
+    "locked_test_outcome_accessed": false,
+    "used_outer_monitor_reused_as_fresh_evidence": false,
+    "inspected_inner_score_blocks_reused_as_fresh_evidence": false,
+    "publisher_request_resent": false,
+    "external_message_sent": false,
+    "files_deleted": false
+  },
+  "exact_next_action": "Mount or produce the verified train-only NEW-crossing package that satisfies config/missingness_experiment_package_v1.json and run tools/run_missingness_forecast_benchmark.py without changing the frozen experiment logic. Separately, if a verified train-only magnetic-map package with authoritative geometry satisfies config/magnetic_map_gap_package_v1.json, run tools/run_simple_physics_gap_benchmark.py. Physics may enter the downstream SEP forecast only after it beats last-map persistence on hidden real maps and a causal map-to-forecast-feature path is frozen and then shown to preserve forecast skill better than the simpler recovery arms."
+}

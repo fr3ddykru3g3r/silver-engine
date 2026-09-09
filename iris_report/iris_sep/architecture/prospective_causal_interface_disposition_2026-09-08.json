@@ -1,0 +1,38 @@
+{
+  "format": "IRIS_SEP_PROSPECTIVE_CAUSAL_INTERFACE_DISPOSITION_V1",
+  "date": "2026-09-08",
+  "frozen_model_interface": {
+    "total_positions": 259,
+    "solar_context_positions": 251,
+    "xrs_positions": 4,
+    "proton_positions": 4
+  },
+  "fresh_source_evidence": {
+    "audit_run_id": 34191713209,
+    "audit_artifact_sha256": "781743978753c207b64a473fb946f2a5078918f65502fb534f2b0c69068ae8f5",
+    "jsoc_definitive_series": "hmi.sharp_cea_720s",
+    "jsoc_nrt_series": "hmi.sharp_cea_720s_nrt",
+    "nrt_missing_required_keywords": ["CMASKL", "MEANGBL", "USFLUXL"],
+    "affected_frozen_positions": [
+      "SHARP_CMASKL_min", "SHARP_CMASKL_max", "SHARP_CMASKL_avg",
+      "SHARP_MEANGBL_min", "SHARP_MEANGBL_max", "SHARP_MEANGBL_avg",
+      "SHARP_USFLUXL_min", "SHARP_USFLUXL_max", "SHARP_USFLUXL_avg",
+      "SHARP_AR_CMASKL_min", "SHARP_AR_CMASKL_max", "SHARP_AR_CMASKL_avg",
+      "SHARP_AR_MEANGBL_min", "SHARP_AR_MEANGBL_max", "SHARP_AR_MEANGBL_avg",
+      "SHARP_AR_USFLUXL_min", "SHARP_AR_USFLUXL_max", "SHARP_AR_USFLUXL_avg"
+    ]
+  },
+  "disposition": "FROZEN_MODEL_RETROSPECTIVE_ONLY_FOR_SKILL_UNTIL_SOURCE_EQUIVALENCE_IS_ESTABLISHED",
+  "prospective_skill_allowed": false,
+  "integration_only_missing_value_run_allowed": false,
+  "rules": {
+    "zero_fill_missing_nrt_fields": false,
+    "substitute_similarly_named_quantities": false,
+    "use_definitive_values_retrieved_after_issue_as_nrt": false,
+    "retrospective_backcast_or_harmonisation": false,
+    "relabel_reduced_interface_as_same_frozen_model": false,
+    "train_a_separately_preregistered_reduced_causal_interface_model": true
+  },
+  "reason": "The issue-time CEA-NRT product does not expose three quantities required by the frozen historical interface. Definitive-series metadata existence does not prove issue-time availability. A prospective skill forecast using the current 259-position package would therefore require an unvalidated substitution or missing-data assumption.",
+  "claim_boundary": "This disposition closes the current prospective-skill path as blocked; it does not imply the retrospective V3 development experiments are invalid."
+}

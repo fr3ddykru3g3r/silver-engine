@@ -1,0 +1,20 @@
+{
+  "receipt_type": "IRIS_SEP_CLEANUP_MANIFEST",
+  "date": "2026-09-05",
+  "status": "NO_DELETION_PERFORMED",
+  "scope": "SOL_CONTINUATION_EXECUTION_ENVIRONMENT",
+  "deleted_paths": [],
+  "preserved_classes": [
+    "failed_experiments",
+    "pinned_receipt_dependencies",
+    "datasets",
+    "model_checkpoints",
+    "notebook_outputs",
+    "caches_without_verified_hash_matching_backup"
+  ],
+  "reason": "No candidate duplicate or reproducible cache in this execution environment had both a verified hash-matching remote/external backup and proof that it was unreferenced. The environment contained only a minimal source hydration for bounded tests, not the original artifact workspace.",
+  "backup_verification_performed": false,
+  "artifact_deletion_authorized": false,
+  "locked_test_accessed": false,
+  "note": "Source publication is not treated as a backup for datasets, checkpoints, failed experiments, or artifacts required by pinned receipts."
+}

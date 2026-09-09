@@ -1,0 +1,74 @@
+name: IRIS-SEP SHARP NRT equivalence probe
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/tools/run_sharp_nrt_equivalence_probe.py'
+      - 'iris_report/iris_sep/tests/test_sharp_nrt_equivalence_probe.py'
+      - '.github/workflows/iris-sep-sharp-nrt-equivalence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+
+      - name: Install bounded probe dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 drms==0.9.1 pytest==8.4.2
+
+      - name: Compile and test probe logic offline
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/run_sharp_nrt_equivalence_probe.py
+          python -m pytest -q iris_report/iris_sep/tests/test_sharp_nrt_equivalence_probe.py
+
+      - name: Run one bounded live source-equivalence probe
+        run: |
+          rm -rf /tmp/iris-sep-sharp-nrt-equivalence
+          python -m iris_report.iris_sep.tools.run_sharp_nrt_equivalence_probe \
+            --output /tmp/iris-sep-sharp-nrt-equivalence
+
+      - name: Bind runtime and head
+        if: always()
+        run: |
+          mkdir -p /tmp/iris-sep-sharp-nrt-equivalence
+          python - <<'PY'
+          import json, platform
+          from pathlib import Path
+          import drms, numpy, pandas
+          path = Path('/tmp/iris-sep-sharp-nrt-equivalence/runtime.json')
+          path.write_text(json.dumps({
+            'git_head': '${{ github.sha }}',
+            'python': platform.python_version(),
+            'numpy': numpy.__version__,
+            'pandas': pandas.__version__,
+            'drms': drms.__version__,
+            'probe_scope': 'SHARP_STORED_KEYWORD_SOURCE_EQUIVALENCE_ONLY',
+            'forecast_probability_emitted': False,
+            'training_performed': False,
+            'locked_test_accessed': False,
+          }, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Upload immutable equivalence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-sharp-nrt-equivalence-${{ github.sha }}
+          path: /tmp/iris-sep-sharp-nrt-equivalence
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,47 @@
+name: IRIS Gate 0 Data Collection
+
+on:
+  push:
+    branches: [iris-gate0-data]
+    paths:
+      - 'iris-gate0-data/**'
+      - '.github/workflows/iris-gate0-collect.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: iris-gate0-data-collection
+  cancel-in-progress: true
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-gate0-data
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r iris-gate0-data/requirements.txt
+      - name: Verify exact JSOC time conversion
+        run: python common/test_jsoc_time.py
+      - name: Collect NOAA and HARP evidence
+        run: python iris-gate0-data/fetch_gate0.py
+      - name: Query complete JSOC SHARP census
+        run: python iris-gate0-data/query_sharp.py
+      - name: Build connected-region manifest and counts
+        run: python iris-gate0-data/build_manifest.py
+      - name: Smoke-test real FITS retrieval
+        run: python iris-gate0-data/smoke_download.py
+      - name: Package evidence
+        run: |
+          cd iris-gate0-data
+          find data -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          tar -czf ../iris-gate0-evidence.tar.gz data SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-gate0-evidence
+          path: iris-gate0-evidence.tar.gz
+          retention-days: 30

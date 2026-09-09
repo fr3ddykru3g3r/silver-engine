@@ -1,0 +1,116 @@
+name: IRIS Seven-Arm Synthetic Augmentation Locked Test
+
+on:
+  push:
+    branches: [iris-generator-historical]
+    paths:
+      - '.github/workflows/iris-augmentation-locked-test.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  arm:
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [real, rw, duplicate, base, hj, pil, hj_pil]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-generator-historical
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/requirements-no-torch.txt
+          pip install -r /tmp/requirements-no-torch.txt
+      - name: Download integrity-locked historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Wait for frozen generator artifact
+        if: matrix.arm != 'real' && matrix.arm != 'rw' && matrix.arm != 'duplicate'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p gen_bundle gen_artifact
+          ok=0
+          for i in $(seq 1 240); do
+            rm -rf gen_bundle/*
+            if gh run download 32964195149 -n iris-generator-${{ matrix.arm }}-pilot -D gen_bundle 2>/dev/null; then ok=1; break; fi
+            echo "Frozen generator ${{ matrix.arm }} not ready ($i/240); waiting 60 s"
+            sleep 60
+          done
+          test "$ok" = 1
+          tar -xzf gen_bundle/iris-generator-${{ matrix.arm }}-pilot.tar.gz -C gen_artifact
+          test -f gen_artifact/samples/${{ matrix.arm }}/synthetic_manifest.csv
+      - name: Verify frozen protocol
+        run: |
+          test -f V2_DOWNSTREAM_MATRIX_FREEZE_2026-08-27.md
+          python -m compileall -q iris-model
+      - name: Train validation-selected arm and evaluate test once
+        shell: bash
+        run: |
+          set -e
+          COMMON="--evidence-dir evidence --cache-dir cache/${{ matrix.arm }} --out-dir outputs/${{ matrix.arm }} --seed 2026 --train-per-group 4 --val-per-group 6 --pos-cap 2 --test-per-group 6 --test-pos-cap 2 --width 48 --dropout 0.2 --gamma 1.5 --lr 0.0003 --batch-size 32 --steps 1200 --eval-every 300 --download-workers 8 --validation-bootstrap 1000 --test-bootstrap 5000 --evaluate-test"
+          case "${{ matrix.arm }}" in
+            real) python iris-model/train_matched_augmentation.py $COMMON --arm real --class-weighting none ;;
+            rw) python iris-model/train_matched_augmentation.py $COMMON --arm real_weighted --class-weighting balanced ;;
+            duplicate) python iris-model/train_matched_augmentation.py $COMMON --arm duplicate --class-weighting none --augmentation-count 250 ;;
+            base|hj|pil|hj_pil) python iris-model/train_matched_augmentation.py $COMMON --arm synthetic --class-weighting none --synthetic-manifest gen_artifact/samples/${{ matrix.arm }}/synthetic_manifest.csv --augmentation-count 250 ;;
+          esac
+          if [ -d "gen_artifact/physics_eval/${{ matrix.arm }}" ]; then
+            cp -r "gen_artifact/physics_eval/${{ matrix.arm }}" "outputs/${{ matrix.arm }}/generator_physics_eval"
+          fi
+          cp V2_DOWNSTREAM_MATRIX_FREEZE_2026-08-27.md "outputs/${{ matrix.arm }}/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: augmentation-${{ matrix.arm }}
+          path: outputs/${{ matrix.arm }}
+          retention-days: 30
+
+  paired-summary:
+    needs: arm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-generator-historical
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install analysis dependencies
+        run: pip install numpy pandas scikit-learn
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: augmentation-*
+          path: collected
+      - name: Normalize artifact layout
+        run: |
+          mkdir -p all/outputs
+          for arm in real rw duplicate base hj pil hj_pil; do
+            test -d "collected/augmentation-$arm"
+            mv "collected/augmentation-$arm" "all/outputs/$arm"
+          done
+      - name: Paired connected-region test comparisons
+        run: |
+          PYTHONPATH=iris-model python iris-model/compare_augmentation_locked_test.py --root all --out-dir comparison --bootstrap 5000
+          cp V2_DOWNSTREAM_MATRIX_FREEZE_2026-08-27.md comparison/
+          sha256sum comparison/* > comparison/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-augmentation-locked-test-comparison
+          path: comparison
+          retention-days: 30

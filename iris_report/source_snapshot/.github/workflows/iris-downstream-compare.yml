@@ -1,0 +1,57 @@
+name: IRIS Paired Augmentation Validation Comparison
+
+on:
+  push:
+    branches: [iris-generator-historical]
+    paths:
+      - 'iris-model/compare_augmentation.py'
+      - '.github/workflows/iris-downstream-compare.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-generator-historical
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install analysis dependencies
+        run: pip install numpy pandas scikit-learn
+      - name: Wait for latest successful downstream validation run and download all arms
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p bundles arms
+          for i in $(seq 1 180); do
+            RID=$(gh run list --workflow "IRIS Matched Synthetic Augmentation Validation" --branch iris-generator-historical --limit 1 --json databaseId --jq '.[0].databaseId')
+            STATUS=$(gh run view "$RID" --json status,conclusion --jq '.status+":"+(.conclusion//"")')
+            echo "Downstream $RID => $STATUS"
+            if [ "$STATUS" = "completed:success" ]; then echo "$RID" > /tmp/downstream_run; break; fi
+            if [[ "$STATUS" == completed:* ]] && [ "$STATUS" != "completed:success" ]; then exit 1; fi
+            sleep 60
+          done
+          test -s /tmp/downstream_run
+          RID=$(cat /tmp/downstream_run)
+          for arm in real duplicate base hj pil hj_pil; do
+            mkdir -p bundles/$arm arms/$arm
+            gh run download "$RID" -n iris-downstream-$arm -D bundles/$arm
+            tar -xzf bundles/$arm/iris-downstream-$arm.tar.gz -C arms/$arm
+          done
+      - name: Run paired connected-region bootstrap differences
+        run: |
+          python iris-model/compare_augmentation.py --root arms --out-dir comparison --n-boot 5000 --seed 2026
+      - name: Package
+        run: tar -czf iris-augmentation-paired-comparison.tar.gz comparison
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-augmentation-paired-comparison
+          path: iris-augmentation-paired-comparison.tar.gz
+          retention-days: 30

@@ -1,0 +1,137 @@
+name: IRIS-SEP availability distilled fallback v3 replay
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/tools/run_availability_distilled_fallback_v3_replay.py'
+      - '.github/workflows/iris-sep-availability-distilled-fallback-v3-replay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  distilled-fallback-v3-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out continuation branch with ancestry
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify original preregistration predates both V3 implementations
+        run: |
+          git merge-base --is-ancestor 5a76da0e92fa2688112a58bf91d7ddb13fef4921 HEAD
+          git merge-base --is-ancestor ee29c105b9fbefb6e5a6838d13f8bca274f1bf88 HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            scipy==1.18.1 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4
+
+      - name: Compile replay and V3 sources
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/modeling/distilled_evidence_stack.py \
+            iris_report/iris_sep/tools/run_availability_distilled_fallback_v3.py \
+            iris_report/iris_sep/tools/run_availability_distilled_fallback_v3_replay.py
+          python -m unittest discover -s iris_report/iris_sep/tests -p 'test_distilled_evidence_stack.py' -v
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Replay frozen V3 development comparison
+        run: |
+          python -m iris_report.iris_sep.tools.run_availability_distilled_fallback_v3_replay \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/distilled-fallback-v3-replay \
+            > /tmp/distilled-fallback-v3-replay.stdout.json
+
+      - name: Print decision receipt
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/distilled-fallback-v3-replay/summary.json').read_text())
+          out={
+            'candidate_for_future_untouched_evaluation':d['candidate_for_future_untouched_evaluation'],
+            'full_state_max_abs_difference_vs_v1':d['full_state_max_abs_difference_vs_v1'],
+            'full_state_reproduction_tolerance':d['full_state_reproduction_tolerance'],
+            'states':{
+              s:{
+                'keep_gate':v['keep_gate'],
+                'v1_TSS':v['v1_scalar_fusion']['metrics']['TSS'],
+                'v3_TSS':v['v3_distilled_fusion']['metrics']['TSS'],
+                'v1_review_enrichment':v['v1_scalar_fusion']['review_5pct']['enrichment_vs_random_review'],
+                'v3_review_enrichment':v['v3_distilled_fusion']['review_5pct']['enrichment_vs_random_review'],
+              }
+              for s,v in d['states'].items()
+            }
+          }
+          print(json.dumps(out,indent=2,sort_keys=True))
+          assert d['locked_test_accessed'] is False
+          assert d['monitor_used'] is False
+          assert d['imputation_used'] is False
+          assert d['reconstruction_used'] is False
+          assert d['full_state_reproduction_tolerance'] == 1e-6
+          PY
+
+      - name: Bind runtime
+        run: |
+          python - <<'PY'
+          import hashlib,json,platform
+          from pathlib import Path
+          import numpy,pandas,scipy,sklearn,xgboost
+          root=Path('/tmp/distilled-fallback-v3-replay')
+          h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          payload={
+            'git_head':'${{ github.sha }}',
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'scipy':scipy.__version__,
+            'scikit_learn':sklearn.__version__,
+            'xgboost':xgboost.__version__,
+            'preregistration_ancestor_commit':'5a76da0e92fa2688112a58bf91d7ddb13fef4921',
+            'first_v3_run_commit':'ee29c105b9fbefb6e5a6838d13f8bca274f1bf88',
+            'replay_reason':'first run stopped on 1e-10 FULL reproducibility guard; existing promoted-stack standard is 1e-6',
+            'summary_sha256':h(root/'summary.json'),
+            'predictions_sha256':h(root/'predictions.csv'),
+            'receipt_sha256':h(root/'receipt.json'),
+            'locked_test_accessed':False,
+            'monitor_used':False,
+          }
+          (root/'runtime.json').write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable V3 replay evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-availability-distilled-fallback-v3-replay-${{ github.sha }}
+          path: /tmp/distilled-fallback-v3-replay
+          if-no-files-found: error
+          retention-days: 30

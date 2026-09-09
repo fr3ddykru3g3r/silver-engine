@@ -1,0 +1,30 @@
+{
+  "receipt_type": "IRIS_HMI_COLAB_LIVE_CHECKPOINT",
+  "date": "2026-09-04",
+  "status": "ACQUISITION_STARTED_UI_UNAVAILABLE_AFTER_MAC_LOCK",
+  "drive_file": {
+    "name": "IRIS_Quantum_Flare_Benchmark_2026-09-02.ipynb",
+    "version": 19,
+    "upload_complete_visible": true,
+    "notebook_sha256": "8819cc01dd0fc462456a1512c3fc5fb0eec13a7c2927633db30bc60ed6caa9da"
+  },
+  "builder_sha256": "af4a08f084420ee46a332ffcd881e7f92643d4c503735505dfa2e3e84d89078b",
+  "overlay_sha256": "04fcaf559154aeef6f7e80fe1da832061cc6f61c6b325a5e744183c68b988512",
+  "runtime": {
+    "accelerator": "Tesla T4",
+    "torch": "2.11.0+cu128",
+    "drive_root": "/content/drive/MyDrive/IRIS_Colab_FULL_WITH_ACQUIRED_DATA_2026-08-31",
+    "existing_fits_before_resume": 3881,
+    "aarp_audit": "PASS",
+    "source_overlay": "READY",
+    "cache_state": "INCOMPLETE_RESUMING",
+    "secure_jsoc_prompt_submitted": true
+  },
+  "fix_applied_before_version_19": {
+    "problem": "root selection accepted an evidence directory without the required source archive",
+    "resolution": "candidate root must contain both evidence and silver-engine-colab-source-final-v2.zip"
+  },
+  "locked_sep_test_accessed": false,
+  "final_hmi_benchmark_receipt_available": false,
+  "claim_status": "NO_FORECAST_OR_BREAKTHROUGH_CLAIM"
+}

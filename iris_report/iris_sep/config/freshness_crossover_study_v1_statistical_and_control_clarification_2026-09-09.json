@@ -1,0 +1,61 @@
+{
+  "format": "IRIS_SEP_FRESHNESS_CROSSOVER_STATISTICAL_AND_CONTROL_CLARIFICATION_V1",
+  "study_id": "IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1",
+  "status": "FROZEN_BEFORE_LABEL_DERIVATION_OR_MODEL_SCORE_INSPECTION",
+  "reason": "Narrow pre-outcome clarification of the no-skill reference, repeated-delay uncertainty, freshness controls, and exact two-satellite measurement definition. The original preregistered gate remains auditable and controlling; no target, model family, delay grid, role boundary, or practical success criterion is changed.",
+  "clean_signal_gate": {
+    "original_gate_preserved_and_reported_verbatim": true,
+    "original_gate_controls_policy_authorization": true,
+    "corrected_no_skill_diagnostic": {
+      "AUPRC_reference": "positive prevalence of the 2016 threshold_and_rule_selection cohort itself",
+      "Brier_reference": "constant probability equal to fit-role positive prevalence, evaluated on the identical 2016 cohort",
+      "MAX_TSS_above_zero_interpretation": "screening condition only; because the threshold is selected on 2016, a positive maximum TSS may occur by chance and is not evidence that useful forecasting has been demonstrated"
+    },
+    "interpretation": "Passing the original gate authorizes the frozen delay/switching experiment. The corrected 2016-prevalence AUPRC comparison is reported alongside it and constrains interpretation; neither gate is described as independent forecast-skill evidence."
+  },
+  "repeated_delay_evidence": {
+    "same_underlying_issue_or_event_across_delays_is_one_independent_unit": true,
+    "bootstrap_unit_positive": "target crossing episode, with every associated issue and every delay variant kept together",
+    "bootstrap_unit_negative": "contiguous seven-day quiet block, with every contained issue and every delay variant kept together",
+    "paired_across_methods_and_delays": true,
+    "per_delay_results_required": true,
+    "pooled_policy_results_required": true,
+    "pooled_delay_rows_must_not_be_treated_as_independent": true
+  },
+  "freshness_isolation_controls": {
+    "when_XRS_is_delayed": [
+      "clean_joint_XRS_plus_proton",
+      "joint_with_XRS_delayed_and_proton_fresh",
+      "fresh_proton_only_reduced_model",
+      "XRS_only_model_with_XRS_delayed"
+    ],
+    "when_proton_is_delayed": [
+      "clean_joint_XRS_plus_proton",
+      "joint_with_proton_delayed_and_XRS_fresh",
+      "fresh_XRS_only_reduced_model",
+      "proton_only_model_with_proton_delayed"
+    ],
+    "explanatory_requirement": "A claimed freshness crossover must be discussed against both the clean-joint reference and the delayed single-feed control so that deterioration from stale information is distinguished from an intrinsically weaker joint model."
+  },
+  "measurement_definition": {
+    "experiment_type": "two-satellite retrospective controlled information-age experiment",
+    "proton": {
+      "spacecraft": "GOES-13",
+      "provider": "NASA SPDF/OMNIWeb",
+      "quantity": "five-minute integral proton flux above 10 MeV",
+      "direction_definition": "documented Av product, the average of the NOAA eastward- and westward-looking GOES-13 sensors",
+      "units": "1/(cm^2 s sr)",
+      "used_as_pfu_at_gt10mev_threshold": true
+    },
+    "xrs": {
+      "spacecraft": "GOES-15",
+      "provider": "NOAA/NCEI operational GOES 1-15 archive",
+      "A": "A_AVG / 0.85, 0.05-0.4 nm, W/m^2, quality flag must be zero",
+      "B": "B_AVG / 0.7, 0.1-0.8 nm, W/m^2, quality flag must be zero"
+    },
+    "historical_SWPC_primary_stream_equivalence_established": false,
+    "forbidden_description": "Do not call this pair the historical SWPC primary stream or an operational constellation replay."
+  },
+  "labels_inspected_before_clarification": false,
+  "model_scores_inspected_before_clarification": false
+}

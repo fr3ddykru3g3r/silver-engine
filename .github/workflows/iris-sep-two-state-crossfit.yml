@@ -1,0 +1,107 @@
+name: IRIS-SEP two-state cross-fitted architecture diagnostic
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/src/iris_sep/modeling/two_state_features.py'
+      - 'iris_report/iris_sep/tests/test_two_state_features.py'
+      - 'iris_report/iris_sep/tools/run_two_state_crossfit_architecture_diagnostic.py'
+      - 'iris_report/iris_sep/config/two_state_crossfit_architecture_preregistration_2026-09-06.json'
+      - '.github/workflows/iris-sep-two-state-crossfit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  two-state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install frozen dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.18.1 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Unit test and compile
+        run: |
+          python -m unittest iris_report.iris_sep.tests.test_two_state_features iris_report.iris_sep.tests.test_positive_evidence_stack -v
+          python -m py_compile \
+            iris_report/iris_sep/src/iris_sep/modeling/two_state_features.py \
+            iris_report/iris_sep/tools/run_two_state_crossfit_architecture_diagnostic.py
+
+      - name: Acquire hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/iris-two-state/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/iris-two-state/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/iris-two-state/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/iris-two-state/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/iris-two-state/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Download immutable static cross-fit comparator predictions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/static-crossfit
+          gh run download 33985243824 \
+            --repo '${{ github.repository }}' \
+            --name 'iris-sep-crossfit-stack-5d90a177462401d1486891e06c6fa6794ea4fbdb' \
+            --dir /tmp/static-crossfit
+          test -f /tmp/static-crossfit/predictions.csv
+          test "$(sha256sum /tmp/static-crossfit/predictions.csv | cut -d' ' -f1)" = "$(python - <<'PY'
+          import json
+          print(json.load(open('/tmp/static-crossfit/summary.json'))['predictions_sha256'])
+          PY
+          )"
+
+      - name: Run one-shot two-state architecture diagnostic
+        run: |
+          python -m iris_report.iris_sep.tools.run_two_state_crossfit_architecture_diagnostic \
+            --features /tmp/iris-two-state/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/iris-two-state/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --static-predictions /tmp/static-crossfit/predictions.csv \
+            --output /tmp/iris-two-state-result
+
+      - name: Bind runtime and source
+        run: |
+          python - <<'PY'
+          import json, platform
+          import numpy, pandas, scipy, sklearn, xgboost
+          from pathlib import Path
+          Path('/tmp/iris-two-state-result/runtime.json').write_text(json.dumps({
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scipy': scipy.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'static_comparator_run': 33985243824,
+              'locked_test_accessed': False,
+              'development_only': True,
+          }, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable development result
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-two-state-crossfit-${{ github.sha }}
+          path: /tmp/iris-two-state-result
+          if-no-files-found: error
+          retention-days: 30

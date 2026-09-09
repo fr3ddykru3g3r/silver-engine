@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">IRIS-SEP reliability-aware forecast state machine</title>
+  <desc id="desc">A plain-language diagram showing how available solar, X-ray, and proton evidence selects full, degraded, or abstain behavior.</desc>
+  <rect width="1200" height="680" fill="#ffffff"/>
+  <text x="60" y="62" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#111827">A probability is not automatically a trustworthy warning</text>
+  <text x="60" y="100" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#4b5563">IRIS-SEP separates the numerical forecast from permission to expose it.</text>
+
+  <rect x="60" y="150" width="250" height="120" rx="18" fill="#eef2ff" stroke="#4f46e5" stroke-width="3"/>
+  <text x="185" y="190" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Incoming evidence</text>
+  <text x="185" y="224" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Solar/context</text>
+  <text x="185" y="250" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">X-ray (XRS) · Proton history</text>
+
+  <line x1="310" y1="210" x2="390" y2="210" stroke="#6b7280" stroke-width="4"/>
+  <polygon points="390,210 372,199 372,221" fill="#6b7280"/>
+
+  <rect x="400" y="150" width="250" height="120" rx="18" fill="#f9fafb" stroke="#6b7280" stroke-width="3"/>
+  <text x="525" y="193" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#111827">Availability gate</text>
+  <text x="525" y="228" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Which evidence families</text>
+  <text x="525" y="253" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">are actually present?</text>
+
+  <line x1="650" y1="210" x2="735" y2="210" stroke="#6b7280" stroke-width="4"/>
+  <polygon points="735,210 717,199 717,221" fill="#6b7280"/>
+
+  <rect x="745" y="130" width="395" height="160" rx="18" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+  <text x="942" y="170" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#065f46">FULL</text>
+  <text x="942" y="202" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Solar + XRS + proton</text>
+  <text x="942" y="232" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Full frozen stack</text>
+  <text x="942" y="265" text-anchor="middle" font-family="Arial" font-size="18" font-weight="700" fill="#065f46">Normal only if provenance also passes</text>
+
+  <rect x="60" y="340" width="335" height="165" rx="18" fill="#fffbeb" stroke="#d97706" stroke-width="3"/>
+  <text x="227" y="380" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#92400e">NO_XRS</text>
+  <text x="227" y="413" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Solar + proton only</text>
+  <text x="227" y="443" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Pre-trained reduced-input model</text>
+  <rect x="150" y="462" width="155" height="32" rx="16" fill="#f59e0b"/>
+  <text x="227" y="485" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#ffffff">DEGRADED</text>
+
+  <rect x="432" y="340" width="335" height="165" rx="18" fill="#fffbeb" stroke="#d97706" stroke-width="3"/>
+  <text x="599" y="380" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#92400e">NO_PROTON</text>
+  <text x="599" y="413" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Solar + XRS only</text>
+  <text x="599" y="443" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Pre-trained reduced-input model</text>
+  <rect x="522" y="462" width="155" height="32" rx="16" fill="#f59e0b"/>
+  <text x="599" y="485" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#ffffff">DEGRADED</text>
+
+  <rect x="804" y="340" width="336" height="165" rx="18" fill="#fef2f2" stroke="#dc2626" stroke-width="3"/>
+  <text x="972" y="380" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#991b1b">NO_XRS_OR_PROTON</text>
+  <text x="972" y="413" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Solar-only diagnostic</text>
+  <text x="972" y="443" text-anchor="middle" font-family="Arial" font-size="18" fill="#374151">Probability may exist internally</text>
+  <rect x="895" y="462" width="154" height="32" rx="16" fill="#dc2626"/>
+  <text x="972" y="485" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#ffffff">ABSTAIN</text>
+
+  <line x1="972" y1="505" x2="972" y2="555" stroke="#dc2626" stroke-width="4"/>
+  <polygon points="972,568 961,550 983,550" fill="#dc2626"/>
+  <rect x="820" y="570" width="304" height="58" rx="14" fill="#fff1f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="972" y="606" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700" fill="#991b1b">NO ALERT</text>
+
+  <text x="60" y="635" font-family="Arial" font-size="17" fill="#4b5563">Frozen candidate: IRIS_AVAILABILITY_DISTILLED_EVIDENCE_STACK_V3 · No runtime feed fabrication or retraining.</text>
+  <text x="60" y="660" font-family="Arial" font-size="15" fill="#6b7280">Source: config/eight_issue_status_2026-09-08.json · development architecture, not independent prospective skill.</text>
+</svg>

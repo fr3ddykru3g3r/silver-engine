@@ -1,0 +1,59 @@
+{
+  "format": "IRIS_V3_ALERT_VETO_FILTER_FREEZE_V2",
+  "frozen_at_date": "2026-09-08",
+  "architecture": "IRIS_V3_ALERT_VETO_FILTER_V2",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "selection_status": "POST_HOC_DEVELOPMENT_SELECTION_SCORE_ALREADY_INSPECTED",
+  "predecessor": {
+    "architecture": "IRIS_V3_ALERT_DECISION_FILTER_V1",
+    "workflow_run": 34206898291,
+    "result": "FAILED_FROZEN_LARGE_IMPROVEMENT_GATE",
+    "failure_mechanism": "The decision model was allowed to create alerts outside the frozen V3 alert set. On NO_XRS it increased score false positives from 603 to 674 despite increasing detections from 13 to 15."
+  },
+  "structural_correction": {
+    "rule": "candidate_alert = frozen_v3_MAX_TSS_alert AND veto_score >= frozen_veto_threshold",
+    "new_alerts_outside_v3_allowed": false,
+    "reason": "A false-alarm suppression layer must be monotone: it may suppress an existing V3 alert but cannot manufacture a new alert."
+  },
+  "model_parameters": {
+    "NO_XRS": {
+      "max_depth": 2,
+      "n_estimators": 20,
+      "learning_rate": 0.08,
+      "min_child_weight": 10,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "reg_lambda": 8.0,
+      "reg_alpha": 1.0,
+      "scale_pos_weight": 50.0,
+      "random_state": 7
+    },
+    "NO_PROTON": {
+      "max_depth": 2,
+      "n_estimators": 30,
+      "learning_rate": 0.10,
+      "min_child_weight": 40,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85,
+      "reg_lambda": 8.0,
+      "reg_alpha": 1.0,
+      "scale_pos_weight": 50.0,
+      "random_state": 7
+    }
+  },
+  "training_role": "calibration",
+  "veto_threshold_selection_role": "threshold",
+  "score_role": "already_inspected_development_only",
+  "max_threshold_role_true_positive_loss": 1,
+  "large_development_improvement_gate": {
+    "score_true_positives_must_not_decrease": true,
+    "minimum_false_positive_reduction_fraction": 0.20
+  },
+  "probability_replacement_allowed": false,
+  "probability_recalibration_allowed": false,
+  "runtime_missing_family_reconstruction_allowed": false,
+  "runtime_retraining_allowed": false,
+  "locked_test_access_allowed": false,
+  "monitor_use_allowed": false,
+  "claim_boundary": "Development-selected monotone veto. Failure or success on the already-inspected score cohort is architecture evidence only. Future witnessed outcomes are required for independent validation."
+}

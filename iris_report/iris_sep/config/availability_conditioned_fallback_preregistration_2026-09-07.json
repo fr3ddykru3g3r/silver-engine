@@ -1,0 +1,63 @@
+{
+  "status": "PREREGISTERED_BEFORE_RESULT_CAPABLE_RUNNER",
+  "scope": "DEVELOPMENT_ONLY_AVAILABILITY_CONDITIONED_FALLBACK",
+  "purpose": "Test whether pretraining a small specialist-fusion fallback for each sensor-availability state is safer and more useful than fabricating missing XRS/proton measurements.",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "locked_test_accessed": false,
+  "monitor_used": false,
+  "prior_results_disclosed": [
+    "crossfit evidence-stack development result",
+    "daily quiet-window outage result",
+    "event-terminal imputation result"
+  ],
+  "source": {
+    "feature_table_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "event_catalogue_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0"
+  },
+  "availability_states": {
+    "FULL": ["SOLAR", "XRS", "PROTON"],
+    "NO_XRS": ["SOLAR", "PROTON"],
+    "NO_PROTON": ["SOLAR", "XRS"],
+    "NO_XRS_OR_PROTON": ["SOLAR"]
+  },
+  "training": {
+    "specialists": "same five-seed XGBoost experts and hyperparameters as IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+    "inner_folds": "same four expanding chronological fit-only folds as crossfit evidence stack",
+    "fusion": "PositiveEvidenceStack with nonnegative coefficients and existing regularization; expert_count equals available expert count",
+    "solar_only": "existing five-seed solar expert; no invented XRS/proton values",
+    "meta_weight_fit_scope": "fit-role out-of-fold predictions only",
+    "calibration_scope": "calibration role only",
+    "threshold_scope": "threshold role only",
+    "retraining_at_outage_time": false,
+    "imputation_at_outage_time": false
+  },
+  "evaluation": {
+    "primary_policy": "MAX_TSS",
+    "secondary_policy": "POD80_MIN_FAR",
+    "score_role": "development score only; already inspected",
+    "event_terminal_selection": "exact event-terminal positive + deterministic quiet-control selection contract from the preregistered 2026-09-06 outage experiment",
+    "durations_hours": [24, 72, 168],
+    "paired_bootstrap_replicates": 10000,
+    "paired_bootstrap_unit": "event-terminal identity / matched quiet control for affected rows; complete episode/quiet block for whole-score comparisons",
+    "report": [
+      "TSS", "HSS", "POD", "FPR", "FAR", "Brier", "Brier skill", "ECE", "AUPRC", "AUROC", "coverage"
+    ]
+  },
+  "operator_promotion_rule": {
+    "NORMAL": "FORBIDDEN from this development extension regardless of point estimate; fresh independent evaluation is required.",
+    "DEGRADED_CANDIDATE": [
+      "primary MAX_TSS affected-row TSS > 0",
+      "primary MAX_TSS affected-row POD >= 0.50",
+      "whole-score Brier degradation versus clean full stack <= 0.01",
+      "whole-score ECE degradation versus clean full stack <= 0.02",
+      "no nonfinite probability and no unresolved unavailable expert is silently substituted"
+    ],
+    "ABSTAIN": "required for an availability state that fails any DEGRADED_CANDIDATE criterion"
+  },
+  "comparison": {
+    "clean_reference": "IRIS_CROSSFIT_EVIDENCE_STACK_V1 full-data forecast",
+    "historical_simple_recovery_arms": ["MASK_AWARE_NO_FILL", "TRAIN_FIT_MEDIAN", "CAUSAL_FORWARD_FILL"],
+    "note": "Prior simple-recovery outcomes are already inspected and are contextual comparators, not fresh selection evidence."
+  },
+  "claim_boundary": "A successful result supports an availability-conditioned DEGRADED research fallback. It does not establish operational certification, raw-sensor reconstruction accuracy, or final superiority."
+}

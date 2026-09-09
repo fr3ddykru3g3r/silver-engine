@@ -1,0 +1,7 @@
+{
+  "result_sha256": "c3a24aab1a0059408848358bfca4dd67f47aea9ba7043da2cc545bda7a60d477",
+  "runner_sha256": "ad750f7fc6b242fae39542cf4ebc7c25c699310bf70c971351fe521f0590f6b3",
+  "trials": 10000,
+  "unsafe_valid_outputs": 0,
+  "locked_test_accessed": false
+}

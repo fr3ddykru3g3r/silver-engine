@@ -1,0 +1,103 @@
+name: IRIS-SEP contiguous modality outage benchmark
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/contiguous_modality_outage_preregistration_2026-09-06.json'
+      - 'iris_report/iris_sep/tools/run_contiguous_modality_outage.py'
+      - '.github/workflows/iris-sep-contiguous-modality-outage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  outage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out preregistered head
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.18.1 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Compile and test frozen architecture/recovery path
+        run: |
+          python -m py_compile \
+            iris_report/iris_sep/tools/run_contiguous_modality_outage.py \
+            iris_report/iris_sep/tools/run_promoted_stack_missingness_transfer.py \
+            iris_report/iris_sep/tools/run_crossfit_evidence_stack_diagnostic.py \
+            iris_report/iris_sep/src/iris_sep/modeling/positive_evidence_stack.py \
+            iris_report/iris_sep/src/iris_sep/missingness_experiment.py \
+            iris_report/iris_sep/src/iris_sep/missingness_recovery.py
+          python -m unittest \
+            iris_report.iris_sep.tests.test_positive_evidence_stack \
+            iris_report.iris_sep.tests.test_missingness_experiment \
+            iris_report.iris_sep.tests.test_missingness_recovery -v
+
+      - name: Verify preregistration before result
+        run: |
+          test -s iris_report/iris_sep/config/contiguous_modality_outage_preregistration_2026-09-06.json
+          sha256sum iris_report/iris_sep/config/contiguous_modality_outage_preregistration_2026-09-06.json
+
+      - name: Acquire exact hash-pinned public development inputs
+        run: |
+          mkdir -p /tmp/iris-input/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/iris-input/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/iris-input/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Run every preregistered contiguous modality outage
+        run: |
+          python -m iris_report.iris_sep.tools.run_contiguous_modality_outage \
+            --features /tmp/iris-input/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/iris-input/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-contiguous-modality-outage
+
+      - name: Bind runtime
+        if: always()
+        run: |
+          mkdir -p /tmp/iris-contiguous-modality-outage
+          python - <<'PY'
+          import json, platform
+          from pathlib import Path
+          import numpy, pandas, scipy, sklearn, xgboost
+          receipt = {
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scipy': scipy.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'locked_test_accessed': False,
+              'monitor_used': False,
+              'development_only': True,
+          }
+          Path('/tmp/iris-contiguous-modality-outage/runtime.json').write_text(json.dumps(receipt, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Upload immutable result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-contiguous-modality-outage-${{ github.sha }}
+          path: /tmp/iris-contiguous-modality-outage
+          if-no-files-found: error
+          retention-days: 30

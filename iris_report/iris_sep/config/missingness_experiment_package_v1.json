@@ -1,0 +1,30 @@
+{
+  "contract_id": "IRIS_SEP_TRAIN_ONLY_MISSINGNESS_PACKAGE_V1",
+  "status": "SOURCE_PACKAGE_CONTRACT_NOT_A_RESULT",
+  "purpose": "Minimal package needed to run the hidden-data forecast robustness experiment without exposing or mixing locked-test data.",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "metadata_required": {
+    "format": "IRIS_SEP_TRAIN_ONLY_MISSINGNESS_PACKAGE_V1",
+    "scope": "TRAIN_ONLY_NEW_CROSSING_MISSINGNESS",
+    "target": "new_sep_10mev_10pfu_within_24h",
+    "locked_test_included": false,
+    "chronological_roles_verified": true,
+    "episode_disjoint_roles_verified": true,
+    "purge_hours_minimum": 24,
+    "source_manifest_sha256": "lowercase sha256",
+    "feature_names": "one unique name per feature column"
+  },
+  "npz_required_arrays": {
+    "values": "float [rows, features]; unobserved cells may be NaN",
+    "observed_mask": "bool [rows, features]",
+    "structural_unavailable_mask": "bool [rows, features]; cannot overlap observed_mask",
+    "labels": "binary [rows]",
+    "roles": "string [rows], exactly fit/calibration/threshold/score in chronological blocks",
+    "issue_ids": "unique nonempty string [rows]",
+    "unit_ids": "nonempty episode/unit id [rows]; one role per unit",
+    "issue_time_unix_seconds": "strictly increasing numeric [rows]"
+  },
+  "experiment_rule": "Artificial missingness may be introduced only into cells that are genuinely observed, nonstructural and in the train-only score role. The reference model, calibration and threshold are frozen before the artificial outage is applied.",
+  "physics_rule": "Physics is not generated from this tabular package. A physics arm requires separately validated magnetic-map geometry and a causal map-to-feature transformation. This prevents a tabular missing value from being relabelled as physics without a physical state behind it.",
+  "claim_boundary": "This package contract does not establish forecast improvement, physics-reconstruction benefit, operational readiness, company superiority, economic savings, breakthrough or award outcome."
+}

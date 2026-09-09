@@ -1,0 +1,126 @@
+name: IRIS v2 Positive-Only PIL Lambda Sweep
+
+on:
+  push:
+    branches: [iris-v2-physics-transfer]
+    paths:
+      - '.github/workflows/iris-v2-positive-lambda-sweep.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  arm:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tag: base
+            condition: base
+            lambda_pil: '0.0'
+          - tag: pil010
+            condition: pil
+            lambda_pil: '0.10'
+          - tag: pil050
+            condition: pil
+            lambda_pil: '0.50'
+          - tag: pil100
+            condition: pil
+            lambda_pil: '1.00'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iris-v2-physics-transfer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU runtime
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          grep -v -E '^(torch|torchvision)' iris-model/requirements.txt > /tmp/req.txt
+          pip install -r /tmp/req.txt
+      - name: Download frozen historical evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p evidence_bundle evidence
+          gh run download 32937498427 -n iris-historical-evidence-integrity -D evidence_bundle
+          tar -xzf evidence_bundle/iris-historical-evidence-integrity.tar.gz -C evidence
+          python iris-gate0-data/repair_historical_tai_manifest.py --evidence-dir evidence
+          test -f evidence/data/derived/training_manifest.csv.gz
+      - name: Train positive-only generator
+        run: |
+          python iris-model/train_generator_positive_v2.py \
+            --evidence-dir evidence --cache-dir cache/${{ matrix.tag }} --out-dir outputs/${{ matrix.tag }} \
+            --condition ${{ matrix.condition }} --lambda-pil ${{ matrix.lambda_pil }} --seed 2026 \
+            --per-group 4 --batch-size 16 --physics-batch-size 16 --base-channels 16 \
+            --diffusion-steps 100 --max-steps 1200 --physics-warmup-steps 200 --download-workers 16
+      - name: Sample
+        run: |
+          python iris-model/sample_generator.py \
+            --checkpoint outputs/${{ matrix.tag }}/generator.pt --evidence-dir evidence \
+            --out-dir samples/${{ matrix.tag }} --per-group 2 --max-groups 64 --batch-size 8 --sampling-steps 50 --seed 2026
+      - name: Independent hard manipulation evaluation
+        run: |
+          python iris-model/evaluate_generator_v2_fixed.py \
+            --evidence-dir evidence --cache-dir cache_eval/${{ matrix.tag }} \
+            --synthetic-manifest samples/${{ matrix.tag }}/synthetic_manifest.csv \
+            --out-dir eval/${{ matrix.tag }} --real-per-group 2 --seed 2026
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-positive-${{ matrix.tag }}
+          path: |
+            outputs/${{ matrix.tag }}
+            samples/${{ matrix.tag }}
+            eval/${{ matrix.tag }}
+          retention-days: 30
+
+  summarize:
+    needs: arm
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: iris-v2-positive-*
+          path: collected
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Rank by train-only physical fidelity gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,csv,math
+          root=pathlib.Path('collected'); rows=[]
+          for tag in ['base','pil010','pil050','pil100']:
+            fs=list((root/f'iris-v2-positive-{tag}').rglob('v2_manipulation_metrics.json'))
+            if len(fs)!=1: raise RuntimeError((tag,fs))
+            m=json.loads(fs[0].read_text())
+            rows.append({'tag':tag,'pil_distance':m['hard_pil_standardized_energy_distance'],'geometry_distance':m['hard_geometry_standardized_energy_distance'],'flux_median':m['synthetic_unsigned_flux_proxy']['median'],'real_flux_median':m['real_unsigned_flux_proxy']['median'],'strong_area_median':m['synthetic_strong_field_area_fraction']['median'],'real_strong_area_median':m['real_strong_field_area_fraction']['median'],'diversity':m['synthetic_coarse_pairwise_diversity'],'saturation':m['synthetic_saturation_fraction_abs_gt_2900G']})
+          base=rows[0]
+          for r in rows:
+            r['pil_improvement_vs_base']=(base['pil_distance']-r['pil_distance'])/base['pil_distance']
+            r['flux_ratio_to_real']=r['flux_median']/r['real_flux_median']
+            r['strong_area_ratio_to_real']=r['strong_area_median']/max(1e-9,r['real_strong_area_median'])
+            r['generic_gate']=bool(0.5<=r['flux_ratio_to_real']<=2.0 and 0.4<=r['strong_area_ratio_to_real']<=2.5 and r['saturation']<0.05)
+            r['physics_gate']=bool(r['pil_improvement_vs_base']>=0.20 and r['generic_gate']) if r['tag']!='base' else r['generic_gate']
+          eligible=[r for r in rows[1:] if r['physics_gate']]
+          chosen=min(eligible,key=lambda z: float(z['tag'].replace('pil','')) )['tag'] if eligible else None
+          report={'phase':'TRAIN-ONLY generator selection; no forecast validation/test accessed','rows':rows,'chosen_smallest_passing_lambda_tag':chosen,'status':'PASS' if chosen else 'FAIL'}
+          pathlib.Path('positive_lambda_sweep_summary.json').write_text(json.dumps(report,indent=2)+'\n')
+          with open('positive_lambda_sweep.csv','w',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-v2-positive-lambda-summary
+          path: |
+            positive_lambda_sweep_summary.json
+            positive_lambda_sweep.csv
+          retention-days: 30

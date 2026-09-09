@@ -1,0 +1,34 @@
+{
+  "status": "PREREGISTERED_BEFORE_CONTIGUOUS_MODALITY_OUTAGE_RESULTS",
+  "scope": "DEVELOPMENT_ONLY_PROMOTED_STACK_CONTIGUOUS_MODALITY_OUTAGE",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "motivation_disclosure": "The prior random observed-cell transfer was inspected. Causal forward-fill minimized probability drift, but severe random loss degraded the frozen operational-policy TSS. This experiment is therefore a realism check, not an independent recovery-method selection test. All prior simple recovery arms are retained.",
+  "model": "IRIS_CROSSFIT_EVIDENCE_STACK_V1",
+  "frozen_before_outage": true,
+  "outage_role": "score",
+  "monitor_used": false,
+  "locked_test_access": false,
+  "issue_cadence_required": "1 hour",
+  "modalities": ["XRS", "PROTON", "XRS_AND_PROTON"],
+  "durations_hours": [24, 72, 168],
+  "blocks_per_scenario": 5,
+  "block_placement": "deterministic equally spaced score-row positions at 10%, 30%, 50%, 70%, 90% of the admissible start range; no labels or outcomes used; blocks within a scenario must not overlap",
+  "cell_eligibility": "hide only cells that were genuinely finite/observed before the synthetic outage; pre-existing unavailable cells remain unavailable and are never counted as hidden truth",
+  "recovery_arms": ["MASK_AWARE_NO_FILL", "TRAIN_FIT_MEDIAN", "CAUSAL_FORWARD_FILL"],
+  "fit_policy": {
+    "retrain_after_outage": false,
+    "recalibrate_after_outage": false,
+    "rethreshold_after_outage": false,
+    "meta_weights_from_outage_rows": false
+  },
+  "evaluation": {
+    "policies": ["MAX_TSS", "POD80_MIN_FAR"],
+    "primary": "paired change in TSS at frozen clean threshold",
+    "secondary": ["Brier", "ECE", "probability absolute drift", "matched-detection FAR"],
+    "paired_bootstrap_replicates": 10000,
+    "bootstrap_unit": "complete NEW-crossing event episode or quiet block",
+    "bootstrap_seed": 20260906,
+    "selection_rule": "report every modality x duration x recovery-arm scenario; no scenario may be omitted based on outcome"
+  },
+  "claim_boundary": "Development-only realism diagnostic on already-inspected score identities. It may motivate a DEGRADED/ABSTAIN policy but cannot validate that policy, establish locked-test robustness, operational certification, physics advantage, company superiority, economic savings, award outcome or breakthrough."
+}

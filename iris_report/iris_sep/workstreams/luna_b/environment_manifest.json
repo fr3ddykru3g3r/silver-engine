@@ -1,0 +1,57 @@
+{
+  "receipt_type": "IRIS_SEP_LUNA_B_ENVIRONMENT_MANIFEST",
+  "schema_version": "1.0",
+  "created_at_utc": "2026-09-04T00:00:00Z",
+  "status": "REFERENCE_ONLY_NOT_EXECUTED",
+  "execution_target": {
+    "compute_location": "Google Colab",
+    "gpu_required_for_neural_runs": true,
+    "expected_gpu_class": "T4_or_better",
+    "classical_baselines": "CPU_permitted_but_same_frozen_cohort_and_receipt_rules_apply",
+    "local_locked_test_execution": "prohibited"
+  },
+  "public_source_runtime_claims": [
+    {
+      "source": "SEP-Prediction v1 README",
+      "python": "3.12",
+      "r": "4.5.1",
+      "claim_type": "reported_by_source_not_local_verification"
+    }
+  ],
+  "python_packages_to_capture_in_colab": [
+    "torch",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "xgboost",
+    "optuna",
+    "requests",
+    "sunpy",
+    "drms",
+    "parfive"
+  ],
+  "package_version_policy": {
+    "exact_versions": "capture_before_run_with_pip_freeze_or_importlib_metadata",
+    "unresolved_versions_are_not_zero": true,
+    "source_version_pins_live_in": "baseline_contract.json",
+    "no_unrecorded_dependency_upgrade": true
+  },
+  "required_runtime_receipts_before_metrics": [
+    "python_version",
+    "os_and_kernel",
+    "cuda_version_if_used",
+    "gpu_name_and_memory_if_used",
+    "package_versions",
+    "git_source_commit_ids",
+    "configuration_sha256",
+    "cohort_manifest_sha256",
+    "partition_manifest_sha256",
+    "feature_manifest_sha256"
+  ],
+  "network_provenance": {
+    "local_git_ls_remote_attempt": "NOT_COMPLETED_DUE_TO_DNS_RESOLUTION_FAILURE",
+    "public_source_review": "browser_primary_source_review",
+    "source_code_copied_locally": false,
+    "large_dataset_downloaded_by_this_workstream": false
+  }
+}

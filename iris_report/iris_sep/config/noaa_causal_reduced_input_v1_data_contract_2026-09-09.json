@@ -1,0 +1,98 @@
+{
+  "format": "IRIS_SEP_NOAA_CAUSAL_REDUCED_INPUT_DATA_CONTRACT_V1",
+  "study_id": "NOAA_CAUSAL_REDUCED_INPUT_V1",
+  "date": "2026-09-09",
+  "status": "FROZEN_BEFORE_SOURCE_READINESS_PROBE_AND_BEFORE_TRAINING",
+  "parent_preregistration": "config/noaa_causal_reduced_input_v1_preregistration_2026-09-09.json",
+  "routing_rationale": "Use one operational GOES-R satellite over one uninterrupted historical interval to avoid pre-GOES-R XRS calibration changes and outcome-dependent satellite stitching. SWPC made GOES-16 primary for XRS and protons on 2019-12-09, GOES-14/15 were in storage by 2020-03-10, GOES-16 remained primary when GOES-18 became secondary on 2023-01-04, and GOES-19 did not replace GOES-16 as primary until April 2025.",
+  "historical_interval": {
+    "satellite": "GOES-16",
+    "start_utc_inclusive": "2020-03-11T00:00:00+00:00",
+    "end_utc_inclusive": "2025-04-03T23:59:59+00:00",
+    "routing": "GOES16_ONLY_NO_STITCHING",
+    "fallback_satellite_allowed": false
+  },
+  "historical_products": {
+    "xrs": {
+      "provider": "NOAA_NCEI",
+      "product": "GOES-R XRSF L2 1-minute operational averages",
+      "root": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l2/data/xrsf-l2-avg1m/",
+      "science_quality_reprocessed_product_allowed": false,
+      "required_semantics": [
+        "XRS-A and XRS-B 1-minute irradiance variables identifiable from file metadata",
+        "units available in file metadata",
+        "quality/status variables retained",
+        "UTC time coordinate identifiable from file metadata"
+      ]
+    },
+    "proton": {
+      "provider": "NOAA_NCEI",
+      "product": "GOES-R SEISS SGPS L2 1-minute operational product",
+      "root": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l2/data/sgps-l2-avg1m/",
+      "science_quality_reprocessed_product_allowed": false,
+      "required_semantics": [
+        "a documented integral-proton quantity suitable for the frozen >=10 MeV target is directly present OR a deterministic derivation from documented SGPS channels is specified and frozen before labels are generated",
+        "units available in file metadata",
+        "quality/status variables retained",
+        "UTC time coordinate identifiable from file metadata"
+      ],
+      "fail_if_only_heuristic_channel_guess_is_possible": true
+    }
+  },
+  "live_products": {
+    "xrs": "https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json",
+    "proton": "https://services.swpc.noaa.gov/json/goes/primary/integral-protons-7-day.json",
+    "routing": "https://services.swpc.noaa.gov/json/goes/instrument-sources.json",
+    "purpose": "schema/routing compatibility check only; current live satellite identity does not rewrite the historical GOES-16 cohort"
+  },
+  "fixed_roles": {
+    "fit": {
+      "start_utc_inclusive": "2020-03-11T00:00:00+00:00",
+      "end_utc_inclusive": "2022-12-31T23:59:59+00:00"
+    },
+    "calibration": {
+      "start_utc_inclusive": "2023-01-01T00:00:00+00:00",
+      "end_utc_inclusive": "2023-06-30T23:59:59+00:00"
+    },
+    "threshold": {
+      "start_utc_inclusive": "2023-07-01T00:00:00+00:00",
+      "end_utc_inclusive": "2023-12-31T23:59:59+00:00"
+    },
+    "score": {
+      "start_utc_inclusive": "2024-01-01T00:00:00+00:00",
+      "end_utc_inclusive": "2025-04-03T23:59:59+00:00",
+      "status": "DEVELOPMENT_COMPARISON_NOT_INDEPENDENT_FINAL_TEST"
+    },
+    "boundary_mutation_after_label_or_score_inspection_allowed": false,
+    "insufficient_positive_support_action": "REPORT_INSUFFICIENT_SUPPORT_DO_NOT_MOVE_BOUNDARIES"
+  },
+  "source_readiness_probe": {
+    "fixed_sample_dates": [
+      "2020-11-29",
+      "2022-03-31",
+      "2024-05-11",
+      "2025-03-01"
+    ],
+    "sample_dates_selected_before_archive_file_inspection": true,
+    "must_verify": [
+      "official archive directory and daily file retrievability for XRS and SGPS",
+      "file SHA-256 and byte length",
+      "NetCDF global metadata and variable inventory",
+      "time coordinate, units, fill values and quality/status fields",
+      "XRS A/B measurement semantics",
+      "proton >=10 MeV target semantics without heuristic relabelling",
+      "live SWPC XRS/proton JSON schemas and instrument-source routing"
+    ],
+    "training_allowed_if_probe_fails": false
+  },
+  "causality": {
+    "predictor_window": "[issue-24h, issue)",
+    "issue_time_measurement_excluded_from_predictor_features": true,
+    "outcome_window": "(issue, issue+24h]",
+    "future_fill_allowed": false,
+    "interpolation_across_missing_samples_allowed": false,
+    "quality_flagged_values_promoted_to_observed_allowed": false,
+    "retrospective_science_quality_substitution_allowed": false
+  },
+  "claim_boundary": "Passing this contract establishes source-interface readiness only. It does not establish forecast skill, catalogue-event equivalence, independent evaluation, or operational readiness."
+}

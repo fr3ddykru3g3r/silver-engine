@@ -1,0 +1,147 @@
+{
+  "study_id": "IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1",
+  "status": "PREREGISTERED_DESIGN_ONLY_PROTECTED_OUTCOMES_UNTOUCHED",
+  "created_date": "2026-09-09",
+  "primary_question": "How much do repeated positive windows from the same physical SEP episode, already-active persistence states, and issue-time proton-history information alter apparent 24-hour SEP forecasting skill and model ranking?",
+  "target": {
+    "energy_threshold_mev": 10,
+    "flux_threshold_pfu": 10,
+    "forecast_horizon_hours": 24,
+    "primary_semantics": "new_threshold_crossing_within_horizon",
+    "already_active_is_onset_positive": false
+  },
+  "hypotheses": {
+    "H1_event_multiplicity": "episode normalization materially changes at least one fixed model's TSS or matched-detection FAR",
+    "H2_rank_instability": "at least one pair of fixed model families changes ordering between standard window occurrence scoring and episode-normalized new-onset scoring",
+    "H3_proton_state_dependence": "removing direct proton-history features reduces onset skill more than persistence diagnostic skill",
+    "null_rule": "If all hypotheses fail, retain the null result and do not tune architectures to manufacture an effect"
+  },
+  "evaluation_views": [
+    "WINDOW_OCCURRENCE_STANDARD",
+    "NEW_ONSET_CAUSAL",
+    "EPISODE_NORMALIZED_ONSET",
+    "PROTON_STATE_BLIND_ONSET",
+    "PERSISTENCE_DIAGNOSTIC"
+  ],
+  "episode_weight_rule": {
+    "positive_episode_total_weight": 1.0,
+    "formula": "for each physical positive episode e, sum_i w_i(e)=1 over all eligible positive windows attached to e",
+    "negative_weighting": "unit-window reference plus predeclared quiet-block bootstrap structure; no post-result prevalence reweighting"
+  },
+  "new_quantities": {
+    "EMF": "positive_window_count / distinct_positive_episode_count",
+    "ENS_metric": "metric_episode_normalized_onset - metric_window_occurrence_standard",
+    "rank_stability_matrix": "all pairwise model ordering agreement/disagreement across standard and episode-normalized onset views"
+  },
+  "models": [
+    "fit_prevalence_climatology",
+    "causally_permitted_persistence_diagnostic",
+    "elastic_net_logistic_regression_fixed",
+    "xgboost_fixed",
+    "existing_frozen_iris_candidate_if_exact_development_features_available"
+  ],
+  "model_search": {
+    "hyperparameter_search_after_benchmark_delta_inspection": false,
+    "architecture_expansion_in_v1": false,
+    "selection_goal": "evaluation mechanism test, not score maximization"
+  },
+  "primary_metrics": [
+    "TSS",
+    "EPISODE_POD",
+    "FAR_AT_MATCHED_EPISODE_POD",
+    "MODEL_RANK_BY_TSS",
+    "EMF"
+  ],
+  "secondary_metrics": [
+    "HSS",
+    "AUROC",
+    "AUPRC",
+    "BRIER",
+    "CALIBRATION_SLOPE",
+    "CALIBRATION_INTERCEPT",
+    "RELIABILITY_CURVE",
+    "NEW_EPISODE_WARNING_LEAD_TIME"
+  ],
+  "uncertainty": {
+    "bootstrap_replicates": 10000,
+    "bootstrap_unit": "complete_physical_sep_episode_or_predeclared_quiet_block",
+    "shared_draws_across_all_models_views_delays_ablations_and_contrasts": true,
+    "paired": true,
+    "interval": "percentile_95_percent",
+    "underpowered_rule": "emit UNDERPOWERED and stop claim escalation; do not rescue by changing cohort or method after results"
+  },
+  "attrition_terminal_codes": [
+    "ELIGIBLE_ONSET_POSITIVE",
+    "ELIGIBLE_ONSET_NEGATIVE",
+    "ALREADY_ACTIVE_PERSISTENCE",
+    "UNRESOLVED_GAP",
+    "IMMATURE_OUTCOME_WINDOW",
+    "DUPLICATE_OR_AMBIGUOUS",
+    "SOURCE_UNAVAILABLE",
+    "EXCLUDED_BY_FROZEN_BOUNDARY"
+  ],
+  "required_row_evidence": [
+    "issue_timestamp",
+    "cohort_role",
+    "eligibility_code",
+    "episode_identifier_when_label_access_authorized",
+    "model_name_version",
+    "probability",
+    "threshold",
+    "binary_alert",
+    "sample_weight_by_evaluation_view",
+    "source_provenance_flags"
+  ],
+  "required_artifact_hashes": [
+    "prediction_file_sha256",
+    "configuration_sha256",
+    "environment_manifest_sha256",
+    "bootstrap_draw_tensor_sha256",
+    "attrition_ledger_sha256",
+    "result_table_sha256"
+  ],
+  "synthetic_property_tests_required": [
+    "long_and_short_positive_episodes_each_sum_to_weight_one",
+    "already_active_issue_is_persistence_not_onset",
+    "crossing_inside_horizon_is_onset_positive",
+    "crossing_after_horizon_is_onset_negative",
+    "issue_time_observation_gap_is_unresolved",
+    "duplicate_timestamps_rejected",
+    "bootstrap_draws_identical_across_compared_conditions",
+    "deliberate_rank_reversal_fixture_detected",
+    "single_window_per_episode_null_fixture_has_zero_normalization_shift"
+  ],
+  "development_evidence_policy": {
+    "historical_exposed_data_allowed_for_mechanics_debugging": true,
+    "historical_exposed_data_may_be_called_untouched": false,
+    "negative_and_null_results_must_be_retained": true
+  },
+  "protected_candidate": {
+    "registry": "config/inspected_evidence_registry_v2.json",
+    "starts_after": "2025-09-10T00:00:00Z",
+    "development_side_may_access_identities": false,
+    "development_side_may_access_labels": false,
+    "development_side_may_access_event_counts": false,
+    "development_side_may_access_episode_durations": false,
+    "development_side_may_access_scores": false,
+    "independent_custodian_required_for_final_claim": true
+  },
+  "claim_gate": {
+    "complete_prediction_level_evidence": true,
+    "exact_attrition_reconciliation": true,
+    "at_least_two_nontrivial_fixed_model_families": true,
+    "episode_level_uncertainty": true,
+    "effect_direction_selected_post_hoc": false,
+    "protected_outcomes_accessed_before_freeze": false,
+    "no_claim_if_any_contract_audit_fails": true
+  },
+  "forbidden": [
+    "post_result_hyperparameter_rescue",
+    "mixing_already_active_cases_into_onset_skill",
+    "independent_bootstrap_redraws_across_compared_conditions",
+    "calling_positive_windows_independent_events",
+    "using_protected_outcomes_for_power_rescue",
+    "claiming published models are biased before the benchmark demonstrates it",
+    "award_or_operational_superiority_claims_without corresponding independent evidence"
+  ]
+}

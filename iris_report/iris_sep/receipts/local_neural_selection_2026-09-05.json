@@ -1,0 +1,72 @@
+{
+  "status": "DEVELOPMENT_ONLY_NOT_HEADLINE_ELIGIBLE",
+  "locked_test_accessed": false,
+  "authoritative_neural_artifact": {
+    "path": "artifacts/local_tabular_v2/receipt.json",
+    "receipt_sha256": "3e5f59f11a01d30d80557f841542441ec02077ea8581d612b1728e3422bdc1f5",
+    "aggregation": "median of five independently calibrated seed probabilities",
+    "reasons": [
+      "bound to the strict-purge development-v3 cohort and manifest",
+      "ordered feature schema is cryptographically bound",
+      "probabilities are persisted at round-trip precision and metrics are recomputed after reload",
+      "threshold is selected only on validation_threshold",
+      "particle-context absence in the V1 table is explicit"
+    ]
+  },
+  "authoritative_comparison": {
+    "path": "artifacts/development_comparison_v2/receipt.json",
+    "receipt_sha256": "823fe96b67d0767c5137ddd10d85241c0ef0082ca1893632f8aa4d018d473160",
+    "comparison": "local_tabular_v2 versus median calibrated XGBoost ensemble",
+    "development_monitor_tss": {
+      "iris_sep": 0.2317272818859561,
+      "xgboost": 0.2573418295385855
+    },
+    "paired_tss_difference_95_ci": [
+      -0.14345823598867408,
+      0.10257787322380707
+    ],
+    "interpretation": "negative point estimate and inconclusive paired interval; no superiority established"
+  },
+  "fixed_hybrid_development_candidate": {
+    "path": "artifacts/development_hybrid_v2/receipt.json",
+    "receipt_sha256": "45214084a770df093761cedf632496c5bfc2c369525a7b05c56d07a030ca3504",
+    "weights": {
+      "iris_sep": 0.5,
+      "xgboost": 0.5
+    },
+    "validation_monitor_tss": 0.2763953254080193,
+    "paired_tss_difference_95_ci_vs_xgboost": [
+      -0.07190921727124425,
+      0.09656460363455492
+    ],
+    "matched_pod_0_8_far": {
+      "hybrid": 0.8973774230330672,
+      "xgboost": 0.8947368421052632
+    },
+    "interpretation": "point estimate improves TSS but the paired interval crosses zero and matched-detection FAR is slightly worse; development diagnostic remains inconclusive"
+  },
+  "superseded_artifacts": [
+    {
+      "path": "artifacts/development_hybrid_v1/receipt.json",
+      "receipt_sha256": "d4d6953754f9e74f73090e1ab9e403f1b0cdd629abfc0fe144759ad46972a565",
+      "reason": "review found incomplete validation of non-XGBoost ensemble rows and asserted rather than recomputed comparator-threshold provenance"
+    },
+    {
+      "path": "artifacts/local_tabular_v1/receipt.json",
+      "receipt_sha256": "326c77aca1bdcb12346c059ec362772f435ce47a6cfc0d87a911e1465dba1a3d",
+      "reason": "ensemble combined logits before calibration rather than combining the five independently calibrated probabilities"
+    },
+    {
+      "path": "artifacts/development_comparison_v1/receipt.json",
+      "receipt_sha256": "a7001b1e907c38f5ab4a6145cb3d548a63f72f878b6cf17bd0a4ec6595614f25",
+      "reason": "compared the superseded local_tabular_v1 artifact"
+    }
+  ],
+  "claims_forbidden": [
+    "SEPVAL_SCORE",
+    "FINAL_NEW_CROSSING_SCORE",
+    "BREAKTHROUGH",
+    "OPERATIONAL_CERTIFICATION",
+    "SUPERIORITY"
+  ]
+}

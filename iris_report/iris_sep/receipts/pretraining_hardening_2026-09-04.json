@@ -1,0 +1,34 @@
+{
+  "receipt_type": "IRIS_SEP_PRETRAINING_HARDENING",
+  "generated_at_utc": "2026-09-04T11:42:10Z",
+  "status": "PASS_SYNTHETIC_CONTRACTS_REAL_DATA_NOT_YET_ADAPTED",
+  "evaluation_policy": {
+    "path": "config/evaluation_policy_v1.json",
+    "sha256": "137b6c4ba6f8f1f83d216a4d64abc8645be1786f4fae0450726210eb0d26c5de"
+  },
+  "data_pipeline": {
+    "cohort_sha256": "9375059d087b64c0be684acb9f54c08a2e3f187280163be52fd7be32e32c9518",
+    "schemas_sha256": "c04c30da9463809fa5caea770dcaff806a8b405d4b89a3ff6410aea462b774c6",
+    "transforms_sha256": "b940662231ea964ba57413a7eeac21b7a5ee77f8024ecdc7a43f4fd645e5f7f7",
+    "manifests_sha256": "0c118e75ab19883b1b8a5ea9fc3fde04de13614c70cae260e8e1c31e643edf9d",
+    "tests": "7/7 PASS"
+  },
+  "model_semantics": {
+    "path": "workstreams/luna_h_model_hardening/luna_model.py",
+    "sha256": "5a17f674f79a64079e3592a933e5d0d2861f60edb51402634be49f162020a5e5",
+    "tests": "7/7 PASS",
+    "pytorch_runtime": "PENDING"
+  },
+  "evaluation_and_operator": {
+    "evaluation_sha256": "3fde3e6c0b68a9b0004a20f9d86c8a277ef571c1e062e83ef2284bf19af680e4",
+    "operator_sha256": "5bc3cb9d045923f9ea68ea6f4844a70933080006b1a4ec704c97d52d3cc34877",
+    "tests": "6/6 PASS"
+  },
+  "scientific_boundaries": {
+    "synthetic_contract_tests_only": true,
+    "real_training_data_accessed": false,
+    "locked_sep_test_accessed": false,
+    "benchmark_result_claimed": false,
+    "operational_certification_claimed": false
+  }
+}
