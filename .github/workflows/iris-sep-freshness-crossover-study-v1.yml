@@ -1,0 +1,86 @@
+name: IRIS-SEP freshness crossover study V1
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-continuation-20260905
+    paths:
+      - 'iris_report/iris_sep/config/freshness_crossover_study_v1_preregistration_2026-09-09.json'
+      - 'iris_report/iris_sep/config/freshness_crossover_study_v1_implementation_freeze_2026-09-09.json'
+      - 'iris_report/iris_sep/config/freshness_crossover_study_v1_policy_pooling_clarification_2026-09-09.json'
+      - 'iris_report/iris_sep/config/freshness_crossover_study_v1_statistical_and_control_clarification_2026-09-09.json'
+      - 'iris_report/iris_sep/tools/run_freshness_crossover_study_v1_payload.py'
+      - 'iris_report/iris_sep/tools/freshness_crossover_v1_payload/**'
+      - '.github/workflows/iris-sep-freshness-crossover-study-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execute-retrospective-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out frozen branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install fixed execution dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            'numpy<3' \
+            'pandas<3' \
+            'scipy<2' \
+            'scikit-learn<2' \
+            'xgboost<4' \
+            'netCDF4<2' \
+            'matplotlib<4' \
+            'requests<3'
+
+      - name: Validate exact decoded source before any data access
+        run: |
+          python - <<'PY'
+          from iris_report.iris_sep.tools.run_freshness_crossover_study_v1_payload import reconstruct, EXPECTED_SOURCE_SHA256
+          import hashlib
+          raw = reconstruct()
+          observed = hashlib.sha256(raw).hexdigest()
+          assert observed == EXPECTED_SOURCE_SHA256
+          compile(raw, '/tmp/run_freshness_crossover_study_v1.py', 'exec')
+          print({'decoded_bytes': len(raw), 'sha256': observed, 'compile': 'PASS'})
+          PY
+
+      - name: Execute frozen retrospective study
+        run: |
+          rm -rf /tmp/iris-sep-freshness-crossover-v1 /tmp/freshness_raw_cache
+          python -m iris_report.iris_sep.tools.run_freshness_crossover_study_v1_payload \
+            --output /tmp/iris-sep-freshness-crossover-v1
+
+      - name: Bind exact source and commit to evidence artifact
+        if: always()
+        run: |
+          mkdir -p /tmp/iris-sep-freshness-crossover-v1
+          python - <<'PY'
+          from pathlib import Path
+          from iris_report.iris_sep.tools.run_freshness_crossover_study_v1_payload import reconstruct
+          Path('/tmp/iris-sep-freshness-crossover-v1/EXECUTED_SOURCE.py').write_bytes(reconstruct())
+          PY
+          git rev-parse HEAD > /tmp/iris-sep-freshness-crossover-v1/git_head.txt
+          cp iris_report/iris_sep/config/freshness_crossover_study_v1_preregistration_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
+          cp iris_report/iris_sep/config/freshness_crossover_study_v1_implementation_freeze_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
+          cp iris_report/iris_sep/config/freshness_crossover_study_v1_policy_pooling_clarification_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
+          cp iris_report/iris_sep/config/freshness_crossover_study_v1_statistical_and_control_clarification_2026-09-09.json /tmp/iris-sep-freshness-crossover-v1/
+
+      - name: Upload immutable study evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-freshness-crossover-v1-${{ github.sha }}
+          path: /tmp/iris-sep-freshness-crossover-v1
+          if-no-files-found: warn
+          retention-days: 30
