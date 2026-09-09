@@ -12,8 +12,10 @@ on:
       - 'iris_report/iris_sep/tools/episode_normalized_benchmark.py'
       - 'iris_report/iris_sep/tools/episode_benchmark_statistics.py'
       - 'iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1.py'
+      - 'iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1_compat.py'
       - 'iris_report/iris_sep/tests/test_episode_semantics.py'
       - 'iris_report/iris_sep/tests/test_episode_normalized_benchmark.py'
+      - 'iris_report/iris_sep/tests/test_episode_feature_compat.py'
       - '.github/workflows/iris-sep-episode-normalized-development-benchmark.yml'
   workflow_dispatch:
 
@@ -54,6 +56,7 @@ jobs:
           python -m py_compile iris_report/iris_sep/tools/episode_normalized_benchmark.py
           python -m py_compile iris_report/iris_sep/tools/episode_benchmark_statistics.py
           python -m py_compile iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1.py
+          python -m py_compile iris_report/iris_sep/tools/run_episode_normalized_development_benchmark_v1_compat.py
           python -m py_compile iris_report/iris_sep/tools/run_freshness_crossover_study_v1.py
 
       - name: Run synthetic and property tests
@@ -62,7 +65,8 @@ jobs:
         run: |
           python -m pytest -q \
             iris_report/iris_sep/tests/test_episode_semantics.py \
-            iris_report/iris_sep/tests/test_episode_normalized_benchmark.py
+            iris_report/iris_sep/tests/test_episode_normalized_benchmark.py \
+            iris_report/iris_sep/tests/test_episode_feature_compat.py
 
       - name: Validate frozen contracts before data access
         env:
@@ -78,13 +82,13 @@ jobs:
           print('Frozen contracts validated; protected post-2025 outcomes remain inaccessible.')
           PY
 
-      - name: Run frozen development benchmark
+      - name: Run frozen development benchmark through compatibility wrapper
         env:
           PYTHONPATH: iris_report/iris_sep
           MPLBACKEND: Agg
         run: |
           rm -rf /tmp/episode-development-benchmark
-          python -m tools.run_episode_normalized_development_benchmark_v1 \
+          python -m tools.run_episode_normalized_development_benchmark_v1_compat \
             --output /tmp/episode-development-benchmark
 
       - name: Record exact runtime and claim boundary
@@ -107,6 +111,7 @@ jobs:
             'netCDF4': netCDF4.__version__,
             'matplotlib': matplotlib.__version__,
             'joblib': joblib.__version__,
+            'compatibility_wrapper': 'timezone-aware DatetimeIndex.asi8 only; scientific feature definitions unchanged',
             'protected_post_2025_outcomes_accessed': False,
             'development_only': True,
             'independent_final_evidence': False,
