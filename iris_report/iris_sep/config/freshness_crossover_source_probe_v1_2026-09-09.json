@@ -15,14 +15,19 @@
     "expected_units": "1/(cm^2 s sr)"
   },
   "xrs": {
-    "monthly_directory_template": "https://www.ncei.noaa.gov/data/goes-space-environment-monitor/access/avg/{year}/{month}/",
+    "monthly_directory_template": "https://www.ncei.noaa.gov/data/goes-space-environment-monitor/access/avg/{year}/{month}/goes15/netcdf/",
     "sample_months": ["2011-01", "2014-06", "2017-06"],
     "satellite": 15,
     "preferred_extension": ".nc",
     "required_tokens": ["g15", "xrs", "1m"],
+    "exclude_filename_tokens": ["science"],
     "archive_scaling": {
       "A_divisor": 0.85,
       "B_divisor": 0.7
+    },
+    "path_correction_provenance": {
+      "reason": "Bounded pre-outcome directory diagnostics established the legacy archive nesting as month/goes15/netcdf and identified exactly one g15_xrs_1m operational file in each sampled month. No labels, model scores, or forecast outcomes were inspected while making this source-location correction.",
+      "diagnostic_runs": [34314675307, 34314771315, 34314919680]
     }
   },
   "probe_boundaries": {
