@@ -1,0 +1,189 @@
+{
+  "format": "IRIS_SEP_FRESHNESS_CROSSOVER_IMPLEMENTATION_FREEZE_V1",
+  "study_id": "IRIS_SEP_FRESHNESS_CROSSOVER_STUDY_V1",
+  "status": "FROZEN_AFTER_SOURCE_READINESS_AND_BEFORE_LABEL_DERIVATION_OR_MODEL_SCORE_INSPECTION",
+  "source_readiness": {
+    "workflow_run": 34315156467,
+    "artifact_id": 10089797449,
+    "artifact_zip_sha256": "5ea34cc3415c23f99fba6eb7b29d143663222991dd990d0a7892c3ff4bb85b42",
+    "receipt_sha256": "a64067799bd48a57e55345035dedddebbe697fbfe3a1e8eb946ce788c6ddebca",
+    "proton_sample_schema_passed": true,
+    "xrs_sample_schema_passed": true
+  },
+  "issue_schedule": {
+    "cadence": "DAILY",
+    "utc_time": "00:00:00",
+    "start": "2011-01-02T00:00:00Z",
+    "end": "2017-11-29T00:00:00Z"
+  },
+  "base_clean_cohort": {
+    "fixed_before_delay_injection": true,
+    "label_must_be_resolved": true,
+    "already_active_issue_is_ineligible": true,
+    "proton_predictor_24h_minimum_coverage_fraction": 0.95,
+    "proton_predictor_maximum_clean_age_minutes": 10,
+    "xrs_a_predictor_24h_minimum_coverage_fraction": 0.95,
+    "xrs_b_predictor_24h_minimum_coverage_fraction": 0.95,
+    "xrs_predictor_maximum_clean_age_minutes": 2,
+    "delay_conditions_may_not_drop_base_cohort_rows": true
+  },
+  "label_semantics": {
+    "truth_series": "NASA_SPFD_OMNIWEB_GOES13_5MIN_GT10MEV_AVERAGE",
+    "threshold_pfu": 10.0,
+    "issue_support_max_age_minutes": 5,
+    "issue_support_at_or_above_threshold_is_ineligible": true,
+    "crossing_requires_prior_sample_below_threshold": true,
+    "crossing_window": "(issue_time, issue_time_plus_24h]",
+    "endpoint_inclusive": true,
+    "maximum_valid_sample_gap_minutes": 5,
+    "exact_horizon_endpoint_required": true,
+    "fill_nonfinite_or_negative_flux_makes_affected_label_window_unresolved": true
+  },
+  "feature_window": {
+    "lookback_hours": 24,
+    "interval": "[issue_time_minus_24h, issue_time)",
+    "issue_time_excluded": true,
+    "delay_applied_to_raw_record_availability_before_aggregation": true,
+    "record_available_rule": "observation_time + injected_delay <= issue_time",
+    "expected_xrs_samples": 1440,
+    "expected_proton_samples": 288
+  },
+  "features": {
+    "per_numeric_stream": [
+      "finite_valid_count",
+      "coverage_fraction",
+      "minimum",
+      "maximum",
+      "mean",
+      "median",
+      "standard_deviation_population_ddof0",
+      "last_causal_value",
+      "age_minutes_of_last_causal_value",
+      "maximum_positive_first_difference",
+      "maximum_positive_adjacent_log_change"
+    ],
+    "xrs_streams": ["A_true_W_m2", "B_true_W_m2"],
+    "xrs_b_threshold_counts_W_m2": [0.000001, 0.00001, 0.0001],
+    "proton_stream": "GT10MEV_integral_pfu",
+    "proton_threshold_counts_pfu": [1.0, 5.0, 8.0],
+    "log_change": {
+      "xrs": "natural log difference for adjacent strictly-positive values only",
+      "proton": "natural log1p difference for adjacent non-negative values"
+    },
+    "no_feature_selection_from_outcomes": true
+  },
+  "xrs_preprocessing": {
+    "A_true": "A_AVG / 0.85",
+    "B_true": "B_AVG / 0.7",
+    "valid_A": "finite A_AVG and A_QUAL_FLAG == 0 and corrected value >= 0",
+    "valid_B": "finite B_AVG and B_QUAL_FLAG == 0 and corrected value >= 0",
+    "time": "time_tag UTC milliseconds since 1970-01-01",
+    "science_quality_substitution": false
+  },
+  "fixed_xgboost": {
+    "n_estimators": 300,
+    "learning_rate": 0.03,
+    "max_depth": 3,
+    "min_child_weight": 5,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.0,
+    "tree_method": "hist",
+    "eval_metric": "logloss",
+    "seeds": [7, 13, 26, 42, 73],
+    "seed_aggregation": "median_probability"
+  },
+  "robustness_logistic": {
+    "imputer": "fit_role_median_with_missing_indicators",
+    "scaler": "fit_role_standard_scaler",
+    "C": 1.0,
+    "class_weight": "balanced",
+    "max_iter": 2000,
+    "solver": "lbfgs",
+    "random_state": 42
+  },
+  "probability_calibration": {
+    "role": "2015 calibration",
+    "method": "single_scalar_logit_intercept",
+    "model_parameters_frozen": true
+  },
+  "decision_threshold": {
+    "role": "2016 threshold_and_rule_selection",
+    "method": "MAX_TSS",
+    "ties": "choose_highest_threshold_among_equal_maximum_TSS"
+  },
+  "clean_signal_stop_gate": {
+    "role": "2016 threshold_and_rule_selection",
+    "proceed_if_at_least_one_of": ["joint_xgboost", "xrs_only_xgboost", "proton_only_xgboost"],
+    "must_simultaneously_satisfy": [
+      "AUPRC > fit_role_positive_prevalence",
+      "Brier_score < fit_prevalence_climatology_Brier_score",
+      "MAX_TSS > 0"
+    ],
+    "failure_action": "STOP_BEFORE_SWITCHING_POLICY_FIT_AND_REPORT_NO_USEFUL_CLEAN_SIGNAL"
+  },
+  "delay_grid_minutes": [0, 5, 15, 30, 60, 120, 360, 720, 1440],
+  "primary_delay_conditions": [
+    "XRS delayed while proton remains fresh",
+    "proton delayed while XRS remains fresh"
+  ],
+  "crossover_definition": {
+    "primary_metric": "TSS",
+    "reported_as_bracket_not_forced_point": true,
+    "candidate_bracket": "adjacent frozen delay settings where reduced_fresh_minus_joint_stale TSS changes from <=0 to >0",
+    "no_monotonicity_assumption": true,
+    "no_posthoc_strata_if_no_crossover": true
+  },
+  "policy_selection": {
+    "selection_role": "2016 threshold_and_rule_selection only",
+    "nonabstaining_reference_candidates": ["always_joint_stale", "always_reduced_fresh"],
+    "reference_selection": "fewest false alerts subject to minimum missed crossings; ties favor higher TSS then always_reduced_fresh",
+    "fixed_expiry": {
+      "candidate_ttl_minutes": [0, 5, 15, 30, 60, 120, 360, 720, 1440],
+      "rule": "joint if delayed-family age <= TTL, otherwise reduced",
+      "selection": "fewest false alerts subject to no more misses than selected nonabstaining reference; ties choose smaller TTL"
+    },
+    "confidence_rejection": {
+      "candidate_probability_margins": [0.0, 0.01, 0.02, 0.05, 0.1],
+      "rule": "use selected nonabstaining reference action unless its probability is within margin of that model's frozen threshold; then abstain",
+      "selection": "fewest false alerts subject to no more end-to-end missed crossings than nonabstaining reference and coverage >=0.80; ties choose smaller margin"
+    },
+    "state_dependent_expiry": {
+      "proton_delay_state_bins_by_last_observed_proton_pfu": [0.0, 1.0, 5.0, 8.0, "inf"],
+      "xrs_delay_state_bins_by_last_observed_xrs_B_W_m2": [0.0, 0.000001, 0.00001, 0.0001, "inf"],
+      "candidate_ttl_minutes_per_bin": [0, 5, 15, 30, 60, 120, 360, 720, 1440],
+      "rule": "within each predeclared last-state bin choose joint if age <= bin TTL, otherwise reduced",
+      "selection": "coordinate-free independent per-bin TTL selection on 2016: minimize false alerts subject to no more misses than the selected nonabstaining reference within that bin; if no feasible candidate use the reference action for the entire bin",
+      "complexity": "four state bins per delayed family; no slope or additional stratum may be added after score inspection"
+    }
+  },
+  "end_to_end_accounting": {
+    "abstained_positive_opportunity_counts_as_unwarned": true,
+    "abstained_positive_reported_separately": true,
+    "same_base_cohort_for_all_delay_methods": true,
+    "always_abstain_cannot_win": true
+  },
+  "uncertainty": {
+    "bootstrap_replicates": 2000,
+    "seed": 20260909,
+    "positive_units": "individual positive daily forecast opportunities",
+    "negative_units": "contiguous seven-day quiet blocks",
+    "stratified_resampling": true,
+    "paired_across_methods": true
+  },
+  "practical_gate": {
+    "false_alert_reduction_fraction_at_least": 0.20,
+    "additional_missed_crossings": 0,
+    "forecast_coverage_fraction_at_least": 0.80,
+    "point_estimate_pass_does_not_imply_population_safety": true
+  },
+  "claims": {
+    "retrospective_development_only": true,
+    "independent_final_evidence": false,
+    "operational_replay": false,
+    "award_outcome": false
+  },
+  "labels_inspected_before_this_freeze": false,
+  "model_scores_inspected_before_this_freeze": false
+}
