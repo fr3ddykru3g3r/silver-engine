@@ -1,121 +1,144 @@
 # SOL continuation prompt
 
-Continue IRIS-SEP on `codex/iris-sep-continuation-20260905`. Inspect PR #3 and the branch head first. Do not assume main contains this work.
+Continue IRIS-SEP from the **episode benchmark result**, not from the older freshness or V3 modeling loops.
 
-## Current scientific direction
+## Branches
 
-The freshness-crossover route is closed negative evidence and must not be rescued or retuned.
+Primary benchmark branch:
 
-The authorized design direction is now:
+`codex/iris-sep-episode-benchmark-v1-20260909`
+
+Umbrella continuation branch:
+
+`codex/iris-sep-continuation-20260905`
+
+PR #3 is the umbrella continuation PR and must not be merged automatically.
+
+Always inspect the exact branch head and current PRs before writing.
+
+## Central research question
+
+> Are 24-hour SEP forecasting systems forecasting a new radiation storm, or do ordinary scores partly reward recognition of already-active storms and repeated counting of one physical SEP episode?
+
+Working benchmark:
 
 `IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1`
 
-Central question:
-
-> How much do repeated positive windows from the same physical SEP episode, already-active persistence states, and issue-time proton-history information alter apparent 24-hour SEP forecasting skill and model ranking?
-
-Read these first:
+Read first:
 
 - `CURRENT_STATUS.md`
-- `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_2026-09-09.md`
-- `architecture/NOVELTY_BOUNDARY_EPISODE_NORMALIZED_BENCHMARK_2026-09-09.md`
-- `architecture/LITERATURE_GAP_EPISODE_NORMALIZED_EVALUATION_2026-09-09.md`
-- `architecture/JUDGE_9_OF_10_UPGRADE_PLAN_2026-09-09.md`
+- `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md`
+- `architecture/PUBLISHED_SEPNET_TARGET_AND_EPISODE_AUDIT_RESULT_2026-09-09.md`
+- `architecture/EPISODE_BENCHMARK_POST_RESULT_AUDIT_CORRECTION_2026-09-09.md`
 - `config/episode_normalized_causal_benchmark_v1_preregistration_2026-09-09.json`
+- `config/episode_normalized_causal_benchmark_v1_mechanism_decomposition_2026-09-09.json`
+- `config/episode_normalized_causal_benchmark_v1_expanding_oof_2026-09-09.json`
 - `config/inspected_evidence_registry_v2.json`
-- `architecture/FRESHNESS_CROSSOVER_V1_CLOSURE_2026-09-09.md`
-- `architecture/ONSET_CONTINUATION_FEASIBILITY_2026-09-09.md`
 
-## What is already implemented
+## Authoritative benchmark receipt
 
-Core evaluator:
+Audit-corrected workflow:
 
-- `tools/episode_normalized_benchmark.py`
+- run `34371418428`
+- commit `8b8a1549a7dfaf1745c96a8c7b78d98e564625c5`
+- artifact ID `10112207048`
+- artifact digest `sha256:418fd9bd2a70d0e545095a5a8009548aa74c8734d7bb9e2ed09fb19343c92777`
 
-Tests:
+The workflow passed:
 
-- `tests/test_episode_normalized_benchmark.py`
-- `tests/test_episode_normalized_benchmark_contract.py`
+- pinned environment;
+- compile checks;
+- synthetic/property/compatibility/audit tests;
+- frozen scientific-contract gate before data access;
+- frozen model execution;
+- audit-corrected result estimator;
+- independent V2 verification from persisted CSV/NPZ evidence;
+- final evidence-hash generation;
+- second manifest verification;
+- immutable artifact upload.
 
-The evaluator currently provides:
+## Main development result
 
-- validation of terminal eligibility states;
-- episode-normalized positive weights where each physical positive episode totals 1;
-- Episode Multiplicity Factor;
-- weighted confusion/TSS/FAR/POD scoring for onset-eligible rows;
-- deterministic shared bootstrap draw-tensor generation;
-- episode/quiet-block bootstrap unit construction;
-- model ranking and pairwise rank-reversal detection.
+2014–2017 expanding OOF:
 
-## Protected-outcome rule — critical
+- 936 rows;
+- 27 standard positives;
+- 10 uniquely mapped physical positive episodes;
+- 5 new-onset episodes;
+- 11 persistence windows;
+- 11 ambiguous positive windows.
 
-Post-`2025-09-10T00:00:00Z` candidate data remain `PROTECTED_NOT_INSPECTED` under `config/inspected_evidence_registry_v2.json`.
+TSS:
 
-Do NOT query, count, inspect, score, stratify, or reveal:
+- current-proton-active diagnostic: `0.556 standard -> 0.000 onset`
+- elastic-net joint: `0.642 -> 0.665`
+- XGBoost joint: `0.657 -> 0.043`
+- XGBoost XRS-only: `0.320 -> 0.216`
 
-- protected candidate identities;
-- labels/outcomes;
-- event counts;
-- episode durations;
-- model scores;
-- class balance.
+Mapped 10,000-draw shared bootstrap:
 
-Do not use protected data to decide power, thresholds, hypotheses, or study design.
+- joint XGB multiplicity effect: median `-0.133`, 95% `[-0.225,-0.041]`
+- joint XGB persistence exclusion: median `-0.400`, 95% `[-0.800,-0.125]`
+- current-proton-active persistence exclusion: median `-0.567`, 95% `[-0.867,-0.267]`
+- joint minus XRS-only onset: median `-0.168`, 95% `[-0.746,+0.244]`; rank reversal is not statistically secure.
 
-Historical development/exposed data may be used to debug mechanics only. Never call it untouched final evidence.
+Do not hide the five-event onset limitation.
 
-## Next engineering milestone
+## Public benchmark audit
 
-Build the causal episode constructor and attrition-ledger pipeline on already-exposed development data only.
+Pinned `yuyian/SEP-Prediction` audit:
 
-Required behavior before any model comparison:
+- 11,773 windows;
+- 1,726 stored operational positives;
+- 1,083 stored positives with no >=10 pfu episode overlap under the audited event-table semantics;
+- 411 persistence vs 227 onset windows;
+- 610 mapped positive windows / 256 physical episodes;
+- multiplicity factor `2.3828125`.
 
-1. construct physical threshold-crossing episodes deterministically;
-2. classify issue times into the frozen terminal eligibility codes;
-3. prove already-active cases never enter onset-positive scoring;
-4. persist one prediction/eligibility row per issue time;
-5. make attrition counts reconcile exactly;
-6. generate one bootstrap draw tensor and reuse it for every paired comparison;
-7. hash predictions, attrition ledger, config, environment and bootstrap draws;
-8. add boundary tests for exact issue+24h endpoint, gaps, duplicates, immature windows and long events;
-9. only then run the fixed comparator set on already-exposed development data as a mechanics/diagnostic result.
+This is motivation/methodology evidence. Do not claim the published final SEPVAL score is wrong.
 
-Fixed model families for V1:
+## Post-result correction boundary
 
-- climatology;
-- causally permitted persistence diagnostic;
-- fixed elastic-net logistic regression;
-- fixed XGBoost;
-- existing frozen IRIS candidate only if the exact development feature interface is available.
+The first successful artifact had:
 
-No architecture expansion or hyperparameter rescue after observing episode-normalization shifts.
+1. an OOF summary bug using one threshold rather than persisted row-specific frozen thresholds;
+2. a bootstrap estimand that needed to be explicitly separated from the full descriptive cohort.
 
-## Scientific claim boundary
+Correction was evidence-layer only:
 
-Do not claim that existing SEP papers are biased or wrong before the frozen benchmark demonstrates a robust effect.
+- no refit;
+- no feature changes;
+- no threshold reselection;
+- no hyperparameter tuning;
+- no protected outcome access.
 
-The candidate originality is the combined evaluation framework:
+Legacy result files remain preserved.
 
-- quantify repeated positive-window multiplicity;
-- equalize total positive weight per physical SEP episode;
-- separate new onset from already-active persistence;
-- test model-rank stability;
-- use identical episode-level paired bootstrap draws;
-- persist complete per-issue eligibility/attrition evidence.
+## Protected outcome rule
 
-Recent work already includes proton/XRS forecasting, XGBoost, deep learning, multimodality, 24-hour forecasts and operational onset/persistence concepts. Those are not novelty claims.
+Post-`2025-09-10T00:00:00Z` candidate outcomes remain sealed.
 
-## Existing V3/fail-closed evidence
+Do not query, count, inspect, score, stratify or otherwise reveal them.
 
-Preserve all prior V3 package, replay, missingness, filter, source-readiness and fail-closed results. They are historical evidence, not the new centerpiece.
+Do not use protected data for power rescue, model selection, threshold changes or narrative tuning.
 
-The exact prospective V3 interface remains blocked by unavailable `CMASKL`, `MEANGBL`, and `USFLUXL` quantities affecting 18 frozen feature-vector positions. The prior prospective preflight emitted no forecast probability. Do not silently substitute or zero-fill them.
+## Historical V3 evidence
 
-## Before ending any continuation
+Preserve it.
 
-- run source-only CI/test suite on the exact published head;
-- preserve null and negative evidence;
-- update CURRENT_STATUS and this handoff with exact commit/test receipts;
-- do not merge PR #3 automatically;
-- do not access protected final outcomes;
-- do not claim award outcome, operational superiority, economic impact, state-of-the-art performance, or breakthrough without independent evidence.
+The exact prospective V3 interface remains blocked because `CMASKL`, `MEANGBL`, and `USFLUXL` are missing, affecting 18 frozen feature-vector positions. The prior preflight emitted no forecast probability. That is a valid fail-closed engineering result but no longer the research centerpiece.
+
+## Next legitimate work
+
+1. Finalize the dedicated episode-benchmark PR into the continuation branch; do not merge automatically.
+2. Build the IRIS research paper and judge-facing package from verified results.
+3. Generate figures only from authoritative corrected files.
+4. Keep the protected final cohort sealed.
+5. If increasing statistical power, use only a preregistered independent extension/public dataset and freeze it before score inspection.
+6. No post-hoc architecture rescue on the 5-event onset cohort.
+
+## Claim to use
+
+> On exposed development data, conventional window-level SEP occurrence scoring can reward repeated representations of physical episodes and recognition of already-active storms. A physical-episode, new-onset evaluation changes measured skill for some fixed models and yields a more causally interpretable estimate of pre-onset warning ability.
+
+Do not strengthen this into a universal literature claim without independent confirmation.
