@@ -13,9 +13,27 @@ The centerpiece is now the episode-normalized causal evaluation benchmark, not a
 
 ## Current disposition
 
-`EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1 — AUDIT_CORRECTED_AND_INDEPENDENTLY_VERIFIED_DEVELOPMENT_RESULT`
+`SEP_PRISM_FIXED_MODEL_REPLAY_V1 — STRONG_MODEL_CONFIRMATION_ON_PREVIOUSLY_EXPOSED_PUBLIC_DATA`
 
-The methodological result is real and reproducible on exposed development data, but the internal new-onset cohort is small and final independent evidence has not been released.
+The evaluation effect now reproduces in a preregistered, higher-powered chronological replay on public historical data. The source hashes were already recorded as development-inspected, so this is strong methodological confirmation rather than untouched final evidence. The protected post-2025 cohort remains sealed.
+
+### SEP-PRISM model-free confirmation
+
+The pinned 1986–2025 table contains 14,464 daily windows and 650 stored positives, with zero stored-versus-reconstructed target mismatches. The onset-state audit finds 418 already-active persistence windows, 228 genuine new-onset windows and four ambiguous positives. The Episode Multiplicity Factor is **614 uniquely mapped positive windows / 257 represented physical episodes = 2.389**, because 36 multi-episode-overlap positives are excluded from that calculation. Persistence exceeds onset in 1986–2010, 2011–2017 and 2018–2025; their respective EMFs are 2.46, 2.52 and 1.95.
+
+### SEP-PRISM frozen fixed-model replay
+
+The replay covers 7,558 unique daily score issues across three chronological out-of-fold periods from 2005–2025. Six fixed comparators were evaluated under unchanged alerts. The matched inferential cohort contains 85 onset episodes and 1,080 Monday-anchored quiet blocks, with 10,000 shared physical-unit bootstrap draws.
+
+| Frozen directional TSS contrast | Point change | Paired 95% interval |
+|---|---:|---:|
+| Joint XGBoost: episode-normalized minus mapped occurrence | -0.105 | [-0.146, -0.063] |
+| Joint XGBoost: onset minus episode-normalized occurrence | -0.184 | [-0.247, -0.125] |
+| Past-proton proxy: onset minus mapped occurrence | -0.508 | [-0.567, -0.444] |
+
+All three intervals lie below zero, satisfying the frozen `STRONG_MODEL_CONFIRMATION` rule. On the same matched population, joint-XGBoost TSS changes **0.726 → 0.621 → 0.437** across mapped occurrence, episode normalization and onset. Its onset confusion table is TP=41, FN=44, FP=330 and TN=6,984 (sensitivity 48.24%, FAR 88.95%), so the result is evidence about evaluation sensitivity, not operational readiness.
+
+The joint-XGBoost minus no-proton onset contrast is -0.040 with interval [-0.163, +0.083], which does not establish a reliable rank reversal. Elastic-net's corresponding contrast is positive, but both elastic-net onset TSS values are negative. No broad proton-feature or model-superiority claim is supported.
 
 ### External public-data arm
 
@@ -61,6 +79,16 @@ Shared mapped-episode bootstrap, 10,000 draws:
 The onset arm has only five positive episodes and is explicitly underpowered.
 
 ## Authoritative evidence receipt
+
+Final source-only compatibility verification:
+
+- workflow run `34509843220`
+- commit `03c912842652e7a4ef4c273ebaff9555fa920bc7`
+- pandas 2.3.2: PASS
+- pandas 3.0.1: PASS
+- both jobs passed environment setup, full Python compilation, every registered source-only test, JSON parsing and data-dependent-test inventory checks
+
+The pandas 3 compatibility fixes explicitly normalize timestamps to nanoseconds in feature-window indexing and physical-episode gap detection. They do not refit models, reselect thresholds, alter persisted predictions, reopen the negative freshness experiment or access protected outcomes.
 
 Audit-corrected development workflow:
 
@@ -138,12 +166,12 @@ The project now has a credible high-level competition structure:
 - **Skill:** pinned environment, immutable receipts, model serialization, independent replay/recomputation, double hash verification.
 - **Clarity:** one question — “forecasting a new storm, or recognizing one already happening?”
 
-The remaining weakness is statistical power for new onset. Do not disguise it.
+The earlier five-onset internal limitation has been substantially reduced by an 85-episode matched replay. Remaining weaknesses concern evidence independence, causal feature availability, missing model/threshold-search objects, and prospective operational validation. Do not disguise them.
 
 ## Immediate next actions
 
-1. Publish the benchmark-result documentation and dedicated PR into the continuation branch.
-2. Build the IRIS paper, synopsis, figures and 90-second explanation from the verified result.
+1. Keep PR #5's verified replay documentation and final green CI receipt synchronized.
+2. Preserve the replay archive digest, independent receipts and exact matched-population denominators.
 3. Keep the protected final cohort sealed.
-4. Seek a higher-powered **independent** confirmation only through a preregistered, non-tuned extension or external/public benchmark whose labels are already legitimately exposed.
-5. Do not perform post-result architecture rescue on the five-event onset cohort.
+4. Obtain a custodian-controlled prospective confirmation only after freezing an operational feature-availability contract.
+5. Do not tune or rescue the frozen replay after score inspection.
