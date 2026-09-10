@@ -150,7 +150,11 @@ def build_threshold_episodes(
         raise ValueError("times/flux length mismatch")
     if len(t) == 0:
         return []
-    ns = t.asi8
+    # Pandas 3 may retain datetime64[us, UTC], so asi8 can otherwise expose
+    # microsecond counts.  Normalize to nanoseconds before comparing with the
+    # frozen nanosecond gap threshold.  This changes representation, not the
+    # physical episode definition.
+    ns = t.as_unit("ns").asi8
     if np.any(np.diff(ns) <= 0):
         raise ValueError("timestamps must be strictly increasing and unique")
     max_gap_ns = int(maximum_gap_minutes * 60 * 1e9)
