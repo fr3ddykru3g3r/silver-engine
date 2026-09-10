@@ -1,0 +1,121 @@
+{
+  "format": "IRIS_SEP_PRISM_EXTERNAL_FIXED_MODEL_REPLAY_V1",
+  "status": "FROZEN_BEFORE_ANY_EXTERNAL_MODEL_SCORE_INSPECTION",
+  "date": "2026-09-10",
+  "parent_confirmation": "IRIS_SEP_PRISM_EXTERNAL_CONFIRMATION_V1",
+  "purpose": "Test on the pinned public SEP-PRISM 24-hour table whether the same fixed model predictions receive materially different skill under ordinary occurrence, episode-normalized occurrence, and genuine new-onset evaluation. This is a methodological external replay, not an operational or state-of-the-art claim.",
+  "upstream": {
+    "repository": "yuyian/SEP-Prediction-V2",
+    "commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+    "rolling_table": "Data/rolling_combinded_seq_24hours.csv",
+    "rolling_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "event_catalog": "GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv",
+    "event_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0"
+  },
+  "feature_rule": {
+    "causal_predictor_definition": "All numeric columns from the published current/past 24-hour predictor window, excluding timestamps, direct past SEP catalogue labels OSEP_label/GSEP_label, and every Future_* column.",
+    "excluded_exact": ["window_begin", "window_end", "OSEP_label", "GSEP_label"],
+    "excluded_prefixes": ["Future_"],
+    "joint_feature_set": "all remaining numeric predictor-side columns",
+    "no_proton_feature_set": "joint feature set excluding ProtonFlux_label and every column beginning ProtonFlux_",
+    "proton_history_proxy": "1 if published past-window ProtonFlux_max >= 10 pfu, else 0; this is explicitly a past-24h history proxy, not an exact issue-time active-state measurement",
+    "no_outcome_based_feature_selection": true,
+    "missing_values": "XGBoost native NaN handling; elastic-net median imputation with missingness indicators followed by standard scaling. No row deletion based on predictor missingness."
+  },
+  "folds": [
+    {
+      "name": "OOF_2005_2010",
+      "fit": ["1986-02-04T00:00:00Z", "2000-01-01T00:00:00Z"],
+      "threshold": ["2000-01-01T00:00:00Z", "2005-01-01T00:00:00Z"],
+      "score": ["2005-01-01T00:00:00Z", "2011-01-01T00:00:00Z"]
+    },
+    {
+      "name": "OOF_2011_2017",
+      "fit": ["1986-02-04T00:00:00Z", "2005-01-01T00:00:00Z"],
+      "threshold": ["2005-01-01T00:00:00Z", "2011-01-01T00:00:00Z"],
+      "score": ["2011-01-01T00:00:00Z", "2018-01-01T00:00:00Z"]
+    },
+    {
+      "name": "OOF_2018_2025",
+      "fit": ["1986-02-04T00:00:00Z", "2011-01-01T00:00:00Z"],
+      "threshold": ["2011-01-01T00:00:00Z", "2018-01-01T00:00:00Z"],
+      "score": ["2018-01-01T00:00:00Z", "2025-09-11T00:00:00Z"]
+    }
+  ],
+  "models": {
+    "xgb_joint": {
+      "type": "five-seed median XGBoost",
+      "seeds": [7, 13, 26, 42, 73],
+      "params": {"n_estimators": 300, "learning_rate": 0.03, "max_depth": 3, "min_child_weight": 5, "subsample": 0.8, "colsample_bytree": 0.8, "reg_lambda": 1.0, "reg_alpha": 0.0, "tree_method": "hist", "eval_metric": "logloss", "n_jobs": 2}
+    },
+    "xgb_no_proton": "same XGBoost settings on the no-proton feature set",
+    "elastic_net_joint": {"penalty": "elasticnet", "C": 1.0, "l1_ratio": 0.5, "solver": "saga", "class_weight": "balanced", "max_iter": 5000, "random_state": 42},
+    "elastic_net_no_proton": "same elastic-net settings on the no-proton feature set",
+    "fit_prevalence_climatology": "constant fit-block prevalence",
+    "past_proton_ge10_proxy": "fixed binary past-window ProtonFlux_max >= 10 pfu diagnostic"
+  },
+  "decision_rule": {
+    "target_for_fit_and_threshold": "published Future_OSEP_label, already independently shown to match reconstructed interval occurrence 14,464/14,464",
+    "threshold_selection": "maximize TSS on each fold's threshold block; if tied choose the highest probability threshold",
+    "same_frozen_threshold_used_for_all_evaluation_views": true,
+    "calibration": "none in expanding OOF replay",
+    "no_threshold_reselection_for_onset": true
+  },
+  "evaluation": {
+    "standard_occurrence": "all scored rows, unit window weights",
+    "mapped_episode_occurrence": "positive rows uniquely mapped to one physical episode plus all negative rows; standard repeated-window weights",
+    "episode_normalized_occurrence": "same mapped cohort, every represented physical positive episode has total weight 1",
+    "new_onset": "only ELIGIBLE_ONSET_POSITIVE and ELIGIBLE_ONSET_NEGATIVE rows; persistence/ambiguous rows excluded",
+    "metrics": ["TSS", "POD", "FAR", "HSS", "Brier"],
+    "point_results": "concatenate chronological OOF score folds and use each row's fold-specific frozen threshold/alert"
+  },
+  "uncertainty": {
+    "replicates": 10000,
+    "seed": 20260910,
+    "positive_unit": "physical episode ID",
+    "negative_unit": "contiguous UTC 7-day quiet block",
+    "shared_draws": "one set of physical-episode draws and one set of quiet-block draws per replicate reused across every fixed model and evaluation contrast on the uniquely mapped physical-unit sensitivity cohort",
+    "ambiguous_positive_windows": "excluded from inferential cohort, retained in full-window descriptive standard results",
+    "interval": "paired percentile 95%"
+  },
+  "predeclared_primary_contrasts": [
+    {
+      "name": "XGB_JOINT_MULTIPLICITY_EFFECT",
+      "contrast": "episode_normalized_occurrence_TSS - mapped_standard_occurrence_TSS",
+      "expected_direction": "negative",
+      "support_condition": "95% paired interval entirely below 0"
+    },
+    {
+      "name": "XGB_JOINT_PERSISTENCE_REMOVAL_EFFECT",
+      "contrast": "new_onset_TSS - episode_normalized_occurrence_TSS",
+      "expected_direction": "negative",
+      "support_condition": "95% paired interval entirely below 0"
+    },
+    {
+      "name": "PROTON_HISTORY_PROXY_PERSISTENCE_EFFECT",
+      "contrast": "new_onset_TSS - mapped_standard_occurrence_TSS for past_proton_ge10_proxy",
+      "expected_direction": "negative",
+      "support_condition": "95% paired interval entirely below 0"
+    },
+    {
+      "name": "PROTON_ABLATION_ONSET_RANKING",
+      "contrast": "joint minus no-proton new-onset TSS, separately for XGBoost and elastic-net",
+      "expected_direction": "none",
+      "support_condition": "report point difference, paired 95% interval, and ordering-reversal fraction without forcing a directional success criterion"
+    }
+  ],
+  "model_level_confirmation_gate": {
+    "strong": "At least two of the three directional mechanism contrasts have paired 95% intervals entirely below zero, including XGB_JOINT_PERSISTENCE_REMOVAL_EFFECT or PROTON_HISTORY_PROXY_PERSISTENCE_EFFECT.",
+    "partial": "At least one directional mechanism contrast is supported, but the strong gate is not met.",
+    "null": "None of the three directional mechanism contrasts is supported. Preserve without tuning."
+  },
+  "claim_boundary": {
+    "external_public_methodological_evidence": true,
+    "operational_equivalence_of_retrospectively_fused_features": false,
+    "state_of_the_art_model_claim": false,
+    "paper_model_reproduction": false,
+    "universal_literature_bias_claim": false,
+    "protected_local_post_2025_outcomes_accessed": false,
+    "no_posthoc_model_or_feature_search": true
+  }
+}
