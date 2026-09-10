@@ -57,7 +57,8 @@ jobs:
 
       - name: Record runtime
         run: |
-          python - <<'PY'
+          mkdir -p source_only_ci_logs
+          python - <<'PY' | tee source_only_ci_logs/runtime.txt
           import platform
           import numpy, pandas, pytest, requests, scipy, sklearn, torch, xgboost
           print('python', platform.python_version())
@@ -88,8 +89,10 @@ jobs:
           PY
 
       - name: Run every source-only test and inventory data-bound exclusions
+        shell: bash
         run: |
-          python -m iris_report.iris_sep.tools.run_source_only_tests
+          set -o pipefail
+          python -m iris_report.iris_sep.tools.run_source_only_tests 2>&1 | tee source_only_ci_logs/pytest.txt
 
       - name: Verify JSON configuration parses
         run: |
@@ -113,3 +116,12 @@ jobs:
           print('deselected data-bound nodeids:', len(data['deselect_nodeids']))
           print('source-only success does not establish data-dependent test success or forecasting usefulness')
           PY
+
+      - name: Upload source-only diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-source-only-pandas-${{ matrix.pandas }}-${{ github.sha }}
+          path: source_only_ci_logs/
+          if-no-files-found: error
+          retention-days: 14
