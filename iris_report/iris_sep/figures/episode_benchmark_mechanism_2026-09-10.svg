@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <rect width="1200" height="675" fill="white"/>
+  <style>
+    .title{font:700 34px Arial,sans-serif;fill:#111}.sub{font:20px Arial,sans-serif;fill:#333}.label{font:700 22px Arial,sans-serif;fill:#111}.body{font:18px Arial,sans-serif;fill:#222}.small{font:16px Arial,sans-serif;fill:#444}.box{fill:#f5f5f5;stroke:#222;stroke-width:2}.window{fill:#fff;stroke:#555;stroke-width:2}.event{fill:#d9d9d9;stroke:#111;stroke-width:2}.accent{fill:#ededed;stroke:#111;stroke-width:3}
+  </style>
+  <text x="60" y="60" class="title">One physical radiation storm can look like several “correct forecasts”</text>
+  <text x="60" y="95" class="sub">Our benchmark separates three different things that ordinary 24-hour occurrence scoring can mix together.</text>
+
+  <text x="70" y="155" class="label">A. Standard window scoring</text>
+  <line x1="90" y1="220" x2="1110" y2="220" stroke="#333" stroke-width="3"/>
+  <rect x="260" y="188" width="430" height="64" rx="12" class="event"/>
+  <text x="365" y="228" class="body">one physical SEP episode</text>
+  <rect x="140" y="275" width="220" height="90" rx="8" class="window"/>
+  <rect x="380" y="275" width="220" height="90" rx="8" class="window"/>
+  <rect x="620" y="275" width="220" height="90" rx="8" class="window"/>
+  <text x="177" y="315" class="body">positive window 1</text>
+  <text x="417" y="315" class="body">positive window 2</text>
+  <text x="657" y="315" class="body">positive window 3</text>
+  <text x="175" y="345" class="small">full weight = 1</text>
+  <text x="415" y="345" class="small">full weight = 1</text>
+  <text x="655" y="345" class="small">full weight = 1</text>
+  <text x="875" y="320" class="label">Total positive mass = 3</text>
+
+  <text x="70" y="430" class="label">B. Episode-normalized causal scoring</text>
+  <rect x="100" y="470" width="300" height="120" rx="12" class="accent"/>
+  <text x="125" y="510" class="body">Same physical episode</text>
+  <text x="125" y="542" class="body">Total positive weight = 1</text>
+  <text x="125" y="574" class="small">each mapped window shares the weight</text>
+
+  <rect x="460" y="470" width="300" height="120" rx="12" class="box"/>
+  <text x="490" y="510" class="body">Already active at issue time?</text>
+  <text x="490" y="542" class="body">Score as persistence</text>
+  <text x="490" y="574" class="small">not as new-onset warning</text>
+
+  <rect x="820" y="470" width="300" height="120" rx="12" class="box"/>
+  <text x="850" y="510" class="body">Below threshold at issue time?</text>
+  <text x="850" y="542" class="body">Crosses within 24 h?</text>
+  <text x="850" y="574" class="small">this is genuine new-onset skill</text>
+
+  <text x="60" y="640" class="small">Judge question: are we measuring prediction before onset, persistence recognition, or repeated windows from the same event?</text>
+</svg>
