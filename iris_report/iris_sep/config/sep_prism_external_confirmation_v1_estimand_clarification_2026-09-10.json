@@ -1,0 +1,20 @@
+{
+  "format": "IRIS_SEP_PRISM_EXTERNAL_CONFIRMATION_V1_ESTIMAND_CLARIFICATION",
+  "status": "FROZEN_BEFORE_LFS_OUTCOME_ACCESS",
+  "date": "2026-09-10",
+  "parent_preregistration": "config/sep_prism_external_confirmation_v1_preregistration_2026-09-10.json",
+  "primary_mechanism_population": "independently reconstructed operational >=10 MeV, >=10 pfu threshold-overlap positive windows from the pinned event catalog",
+  "reason": "Multiplicity and onset-versus-persistence are physical-event mechanisms. The public stored Future_OSEP_label is audited separately and is not allowed to define the primary mechanism gate if it disagrees with the independently reconstructed event intervals.",
+  "primary_episode_multiplicity_factor": "number of reconstructed positive windows that map uniquely to one physical episode divided by the number of distinct physical episodes represented by those windows",
+  "primary_persistence_count": "reconstructed positive windows whose issue time lies inside exactly one physical threshold episode",
+  "primary_new_onset_count": "reconstructed positive windows not already active at issue time with exactly one physical threshold episode beginning in (issue, issue+24h]",
+  "stored_target_analysis": "Future_OSEP_label is retained unchanged, cross-tabulated against reconstructed interval occurrence, and receives separate stored-positive mapping/multiplicity descriptors; discrepancies do not alter physical episode definitions.",
+  "endpoint_semantics": {
+    "new_onset": "issue < episode_start <= issue+24h",
+    "overlap": "episode_start <= issue+24h AND episode_end >= issue",
+    "already_active": "episode_start <= issue < episode_end"
+  },
+  "primary_gate_unchanged": "strong confirmation requires reconstructed EMF >= 1.5 and reconstructed persistence windows > reconstructed new-onset windows",
+  "no_posthoc_selection": true,
+  "protected_local_post_2025_outcomes_accessed": false
+}
