@@ -1,0 +1,11 @@
+{
+  "format": "IRIS_SEP_PRISM_EXTERNAL_FIXED_MODEL_REPLAY_V1_TEMPORAL_REPORTING",
+  "status": "FROZEN_BEFORE_ANY_EXTERNAL_MODEL_SCORE_INSPECTION",
+  "date": "2026-09-10",
+  "parent": "config/sep_prism_external_model_replay_v1_preregistration_2026-09-10.json",
+  "requirement": "Report every predeclared OOF score fold separately for every fixed model under standard occurrence and new-onset scoring, in addition to the concatenated OOF analysis.",
+  "folds": ["OOF_2005_2010", "OOF_2011_2017", "OOF_2018_2025"],
+  "metrics": ["TSS", "POD", "FAR", "HSS", "Brier"],
+  "use": "Temporal robustness diagnostic only. No fold may be selected or dropped post hoc to determine the model-level confirmation gate.",
+  "protected_local_post_2025_outcomes_accessed": false
+}
