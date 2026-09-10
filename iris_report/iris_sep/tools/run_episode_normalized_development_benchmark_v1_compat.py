@@ -21,7 +21,13 @@ import tools.run_episode_normalized_development_benchmark_v1 as benchmark
 
 
 def family_features_compat(df: pd.DataFrame, issue: pd.Timestamp, delay: int, family: str):
-    ns = pd.DatetimeIndex(pd.to_datetime(df["time"], utc=True)).asi8
+    # Pandas 3 may preserve timezone-aware datetimes at microsecond resolution,
+    # in which case ``asi8`` is expressed in that underlying unit.  The frozen
+    # feature-window arithmetic is explicitly nanosecond based, so normalize the
+    # DatetimeIndex to ns before extracting integer values.  This is a runtime
+    # representation correction only; timestamps and scientific windows are
+    # unchanged.
+    ns = pd.DatetimeIndex(pd.to_datetime(df["time"], utc=True)).as_unit("ns").asi8
     ins = int(issue.value)
     lo = ins - int(24 * 3600 * 1e9)
     cutoff = min(ins - 1, ins - int(delay * 60 * 1e9))
