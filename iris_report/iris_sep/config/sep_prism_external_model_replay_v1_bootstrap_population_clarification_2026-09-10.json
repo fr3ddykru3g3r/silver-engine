@@ -1,0 +1,17 @@
+{
+  "format": "IRIS_SEP_PRISM_EXTERNAL_FIXED_MODEL_REPLAY_V1_BOOTSTRAP_POPULATION",
+  "status": "FROZEN_BEFORE_ANY_EXTERNAL_MODEL_SCORE_INSPECTION",
+  "date": "2026-09-10",
+  "parent": "config/sep_prism_external_model_replay_v1_preregistration_2026-09-10.json",
+  "paired_positive_population": "Physical operational episodes that are uniquely mapped in the concatenated OOF score rows and have at least one ELIGIBLE_ONSET_POSITIVE issue in those score rows.",
+  "occurrence_view_within_paired_population": "For each selected physical episode, retain every uniquely mapped positive occurrence window belonging to that episode; this preserves repeated-window multiplicity for the standard occurrence estimand.",
+  "episode_normalized_view_within_paired_population": "Use the same retained occurrence windows but divide each selected episode's total positive statistical mass equally so that the episode sums to 1.",
+  "onset_view_within_paired_population": "Use only ELIGIBLE_ONSET_POSITIVE rows from the same selected physical episodes plus the common onset-eligible negative rows.",
+  "negative_population": "All scored interval-negative rows grouped into contiguous UTC Monday-anchored 7-day quiet blocks; the same sampled quiet-block indices are reused across views and models, with each view applying its predeclared eligibility mask.",
+  "ambiguous_positive_windows": "Excluded from paired physical-unit inference and retained only in full-window descriptive results.",
+  "reason": "This keeps the physical positive events identical across standard, episode-normalized, and onset contrasts, so a cross-view difference is not caused by sampling a different set of storms.",
+  "bootstrap_replicates": 10000,
+  "seed": 20260910,
+  "no_posthoc_event_selection": true,
+  "protected_local_post_2025_outcomes_accessed": false
+}
