@@ -1,0 +1,36 @@
+{
+  "format": "IRIS_SEP_PRISM_EXTERNAL_CONFIRMATION_V1_ERA_SENSITIVITY",
+  "status": "FROZEN_BEFORE_LFS_OUTCOME_ACCESS",
+  "date": "2026-09-10",
+  "parent_preregistration": "config/sep_prism_external_confirmation_v1_preregistration_2026-09-10.json",
+  "purpose": "Test whether the model-free episode multiplicity and persistence mechanisms are confined to the 2011-2017 local development era.",
+  "eras": [
+    {
+      "name": "PRE_LOCAL_DEVELOPMENT_1986_2010",
+      "issue_time_start_inclusive": "1986-02-03T00:00:00Z",
+      "issue_time_end_exclusive": "2011-01-01T00:00:00Z"
+    },
+    {
+      "name": "LOCAL_DEVELOPMENT_2011_2017",
+      "issue_time_start_inclusive": "2011-01-01T00:00:00Z",
+      "issue_time_end_exclusive": "2018-01-01T00:00:00Z"
+    },
+    {
+      "name": "POST_LOCAL_DEVELOPMENT_2018_2025",
+      "issue_time_start_inclusive": "2018-01-01T00:00:00Z",
+      "issue_time_end_exclusive": "2025-09-11T00:00:00Z"
+    }
+  ],
+  "outputs_per_era": [
+    "window rows",
+    "recorded positive windows",
+    "uniquely mapped positive windows",
+    "distinct represented physical episodes",
+    "episode multiplicity factor",
+    "already-active persistence windows",
+    "new-onset windows",
+    "stored-target versus interval-target mismatch count"
+  ],
+  "interpretation": "Era results are preregistered robustness/sensitivity evidence. They do not replace or modify the full-dataset primary confirmation gate and no era will be selected post hoc as the headline subset.",
+  "protected_local_post_2025_outcomes_accessed": false
+}
