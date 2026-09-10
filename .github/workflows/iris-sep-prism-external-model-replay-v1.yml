@@ -1,0 +1,155 @@
+name: IRIS-SEP SEP-PRISM external fixed-model replay V1
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-episode-benchmark-v1-20260909
+    paths:
+      - 'iris_report/iris_sep/config/sep_prism_external_model_replay_v1_preregistration_2026-09-10.json'
+      - 'iris_report/iris_sep/config/sep_prism_external_model_replay_v1_bootstrap_population_clarification_2026-09-10.json'
+      - 'iris_report/iris_sep/config/sep_prism_external_model_replay_v1_temporal_reporting_2026-09-10.json'
+      - 'iris_report/iris_sep/tools/run_sep_prism_external_model_replay_v1.py'
+      - 'iris_report/iris_sep/tools/verify_sep_prism_external_model_replay_v1.py'
+      - '.github/workflows/iris-sep-prism-external-model-replay-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  external-fixed-model-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out IRIS benchmark branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+
+      - name: Install pinned model environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            scipy==1.16.2 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4 \
+            joblib==1.5.2
+          git lfs version
+
+      - name: Compile runner and independent verifier
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/run_sep_prism_external_model_replay_v1.py
+          python -m py_compile iris_report/iris_sep/tools/verify_sep_prism_external_model_replay_v1.py
+
+      - name: Validate all pre-score contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('iris_report/iris_sep/config')
+          pre=json.loads((root/'sep_prism_external_model_replay_v1_preregistration_2026-09-10.json').read_text())
+          pop=json.loads((root/'sep_prism_external_model_replay_v1_bootstrap_population_clarification_2026-09-10.json').read_text())
+          temporal=json.loads((root/'sep_prism_external_model_replay_v1_temporal_reporting_2026-09-10.json').read_text())
+          assert pre['status']=='FROZEN_BEFORE_ANY_EXTERNAL_MODEL_SCORE_INSPECTION'
+          assert pop['status']=='FROZEN_BEFORE_ANY_EXTERNAL_MODEL_SCORE_INSPECTION'
+          assert temporal['status']=='FROZEN_BEFORE_ANY_EXTERNAL_MODEL_SCORE_INSPECTION'
+          assert pre['decision_rule']['no_threshold_reselection_for_onset'] is True
+          assert pre['claim_boundary']['no_posthoc_model_or_feature_search'] is True
+          assert pre['claim_boundary']['protected_local_post_2025_outcomes_accessed'] is False
+          assert pop['bootstrap_replicates']==10000 and pop['seed']==20260910
+          print('External fixed-model replay contracts validated before scoring.')
+          PY
+
+      - name: Acquire exact pinned SEP-PRISM LFS sources
+        env:
+          GIT_LFS_SKIP_SMUDGE: '1'
+        run: |
+          rm -rf /tmp/sep-prism-upstream
+          git clone --filter=blob:none --no-checkout https://github.com/yuyian/SEP-Prediction-V2.git /tmp/sep-prism-upstream
+          cd /tmp/sep-prism-upstream
+          git checkout e138dcd72c1952a00e11e1a0b025337f9e7c93fb
+          test "$(git rev-parse HEAD)" = "e138dcd72c1952a00e11e1a0b025337f9e7c93fb"
+          git lfs install --local
+          git lfs pull --include='Data/rolling_combinded_seq_24hours.csv,GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv'
+          test "$(sha256sum Data/rolling_combinded_seq_24hours.csv | awk '{print $1}')" = "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb"
+          test "$(sha256sum GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | awk '{print $1}')" = "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0"
+
+      - name: Run frozen chronological external model replay
+        env:
+          PYTHONWARNINGS: default
+        run: |
+          rm -rf /tmp/sep-prism-model-replay
+          python iris_report/iris_sep/tools/run_sep_prism_external_model_replay_v1.py \
+            --upstream-root /tmp/sep-prism-upstream \
+            --output /tmp/sep-prism-model-replay
+
+      - name: Independently verify predictions, metrics and bootstrap
+        run: |
+          python iris_report/iris_sep/tools/verify_sep_prism_external_model_replay_v1.py \
+            /tmp/sep-prism-model-replay \
+            --output /tmp/sep-prism-model-replay/independent_verification_v1.json
+
+      - name: Record exact runtime and claim boundary
+        if: always()
+        run: |
+          mkdir -p /tmp/sep-prism-model-replay
+          python - <<'PY'
+          import json,platform
+          from pathlib import Path
+          import joblib,numpy,pandas,scipy,sklearn,xgboost
+          root=Path('/tmp/sep-prism-model-replay')
+          root.joinpath('runtime.json').write_text(json.dumps({
+            'git_head':'${{ github.sha }}',
+            'workflow_run':'${{ github.run_id }}',
+            'python':platform.python_version(),
+            'numpy':numpy.__version__,
+            'pandas':pandas.__version__,
+            'scipy':scipy.__version__,
+            'scikit_learn':sklearn.__version__,
+            'xgboost':xgboost.__version__,
+            'joblib':joblib.__version__,
+            'upstream_commit':'e138dcd72c1952a00e11e1a0b025337f9e7c93fb',
+            'external_public_methodological_replay':True,
+            'paper_model_reproduction':False,
+            'operational_equivalence_claimed':False,
+            'protected_local_post_2025_outcomes_accessed':False,
+          },indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Finalize and reverify evidence manifest
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/sep-prism-model-replay')
+          def sha(path):
+            h=hashlib.sha256()
+            with path.open('rb') as f:
+              for b in iter(lambda:f.read(1<<20),b''): h.update(b)
+            return h.hexdigest()
+          files=sorted(p for p in root.iterdir() if p.is_file() and p.name!='final_evidence_manifest.json')
+          manifest={p.name:sha(p) for p in files}
+          root.joinpath('final_evidence_manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          for name,expected in manifest.items():
+            assert sha(root/name)==expected,name
+          receipt=root/'independent_verification_v1.json'
+          if receipt.exists():
+            check=json.loads(receipt.read_text())
+            assert check['passed'] is True,check
+          print(f'Final manifest verified for {len(manifest)} evidence files.')
+          PY
+
+      - name: Upload immutable fixed-model replay artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-prism-external-model-replay-v1-${{ github.sha }}
+          path: /tmp/sep-prism-model-replay
+          if-no-files-found: warn
+          retention-days: 30
