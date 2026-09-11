@@ -213,7 +213,7 @@ def run(output: Path, issue: datetime) -> dict[str, Any]:
             "all_source_retrievals_no_later_than_issue": retrieval_gate,
             "selected_proton_age_within_frozen_limit": proton["age_gate_passed"],
             "candidate_preissue_snapshot": candidate_gate,
-            "features_verified_causal_changed": false
+            "features_verified_causal_changed": False
         },
         "protected_outcomes_accessed": False,
         "claim_boundary": "One timestamped public-input snapshot; not a general latency certification and not forecast-skill evidence."
