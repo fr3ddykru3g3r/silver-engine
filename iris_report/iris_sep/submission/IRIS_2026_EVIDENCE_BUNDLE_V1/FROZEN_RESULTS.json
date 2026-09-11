@@ -1,0 +1,148 @@
+{
+  "format": "IRIS_SEP_FROZEN_RESULTS_V1",
+  "frozen_utc_date": "2026-09-11",
+  "scientific_submission_baseline_commit": "7bd7f0659b8ce2f4310d5c83f7d81b6db439c40b",
+  "latest_documented_technical_head_before_this_contract": "5d240b20b6442832e0a6a32cdd96843df75242d2",
+  "protected_post_2025_outcomes_accessed": false,
+  "historical_evidence_class": "DEVELOPMENT_EXPOSED_PUBLIC_HISTORICAL_DATA",
+  "model_free_audit": {
+    "daily_windows": 14464,
+    "stored_positive_windows": 650,
+    "target_mismatch_count": 0,
+    "uniquely_mapped_positive_windows": 614,
+    "represented_physical_episodes": 257,
+    "episode_multiplicity_factor": 2.389105,
+    "multiple_episode_overlap_positive_windows_excluded_from_emf": 36,
+    "already_active_persistence_windows": 418,
+    "new_onset_windows": 228,
+    "ambiguous_positive_windows": 4
+  },
+  "fixed_replay": {
+    "unique_score_issues": 7558,
+    "fixed_comparators": 6,
+    "all_prediction_rows": 45348,
+    "matched_sensitivity_prediction_rows": 45066,
+    "matched_onset_episode_units": 85,
+    "quiet_block_units": 1080,
+    "shared_bootstrap_draws": 10000,
+    "matched_tss": {
+      "xgb_joint": {
+        "mapped_occurrence": 0.726455,
+        "episode_normalized_occurrence": 0.621128,
+        "new_onset": 0.437234
+      },
+      "xgb_no_proton": {
+        "mapped_occurrence": 0.508922,
+        "episode_normalized_occurrence": 0.514758,
+        "new_onset": 0.477391
+      },
+      "past_proton_ge10_proxy": {
+        "mapped_occurrence": 0.601224,
+        "episode_normalized_occurrence": 0.446983,
+        "new_onset": 0.092894
+      },
+      "elastic_net_joint": {
+        "mapped_occurrence": -0.122768,
+        "episode_normalized_occurrence": -0.182816,
+        "new_onset": -0.26699
+      },
+      "elastic_net_no_proton": {
+        "mapped_occurrence": -0.318921,
+        "episode_normalized_occurrence": -0.33209,
+        "new_onset": -0.333015
+      },
+      "fit_prevalence_climatology": {
+        "mapped_occurrence": 0.0,
+        "episode_normalized_occurrence": 0.0,
+        "new_onset": 0.0
+      }
+    },
+    "primary_bootstrap_contrasts": {
+      "xgb_joint_episode_normalized_minus_mapped": {
+        "point_change": -0.105327,
+        "bootstrap_median": -0.103744,
+        "ci95_percentile": [-0.146175, -0.063165],
+        "all_10000_draws_negative": true
+      },
+      "xgb_joint_onset_minus_episode_normalized": {
+        "point_change": -0.183894,
+        "bootstrap_median": -0.183333,
+        "ci95_percentile": [-0.246639, -0.12507],
+        "all_10000_draws_negative": true
+      },
+      "past_proton_proxy_onset_minus_mapped": {
+        "point_change": -0.508331,
+        "bootstrap_median": -0.506167,
+        "ci95_percentile": [-0.566675, -0.443973],
+        "all_10000_draws_negative": true
+      }
+    },
+    "secondary_bootstrap_contrasts": {
+      "xgb_joint_minus_xgb_no_proton_onset": {
+        "point_change": -0.040157,
+        "bootstrap_median": -0.0413,
+        "ci95_percentile": [-0.162967, 0.08292],
+        "reliable_rank_reversal_supported": false
+      },
+      "elastic_joint_minus_elastic_no_proton_onset": {
+        "point_change": 0.066025,
+        "bootstrap_median": 0.066698,
+        "ci95_percentile": [0.015149, 0.111101],
+        "operational_success_supported": false
+      }
+    },
+    "xgb_joint_new_onset_operating_characteristics": {
+      "tp": 41,
+      "fn": 44,
+      "fp": 330,
+      "tn": 6984,
+      "sensitivity_percent": 48.24,
+      "false_alarm_ratio_percent": 88.95,
+      "false_positive_rate_percent": 4.51,
+      "tss": 0.437234,
+      "hss": 0.164201,
+      "brier": 0.011391
+    }
+  },
+  "immutable_artifacts": {
+    "model_free_confirmation": {
+      "workflow_run": 34438057070,
+      "artifact_id": 10136909164,
+      "archive_sha256": "4d75cb08d9beb8ac1761e138ffcf0464da9456bd7111e5318e83a8d042314f4f"
+    },
+    "fixed_model_replay": {
+      "workflow_run": 34438987251,
+      "artifact_id": 10137507101,
+      "source_commit": "296f302111371e8d421fb5f2a4569ea2c06bd6e1",
+      "archive_sha256": "81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0"
+    }
+  },
+  "source_only_verification": {
+    "baseline_run": 34573237824,
+    "baseline_commit": "7bd7f0659b8ce2f4310d5c83f7d81b6db439c40b",
+    "latest_documentation_head_run": 34604301457,
+    "latest_documentation_head_commit": "5d240b20b6442832e0a6a32cdd96843df75242d2",
+    "latest_documentation_head_conclusion": "success"
+  },
+  "prospective_confirmation": {
+    "study": "IRIS_SEP_PROSPECTIVE_OPERATIONAL_CONFIRMATION_V1",
+    "status": "FROZEN_NOT_EXECUTED",
+    "protected_pool_not_before_utc": "2025-09-10T00:00:00Z",
+    "required_distinct_onset_episodes": 50,
+    "required_quiet_blocks": 500,
+    "bootstrap_draws": 10000,
+    "bootstrap_seed": 20260911,
+    "development_side_outcome_access": "FORBIDDEN"
+  },
+  "claim_boundary": {
+    "supported": "Historical methodological confirmation that fixed SEP prediction skill changes materially when repeated physical-event representation and already-active persistence are separated.",
+    "not_supported": [
+      "untouched prospective validation",
+      "operational readiness or certification",
+      "state-of-the-art model performance",
+      "universal model or feature superiority",
+      "company or economic benefit",
+      "guaranteed competition outcome"
+    ]
+  }
+}
