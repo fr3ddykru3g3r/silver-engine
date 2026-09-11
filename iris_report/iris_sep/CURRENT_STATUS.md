@@ -31,7 +31,7 @@ The replay covers 7,558 unique daily score issues across three chronological out
 | Joint XGBoost: onset minus episode-normalized occurrence | -0.184 | [-0.247, -0.125] |
 | Past-proton proxy: onset minus mapped occurrence | -0.508 | [-0.567, -0.444] |
 
-All three intervals lie below zero, satisfying the frozen `STRONG_MODEL_CONFIRMATION` rule. On the same matched population, joint-XGBoost TSS changes **0.726 -> 0.621 -> 0.437** across mapped occurrence, episode normalization and onset. Its onset confusion table is TP=41, FN=44, FP=330 and TN=6,984 (sensitivity 48.24%, FAR 88.95%), so the result is evidence about evaluation sensitivity, not operational readiness.
+All three intervals lie below zero, satisfying the frozen `STRONG_MODEL_CONFIRMATION` rule. On the same matched population, joint-XGBoost TSS changes **0.726 -> 0.621 -> 0.437** across mapped occurrence, episode normalization and onset. Its onset confusion table is TP=41, FN=44, FP=330 and TN=6,984 (sensitivity 48.24%, false-alarm ratio 88.95%; false-positive rate 4.51%), so the result is evidence about evaluation sensitivity, not operational readiness.
 
 The joint-XGBoost minus no-proton onset contrast is -0.040 with interval [-0.163, +0.083], which does not establish a reliable rank reversal. Elastic-net's corresponding contrast is positive, but both elastic-net onset TSS values are negative. No broad proton-feature or model-superiority claim is supported.
 
@@ -139,6 +139,7 @@ Supported:
 - already-active persistence can contribute strongly to occurrence-style skill while being a different task from new-onset forecasting;
 - in the higher-powered historical replay, all three frozen directional evaluation-effect intervals were below zero;
 - physical-episode weighting and onset/persistence separation materially change measured skill for some fixed models;
+- point **model ranking** can change under causal/onset evaluation, while the higher-powered joint-vs-no-proton onset contrast remains uncertain;
 - an aggregate-only prospective confirmation protocol is frozen without protected-outcome inspection.
 
 Not supported:
