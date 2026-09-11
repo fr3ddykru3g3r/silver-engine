@@ -1,0 +1,59 @@
+{
+  "format": "IRIS_2026_SUBMISSION_EVIDENCE_BUNDLE_V1",
+  "created_utc_date": "2026-09-11",
+  "historical_baseline": {
+    "commit": "7bd7f0659b8ce2f4310d5c83f7d81b6db439c40b",
+    "source_only_ci_run": 34573237824,
+    "source_only_ci_conclusion": "success",
+    "development_exposed_historical_evidence": true
+  },
+  "protected_outcomes": {
+    "pool_not_before_utc": "2025-09-10T00:00:00Z",
+    "development_side_access": "FORBIDDEN",
+    "accessed_while_building_this_bundle": false
+  },
+  "denominator_guard": {
+    "full_table_onset_windows": 228,
+    "matched_replay_distinct_onset_episodes": 85,
+    "matched_replay_quiet_blocks": 1080,
+    "rule": "These denominators are not interchangeable."
+  },
+  "headline_metrics": {
+    "joint_xgboost_tss_mapped_occurrence": 0.726,
+    "joint_xgboost_tss_episode_normalized": 0.621,
+    "joint_xgboost_tss_new_onset": 0.437,
+    "joint_xgboost_onset_sensitivity_percent": 48.24,
+    "joint_xgboost_onset_false_alarm_ratio_percent": 88.95,
+    "joint_xgboost_onset_false_positive_rate_percent": 4.51,
+    "joint_minus_proton_free_onset_tss_contrast": -0.040,
+    "joint_minus_proton_free_onset_tss_interval": [-0.163, 0.083]
+  },
+  "frozen_artifacts": {
+    "model_free_confirmation": {
+      "workflow_run": 34438057070,
+      "artifact_id": 10136909164,
+      "archive_sha256": "4d75cb08d9beb8ac1761e138ffcf0464da9456bd7111e5318e83a8d042314f4f"
+    },
+    "fixed_model_replay": {
+      "workflow_run": 34438987251,
+      "source_commit": "296f302111371e8d421fb5f2a4569ea2c06bd6e1",
+      "artifact_id": 10137507101,
+      "archive_sha256": "81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0"
+    }
+  },
+  "baseline_paths": [
+    "CURRENT_STATUS.md",
+    "architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md",
+    "architecture/IRIS_RESEARCH_PAPER_DRAFT_2026-09-10.md",
+    "architecture/IRIS_SUBMISSION_PACK_2026-09-10.md",
+    "architecture/IRIS_SUBMISSION_READINESS_2026-09-10.md",
+    "architecture/IRIS_JUDGE_QA_2026-09-10.md",
+    "architecture/FRESHNESS_CROSSOVER_V1_RESULT_2026-09-09.md",
+    "architecture/FRESHNESS_CROSSOVER_POSTRUN_AUDIT_2026-09-09.md",
+    "architecture/STUDENT_OWNERSHIP_DEFENSE_CHECKLIST_2026-09-11.md",
+    "architecture/ISEF_2027_FORMS_AND_APPROVAL_MATRIX_2026-09-11.md",
+    "figures/episode_benchmark_mechanism_2026-09-10.svg",
+    "figures/sep_prism_fixed_model_tss_2026-09-10.svg"
+  ],
+  "claim_boundary": "Historical methodological confirmation only. No untouched prospective validation, operational certification, state-of-the-art model claim, company-benefit claim, economic-savings claim or award claim."
+}
