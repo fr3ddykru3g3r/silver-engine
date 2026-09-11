@@ -52,7 +52,7 @@ def _iso_z(value: datetime) -> str:
 def _require_sha256(value: str, field: str) -> str:
     value = str(value).lower()
     if not _SHA256.fullmatch(value):
-        raise ForecastValidityError(f"{field} must be a 64-character lowercase SHA-256")
+        raise ForecastValidityError(f"{field} must be a 64-character SHA-256")
     return value
 
 
@@ -64,11 +64,30 @@ def _hash_record(body: Mapping[str, Any]) -> str:
     return hashlib.sha256(_canonical(dict(body))).hexdigest()
 
 
-def derive_reason_codes(assessment: Mapping[str, Any]) -> list[str]:
-    """Map pre-issue evidence flags to frozen reason codes.
+def _nonnegative_number_map(value: Any, field: str) -> dict[str, float]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        raise ForecastValidityError(f"{field} must be a mapping")
+    out: dict[str, float] = {}
+    for key, raw in value.items():
+        try:
+            number = float(raw)
+        except (TypeError, ValueError) as exc:
+            raise ForecastValidityError(f"invalid {field} value for {key}") from exc
+        if number < 0:
+            raise ForecastValidityError(f"negative {field} value for {key}")
+        out[str(key)] = number
+    return out
 
-    Unknown flags are rejected rather than ignored. Observation timestamps are
-    compared directly with issue time so future values cannot be silently used.
+
+def derive_reason_codes(assessment: Mapping[str, Any]) -> list[str]:
+    """Map pre-issue evidence facts to frozen reason codes.
+
+    Source-specific freshness/recovery thresholds may be supplied by a separately
+    frozen execution contract. This evaluator applies them mechanically; it does
+    not choose them. Unknown flags are rejected. Observation timestamps are
+    compared with issue time so future values cannot be silently used.
     """
     issue = _parse_utc(str(assessment["issue_time"]))
     flags = dict(assessment.get("flags", {}))
@@ -88,6 +107,7 @@ def derive_reason_codes(assessment: Mapping[str, Any]) -> list[str]:
         raise ForecastValidityError(f"unknown assessment flags: {unknown}")
 
     reasons = {code for name, code in allowed_flags.items() if bool(flags.get(name, False))}
+
     observations = assessment.get("observation_times", {}) or {}
     if not isinstance(observations, Mapping):
         raise ForecastValidityError("observation_times must be a mapping")
@@ -95,6 +115,37 @@ def derive_reason_codes(assessment: Mapping[str, Any]) -> list[str]:
         observed = _parse_utc(str(timestamp))
         if observed > issue:
             reasons.add("FUTURE_OBSERVATION")
+
+    source_hashes = assessment.get("source_hashes", {}) or {}
+    if not isinstance(source_hashes, Mapping):
+        raise ForecastValidityError("source_hashes must be a mapping")
+    required_sources = assessment.get("required_sources", []) or []
+    if not isinstance(required_sources, list) or not all(isinstance(x, str) for x in required_sources):
+        raise ForecastValidityError("required_sources must be a list of strings")
+    if any(source not in source_hashes for source in required_sources):
+        reasons.add("REQUIRED_FEED_ABSENT")
+
+    ages = _nonnegative_number_map(assessment.get("input_age_seconds", {}), "input_age_seconds")
+    max_ages = _nonnegative_number_map(assessment.get("input_max_age_seconds", {}), "input_max_age_seconds")
+    for source_id, limit in max_ages.items():
+        if source_id not in ages:
+            reasons.add("REQUIRED_FEED_ABSENT")
+        elif ages[source_id] > limit:
+            reasons.add("STALE_INPUT")
+
+    fill_gaps = _nonnegative_number_map(
+        assessment.get("forward_fill_gap_seconds", {}), "forward_fill_gap_seconds"
+    )
+    fill_limits = _nonnegative_number_map(
+        assessment.get("forward_fill_max_gap_seconds", {}), "forward_fill_max_gap_seconds"
+    )
+    for source_id, gap in fill_gaps.items():
+        if source_id not in fill_limits:
+            reasons.add("CAUSAL_AVAILABILITY_RECEIPT_FAILED")
+        elif gap > fill_limits[source_id]:
+            reasons.add("EXCESSIVE_TRANSIENT_LOSS")
+        else:
+            reasons.add("TRANSIENT_FORWARD_FILL_APPLIED")
 
     explicit = assessment.get("reason_codes", []) or []
     if not isinstance(explicit, list):
@@ -145,23 +196,22 @@ def build_validity_record(assessment: Mapping[str, Any]) -> dict[str, Any]:
         raise ForecastValidityError("VALID/DEGRADED records require a candidate alert")
     alert = None if state == "ABSTAIN" else bool(candidate_alert)
 
-    ages = assessment.get("input_age_seconds", {}) or {}
-    if not isinstance(ages, Mapping):
-        raise ForecastValidityError("input_age_seconds must be a mapping")
-    clean_ages: dict[str, float] = {}
-    for key, value in ages.items():
-        try:
-            number = float(value)
-        except (TypeError, ValueError) as exc:
-            raise ForecastValidityError(f"invalid input age for {key}") from exc
-        if number < 0:
-            raise ForecastValidityError(f"negative input age for {key}")
-        clean_ages[str(key)] = number
+    ages = _nonnegative_number_map(assessment.get("input_age_seconds", {}), "input_age_seconds")
+    max_ages = _nonnegative_number_map(assessment.get("input_max_age_seconds", {}), "input_max_age_seconds")
+    fill_gaps = _nonnegative_number_map(
+        assessment.get("forward_fill_gap_seconds", {}), "forward_fill_gap_seconds"
+    )
+    fill_limits = _nonnegative_number_map(
+        assessment.get("forward_fill_max_gap_seconds", {}), "forward_fill_max_gap_seconds"
+    )
 
     hashes = assessment.get("source_hashes", {}) or {}
     if not isinstance(hashes, Mapping):
         raise ForecastValidityError("source_hashes must be a mapping")
-    clean_hashes = {str(key): _require_sha256(str(value), f"source_hashes[{key}]") for key, value in hashes.items()}
+    clean_hashes = {
+        str(key): _require_sha256(str(value), f"source_hashes[{key}]")
+        for key, value in hashes.items()
+    }
 
     body = {
         "format": "IRIS_SEP_FORECAST_VALIDITY_RECORD_V1",
@@ -169,7 +219,10 @@ def build_validity_record(assessment: Mapping[str, Any]) -> dict[str, Any]:
         "alert": alert,
         "validity_state": state,
         "reason_codes": reasons,
-        "input_age_seconds": dict(sorted(clean_ages.items())),
+        "input_age_seconds": dict(sorted(ages.items())),
+        "input_max_age_seconds": dict(sorted(max_ages.items())),
+        "forward_fill_gap_seconds": dict(sorted(fill_gaps.items())),
+        "forward_fill_max_gap_seconds": dict(sorted(fill_limits.items())),
         "source_hashes": dict(sorted(clean_hashes.items())),
         "model_hash": _require_sha256(str(assessment["model_hash"]), "model_hash"),
         "threshold_hash": _require_sha256(str(assessment["threshold_hash"]), "threshold_hash"),
