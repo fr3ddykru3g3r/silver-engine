@@ -25,7 +25,7 @@
     "joint_xgboost_onset_sensitivity_percent": 48.24,
     "joint_xgboost_onset_false_alarm_ratio_percent": 88.95,
     "joint_xgboost_onset_false_positive_rate_percent": 4.51,
-    "joint_minus_proton_free_onset_tss_contrast": -0.040,
+    "joint_minus_proton_free_onset_tss_contrast": -0.04,
     "joint_minus_proton_free_onset_tss_interval": [-0.163, 0.083]
   },
   "frozen_artifacts": {
@@ -41,8 +41,16 @@
       "archive_sha256": "81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0"
     }
   },
+  "machine_readable_results_contract": {
+    "path": "submission/IRIS_2026_EVIDENCE_BUNDLE_V1/FROZEN_RESULTS.json",
+    "regression_test": "tests/test_submission_frozen_results_contract.py",
+    "purpose": "Prevent submission-facing counts, metrics, intervals, artifact hashes and protected-evidence state from silently drifting."
+  },
+  "final_technical_receipt": "architecture/FINAL_TECHNICAL_RESULTS_AND_FREEZE_RECEIPT_2026-09-11.md",
   "baseline_paths": [
     "CURRENT_STATUS.md",
+    "architecture/FINAL_TECHNICAL_RESULTS_AND_FREEZE_RECEIPT_2026-09-11.md",
+    "submission/IRIS_2026_EVIDENCE_BUNDLE_V1/FROZEN_RESULTS.json",
     "architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md",
     "architecture/IRIS_RESEARCH_PAPER_DRAFT_2026-09-10.md",
     "architecture/IRIS_SUBMISSION_PACK_2026-09-10.md",
