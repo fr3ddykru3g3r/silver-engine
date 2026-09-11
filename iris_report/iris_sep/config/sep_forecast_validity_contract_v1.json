@@ -68,7 +68,6 @@
   ],
   "missingness_dependency": {
     "contract": "config/missingness_recovery_contract_v1.json",
-    "contract_sha256_at_freeze": "d3e536052f643de24b0a8f0c5db2ef79ded5b5bf",
     "rule": "Do not infer an operational recovery threshold from synthetic masking percentages alone. Source-specific freshness and recovery limits must be separately frozen before prospective execution.",
     "historical_working_evidence": "The two-week pilot plan reports that causal forward-fill preserved probabilities reasonably under 5-20% random transient loss and degraded materially at 40% loss. Treat this as synthetic research evidence, not blanket operational certification."
   },
