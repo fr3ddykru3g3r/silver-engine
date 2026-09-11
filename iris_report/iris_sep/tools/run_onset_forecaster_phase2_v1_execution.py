@@ -1,10 +1,14 @@
 """Execution adapter for the preregistered Phase II onset forecaster.
 
-This file exists to correct one pre-execution feature-name mismatch in the
-initial implementation. No Phase II real-data score had been executed or
-inspected when this adapter was added. It does not change the preregistered
-model set, splits, target, hyperparameters, calibration, blend grid, threshold
-policy, success gate, or protected-outcome boundary.
+This file contains runtime-compatibility corrections only. The first correction
+resolved a pre-execution XRS feature-name alias mismatch. The second installs
+the already-reviewed pandas timezone/index compatibility patch used by the
+frozen episode benchmark after the first Phase II execution attempt terminated
+with zero modelable rows before fitting or scoring any Phase II model.
+
+Neither correction changes the preregistered model set, splits, target,
+hyperparameters, calibration, blend grid, threshold policy, success gate, or
+protected-outcome boundary.
 """
 from __future__ import annotations
 
@@ -16,6 +20,7 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
+import tools.run_episode_normalized_development_benchmark_v1_compat as benchmark_compat
 import tools.run_onset_forecaster_phase2_v1 as phase2
 
 
@@ -60,11 +65,14 @@ def corrected_engineered_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, li
     return out, created
 
 
-def run(output: Path) -> dict:
-    # Pre-execution compatibility correction only. The imported run() resolves
-    # this global at execution time, so all scientific logic remains in the
-    # preregistered implementation.
+def install_runtime_compatibility() -> None:
+    """Install representation-only compatibility fixes before acquisition."""
+    benchmark_compat.install_compatibility_patch()
     phase2.add_engineered_features = corrected_engineered_features
+
+
+def run(output: Path) -> dict:
+    install_runtime_compatibility()
     return phase2.run(output)
 
 
