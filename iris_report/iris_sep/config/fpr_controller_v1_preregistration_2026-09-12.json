@@ -1,0 +1,53 @@
+{
+  "study_id": "IRIS_SEP_FPR_CONTROLLER_V1",
+  "status": "FROZEN_BEFORE_CONTROLLER_REPLAY",
+  "created_utc": "2026-09-12",
+  "purpose": "Retrospective development-only test of a causal adaptive threshold controller intended to reduce false-positive rate for the already-frozen Phase II direct-onset engineered forecaster.",
+  "claim_boundary": "The 2017 score period was already inspected in Phase II V1. This controller replay is therefore post-hoc development evidence only and must not be described as held-out validation, independent confirmation, state of the art, operational readiness, or prospective validation.",
+  "protected_boundary": {
+    "protected_post_2025_outcomes_may_be_accessed": false,
+    "phase2_model_probabilities_are_refit_only_under_the_original_frozen_phase2_training_design": true,
+    "no_new_feature_or_model_hyperparameter_tuning": true
+  },
+  "source_model": "direct_onset_engineered",
+  "requested_operating_goal": {
+    "maximum_fpr": 0.30,
+    "primary_goal": "reduce retrospective 2017 FPR to <= 0.30 without using future labels at any issue time",
+    "secondary_metrics": ["POD", "TSS", "HSS", "FAR"]
+  },
+  "controller": {
+    "type": "causal rolling negative-score quantile threshold",
+    "internal_negative_exceedance_target": 0.15,
+    "quantile": 0.85,
+    "history_window_days": 120,
+    "minimum_resolved_negative_history": 30,
+    "label_availability_lag_hours": 25,
+    "threshold_floor": "original Phase II fixed threshold",
+    "quantile_method": "higher",
+    "rationale": "A 15 percentage-point guard band below the requested 30% FPR cap is frozen before controller replay to absorb temporal score-distribution drift. Only previously resolved negative outcomes may update the threshold."
+  },
+  "evaluation": {
+    "period": "2017 Phase II score rows",
+    "already_inspected": true,
+    "fixed_model_probabilities": true,
+    "controller_threshold_at_time_t_may_use": [
+      "the current model score",
+      "the original Phase II threshold",
+      "negative model scores from prior rows whose 24-hour labels are fully resolved before time t"
+    ],
+    "controller_threshold_at_time_t_may_not_use": [
+      "the current row label",
+      "future labels",
+      "future scores",
+      "protected post-2025 outcomes"
+    ]
+  },
+  "success_gate": {
+    "required": [
+      "controller FPR <= 0.30 on the retrospective 2017 replay",
+      "controller uses no future labels or future scores",
+      "protected post-2025 outcomes remain sealed"
+    ],
+    "interpretation_if_passed": "engineering proof-of-concept only; must be frozen and tested prospectively or on a genuinely uninspected cohort before performance claims"
+  }
+}
