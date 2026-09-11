@@ -21,10 +21,10 @@
     "quantile": 0.85,
     "history_window_days": 120,
     "minimum_resolved_negative_history": 30,
-    "label_availability_lag_hours": 25,
+    "post_horizon_label_buffer_hours": 1,
     "threshold_floor": "original Phase II fixed threshold",
     "quantile_method": "higher",
-    "rationale": "A 15 percentage-point guard band below the requested 30% FPR cap is frozen before controller replay to absorb temporal score-distribution drift. Only previously resolved negative outcomes may update the threshold."
+    "rationale": "A 15 percentage-point guard band below the requested 30% FPR cap is frozen before controller replay to absorb temporal score-distribution drift. Only prior negative outcomes whose full 24-hour target window has ended, plus a one-hour availability buffer, may update the threshold."
   },
   "evaluation": {
     "period": "2017 Phase II score rows",
