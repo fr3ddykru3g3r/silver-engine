@@ -1,0 +1,100 @@
+{
+  "study_id": "IRIS_SEP_ONSET_FORECASTER_PHASE2_V1",
+  "created_utc": "2026-09-11",
+  "status": "PREREGISTERED_BEFORE_PHASE2_SCORE_EXECUTION",
+  "scope": "DEVELOPMENT_ONLY_PUBLIC_HISTORICAL_DATA",
+  "scientific_question": "Can a forecaster trained around physical-event-balanced genuine new SEP onset improve causal 24-hour warning under the already-frozen NEW-crossing benchmark?",
+  "target": "new_sep_10mev_10pfu_within_24h",
+  "protected_outcomes": {
+    "post_2025_pool_access": "FORBIDDEN",
+    "locked_test_accessed": false,
+    "prospective_protocol_modified": false
+  },
+  "data_contract": {
+    "sep_prism_commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+    "feature_sha256": "4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb",
+    "event_catalogue_sha256": "0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0",
+    "active_event_rows_excluded": true,
+    "catalogue_labels_as_learned_features": false,
+    "future_features_forbidden": true
+  },
+  "outer_roles": ["fit", "calibration", "threshold", "score", "monitor"],
+  "outer_role_policy": {
+    "fit": "architecture selection and final parameter fitting only",
+    "calibration": "single intercept calibration only",
+    "threshold": "decision threshold selection only",
+    "score": "one-shot development evaluation after architecture freeze",
+    "monitor": "secondary development evaluation; already historically exposed"
+  },
+  "inner_selection": {
+    "method": "expanding chronological physical-unit cross-fit inside outer fit role",
+    "purge_hours": 24,
+    "candidate_selection_metric": "OOF_MAX_TSS",
+    "tie_breakers": ["LOWER_OOF_FAR", "HIGHER_OOF_HSS", "FIXED_CANDIDATE_ORDER"],
+    "candidate_count": 6,
+    "post_score_candidate_switching": false
+  },
+  "event_balanced_weighting": {
+    "unit_definition": "positive physical onset episode or contiguous negative quiet block",
+    "each_unit_equal_within_class": true,
+    "positive_and_negative_total_training_weight_equal": true,
+    "row_weight_within_unit": "unit weight divided equally across rows",
+    "mean_weight_normalized_to_one": true
+  },
+  "fixed_candidate_order": [
+    "BASE_SOLAR_REGULAR",
+    "BASE_SOLAR_EVENT_WEIGHTED",
+    "BASE_PLUS_XRS_EVENT_WEIGHTED",
+    "BASE_SOLAR_TWO_STATE_EVENT_WEIGHTED",
+    "BASE_PLUS_XRS_TWO_STATE_EVENT_WEIGHTED",
+    "FULL_CONTEXT_TWO_STATE_EVENT_WEIGHTED"
+  ],
+  "two_state_transform": {
+    "current_window_hours": 24,
+    "lag_hours": 24,
+    "lag_tolerance_hours": 3,
+    "features": ["current", "lag24", "delta24", "lag_availability", "lag_age_hours"]
+  },
+  "xgboost_recipe": {
+    "n_estimators": 500,
+    "learning_rate": 0.03,
+    "max_depth": 3,
+    "min_child_weight": 5,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "n_jobs": 2,
+    "seeds": [7, 13, 26, 42, 73],
+    "regular_baseline_uses_frozen_scale_pos_weight": true,
+    "event_weighted_candidates_use_scale_pos_weight": 1.0
+  },
+  "decision_policies": ["MAX_TSS", "POD80_MIN_FAR"],
+  "primary_policy": "MAX_TSS",
+  "primary_comparison": "selected_phase2_candidate_minus_best_same_cohort_regular_xgboost_baseline",
+  "uncertainty": {
+    "bootstrap_unit": "physical event or contiguous quiet block",
+    "replicates": 10000,
+    "seed": 20260911,
+    "paired": true
+  },
+  "promotion_gate": {
+    "primary_TSS_delta_point_gt": 0.0,
+    "primary_TSS_delta_ci95_lower_gt": 0.0,
+    "candidate_HSS_gt_baseline": true,
+    "candidate_FAR_lt_baseline": true,
+    "interpretation_if_gate_fails": "NO_DEMONSTRATED_PHASE2_SUPERIORITY"
+  },
+  "published_architecture_comparison": {
+    "comparator": "SEPNET_PRISM_RELEASED_ARCHITECTURE",
+    "same_cohort_required": true,
+    "description": "released architecture / fixed recipe under IRIS chronology; not exact paper random-IID reproduction",
+    "claim_if_better": "same-cohort development superiority only; never universal SOTA"
+  },
+  "claim_boundary": [
+    "No protected post-2025 outcome inspection.",
+    "No operational-readiness claim from historical development data.",
+    "No universal state-of-the-art claim from unmatched published headline metrics.",
+    "A successful Phase II result remains development evidence until independently confirmed prospectively."
+  ]
+}
