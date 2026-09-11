@@ -2,9 +2,13 @@
 
 This file contains runtime-compatibility corrections only. The first correction
 resolved a pre-execution XRS feature-name alias mismatch. The second installs
-the already-reviewed pandas timezone/index compatibility patch used by the
+the already-reviewed pandas timezone/index compatibility semantics used by the
 frozen episode benchmark after the first Phase II execution attempt terminated
 with zero modelable rows before fitting or scoring any Phase II model.
+
+The timezone conversion is cached once per source DataFrame. This changes only
+runtime cost: the cached nanosecond timestamp array is byte-for-byte the same
+array that the frozen compatibility helper would reconstruct on every call.
 
 Neither correction changes the preregistered model set, splits, target,
 hyperparameters, calibration, blend grid, threshold policy, success gate, or
@@ -21,7 +25,11 @@ import numpy as np
 import pandas as pd
 
 import tools.run_episode_normalized_development_benchmark_v1_compat as benchmark_compat
+import tools.run_freshness_crossover_study_v1 as fresh
 import tools.run_onset_forecaster_phase2_v1 as phase2
+
+
+_TIME_NS_CACHE: dict[int, tuple[int, np.ndarray]] = {}
 
 
 def _column(frame: pd.DataFrame, *candidates: str) -> pd.Series:
@@ -29,6 +37,46 @@ def _column(frame: pd.DataFrame, *candidates: str) -> pd.Series:
         if name in frame.columns:
             return frame[name]
     raise KeyError(f"none of the required feature aliases exist: {candidates}")
+
+
+def _nanosecond_times(frame: pd.DataFrame) -> np.ndarray:
+    key = id(frame)
+    cached = _TIME_NS_CACHE.get(key)
+    if cached is not None and cached[0] == len(frame):
+        return cached[1]
+    ns = pd.DatetimeIndex(pd.to_datetime(frame["time"], utc=True)).as_unit("ns").asi8
+    _TIME_NS_CACHE[key] = (len(frame), ns)
+    return ns
+
+
+def family_features_cached(df: pd.DataFrame, issue: pd.Timestamp, delay: int, family: str):
+    """Exact frozen compatibility feature windows with cached timestamp conversion."""
+    ns = _nanosecond_times(df)
+    ins = int(issue.value)
+    lo = ins - int(24 * 3600 * 1e9)
+    cutoff = min(ins - 1, ins - int(delay * 60 * 1e9))
+    a = int(np.searchsorted(ns, lo, side="left"))
+    b = int(np.searchsorted(ns, cutoff, side="right"))
+    sub = df.iloc[a:b]
+    tns = ns[a:b]
+
+    if family == "proton":
+        v = sub["proton"].to_numpy(float)
+        out = fresh.stream_features(tns, v, ins, 288, "p", True)
+        good = v[np.isfinite(v)]
+        for q in fresh.P_THRESH:
+            out[f"p_count_ge_{q:g}"] = float(np.sum(good >= q))
+        return out
+
+    if family != "xrs":
+        raise ValueError(f"unknown family: {family}")
+    out = fresh.stream_features(tns, sub["A"].to_numpy(float), ins, 1440, "a")
+    out.update(fresh.stream_features(tns, sub["B"].to_numpy(float), ins, 1440, "b"))
+    good = sub["B"].to_numpy(float)
+    good = good[np.isfinite(good)]
+    for q in fresh.XRS_THRESH:
+        out[f"b_count_ge_{q:.0e}"] = float(np.sum(good >= q))
+    return out
 
 
 def corrected_engineered_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
@@ -68,6 +116,7 @@ def corrected_engineered_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, li
 def install_runtime_compatibility() -> None:
     """Install representation-only compatibility fixes before acquisition."""
     benchmark_compat.install_compatibility_patch()
+    fresh.family_features = family_features_cached
     phase2.add_engineered_features = corrected_engineered_features
 
 
