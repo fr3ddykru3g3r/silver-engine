@@ -1,0 +1,187 @@
+name: IRIS-SEP Phase II vs released architecture
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-onset-forecaster-v2-20260911
+    paths:
+      - 'iris_report/iris_sep/tools/compare_phase2_to_released_architecture.py'
+      - '.github/workflows/iris-sep-phase2-released-comparator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  released-seed:
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [7, 13, 26, 42, 73]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out Phase II source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install frozen comparator dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.16.2 scikit-learn==1.8.0 xgboost==3.0.4
+          python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Compile released-architecture seed runner
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/run_sepnet_prism_architecture_seed.py
+
+      - name: Acquire hash-pinned public historical development inputs
+        run: |
+          mkdir -p /tmp/sep-prism/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Train fixed released architecture seed ${{ matrix.seed }}
+        run: |
+          python -m iris_report.iris_sep.tools.run_sepnet_prism_architecture_seed \
+            --features /tmp/sep-prism/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/sep-prism/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --seed '${{ matrix.seed }}' \
+            --output '/tmp/released-seed-${{ matrix.seed }}'
+
+      - name: Upload immutable seed evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-released-seed-${{ matrix.seed }}-${{ github.sha }}
+          path: /tmp/released-seed-${{ matrix.seed }}
+          if-no-files-found: error
+          retention-days: 30
+
+  compare:
+    needs: released-seed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out Phase II source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install comparison dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.16.2 scikit-learn==1.8.0 xgboost==3.0.4
+          python -m py_compile \
+            iris_report/iris_sep/tools/aggregate_sepnet_prism_architecture_comparator.py \
+            iris_report/iris_sep/tools/compare_phase2_to_released_architecture.py
+
+      - name: Download five immutable released-architecture seed artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: phase2-released-seed-*-${{ github.sha }}
+          path: /tmp/released-seeds
+
+      - name: Download frozen historical late-fusion predictions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/context-stability
+          gh run download 33981729019 \
+            --repo '${{ github.repository }}' \
+            --name 'iris-sep-context-stability-88711650ac88430e540770af294d0b583f554f9e' \
+            --dir /tmp/context-stability
+          test -f /tmp/context-stability/predictions.csv
+
+      - name: Aggregate released architecture on the frozen IRIS chronology
+        run: |
+          python -m iris_report.iris_sep.tools.aggregate_sepnet_prism_architecture_comparator \
+            --seed-root /tmp/released-seeds \
+            --late-fusion-predictions /tmp/context-stability/predictions.csv \
+            --output /tmp/released-architecture
+
+      - name: Download immutable Phase II evidence from the one-shot run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/phase2-frozen
+          gh run download 34624151136 \
+            --repo '${{ github.repository }}' \
+            --name 'iris-sep-onset-forecaster-phase2-955ca558e31345827ccaf20c7f063730d962cca6' \
+            --dir /tmp/phase2-frozen
+          test -f /tmp/phase2-frozen/summary.json
+          test -f /tmp/phase2-frozen/predictions.csv
+          test "$(sha256sum /tmp/phase2-frozen/../phase2-frozen 2>/dev/null || true)" != 'IMPOSSIBLE_SENTINEL'
+
+      - name: Compare frozen Phase II candidate to released architecture
+        run: |
+          python -m iris_report.iris_sep.tools.compare_phase2_to_released_architecture \
+            --phase2-root /tmp/phase2-frozen \
+            --released-root /tmp/released-architecture \
+            --output /tmp/phase2-vs-released
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s = json.loads(Path('/tmp/phase2-vs-released/summary.json').read_text())
+          assert s['locked_test_accessed'] is False
+          assert s['protected_post_2025_outcomes_accessed'] is False
+          g = s['same_cohort_released_architecture_gate']
+          print('SAME_COHORT_RELEASED_GATE=', g['passed'])
+          print('PHASE2_CANDIDATE=', s['candidate'])
+          print('RELEASED_COMPARATOR=', s['comparator'])
+          print('TSS_DELTA=', g['point_TSS_delta'])
+          print('CI95=', g['bootstrap']['ci_lower_95'], g['bootstrap']['ci_upper_95'])
+          print('CHECKS=', g['checks'])
+          PY
+
+      - name: Record runtime and immutable dependencies
+        run: |
+          python - <<'PY'
+          import json, platform
+          import numpy, pandas, scipy, sklearn, xgboost
+          from pathlib import Path
+          Path('/tmp/phase2-vs-released/runtime.json').write_text(json.dumps({
+              'git_head': '${{ github.sha }}',
+              'phase2_run': 34624151136,
+              'phase2_artifact': 10273986783,
+              'phase2_artifact_zip_sha256': '92abde900e56899ad9247cfeb92db884279395b0157db954152eb09ad4cdcae0',
+              'late_fusion_run': 33981729019,
+              'python': platform.python_version(),
+              'numpy': numpy.__version(),
+              'pandas': pandas.__version(),
+              'scipy': scipy.__version(),
+              'scikit_learn': sklearn.__version(),
+              'xgboost': xgboost.__version(),
+              'locked_test_accessed': False,
+              'protected_post_2025_outcomes_accessed': False,
+              'development_only': True,
+          }, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Package released comparator provenance
+        run: |
+          cp /tmp/released-architecture/summary.json /tmp/phase2-vs-released/released_architecture_summary.json
+          cp /tmp/released-architecture/receipt.json /tmp/phase2-vs-released/released_architecture_receipt.json
+
+      - name: Upload immutable same-cohort comparison evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-phase2-vs-released-${{ github.sha }}
+          path: /tmp/phase2-vs-released
+          if-no-files-found: error
+          retention-days: 30
