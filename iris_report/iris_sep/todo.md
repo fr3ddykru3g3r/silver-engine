@@ -34,3 +34,12 @@
 - [ ] Freeze purged chronological boundaries that prevent target horizons and physical episodes from crossing data roles.
 - [ ] Have an independent custodian select, hash and attest a non-overlapping prospective cohort before releasing identities or outcomes.
 - [ ] Define an operational alert objective with acceptable sensitivity, false-alarm rate and review burden before evaluating benefit.
+
+## ISEF / IRIS compliance and student-ownership gate
+
+- [ ] Complete the current universal ISEF paperwork required by the affiliated fair: Forms 1, 1A + Research Plan/Project Summary, 1B and Student Support Disclosure Form 2A; re-run the Rules Wizard if the methodology changes.
+- [ ] Do not create a Form 4/5/6/3 package unless a real human-participant, vertebrate-animal, PHBA or hazardous-procedure component is added; the present public-data/code study does not describe those activities.
+- [ ] Do not use an outdated “Form 8” reference; verify the live 2027 forms list before submission.
+- [ ] Rewrite the final abstract, research-plan prose, poster text and citations in the student researchers' own words; treat repository-generated copy as reviewer/rehearsal scaffolding and disclose AI/programming support accurately.
+- [ ] If the sealed prospective custodian phase is intended to count as the same ISEF project after the affiliated fair, make sure that phase is already included in the approved research plan before competing; do not add a materially new study after the fair.
+- [ ] Use PHYS (Physics and Astronomy) as the default category framing unless the affiliated fair's live category definitions clearly suggest otherwise.
