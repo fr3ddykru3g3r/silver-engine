@@ -1,0 +1,139 @@
+{
+  "study_id": "IRIS_SEP_PROSPECTIVE_OPERATIONAL_CONFIRMATION_V1",
+  "version": 1,
+  "frozen_date_utc": "2026-09-11",
+  "status": "FROZEN_NOT_EXECUTED",
+  "evidence_class": "custodian_controlled_future_confirmation",
+  "protected_pool": {
+    "not_before_utc": "2025-09-10T00:00:00Z",
+    "development_side_outcome_access": "FORBIDDEN",
+    "development_side_event_count_access": "FORBIDDEN",
+    "development_side_episode_identity_access": "FORBIDDEN",
+    "allowed_before_execution": [
+      "feature availability audit without target outcomes",
+      "freeze model and threshold artifacts",
+      "freeze input schema and source receipts",
+      "source-only software tests"
+    ]
+  },
+  "scientific_question": "Do repeated physical-event representation and already-active persistence materially change measured 24-hour SEP occurrence skill when predictions are fixed prospectively?",
+  "issue_protocol": {
+    "cadence": "daily",
+    "issue_time_utc": "00:00:00",
+    "forecast_horizon_hours": 24,
+    "target_particle": ">10 MeV protons",
+    "threshold_pfu": 10.0,
+    "future_interval": "(issue_time, issue_time+24h]",
+    "already_active_at_issue": "persistence_not_onset",
+    "prediction_deadline": "prediction and alert must be append-only and timestamped no later than issue_time",
+    "missing_required_feature_action": "ABSTAIN"
+  },
+  "feature_availability_gate": {
+    "default_state": "BLOCKED_UNTIL_VERIFIED",
+    "required_per_feature_fields": [
+      "name",
+      "source",
+      "timestamp_semantics",
+      "max_expected_latency_minutes",
+      "units",
+      "quality_control_rule",
+      "revision_or_backfill_policy",
+      "issue_time_available",
+      "verification_receipt"
+    ],
+    "execution_requirement": "every model input must be VERIFIED_CAUSAL before model freeze; no feature may rely on future publication, retrospective catalogue boundaries, or later backfill",
+    "substitution_after_outcome_access": "FORBIDDEN"
+  },
+  "model_freeze_gate": {
+    "required_before_outcome_access": [
+      "model_id",
+      "model_artifact_sha256_or_deterministic_rule_sha256",
+      "feature_schema_sha256",
+      "decision_threshold",
+      "training_data_boundary",
+      "software_environment_receipt"
+    ],
+    "required_model_slots": ["past_proton_active_proxy"],
+    "optional_model_slots": ["joint_operational_model", "proton_free_operational_model"],
+    "post_unseal_refit": "FORBIDDEN",
+    "post_unseal_threshold_reselection": "FORBIDDEN"
+  },
+  "evaluation_views": [
+    "MAPPED_OCCURRENCE",
+    "EPISODE_NORMALIZED_OCCURRENCE",
+    "NEW_ONSET_CAUSAL"
+  ],
+  "primary_metric": "TSS",
+  "secondary_metrics": ["POD", "FAR", "Brier", "TP", "FP", "FN", "TN"],
+  "physical_units": {
+    "positive": "distinct qualifying onset episode",
+    "negative": "Monday-anchored seven-day quiet block",
+    "ambiguous_positive_handling": "descriptive_only_not_bootstrap_assigned"
+  },
+  "bootstrap": {
+    "replicates": 10000,
+    "seed": 20260911,
+    "pairing": "one shared resample of physical episode and quiet-block units per replicate reused across all eligible models, evaluation views, and contrasts",
+    "interval": "paired_percentile_95"
+  },
+  "information_floor": {
+    "minimum_distinct_onset_episodes": 50,
+    "minimum_quiet_blocks": 500,
+    "status_if_not_met": "INSUFFICIENT_CONFIRMATORY_INFORMATION",
+    "note": "This floor was chosen before protected counts were inspected and is a design floor, not a power guarantee."
+  },
+  "primary_contrasts": [
+    {
+      "id": "PAST_PROTON_PERSISTENCE_EFFECT",
+      "model_slot": "past_proton_active_proxy",
+      "contrast": "NEW_ONSET_CAUSAL minus MAPPED_OCCURRENCE",
+      "expected_direction": "negative",
+      "required": true
+    },
+    {
+      "id": "JOINT_MULTIPLICITY_EFFECT",
+      "model_slot": "joint_operational_model",
+      "contrast": "EPISODE_NORMALIZED_OCCURRENCE minus MAPPED_OCCURRENCE",
+      "expected_direction": "negative",
+      "required": false
+    },
+    {
+      "id": "JOINT_PERSISTENCE_EFFECT",
+      "model_slot": "joint_operational_model",
+      "contrast": "NEW_ONSET_CAUSAL minus EPISODE_NORMALIZED_OCCURRENCE",
+      "expected_direction": "negative",
+      "required": false
+    }
+  ],
+  "confirmation_rule": {
+    "minimum_requirement": "information floor met and required past-proton persistence interval strictly below zero",
+    "stronger_model_based_confirmation": "if joint_operational_model was frozen before outcome access, both joint directional intervals must also be reported regardless of sign; no model slot may be added after outcome access",
+    "failure_rule": "if the information floor is not met or the required interval includes or exceeds zero, do not claim prospective confirmation"
+  },
+  "custodian_output_policy": {
+    "development_side_receives": [
+      "aggregate cohort counts after analysis freeze",
+      "aggregate confusion tables",
+      "aggregate metric tables",
+      "paired bootstrap contrast summaries",
+      "execution and hash receipts"
+    ],
+    "development_side_does_not_receive_before_conclusion_freeze": [
+      "per-row target labels",
+      "episode identities",
+      "positive event timestamps",
+      "protected candidate counts"
+    ],
+    "row_level_output_from_runner": "FORBIDDEN"
+  },
+  "claim_boundary": {
+    "allowed_if_confirmed": "prospective evidence that occurrence scoring and causal onset scoring measure materially different behavior under the frozen protocol",
+    "not_allowed": [
+      "operational readiness",
+      "state-of-the-art forecasting performance",
+      "universal bias across all SEP literature",
+      "economic savings",
+      "award outcome"
+    ]
+  }
+}
