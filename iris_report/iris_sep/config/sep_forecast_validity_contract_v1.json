@@ -14,6 +14,9 @@
     "validity_state": "VALID | DEGRADED | ABSTAIN",
     "reason_codes": "sorted unique array",
     "input_age_seconds": "mapping from input/source id to non-negative age in seconds",
+    "input_max_age_seconds": "optional mapping of separately frozen source-specific freshness limits applied by the evaluator",
+    "forward_fill_gap_seconds": "optional mapping of causal recovery gap lengths actually used",
+    "forward_fill_max_gap_seconds": "optional mapping of separately frozen source-specific recovery limits applied by the evaluator",
     "source_hashes": "mapping from source id to SHA-256",
     "model_hash": "SHA-256 of frozen model/rule artifact",
     "threshold_hash": "SHA-256 of frozen threshold/rule artifact",
@@ -42,7 +45,7 @@
     },
     "CAUSAL_AVAILABILITY_RECEIPT_FAILED": {
       "severity": "ABSTAIN",
-      "meaning": "A required input failed the issue-time causal-availability receipt gate."
+      "meaning": "A required input or attempted recovery lacked the frozen issue-time causal-availability evidence needed for use."
     },
     "LEDGER_INTEGRITY_FAILURE": {
       "severity": "ABSTAIN",
@@ -66,10 +69,16 @@
     "Else if any DEGRADED-severity reason is present, validity_state=DEGRADED and the pre-existing candidate alert may be exposed.",
     "Else validity_state=VALID and the pre-existing candidate alert may be exposed."
   ],
+  "source_specific_limit_rule": [
+    "This contract does not choose source-specific freshness or recovery limits.",
+    "If frozen input_max_age_seconds are supplied, age greater than the corresponding limit causes STALE_INPUT.",
+    "If forward_fill_gap_seconds are supplied, a corresponding frozen forward_fill_max_gap_seconds value is required.",
+    "A forward-fill gap within its frozen source-specific limit is DEGRADED; a gap beyond the limit is ABSTAIN; a recovery attempt without a frozen limit is ABSTAIN."
+  ],
   "missingness_dependency": {
     "contract": "config/missingness_recovery_contract_v1.json",
     "rule": "Do not infer an operational recovery threshold from synthetic masking percentages alone. Source-specific freshness and recovery limits must be separately frozen before prospective execution.",
-    "historical_working_evidence": "The two-week pilot plan reports that causal forward-fill preserved probabilities reasonably under 5-20% random transient loss and degraded materially at 40% loss. Treat this as synthetic research evidence, not blanket operational certification."
+    "historical_working_evidence": "Development-only random observed-cell masking tested 5%, 20% and 40% loss. Causal forward-fill preserved probability space relatively well under 5-20% loss, while the 40% condition showed detectably worse Brier quality and material degradation under the POD80_MIN_FAR decision policy. This is stress-test evidence, not blanket operational certification."
   },
   "magnetic_reconstruction_policy": {
     "status": "EXPERIMENTAL_NOT_PROMOTED",
