@@ -41,10 +41,15 @@
     "row_weight_within_unit": "unit weight divided equally across rows",
     "mean_weight_normalized_to_one": true
   },
-  "fixed_candidate_order": [
+  "regular_baselines": [
     "BASE_SOLAR_REGULAR",
+    "BASE_PLUS_XRS_REGULAR",
+    "FULL_CONTEXT_REGULAR"
+  ],
+  "fixed_candidate_order": [
     "BASE_SOLAR_EVENT_WEIGHTED",
     "BASE_PLUS_XRS_EVENT_WEIGHTED",
+    "FULL_CONTEXT_EVENT_WEIGHTED",
     "BASE_SOLAR_TWO_STATE_EVENT_WEIGHTED",
     "BASE_PLUS_XRS_TWO_STATE_EVENT_WEIGHTED",
     "FULL_CONTEXT_TWO_STATE_EVENT_WEIGHTED"
@@ -62,8 +67,11 @@
     "min_child_weight": 5,
     "subsample": 0.8,
     "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.0,
     "objective": "binary:logistic",
     "eval_metric": "logloss",
+    "tree_method": "hist",
     "n_jobs": 2,
     "seeds": [7, 13, 26, 42, 73],
     "regular_baseline_uses_frozen_scale_pos_weight": true,
