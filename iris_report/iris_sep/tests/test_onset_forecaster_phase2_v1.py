@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import tools.run_episode_normalized_development_benchmark_v1_compat as benchmark_compat
 import tools.run_onset_forecaster_phase2_v1 as phase2
 import tools.run_onset_forecaster_phase2_v1_execution as execution
 
@@ -74,6 +75,34 @@ def test_execution_adapter_resolves_scientific_count_alias() -> None:
     assert "eng_b_ge1e4_fraction" in names
     assert out["eng_b_ge1e4_fraction"].notna().all()
     assert len(names) == 15
+
+
+def test_cached_timezone_feature_adapter_matches_frozen_compatibility_helper() -> None:
+    issue = pd.Timestamp("2017-01-02T00:00:00Z")
+    proton_times = pd.date_range(issue - pd.Timedelta(hours=24), issue, freq="5min", inclusive="left")
+    proton = pd.DataFrame({"time": proton_times, "proton": np.linspace(0.2, 2.0, len(proton_times))})
+    xrs_times = pd.date_range(issue - pd.Timedelta(hours=24), issue, freq="1min", inclusive="left")
+    xrs = pd.DataFrame({"time": xrs_times, "A": np.linspace(1e-8, 5e-7, len(xrs_times)), "B": np.linspace(1e-7, 2e-5, len(xrs_times))})
+
+    execution._TIME_NS_CACHE.clear()
+    for frame, family in ((proton, "proton"), (xrs, "xrs")):
+        expected = benchmark_compat.family_features_compat(frame, issue, 0, family)
+        actual = execution.family_features_cached(frame, issue, 0, family)
+        assert set(actual) == set(expected)
+        for name in expected:
+            assert np.isclose(actual[name], expected[name], equal_nan=True)
+
+    assert len(execution._TIME_NS_CACHE) == 2
+    first = execution._nanosecond_times(proton)
+    second = execution._nanosecond_times(proton)
+    assert first is second
+
+
+def test_runtime_correction_receipt_is_explicit() -> None:
+    text = (ROOT / "architecture" / "PHASE2_RUNTIME_COMPATIBILITY_CORRECTION_2026-09-11.md").read_text()
+    assert "NO PHASE II MODEL SCORES INSPECTED BEFORE THIS CHANGE" in text
+    assert "no modelable rows" in text
+    assert "does **not** alter" in text
 
 
 def test_pre_execution_correction_receipt_is_explicit() -> None:
