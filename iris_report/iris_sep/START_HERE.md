@@ -8,6 +8,10 @@
 
 **Authoritative scientific status:** `CURRENT_STATUS.md`.
 
+**Final technical freeze receipt:** `architecture/FINAL_TECHNICAL_RESULTS_AND_FREEZE_RECEIPT_2026-09-11.md`.
+
+**Machine-readable frozen results:** `submission/IRIS_2026_EVIDENCE_BUNDLE_V1/FROZEN_RESULTS.json`.
+
 **End-to-end build checkpoint:** `architecture/PROJECT_BUILD_COMPLETION_2026-09-11.md`.
 
 **Two-week finish / real-world pilot execution plan:** `architecture/TWO_WEEK_FINISH_AND_REAL_WORLD_PILOT_PLAN_2026-09-11.md`.
@@ -30,7 +34,7 @@ This is strong **methodological confirmation on development-exposed historical d
 
 ## Build state
 
-The project now includes the complete historical benchmark/replay stack, independent verification, competition-facing figures/scaffolds, and predictor-side infrastructure for a future sealed prospective confirmation.
+The project now includes the complete historical benchmark/replay stack, independent verification, competition-facing figures/scaffolds, predictor-side infrastructure for a future sealed prospective confirmation, and a machine-readable final-results contract regression-tested against the submission evidence bundle.
 
 The prospective software can capture timestamped public NOAA/SWPC inputs, create a deterministic pre-issue proton-state prediction, store it in a hash-chained predictor ledger and verify that ledger. A new forecast-validity layer can classify pre-issue records as `VALID`, `DEGRADED` or fail-closed `ABSTAIN` using provenance/missingness facts without reading outcomes. It still **cannot** unseal protected outcomes, set `features_verified_causal=true` by itself, define universal recovery thresholds from development masking tests, or claim prospective skill. Recurring prospective collection is not authorized until the research-plan/approval, independent-custody and execution-freeze gates are satisfied.
 
@@ -41,46 +45,48 @@ The external-facing package is explicitly an **SEP Forecast Validity and Evaluat
 ### Scientific core
 
 1. `CURRENT_STATUS.md`
-2. `architecture/PROJECT_BUILD_COMPLETION_2026-09-11.md`
-3. `architecture/TWO_WEEK_FINISH_AND_REAL_WORLD_PILOT_PLAN_2026-09-11.md`
-4. `architecture/PROJECT_ARCHITECTURE_2026-09-11.md`
-5. `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md`
-6. `architecture/EVIDENCE_INDEX_2026-09-11.md`
-7. `architecture/LITERATURE_NOVELTY_MATRIX_2026-09-11.md`
+2. `architecture/FINAL_TECHNICAL_RESULTS_AND_FREEZE_RECEIPT_2026-09-11.md`
+3. `submission/IRIS_2026_EVIDENCE_BUNDLE_V1/FROZEN_RESULTS.json`
+4. `architecture/PROJECT_BUILD_COMPLETION_2026-09-11.md`
+5. `architecture/TWO_WEEK_FINISH_AND_REAL_WORLD_PILOT_PLAN_2026-09-11.md`
+6. `architecture/PROJECT_ARCHITECTURE_2026-09-11.md`
+7. `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md`
+8. `architecture/EVIDENCE_INDEX_2026-09-11.md`
+9. `architecture/LITERATURE_NOVELTY_MATRIX_2026-09-11.md`
 
 ### Prospective confirmation and validity
 
-8. `architecture/PROSPECTIVE_OPERATIONAL_FEATURE_AVAILABILITY_CONTRACT_2026-09-11.md`
-9. `architecture/PROSPECTIVE_PIPELINE_IMPLEMENTATION_2026-09-11.md`
-10. `architecture/PROSPECTIVE_CUSTODIAN_HANDOFF_2026-09-11.md`
-11. `config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json`
-12. `config/prospective_live_input_sources_v1.json`
-13. `config/past_proton_active_proxy_rule_v1.json`
-14. `config/sep_forecast_validity_contract_v1.json`
-15. `src/iris_sep/forecast_validity.py`
-16. `config/inspected_evidence_registry_v2.json`
+10. `architecture/PROSPECTIVE_OPERATIONAL_FEATURE_AVAILABILITY_CONTRACT_2026-09-11.md`
+11. `architecture/PROSPECTIVE_PIPELINE_IMPLEMENTATION_2026-09-11.md`
+12. `architecture/PROSPECTIVE_CUSTODIAN_HANDOFF_2026-09-11.md`
+13. `config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json`
+14. `config/prospective_live_input_sources_v1.json`
+15. `config/past_proton_active_proxy_rule_v1.json`
+16. `config/sep_forecast_validity_contract_v1.json`
+17. `src/iris_sep/forecast_validity.py`
+18. `config/inspected_evidence_registry_v2.json`
 
 ### Competition / student ownership
 
-17. `submission/IRIS_2026_EVIDENCE_BUNDLE_V1/README.md`
-18. `architecture/COMPETITION_FINAL_AUDIT_2026-09-11.md`
-19. `architecture/IRIS_SUBMISSION_READINESS_2026-09-10.md`
-20. `architecture/IRIS_SUBMISSION_PACK_2026-09-10.md`
-21. `architecture/POSTER_BLUEPRINT_2026-09-11.md`
-22. `architecture/VIDEO_STORYBOARD_2026-09-11.md`
-23. `architecture/IRIS_JUDGE_QA_2026-09-10.md`
-24. `architecture/STUDENT_OWNERSHIP_DEFENSE_CHECKLIST_2026-09-11.md`
-25. `architecture/ISEF_RESEARCH_PLAN_SCAFFOLD_2026-09-11.md`
-26. `todo.md`
+19. `submission/IRIS_2026_EVIDENCE_BUNDLE_V1/README.md`
+20. `architecture/COMPETITION_FINAL_AUDIT_2026-09-11.md`
+21. `architecture/IRIS_SUBMISSION_READINESS_2026-09-10.md`
+22. `architecture/IRIS_SUBMISSION_PACK_2026-09-10.md`
+23. `architecture/POSTER_BLUEPRINT_2026-09-11.md`
+24. `architecture/VIDEO_STORYBOARD_2026-09-11.md`
+25. `architecture/IRIS_JUDGE_QA_2026-09-10.md`
+26. `architecture/STUDENT_OWNERSHIP_DEFENSE_CHECKLIST_2026-09-11.md`
+27. `architecture/ISEF_RESEARCH_PLAN_SCAFFOLD_2026-09-11.md`
+28. `todo.md`
 
 ### External workflow review — draft only
 
-27. `architecture/operator_pilot/SEP_FORECAST_VALIDITY_EVALUATION_KIT_OPERATOR_BRIEF.md`
-28. `architecture/operator_pilot/TECHNICAL_VALIDATION_SHEET.md`
-29. `architecture/operator_pilot/FIVE_MINUTE_DEMO.md`
-30. `architecture/operator_pilot/WORKFLOW_INTERVIEW_REQUEST_DRAFT.md`
-31. `architecture/operator_pilot/PILOT_PROPOSAL_DRAFT.md`
-32. `architecture/operator_pilot/WORKFLOW_REVIEW_TEMPLATE.md`
+29. `architecture/operator_pilot/SEP_FORECAST_VALIDITY_EVALUATION_KIT_OPERATOR_BRIEF.md`
+30. `architecture/operator_pilot/TECHNICAL_VALIDATION_SHEET.md`
+31. `architecture/operator_pilot/FIVE_MINUTE_DEMO.md`
+32. `architecture/operator_pilot/WORKFLOW_INTERVIEW_REQUEST_DRAFT.md`
+33. `architecture/operator_pilot/PILOT_PROPOSAL_DRAFT.md`
+34. `architecture/operator_pilot/WORKFLOW_REVIEW_TEMPLATE.md`
 
 ## Protected-evidence rule
 
