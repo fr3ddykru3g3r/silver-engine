@@ -1,0 +1,85 @@
+{
+  "contract_id": "IRIS_SEP_FORECAST_VALIDITY_V1",
+  "status": "FROZEN_INTERFACE_NOT_OPERATIONALLY_CERTIFIED",
+  "purpose": "Expose whether a pre-issue SEP forecast record is scientifically interpretable and whether its inputs and provenance passed the frozen validity gates. This is an audit layer, not a new operational forecaster.",
+  "protected_outcomes_accessed": false,
+  "validity_states": [
+    "VALID",
+    "DEGRADED",
+    "ABSTAIN"
+  ],
+  "record_fields": {
+    "issue_time": "UTC timestamp",
+    "alert": "boolean for VALID/DEGRADED; null for ABSTAIN",
+    "validity_state": "VALID | DEGRADED | ABSTAIN",
+    "reason_codes": "sorted unique array",
+    "input_age_seconds": "mapping from input/source id to non-negative age in seconds",
+    "source_hashes": "mapping from source id to SHA-256",
+    "model_hash": "SHA-256 of frozen model/rule artifact",
+    "threshold_hash": "SHA-256 of frozen threshold/rule artifact",
+    "ledger_previous_hash": "SHA-256 of previous record, or null only for an explicitly declared genesis record"
+  },
+  "reason_codes": {
+    "STALE_INPUT": {
+      "severity": "ABSTAIN",
+      "meaning": "At least one required input exceeded its separately frozen source-specific age limit."
+    },
+    "REQUIRED_FEED_ABSENT": {
+      "severity": "ABSTAIN",
+      "meaning": "A required forecast-time feed was absent."
+    },
+    "AMBIGUOUS_PROTON_CHANNEL": {
+      "severity": "ABSTAIN",
+      "meaning": "The required integral >=10 MeV proton quantity could not be identified unambiguously."
+    },
+    "STRUCTURAL_UNAVAILABILITY": {
+      "severity": "ABSTAIN",
+      "meaning": "A required quantity was not authoritatively available in the source/instrument regime; it must not be reconstructed and relabelled as an observation."
+    },
+    "EXCESSIVE_TRANSIENT_LOSS": {
+      "severity": "ABSTAIN",
+      "meaning": "Transient loss exceeded the separately frozen, validated recovery envelope."
+    },
+    "CAUSAL_AVAILABILITY_RECEIPT_FAILED": {
+      "severity": "ABSTAIN",
+      "meaning": "A required input failed the issue-time causal-availability receipt gate."
+    },
+    "LEDGER_INTEGRITY_FAILURE": {
+      "severity": "ABSTAIN",
+      "meaning": "The append-only prediction ledger or previous-record link failed integrity verification."
+    },
+    "FUTURE_OBSERVATION": {
+      "severity": "ABSTAIN",
+      "meaning": "At least one supplied predictor observation occurred after the forecast issue time."
+    },
+    "PROVENANCE_UNCERTAIN": {
+      "severity": "ABSTAIN",
+      "meaning": "Required source identity, hash, routing or provenance could not be verified."
+    },
+    "TRANSIENT_FORWARD_FILL_APPLIED": {
+      "severity": "DEGRADED",
+      "meaning": "A short transient gap was recovered causally within a separately frozen source-specific limit; the recovered value is not relabelled as an observation."
+    }
+  },
+  "precedence": [
+    "If any ABSTAIN-severity reason is present, validity_state=ABSTAIN and alert=null.",
+    "Else if any DEGRADED-severity reason is present, validity_state=DEGRADED and the pre-existing candidate alert may be exposed.",
+    "Else validity_state=VALID and the pre-existing candidate alert may be exposed."
+  ],
+  "missingness_dependency": {
+    "contract": "config/missingness_recovery_contract_v1.json",
+    "contract_sha256_at_freeze": "d3e536052f643de24b0a8f0c5db2ef79ded5b5bf",
+    "rule": "Do not infer an operational recovery threshold from synthetic masking percentages alone. Source-specific freshness and recovery limits must be separately frozen before prospective execution.",
+    "historical_working_evidence": "The two-week pilot plan reports that causal forward-fill preserved probabilities reasonably under 5-20% random transient loss and degraded materially at 40% loss. Treat this as synthetic research evidence, not blanket operational certification."
+  },
+  "magnetic_reconstruction_policy": {
+    "status": "EXPERIMENTAL_NOT_PROMOTED",
+    "promotion_requires": [
+      "preregistered comparison on hidden real magnetic maps",
+      "better reconstruction performance than persistence on the frozen comparison",
+      "preservation of downstream causal new-onset forecasting utility",
+      "forecast-time provenance and uncertainty exposed"
+    ]
+  },
+  "claim_boundary": "A VALID or DEGRADED record means only that the frozen validity interface passed its declared pre-issue checks. It does not establish forecast skill, operational certification, company benefit, economic savings or prospective confirmation."
+}
