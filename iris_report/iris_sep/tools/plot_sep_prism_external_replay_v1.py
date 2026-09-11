@@ -56,7 +56,7 @@ def graphical_abstract() -> None:
     boxes = [
         (0.04, "14,464 daily windows\n650 stored positives\n0 target mismatches", BLUE),
         (0.36, "614 mapped windows\n257 physical episodes\nEMF = 2.389", ORANGE),
-        (0.68, "Fixed joint XGBoost TSS\n0.726 → 0.621 → 0.437\n85 matched onsets", GREEN),
+        (0.68, "Same fixed XGBoost alerts\nTSS: 0.726 → 0.621 → 0.437\n85 matched onsets", GREEN),
     ]
     for x, text, color in boxes:
         ax.add_patch(FancyBboxPatch((x, 0.34), 0.27, 0.32, boxstyle="round,pad=0.018", facecolor=color, alpha=0.13, edgecolor=color, linewidth=2))
