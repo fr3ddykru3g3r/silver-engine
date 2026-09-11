@@ -1,0 +1,51 @@
+{
+  "study_id": "IRIS_SEP_FPR_CONTROLLER_V2",
+  "status": "FROZEN_BEFORE_V2_REPLAY",
+  "created_utc": "2026-09-12",
+  "purpose": "Post-hoc engineering revision of the causal adaptive threshold controller after V1 met the FPR cap but missed the sole positive onset.",
+  "selection_context": "The 2017 score period and V1 aggregate result are already inspected. V2 is explicitly tuned development work and is not held-out evidence.",
+  "claim_boundary": "Any V2 result is retrospective post-hoc engineering only. It must not be described as independent validation, state of the art, operational readiness, prospective validation, or evidence from an untouched holdout.",
+  "protected_boundary": {
+    "protected_post_2025_outcomes_may_be_accessed": false,
+    "source_model_features_hyperparameters_and_probabilities_unchanged": true,
+    "no_protected_outcome_feedback": true
+  },
+  "source_model": "direct_onset_engineered",
+  "source_model_reference": {
+    "phase2_fixed_threshold_fpr": 0.5119617224880383,
+    "phase2_fixed_threshold_pod": 1.0,
+    "phase2_fixed_threshold_tss": 0.4880382775119617
+  },
+  "requested_operating_goal": {
+    "maximum_fpr": 0.30,
+    "minimum_pod": 1.0,
+    "require_tss_above_source": true
+  },
+  "controller": {
+    "type": "causal rolling negative-score quantile threshold",
+    "internal_negative_exceedance_target": 0.20,
+    "quantile": 0.80,
+    "history_window_days": 120,
+    "minimum_resolved_negative_history": 30,
+    "post_horizon_label_buffer_hours": 1,
+    "threshold_floor": "original Phase II fixed threshold",
+    "quantile_method": "higher",
+    "rationale": "V1's 0.85 quantile was too conservative. V2 freezes a simpler 0.80 quantile, corresponding to a 20% internal negative exceedance target and 10 percentage points of headroom below the requested 30% FPR cap."
+  },
+  "evaluation": {
+    "period": "2017 Phase II score rows",
+    "already_inspected": true,
+    "controller_is_causal_within_replay": true,
+    "future_labels_forbidden": true,
+    "future_scores_forbidden": true
+  },
+  "success_gate": {
+    "required": [
+      "FPR <= 0.30",
+      "POD >= 1.0 on the one-positive 2017 replay",
+      "TSS > 0.4880382775119617",
+      "protected post-2025 outcomes remain sealed"
+    ],
+    "interpretation_if_passed": "better retrospective operating point only; still requires genuinely uninspected or prospective validation"
+  }
+}
