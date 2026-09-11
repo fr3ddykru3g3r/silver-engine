@@ -8,6 +8,8 @@
 
 **Authoritative scientific status:** `CURRENT_STATUS.md`.
 
+**End-to-end build checkpoint:** `architecture/PROJECT_BUILD_COMPLETION_2026-09-11.md`.
+
 This entry point is intentionally short. Older modeling, freshness and V3 reliability files remain preserved for audit continuity, but they are not the current scientific centerpiece when they conflict with `CURRENT_STATUS.md`.
 
 ## Current project in one sentence
@@ -35,32 +37,33 @@ The prospective software can capture timestamped public NOAA/SWPC inputs, create
 ### Scientific core
 
 1. `CURRENT_STATUS.md`
-2. `architecture/PROJECT_ARCHITECTURE_2026-09-11.md`
-3. `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md`
-4. `architecture/EVIDENCE_INDEX_2026-09-11.md`
-5. `architecture/LITERATURE_NOVELTY_MATRIX_2026-09-11.md`
+2. `architecture/PROJECT_BUILD_COMPLETION_2026-09-11.md`
+3. `architecture/PROJECT_ARCHITECTURE_2026-09-11.md`
+4. `architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md`
+5. `architecture/EVIDENCE_INDEX_2026-09-11.md`
+6. `architecture/LITERATURE_NOVELTY_MATRIX_2026-09-11.md`
 
 ### Prospective confirmation
 
-6. `architecture/PROSPECTIVE_OPERATIONAL_FEATURE_AVAILABILITY_CONTRACT_2026-09-11.md`
-7. `architecture/PROSPECTIVE_PIPELINE_IMPLEMENTATION_2026-09-11.md`
-8. `architecture/PROSPECTIVE_CUSTODIAN_HANDOFF_2026-09-11.md`
-9. `config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json`
-10. `config/prospective_live_input_sources_v1.json`
-11. `config/past_proton_active_proxy_rule_v1.json`
-12. `config/inspected_evidence_registry_v2.json`
+7. `architecture/PROSPECTIVE_OPERATIONAL_FEATURE_AVAILABILITY_CONTRACT_2026-09-11.md`
+8. `architecture/PROSPECTIVE_PIPELINE_IMPLEMENTATION_2026-09-11.md`
+9. `architecture/PROSPECTIVE_CUSTODIAN_HANDOFF_2026-09-11.md`
+10. `config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json`
+11. `config/prospective_live_input_sources_v1.json`
+12. `config/past_proton_active_proxy_rule_v1.json`
+13. `config/inspected_evidence_registry_v2.json`
 
 ### Competition / student ownership
 
-13. `architecture/COMPETITION_FINAL_AUDIT_2026-09-11.md`
-14. `architecture/IRIS_SUBMISSION_READINESS_2026-09-10.md`
-15. `architecture/IRIS_SUBMISSION_PACK_2026-09-10.md`
-16. `architecture/POSTER_BLUEPRINT_2026-09-11.md`
-17. `architecture/VIDEO_STORYBOARD_2026-09-11.md`
-18. `architecture/IRIS_JUDGE_QA_2026-09-10.md`
-19. `architecture/STUDENT_OWNERSHIP_DEFENSE_CHECKLIST_2026-09-11.md`
-20. `architecture/ISEF_RESEARCH_PLAN_SCAFFOLD_2026-09-11.md`
-21. `todo.md`
+14. `architecture/COMPETITION_FINAL_AUDIT_2026-09-11.md`
+15. `architecture/IRIS_SUBMISSION_READINESS_2026-09-10.md`
+16. `architecture/IRIS_SUBMISSION_PACK_2026-09-10.md`
+17. `architecture/POSTER_BLUEPRINT_2026-09-11.md`
+18. `architecture/VIDEO_STORYBOARD_2026-09-11.md`
+19. `architecture/IRIS_JUDGE_QA_2026-09-10.md`
+20. `architecture/STUDENT_OWNERSHIP_DEFENSE_CHECKLIST_2026-09-11.md`
+21. `architecture/ISEF_RESEARCH_PLAN_SCAFFOLD_2026-09-11.md`
+22. `todo.md`
 
 ## Protected-evidence rule
 
