@@ -1,0 +1,126 @@
+name: IRIS-SEP Phase II genuine-onset forecaster
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-onset-forecaster-v2-20260911
+    paths:
+      - 'iris_report/iris_sep/config/onset_forecaster_phase2_preregistration_2026-09-11.json'
+      - 'iris_report/iris_sep/tools/run_onset_forecaster_phase2.py'
+      - 'iris_report/iris_sep/tests/test_onset_forecaster_phase2.py'
+      - 'iris_report/iris_sep/src/iris_sep/modeling/two_state_features.py'
+      - '.github/workflows/iris-sep-onset-forecaster-phase2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out isolated Phase II branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+          cache: 'pip'
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 pandas==2.3.2 scipy==1.16.2 scikit-learn==1.8.0 xgboost==3.0.4
+
+      - name: Verify Phase II source invariants
+        run: |
+          python -m unittest iris_report.iris_sep.tests.test_onset_forecaster_phase2 -v
+          python -m unittest iris_report.iris_sep.tests.test_two_state_features -v
+          python -m py_compile \
+            iris_report/iris_sep/tools/run_onset_forecaster_phase2.py \
+            iris_report/iris_sep/src/iris_sep/modeling/two_state_features.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('iris_report/iris_sep/config/onset_forecaster_phase2_preregistration_2026-09-11.json')
+          c = json.loads(p.read_text())
+          assert c['status'] == 'PREREGISTERED_BEFORE_PHASE2_SCORE_EXECUTION'
+          assert c['protected_outcomes']['post_2025_pool_access'] == 'FORBIDDEN'
+          assert c['protected_outcomes']['locked_test_accessed'] is False
+          assert c['inner_selection']['post_score_candidate_switching'] is False
+          print('preregistration guard: PASS')
+          PY
+
+      - name: Acquire only hash-pinned public historical development inputs
+        run: |
+          mkdir -p /tmp/iris-phase2/Data
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/Data/rolling_combinded_seq_24hours.csv' \
+            --output /tmp/iris-phase2/Data/rolling_combinded_seq_24hours.csv
+          curl --fail --location --retry 3 --retry-all-errors \
+            'https://media.githubusercontent.com/media/yuyian/SEP-Prediction-V2/e138dcd72c1952a00e11e1a0b025337f9e7c93fb/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv' \
+            --output /tmp/iris-phase2/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv
+          test "$(sha256sum /tmp/iris-phase2/Data/rolling_combinded_seq_24hours.csv | cut -d' ' -f1)" = '4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb'
+          test "$(sha256sum /tmp/iris-phase2/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv | cut -d' ' -f1)" = '0ec9f0d6e088821091fcd369481bbbc9a2281a92fc8a582df40aefa62cae59b0'
+
+      - name: Execute preregistered Phase II once
+        run: |
+          python -m iris_report.iris_sep.tools.run_onset_forecaster_phase2 \
+            --features /tmp/iris-phase2/Data/rolling_combinded_seq_24hours.csv \
+            --events /tmp/iris-phase2/GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv \
+            --output /tmp/iris-phase2-result
+
+      - name: Validate claim boundary and print result gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('/tmp/iris-phase2-result/summary.json')
+          s = json.loads(p.read_text())
+          assert s['locked_test_accessed'] is False
+          assert s['protected_post_2025_outcomes_accessed'] is False
+          assert s['architecture_selection']['score_or_monitor_used_for_selection'] is False
+          assert s['status'] in {
+              'PHASE2_DEVELOPMENT_SUPERIORITY_GATE_PASSED',
+              'NO_DEMONSTRATED_PHASE2_SUPERIORITY',
+          }
+          pc = s['primary_comparison']
+          print('PHASE2_STATUS=', s['status'])
+          print('SELECTED=', pc['candidate'])
+          print('BASELINE=', pc['baseline'])
+          print('TSS_DELTA=', pc['point_TSS_delta'])
+          print('CI95=', pc['bootstrap']['ci_lower_95'], pc['bootstrap']['ci_upper_95'])
+          print('CHECKS=', pc['checks'])
+          PY
+
+      - name: Bind runtime and exact source head
+        run: |
+          python - <<'PY'
+          import json, platform
+          import numpy, pandas, scipy, sklearn, xgboost
+          from pathlib import Path
+          Path('/tmp/iris-phase2-result/runtime.json').write_text(json.dumps({
+              'study_id': 'IRIS_SEP_ONSET_FORECASTER_PHASE2_V1',
+              'git_head': '${{ github.sha }}',
+              'python': platform.python_version(),
+              'numpy': numpy.__version__,
+              'pandas': pandas.__version__,
+              'scipy': scipy.__version__,
+              'scikit_learn': sklearn.__version__,
+              'xgboost': xgboost.__version__,
+              'locked_test_accessed': False,
+              'protected_post_2025_outcomes_accessed': False,
+              'development_only': True,
+          }, indent=2, sort_keys=True) + '\n')
+          PY
+
+      - name: Upload immutable Phase II development evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-onset-forecaster-phase2-${{ github.sha }}
+          path: /tmp/iris-phase2-result
+          if-no-files-found: warn
+          retention-days: 30
