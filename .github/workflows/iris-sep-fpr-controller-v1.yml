@@ -1,0 +1,125 @@
+name: IRIS-SEP causal FPR controller V1
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-fpr-controller-v1-20260912
+    paths:
+      - 'iris_report/iris_sep/config/fpr_controller_v1_preregistration_2026-09-12.json'
+      - 'iris_report/iris_sep/tools/run_fpr_controller_v1.py'
+      - 'iris_report/iris_sep/tests/test_fpr_controller_v1.py'
+      - '.github/workflows/iris-sep-fpr-controller-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fpr-controller-development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out controller branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+
+      - name: Install pinned environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy==2.3.5 \
+            pandas==2.3.2 \
+            requests==2.32.5 \
+            scipy==1.16.2 \
+            scikit-learn==1.8.0 \
+            xgboost==3.0.4 \
+            netCDF4==1.7.2 \
+            matplotlib==3.10.6 \
+            joblib==1.5.2 \
+            pytest==8.4.2
+
+      - name: Compile controller and frozen dependencies
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/run_fpr_controller_v1.py
+          python -m py_compile iris_report/iris_sep/tools/run_onset_forecaster_phase2_v1.py
+          python -m py_compile iris_report/iris_sep/tools/run_onset_forecaster_phase2_v1_execution.py
+
+      - name: Run controller boundary tests
+        env:
+          PYTHONPATH: iris_report/iris_sep
+        run: |
+          python -m pytest -q \
+            iris_report/iris_sep/tests/test_fpr_controller_v1.py \
+            iris_report/iris_sep/tests/test_onset_forecaster_phase2_v1.py
+
+      - name: Validate frozen post-hoc claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('iris_report/iris_sep/config/fpr_controller_v1_preregistration_2026-09-12.json')
+          cfg = json.loads(p.read_text())
+          assert cfg['status'] == 'FROZEN_BEFORE_CONTROLLER_REPLAY'
+          assert cfg['evaluation']['already_inspected'] is True
+          assert cfg['protected_boundary']['protected_post_2025_outcomes_may_be_accessed'] is False
+          assert cfg['requested_operating_goal']['maximum_fpr'] == 0.30
+          print('Controller boundary validated: post-hoc development only; protected outcomes remain sealed.')
+          PY
+
+      - name: Run causal FPR controller replay
+        env:
+          PYTHONPATH: iris_report/iris_sep
+          MPLBACKEND: Agg
+        run: |
+          rm -rf /tmp/iris-sep-fpr-controller-v1
+          python -m tools.run_fpr_controller_v1 --output /tmp/iris-sep-fpr-controller-v1
+
+      - name: Verify requested FPR cap
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/iris-sep-fpr-controller-v1')
+          summary = json.loads((root / 'fpr_controller_summary.json').read_text())
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          assert summary['protected_post_2025_outcomes_accessed'] is False
+          assert summary['passes_requested_fpr_cap'] is True, summary
+          assert summary['controller_metrics']['FPR'] <= 0.30
+          PY
+
+      - name: Recompute top-level evidence hashes
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('/tmp/iris-sep-fpr-controller-v1')
+          if not root.exists():
+              raise SystemExit(0)
+          def sha(path):
+              h = hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda: f.read(1 << 20), b''):
+                      h.update(block)
+              return h.hexdigest()
+          manifest = {
+              str(p.relative_to(root)): sha(p)
+              for p in sorted(root.rglob('*'))
+              if p.is_file() and p.name != 'evidence_hashes.json'
+          }
+          (root / 'evidence_hashes.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
+          print(f'Hashed {len(manifest)} controller evidence files.')
+          PY
+
+      - name: Upload controller evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-fpr-controller-v1-${{ github.sha }}
+          path: /tmp/iris-sep-fpr-controller-v1
+          if-no-files-found: warn
+          retention-days: 30
