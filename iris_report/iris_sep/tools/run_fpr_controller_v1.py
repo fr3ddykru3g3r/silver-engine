@@ -68,7 +68,7 @@ def causal_controller(
     quantile: float,
     history_window_days: int,
     minimum_resolved_negative_history: int,
-    label_availability_lag_hours: int,
+    post_horizon_label_buffer_hours: int,
 ) -> pd.DataFrame:
     """Generate one threshold per issue using only labels available before it."""
     times = pd.to_datetime(issue_times, utc=True).reset_index(drop=True)
@@ -82,19 +82,18 @@ def causal_controller(
     history_sizes = np.zeros(len(y), dtype=int)
     quantile_thresholds = np.full(len(y), np.nan, dtype=float)
 
-    lag = pd.Timedelta(hours=int(label_availability_lag_hours))
+    buffer = pd.Timedelta(hours=int(post_horizon_label_buffer_hours))
     window = pd.Timedelta(days=int(history_window_days))
 
     for i in range(len(y)):
         now = times.iloc[i]
         lower = now - window
         # A prior row's 24 h outcome must be fully resolved, plus the frozen
-        # extra lag, before it is eligible to update the controller.
-        resolved_cutoff = now - lag
+        # post-horizon availability buffer, before it can update the controller.
         hist_mask = (
             (times < now)
             & (times >= lower)
-            & ((times + pd.Timedelta(hours=24)) <= resolved_cutoff)
+            & ((times + pd.Timedelta(hours=24) + buffer) <= now)
             & (y == 0)
         ).to_numpy(dtype=bool)
         hist_scores = p[hist_mask]
@@ -158,7 +157,7 @@ def run(out: Path) -> dict[str, Any]:
         quantile=float(ccfg["quantile"]),
         history_window_days=int(ccfg["history_window_days"]),
         minimum_resolved_negative_history=int(ccfg["minimum_resolved_negative_history"]),
-        label_availability_lag_hours=int(ccfg["label_availability_lag_hours"]),
+        post_horizon_label_buffer_hours=int(ccfg["post_horizon_label_buffer_hours"]),
     )
     controller_metrics = metrics_from_alert(y, replay["controller_alert"].to_numpy(int))
     requested_cap = float(cfg["requested_operating_goal"]["maximum_fpr"])
