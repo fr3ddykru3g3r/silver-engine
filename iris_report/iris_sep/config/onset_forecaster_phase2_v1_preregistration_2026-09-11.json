@@ -1,0 +1,76 @@
+{
+  "study_id": "IRIS_SEP_ONSET_FORECASTER_PHASE2_V1",
+  "status": "FROZEN_BEFORE_PHASE2_SCORE_INSPECTION",
+  "created_utc": "2026-09-11",
+  "purpose": "Development-only test of whether a forecaster trained directly on genuine new-onset eligibility can improve causal-onset skill without changing the frozen benchmark study.",
+  "separation": {
+    "frozen_benchmark_branch_untouched": true,
+    "historical_benchmark_results_remain_primary_measurement_validity_evidence": true,
+    "protected_post_2025_outcomes_may_be_accessed": false,
+    "phase2_results_are_development_evidence_only": true
+  },
+  "data": {
+    "source": "same public historical OMNI proton and GOES-15 XRS source adapter used by the frozen development benchmark",
+    "years": "2011-2017",
+    "roles": {
+      "fit": "2011-2014",
+      "calibration": "2015",
+      "threshold": "2016",
+      "score": "2017"
+    },
+    "eligible_target_rows": ["ELIGIBLE_ONSET_POSITIVE", "ELIGIBLE_ONSET_NEGATIVE"],
+    "already_active_rows_excluded": true,
+    "future_observations_forbidden": true
+  },
+  "models": [
+    "occurrence_trained_xrs_baseline",
+    "direct_onset_xrs",
+    "direct_onset_joint",
+    "direct_onset_engineered",
+    "threshold_selected_blend"
+  ],
+  "training": {
+    "direct_models_train_only_on_onset_eligible_rows": true,
+    "class_weighting": "scale_pos_weight computed from fit-role onset rows only",
+    "seeds": [7, 13, 26, 42, 73],
+    "xgboost": {
+      "n_estimators": 400,
+      "learning_rate": 0.025,
+      "max_depth": 3,
+      "min_child_weight": 4,
+      "subsample": 0.85,
+      "colsample_bytree": 0.8,
+      "reg_lambda": 2.0,
+      "reg_alpha": 0.05,
+      "tree_method": "hist"
+    }
+  },
+  "calibration": {
+    "method": "logit intercept only",
+    "fit_on": "2015 onset-eligible rows only"
+  },
+  "threshold_policy": {
+    "selection_set": "2016 onset-eligible rows only",
+    "primary_metric": "TSS",
+    "near_optimal_tss_tolerance": 0.02,
+    "tie_break": "minimum FAR among thresholds whose TSS is within 0.02 of maximum; then higher threshold"
+  },
+  "blend_policy": {
+    "candidate_alphas": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "components": ["direct_onset_xrs", "direct_onset_engineered"],
+    "selection_set": "2016 onset-eligible rows only",
+    "selection_metric": "same frozen threshold policy"
+  },
+  "primary_score_metrics": ["TSS", "HSS", "FAR", "FPR", "POD", "Brier", "AUPRC", "AUROC"],
+  "development_success_gate": {
+    "reference": "occurrence_trained_xrs_baseline on the same 2017 onset-eligible score rows",
+    "required": [
+      "candidate TSS > reference TSS",
+      "candidate HSS >= reference HSS",
+      "candidate FAR < reference FAR"
+    ],
+    "stretch_target_tss": 0.55,
+    "preferred_target_tss": 0.60
+  },
+  "claim_boundary": "Passing this development gate does not establish state of the art, independent superiority, operational readiness, or prospective validation. Any such claim requires a same-cohort published-model reproduction or sealed prospective confirmation."
+}
