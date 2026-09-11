@@ -1,6 +1,6 @@
 # IRIS-SEP authoritative current status
 
-**Status date:** 2026-09-10  
+**Status date:** 2026-09-11  
 **Work branch:** `codex/iris-sep-episode-benchmark-v1-20260909`  
 **Umbrella continuation:** `codex/iris-sep-continuation-20260905`  
 **Purpose:** scientific source of truth. Historical inspected results remain development evidence and are never relabelled as untouched final evidence.
@@ -9,13 +9,13 @@
 
 **Are 24-hour SEP forecasting scores measuring prediction of a new radiation storm, or partly rewarding recognition of a storm that is already active and repeated counting of the same physical event?**
 
-The centerpiece is now the episode-normalized causal evaluation benchmark, not a claim of a new state-of-the-art forecasting architecture.
+The centerpiece is the episode-normalized causal evaluation benchmark, not a claim of a new state-of-the-art forecasting architecture.
 
 ## Current disposition
 
 `SEP_PRISM_FIXED_MODEL_REPLAY_V1 — STRONG_MODEL_CONFIRMATION_ON_PREVIOUSLY_EXPOSED_PUBLIC_DATA`
 
-The evaluation effect now reproduces in a preregistered, higher-powered chronological replay on public historical data. The source hashes were already recorded as development-inspected, so this is strong methodological confirmation rather than untouched final evidence. The protected post-2025 cohort remains sealed.
+The evaluation effect reproduces in a preregistered, higher-powered chronological replay on public historical data. The source hashes were already recorded as development-inspected, so this is strong methodological confirmation rather than untouched final evidence. The protected post-2025 cohort remains sealed.
 
 ### SEP-PRISM model-free confirmation
 
@@ -31,90 +31,85 @@ The replay covers 7,558 unique daily score issues across three chronological out
 | Joint XGBoost: onset minus episode-normalized occurrence | -0.184 | [-0.247, -0.125] |
 | Past-proton proxy: onset minus mapped occurrence | -0.508 | [-0.567, -0.444] |
 
-All three intervals lie below zero, satisfying the frozen `STRONG_MODEL_CONFIRMATION` rule. On the same matched population, joint-XGBoost TSS changes **0.726 → 0.621 → 0.437** across mapped occurrence, episode normalization and onset. Its onset confusion table is TP=41, FN=44, FP=330 and TN=6,984 (sensitivity 48.24%, FAR 88.95%), so the result is evidence about evaluation sensitivity, not operational readiness.
+All three intervals lie below zero, satisfying the frozen `STRONG_MODEL_CONFIRMATION` rule. On the same matched population, joint-XGBoost TSS changes **0.726 -> 0.621 -> 0.437** across mapped occurrence, episode normalization and onset. Its onset confusion table is TP=41, FN=44, FP=330 and TN=6,984 (sensitivity 48.24%, FAR 88.95%), so the result is evidence about evaluation sensitivity, not operational readiness.
 
 The joint-XGBoost minus no-proton onset contrast is -0.040 with interval [-0.163, +0.083], which does not establish a reliable rank reversal. Elastic-net's corresponding contrast is positive, but both elastic-net onset TSS values are negative. No broad proton-feature or model-superiority claim is supported.
 
 ### External public-data arm
 
-A pinned audit of `yuyian/SEP-Prediction` found:
+A pinned audit of `yuyian/SEP-Prediction` found 11,773 24-hour windows, 1,726 stored operational positives, 411 already-active persistence windows versus 227 new-onset windows, and 610 uniquely mapped positive windows representing 256 physical episodes (Episode Multiplicity Factor **2.3828125**). Under the audited event-table semantics, 1,083 stored positives do not overlap a reconstructed >=10 pfu operational episode in the nominal future interval. This motivates the benchmark; it does not prove the paper's final SEPVAL score is wrong.
 
-- 11,773 24-hour windows;
-- 1,726 stored operational positives;
-- 1,083 stored positives that do not overlap a reconstructed >=10 pfu operational episode under the audited event-table semantics;
-- 411 already-active persistence windows versus 227 new-onset windows;
-- 610 uniquely mapped positive windows representing 256 physical episodes;
-- Episode Multiplicity Factor **2.3828125**.
+### Earlier internal development arm
 
-This motivates the benchmark. It does not prove the paper's final SEPVAL score is wrong.
+The exposed 2014–2017 expanding-OOF cohort contained 936 scored issues but only five distinct new-onset episodes. It remains supporting development evidence, not the main power claim. Its strongest mapped-episode effects were joint-XGBoost multiplicity shift -0.133 [-0.225,-0.041], joint-XGBoost persistence shift -0.400 [-0.800,-0.125], and current-proton-active persistence shift -0.567 [-0.867,-0.267].
 
-### Internal fixed-model development arm
+## Frozen prospective confirmation — new on 2026-09-11
 
-Exposed 2014–2017 expanding OOF cohort:
+`IRIS_SEP_PROSPECTIVE_OPERATIONAL_CONFIRMATION_V1 — FROZEN_NOT_EXECUTED`
 
-- 936 scored issue rows;
-- 27 standard positive windows;
-- 10 uniquely mapped positive physical episodes;
-- 5 distinct new-onset episodes;
-- 11 persistence windows;
-- 11 ambiguous positive windows;
-- mapped Episode Multiplicity Factor **1.6**.
+The next confirmation is now preregistered **without inspecting, counting or scoring protected post-2025 outcomes**. It is intentionally harder than the historical replay:
 
-Headline TSS:
+- protected pool begins `2025-09-10T00:00:00Z`;
+- development-side label, event-count and episode-identity access remain forbidden;
+- every predictor must have an issue-time feature-availability receipt before use;
+- missing or late required input causes `ABSTAIN`, not retrospective substitution;
+- the historical SEP-PRISM 259-variable feature set is blocked as a prospective set until every field is causally verified;
+- the required comparator is a frozen pre-issue past-proton-active rule; learned operational models are optional and can enter only if serialized, hashed and frozen before outcome access;
+- inference uses the same three evaluation views: mapped occurrence, episode-normalized occurrence and causal new onset;
+- bootstrap is frozen at 10,000 shared physical-unit draws, seed `20260911`;
+- confirmatory information floor is **>=50 distinct onset episodes and >=500 quiet blocks**, chosen before protected counts were inspected;
+- if that floor is not met, the only allowed scientific disposition is `INSUFFICIENT_CONFIRMATORY_INFORMATION`;
+- the custodian runner emits aggregate results and receipts only, never row-level protected labels or episode identities to the development side.
 
-| Model | Standard | Episode-normalized occurrence | New onset |
-|---|---:|---:|---:|
-| Current-proton-active diagnostic | 0.556 | 0.567 | 0.000 |
-| Elastic-net joint | 0.642 | 0.765 | 0.665 |
-| XGBoost joint | 0.657 | 0.443 | 0.043 |
-| XGBoost XRS-only | 0.320 | 0.266 | 0.216 |
+Primary required prospective contrast:
 
-Shared mapped-episode bootstrap, 10,000 draws:
+`past_proton_active_proxy: NEW_ONSET_CAUSAL TSS - MAPPED_OCCURRENCE TSS`
 
-- joint-XGBoost multiplicity-only TSS shift median **-0.133**, 95% **[-0.225, -0.041]**;
-- joint-XGBoost persistence-exclusion shift median **-0.400**, 95% **[-0.800, -0.125]**;
-- current-proton-active persistence-exclusion shift median **-0.567**, 95% **[-0.867, -0.267]**;
-- joint-vs-XRS-only onset difference median **-0.168**, 95% **[-0.746, +0.244]**: point reversal observed, statistically secure reversal not established.
+A prospective confirmation requires the information floor and a paired 95% percentile interval strictly below zero. No protected execution is authorized yet because issue-time latency/availability receipts and a final `EXECUTION_FROZEN` manifest are still required.
 
-The onset arm has only five positive episodes and is explicitly underpowered.
+Read:
 
-## Authoritative evidence receipt
+- `config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json`
+- `config/prospective_operational_execution_manifest_template_v1.json`
+- `architecture/PROSPECTIVE_OPERATIONAL_FEATURE_AVAILABILITY_CONTRACT_2026-09-11.md`
+- `architecture/PROSPECTIVE_CUSTODIAN_HANDOFF_2026-09-11.md`
+- `tools/run_custodian_prospective_episode_evaluation_v1.py`
 
-Final source-only compatibility verification:
+## Authoritative evidence receipts
 
-- workflow run `34509843220`
-- commit `03c912842652e7a4ef4c273ebaff9555fa920bc7`
-- pandas 2.3.2: PASS
-- pandas 3.0.1: PASS
-- both jobs passed environment setup, full Python compilation, every registered source-only test, JSON parsing and data-dependent-test inventory checks
+SEP-PRISM model-free confirmation:
 
-The pandas 3 compatibility fixes explicitly normalize timestamps to nanoseconds in feature-window indexing and physical-episode gap detection. They do not refit models, reselect thresholds, alter persisted predictions, reopen the negative freshness experiment or access protected outcomes.
+- workflow run `34438057070`
+- artifact `10136909164`
+- archive SHA-256 `4d75cb08d9beb8ac1761e138ffcf0464da9456bd7111e5318e83a8d042314f4f`
+- row-level target reconstruction: PASS
 
-Audit-corrected development workflow:
+SEP-PRISM fixed-model replay:
+
+- workflow run `34438987251`
+- source commit `296f302111371e8d421fb5f2a4569ea2c06bd6e1`
+- artifact `10137507101`
+- archive SHA-256 `81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0`
+- supplied verifier: PASS
+- separate independent reconstruction: PASS
+
+Audit-corrected earlier development workflow:
 
 - run `34371418428`
 - commit `8b8a1549a7dfaf1745c96a8c7b78d98e564625c5`
 - artifact `10112207048`
 - artifact SHA-256 `418fd9bd2a70d0e545095a5a8009548aa74c8734d7bb9e2ed09fb19343c92777`
 
-The workflow passed compile/tests, frozen-contract validation, benchmark execution, independent evidence recomputation, final hash generation, a second manifest verification and artifact upload.
+Prospective-contract source-only verification at preregistration head `749967ccd99a9d4187ea2a82add79353698c708f`:
 
-Read:
-`architecture/EPISODE_NORMALIZED_CAUSAL_BENCHMARK_RESULT_2026-09-10.md`
+- dedicated prospective contract workflow: PASS on Python 3.11 and 3.12;
+- full IRIS-SEP source-only verification run `34570209759`: PASS.
+
+No protected data are accessed by the prospective source-only workflow.
 
 ## Post-result correction boundary
 
-Independent audit found an OOF threshold-summary bug and an estimand-labeling ambiguity in the first successful artifact.
-
-The correction changed **only** the result/evidence layer:
-
-- no refit;
-- no threshold reselection;
-- no feature change;
-- no hyperparameter search;
-- no protected-outcome access.
-
-Legacy uncorrected tables remain preserved in the artifact.
+Independent audit of the earlier development package found an OOF threshold-summary bug and an estimand-labeling ambiguity. The correction changed **only** the result/evidence layer: no refit, no threshold reselection, no feature change, no hyperparameter search, and no protected-outcome access. Legacy uncorrected tables remain preserved.
 
 ## Protected evidence rule
 
@@ -122,7 +117,7 @@ Legacy uncorrected tables remain preserved in the artifact.
 
 Post-`2025-09-10T00:00:00Z` candidate outcomes remain protected. Development-side work must not query, count, inspect, score or stratify them, including for power rescue.
 
-The current result is **development/methodology evidence**, not independent final evidence.
+The historical replay is **development/methodology evidence**, not independent final evidence. The prospective contract does not change that classification until a valid custodian-controlled execution actually occurs.
 
 ## Historical V3 reliability engineering — preserved, not the centerpiece
 
@@ -140,17 +135,18 @@ The V3 `NO_XRS_OR_PROTON` state remains `ABSTAIN`, with no alert. Prior post-hoc
 
 Supported:
 
-- repeated physical-event representation exists in a current public SEP rolling benchmark;
-- already-active persistence can score highly under occurrence evaluation while providing no new-onset detections;
-- in the exposed development cohort, multiplicity and persistence materially affect some fixed-model TSS values;
-- point model ranking can change under causal/onset evaluation;
-- physical-episode weighting and onset/persistence separation are scientifically justified.
+- repeated physical-event representation exists in current public SEP rolling benchmarks;
+- already-active persistence can contribute strongly to occurrence-style skill while being a different task from new-onset forecasting;
+- in the higher-powered historical replay, all three frozen directional evaluation-effect intervals were below zero;
+- physical-episode weighting and onset/persistence separation materially change measured skill for some fixed models;
+- an aggregate-only prospective confirmation protocol is frozen without protected-outcome inspection.
 
 Not supported:
 
 - all prior SEP papers are wrong or biased;
 - SEPNET's final published SEPVAL score is wrong;
 - independent prospective superiority;
+- prospective confirmation before the frozen custodian study is validly executed;
 - operational readiness/certification;
 - state-of-the-art model performance;
 - economic savings;
@@ -160,18 +156,20 @@ Not supported:
 
 The project now has a credible high-level competition structure:
 
-- **Scientific thought:** falsifiable mechanism + causal estimands + paired physical-unit uncertainty.
+- **Scientific thought:** falsifiable mechanism + causal estimands + paired physical-unit uncertainty + a predeclared prospective falsification path.
 - **Creativity:** benchmark contribution rather than another classifier.
-- **Thoroughness:** public external audit, attrition ledger, multiple fixed comparators, preserved negative/legacy evidence, shared bootstrap tensors.
-- **Skill:** pinned environment, immutable receipts, model serialization, independent replay/recomputation, double hash verification.
+- **Thoroughness:** public audits, 85-episode replay, attrition/evidence ledgers, fixed comparators, preserved negative/legacy evidence, shared bootstrap tensors and a protected-outcome governance contract.
+- **Skill:** pinned environments, immutable receipts, independent reconstruction, double hash verification, fail-closed feature availability and aggregate-only custodian tooling.
 - **Clarity:** one question — “forecasting a new storm, or recognizing one already happening?”
 
-The earlier five-onset internal limitation has been substantially reduced by an 85-episode matched replay. Remaining weaknesses concern evidence independence, causal feature availability, missing model/threshold-search objects, and prospective operational validation. Do not disguise them.
+Remaining weaknesses are evidence independence, issue-time availability for operational predictors, full training-object replay, and prospective validation. Do not disguise them.
 
 ## Immediate next actions
 
-1. Keep PR #5's verified replay documentation and final green CI receipt synchronized.
-2. Preserve the replay archive digest, independent receipts and exact matched-population denominators.
-3. Keep the protected final cohort sealed.
-4. Obtain a custodian-controlled prospective confirmation only after freezing an operational feature-availability contract.
-5. Do not tune or rescue the frozen replay after score inspection.
+1. Keep PR #5 synchronized with this status and the green prospective-contract CI receipt.
+2. Preserve all SEP-PRISM archive digests, independent receipts and exact matched-population denominators.
+3. Keep the protected final cohort sealed; do not inspect it for event counts or power.
+4. Complete issue-time first-seen/latency receipts for the minimum prospective input set.
+5. Freeze a completed `EXECUTION_FROZEN` manifest only after every evaluated feature passes the availability gate.
+6. Hand the sealed evaluation to an independent custodian; development-side execution is not authorized.
+7. Do not tune or rescue the historical replay after score inspection.
