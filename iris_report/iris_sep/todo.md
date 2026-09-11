@@ -16,6 +16,15 @@
 - [x] Add source-only validity tests including causal-forward-fill degradation and excessive-loss abstention.
 - [x] Build the two-week finish plan and submission evidence-bundle index.
 - [x] Prepare the operator brief, technical validation sheet, five-minute demo, interview-request draft, pilot-proposal draft and workflow-review template. **Nothing has been sent.**
+- [x] Verify the current IRIS 2026–27 submission window, current ISEF 2027 core forms, 12-month eligibility rule, judging weights, PHYS category fit and human-participant interview boundary in `architecture/LIVE_IRIS_ISEF_RULES_VERIFICATION_2026-09-11.md`.
+
+## Immediate registration / compliance gate
+
+- [ ] Confirm IRIS registration/portal access well before **3 October 2026**.
+- [ ] Bring the true research timeline and `architecture/ISEF_2027_FORMS_AND_APPROVAL_MATRIX_2026-09-11.md` to the Adult Sponsor/SRC.
+- [ ] Complete/obtain Forms 1, 1A, 1B and 2A with truthful dates and support disclosures; never backdate.
+- [ ] Ask the SRC explicitly whether Form 2C and/or Form 7 applies to the actual research setting/history.
+- [ ] Obtain an SRC/IRB determination **before** any stakeholder/operator interview that may be collected, analyzed or presented as research evidence.
 
 ## Days 1–3 — evidence freeze / bundle gate
 
@@ -65,8 +74,9 @@
 - [x] Preserve the missingness boundary: 5–20% versus 40% random masking is development stress evidence, not a universal deployment threshold.
 - [x] Keep magnetic-map reconstruction `EXPERIMENTAL_NOT_PROMOTED` until a preregistered hidden real-map comparison beats persistence and preserves downstream onset utility.
 - [ ] Student/mentor review all outreach materials before any message is sent.
+- [ ] Obtain the applicable SRC/IRB determination before recruitment if workflow interviews will be used as research evidence.
 - [ ] Identify an appropriate external reviewer through the mentor/school/research network.
-- [ ] Conduct one approved 30-minute workflow interview.
+- [ ] Conduct one approved 30-minute workflow interview only after the required determination/approval path is complete.
 - [ ] Record one concrete external requirement and incorporate it into a **new versioned prospective protocol** before affected future evidence is inspected.
 - [ ] Do not claim company benefit from an interview alone.
 
