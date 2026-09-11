@@ -5,7 +5,7 @@
 **Evidence class:** strong methodological confirmation on previously development-exposed public historical data.  
 **Protected outcomes:** post-`2025-09-10T00:00:00Z` outcomes remain sealed from the development side.
 
-This directory is the submission audit index. It deliberately **references** frozen repository files and immutable workflow/artifact receipts instead of making mutable copies that could drift.
+This directory is the submission audit index. It deliberately **references** frozen repository files and immutable workflow/artifact receipts instead of making mutable copies that could drift. `FROZEN_RESULTS.json` is the machine-readable source of truth for the final headline counts, TSS values, bootstrap contrasts, operating characteristics, artifact hashes and prospective-state boundary.
 
 ## Headline scientific record
 
@@ -25,7 +25,7 @@ This directory is the submission audit index. It deliberately **references** fro
 - `228` = onset **windows** in the full 1986–2025 model-free table.
 - `85` = distinct onset **physical episodes** in the frozen matched fixed-model replay inferential cohort.
 
-Every paper, poster, video, synopsis and oral answer must preserve that distinction.
+Every paper, poster, video, synopsis and oral answer must preserve that distinction. `tests/test_submission_frozen_results_contract.py` now regression-tests this guard and the other headline submission values.
 
 ## Referenced submission scaffolds
 
@@ -52,6 +52,8 @@ Recommended fixed-alert figure title for the final student-designed display:
 - Model-free confirmation workflow: `34438057070`; artifact `10136909164`; archive SHA-256 `4d75cb08d9beb8ac1761e138ffcf0464da9456bd7111e5318e83a8d042314f4f`.
 - Fixed-model replay workflow: `34438987251`; source commit `296f302111371e8d421fb5f2a4569ea2c06bd6e1`; artifact `10137507101`; archive SHA-256 `81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0`.
 - Baseline source-only workflow: `34573237824` on `7bd7f0659b8ce2f4310d5c83f7d81b6db439c40b` — PASS.
+- Final technical freeze receipt: `architecture/FINAL_TECHNICAL_RESULTS_AND_FREEZE_RECEIPT_2026-09-11.md`.
+- Machine-readable final results contract: `FROZEN_RESULTS.json`.
 
 ## Required limitations retained
 
@@ -63,4 +65,4 @@ Recommended fixed-alert figure title for the final student-designed display:
 - prospective confirmation is frozen but not executed;
 - no state-of-the-art, deployment, economic-benefit, company-benefit or award claim is supported.
 
-Read `MODEL_DEVELOPMENT_FREEZE.md`, `NEGATIVE_RESULT_LEDGER.md`, `PROTECTED_DATA_STATEMENT.md`, `SUBMISSION_GATE_CHECKLIST.md` and `MANIFEST.json` before final submission.
+Read `FROZEN_RESULTS.json`, `MODEL_DEVELOPMENT_FREEZE.md`, `NEGATIVE_RESULT_LEDGER.md`, `PROTECTED_DATA_STATEMENT.md`, `SUBMISSION_GATE_CHECKLIST.md` and `MANIFEST.json` before final submission.
