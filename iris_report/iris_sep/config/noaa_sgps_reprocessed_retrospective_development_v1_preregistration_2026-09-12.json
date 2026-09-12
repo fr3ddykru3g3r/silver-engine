@@ -1,0 +1,86 @@
+{
+  "format": "IRIS_SEP_NSRRD_V1_PREREGISTRATION",
+  "study_id": "NOAA_SGPS_REPROCESSED_RETROSPECTIVE_DEVELOPMENT_V1",
+  "short_id": "NSRRD-V1",
+  "date": "2026-09-12",
+  "status": "PREREGISTERED_BEFORE_SOURCE_GATE_BEFORE_LABELS_BEFORE_TRAINING",
+  "source_contract": "config/noaa_sgps_reprocessed_retrospective_development_v1_source_contract_2026-09-12.json",
+  "relationship_to_frozen_submission": "SUPPLEMENTARY_DEVELOPMENT_ONLY_DOES_NOT_REOPEN_OR_SUPERSEDE_FROZEN_RESULTS_JSON",
+  "target": {
+    "definition": "A new official NOAA/SWPC >=10 MeV, >=10 pfu event onset in (issue_time, issue_time+24h].",
+    "labels": "Official NOAA/SWPC event start and end intervals only; predictor fluxes never define labels.",
+    "already_active_at_issue": "EXCLUDE_FROM_ONSET_SCORE_AND_REPORT_SEPARATELY",
+    "unresolved_or_censored_interval": "EXCLUDE_AND_REPORT_AS_AMBIGUOUS",
+    "construct_overlap_warning": "Differential proton predictors are instrument-adjacent to the proton-event target. Gains are incremental predictive association, not proof of a new upstream physical precursor."
+  },
+  "issues": {
+    "cadence": "DAILY_AT_00_00_UTC",
+    "predictor_window": "[issue_time-24h, issue_time)",
+    "outcome_window": "(issue_time, issue_time+24h]",
+    "role_edge_rule": "Both full predictor and outcome windows must remain inside one role; enforce a 24-hour purge at every role boundary.",
+    "no_future_fill": true,
+    "no_interpolation_across_gaps": true,
+    "quality_flagged_values_are_missing": true
+  },
+  "roles": {
+    "fit": ["2023-01-01", "2023-12-31"],
+    "calibration": ["2024-01-01", "2024-03-31"],
+    "threshold": ["2024-04-01", "2024-06-30"],
+    "development_score": ["2024-07-01", "2025-04-03"],
+    "common_coverage_rule": "The source gate may narrow only interval edges using source timestamps before labels are read. Boundaries may not move to increase event support."
+  },
+  "features": {
+    "xrs_per_band": ["finite_count", "coverage_fraction", "minimum", "maximum", "mean", "median", "standard_deviation", "last_causal_value", "age_of_last_value", "maximum_first_difference", "maximum_log_flux_change"],
+    "sgps_per_bound_channel": ["finite_count", "coverage_fraction", "minimum", "maximum", "mean", "median", "standard_deviation", "last_causal_value", "age_of_last_value", "maximum_first_difference", "maximum_log_flux_change"],
+    "fixed_spectral": ["log_flux_slope", "low_mid_high_band_sums", "spectral_curvature_when_three_or_more_simultaneous_channels_exist"],
+    "forbidden": ["event label fields", "future observations", "post-issue quality revisions", "reconstructed >=10 MeV integral predictor", "outcome-selected channels", "outcome-selected PCA", "manually associated flare or CME fields"]
+  },
+  "models": {
+    "primary": "Fixed five-seed XGBoost using XRS plus bound SGPS differential features; median probability across seeds; n_estimators=300, learning_rate=0.03, max_depth=3, min_child_weight=5, subsample=0.8, colsample_bytree=0.8, reg_lambda=1.0, reg_alpha=0.0, tree_method=hist; seeds 7,13,26,42,73.",
+    "comparators": ["XRS-only same XGBoost", "SGPS-only same XGBoost", "joint elastic-net logistic regression", "fit-prevalence climatology"],
+    "architecture_or_hyperparameter_search": false
+  },
+  "calibration_and_threshold": {
+    "calibration": "One intercept-only probability correction fit on calibration role only.",
+    "primary_threshold": "Maximize TSS on threshold role only; ties choose the highest threshold.",
+    "secondary_diagnostic": "Among threshold-role points with POD >=0.80, choose minimum FAR; descriptive only.",
+    "onset_specific_reselection": false
+  },
+  "evaluation": {
+    "same_issue_ids_across_models": true,
+    "primary_metrics": ["TP", "FN", "FP", "TN", "TSS", "POD", "FPR", "FAR", "forecast_coverage", "alerts_per_detected_onset"],
+    "secondary_metrics": ["HSS", "Brier", "AUPRC_with_score_prevalence", "AUROC", "ECE"],
+    "lead_time_strata_hours": ["0_to_6", "greater_than_6_to_12", "greater_than_12_to_24"],
+    "abstention_rule": "A positive-event abstention counts as missed/unwarned; never silently drop it."
+  },
+  "uncertainty": {
+    "draws": 10000,
+    "positive_unit": "physical onset episode",
+    "negative_unit": "Monday-anchored contiguous seven-day quiet block",
+    "paired_shared_draws": true,
+    "interval": "paired percentile 95% bootstrap interval",
+    "iid_row_bootstrap_forbidden": true
+  },
+  "support_gate": {
+    "minimum_fit_onsets": 10,
+    "minimum_forecast_coverage": 0.80,
+    "if_inadequate": "INSUFFICIENT_SUPPORT_DO_NOT_TRAIN_OR_MOVE_BOUNDARIES"
+  },
+  "predeclared_utility_gate": {
+    "comparison": "primary joint model versus best simple available-input comparator on identical eligible issues",
+    "false_alert_reduction_minimum": 0.20,
+    "additional_missed_onsets_allowed": 0,
+    "forecast_coverage_minimum": 0.80,
+    "failure_action": "PRESERVE_NEGATIVE_RESULT_WITHOUT_NEW_FILTER_THRESHOLD_OR_MODEL_SEARCH"
+  },
+  "execution_sequence": [
+    "source gate must pass",
+    "complete labels and support gate must pass",
+    "freeze exact input manifest, hashes, eligible issues and role boundaries",
+    "only then train once",
+    "independent verifier recomputes receipt and paired metrics"
+  ],
+  "forbidden_claims": ["historical operational replay", "live equivalence", "causal precursor discovery", "state of the art", "independent validation", "prospective validation", "operational readiness", "economic savings", "company benefit", "protected-cohort confirmation"],
+  "protected_outcomes_accessed": false,
+  "training_performed": false
+}
