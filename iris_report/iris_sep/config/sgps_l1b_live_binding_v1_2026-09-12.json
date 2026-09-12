@@ -1,0 +1,42 @@
+{
+  "format": "IRIS_SEP_SGPS_L1B_LIVE_BINDING_V1",
+  "date": "2026-09-12",
+  "status": "FROZEN_BEFORE_SOURCE_ONLY_PROBE",
+  "purpose": "Determine whether NOAA/NCEI GOES-16 operational SGPS L1b can be mapped deterministically to the public SWPC differential-proton live interface without using event labels, forecast scores, or protected outcomes.",
+  "historical_root": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l1b/seis-l1b-sgps/",
+  "live_url": "https://services.swpc.noaa.gov/json/goes/primary/differential-protons-7-day.json",
+  "routing_url": "https://services.swpc.noaa.gov/json/goes/instrument-sources.json",
+  "anchor_months": ["2020-11", "2022-03", "2024-05", "2025-03"],
+  "anchor_selection_rule": "Within each frozen month, choose the lexicographically first NetCDF file in the operational seis-l1b-sgps directory. Do not inspect labels or model scores to choose a day.",
+  "required_historical_semantics": [
+    "a proton differential-flux variable or variables",
+    "thirteen documented differential proton energy channels spanning approximately 1-500 MeV",
+    "energy lower/upper/effective metadata sufficient to bind channels without guessing",
+    "UTC-convertible time metadata",
+    "data-quality or valid-sample metadata"
+  ],
+  "required_live_semantics": [
+    "time_tag",
+    "flux",
+    "energy",
+    "channel"
+  ],
+  "binding_acceptance": {
+    "all_anchor_months_retrievable": true,
+    "thirteen_archive_differential_channels_required": true,
+    "thirteen_live_differential_energy_bands_required": true,
+    "numeric_energy_band_match_required": true,
+    "ambiguous_sensor_or_telescope_reduction_allowed": false,
+    "heuristic_channel_relabelling_allowed": false
+  },
+  "forbidden_actions": [
+    "training",
+    "label derivation",
+    "forecast scoring",
+    "post-2025-09-10 protected outcome access",
+    "silent use of science-reprocessed files",
+    "manual channel mapping after seeing model performance"
+  ],
+  "if_binding_fails": "Reject L1b as the historical source for the live-compatible causal model. Preserve the negative result and move only to a separately named development study whose historical reprocessing limitation is explicit.",
+  "claim_boundary": "A pass establishes source-schema binding only; it does not establish forecast skill, historical operational replay, or independent validation."
+}
