@@ -1,0 +1,40 @@
+{
+  "study_id": "IRIS_SEP_PROSPECTIVE_FPR_CONTROLLER_CONFIRMATION_V1",
+  "manifest_status": "TEMPLATE_NOT_EXECUTION_FROZEN",
+  "must_be_completed_by": "independent adult custodian before any protected scoring",
+  "controller_freeze_reference": "config/fpr_controller_v2_freeze_2026-09-12.json",
+  "source_model": {
+    "model_id": null,
+    "model_artifact_sha256_or_deterministic_rule_sha256": null,
+    "feature_schema_sha256": null,
+    "frozen_fixed_threshold": null,
+    "training_data_boundary": null,
+    "software_environment_receipt": null,
+    "causal_feature_verification_receipt": null
+  },
+  "protected_cohort": {
+    "custodian_cohort_hash": null,
+    "not_before_utc": "2025-09-10T00:00:00Z",
+    "cohort_end_selected_by_custodian": null,
+    "overlap_check_against_inspected_registry_v2": null,
+    "overlap_check_against_inspected_registry_v3": null,
+    "development_side_outcomes_exposed_before_freeze": false,
+    "development_side_event_counts_exposed_before_freeze": false,
+    "development_side_event_identities_exposed_before_freeze": false,
+    "development_side_model_scores_exposed_before_conclusion_freeze": false
+  },
+  "custodian": {
+    "name_or_identifier": null,
+    "attestation_timestamp_utc": null,
+    "independence_attestation": null
+  },
+  "execution": {
+    "execution_commit_sha": null,
+    "execution_environment_sha256": null,
+    "append_only_score_ledger_sha256": null,
+    "append_only_controller_threshold_ledger_sha256": null,
+    "results_package_sha256": null,
+    "conclusion_frozen_timestamp_utc": null
+  },
+  "hard_rule": "Do not change this template to EXECUTION_FROZEN until every null field required by the preregistration has been truthfully completed without protected-outcome feedback."
+}
