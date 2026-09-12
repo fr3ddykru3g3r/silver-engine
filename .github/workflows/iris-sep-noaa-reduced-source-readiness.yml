@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - codex/iris-sep-continuation-20260905
+      - codex/iris-sep-fpr-controller-v2-20260912
     paths:
       - 'iris_report/iris_sep/config/noaa_causal_reduced_input_v1_preregistration_2026-09-09.json'
       - 'iris_report/iris_sep/config/noaa_causal_reduced_input_v1_data_contract_2026-09-09.json'
