@@ -1,0 +1,119 @@
+{
+  "study_id": "IRIS_SEP_PROSPECTIVE_FPR_CONTROLLER_CONFIRMATION_V1",
+  "version": 1,
+  "frozen_date_utc": "2026-09-12",
+  "status": "FROZEN_NOT_EXECUTED_BLOCKED_ON_SOURCE_MODEL_AND_CUSTODIAN",
+  "evidence_class": "custodian_controlled_future_confirmation",
+  "scientific_question": "When paired with a separately frozen issue-time-causal SEP onset model, does the frozen V2 causal rolling threshold controller reduce false-positive rate to <=0.30 without materially degrading onset detection relative to the same model's frozen fixed threshold?",
+  "controller_freeze": {
+    "reference": "config/fpr_controller_v2_freeze_2026-09-12.json",
+    "controller_type": "causal rolling negative-score quantile threshold",
+    "quantile": 0.80,
+    "history_window_days": 120,
+    "minimum_resolved_negative_history": 30,
+    "forecast_horizon_hours": 24,
+    "post_horizon_label_buffer_hours": 1,
+    "quantile_method": "higher",
+    "threshold_floor": "source model frozen fixed threshold",
+    "post_freeze_controller_tuning": "FORBIDDEN"
+  },
+  "protected_pool": {
+    "not_before_utc": "2025-09-10T00:00:00Z",
+    "development_side_outcome_access": "FORBIDDEN",
+    "development_side_event_count_access": "FORBIDDEN",
+    "development_side_episode_identity_access": "FORBIDDEN",
+    "development_side_model_score_access_before_conclusion_freeze": "FORBIDDEN",
+    "development_side_rule": "Do not query, count, inspect, score, stratify, or use protected outcomes to rescue power or tune the controller/source model."
+  },
+  "source_model_gate": {
+    "status": "UNRESOLVED_EXECUTION_BLOCKER",
+    "required_before_any_protected_scoring": [
+      "model_id",
+      "model_artifact_sha256_or_deterministic_rule_sha256",
+      "feature_schema_sha256",
+      "frozen_fixed_threshold",
+      "training_data_boundary",
+      "software_environment_receipt",
+      "per-feature issue-time causal verification",
+      "source-model freeze timestamp earlier than outcome unseal"
+    ],
+    "phase2_direct_onset_engineered_is_not_automatically_eligible": true,
+    "reason": "Phase II used historical GOES-15/XRS-era source adaptation and was development-only; prospective eligibility requires a separately verified causal source-model package rather than assuming transportability."
+  },
+  "sequential_controller_rule": {
+    "threshold_at_issue_t_may_use": [
+      "source-model current score at t",
+      "source-model frozen fixed threshold",
+      "scores from earlier issues",
+      "negative outcomes from earlier issues only after the complete 24-hour horizon plus one-hour buffer has resolved"
+    ],
+    "threshold_at_issue_t_may_not_use": [
+      "current issue target label",
+      "future labels",
+      "future scores",
+      "later catalogue revisions",
+      "development-side manual overrides informed by protected outcomes"
+    ],
+    "append_only_threshold_ledger_required": true
+  },
+  "evaluation": {
+    "unit_of_issue": "daily 00:00 UTC issue",
+    "target": "new >10 MeV proton crossing to >=10 pfu in (issue_time, issue_time+24h] when not already active at issue",
+    "comparison": "same frozen model probabilities under fixed-threshold policy versus frozen V2 controller policy",
+    "primary_metrics": ["FPR", "POD", "TSS"],
+    "secondary_metrics": ["FAR", "HSS", "Brier", "TP", "FP", "FN", "TN"],
+    "physical_units": {
+      "positive": "distinct qualifying onset episode",
+      "negative": "Monday-anchored seven-day quiet block"
+    }
+  },
+  "information_floor": {
+    "minimum_distinct_onset_episodes": 50,
+    "minimum_quiet_blocks": 500,
+    "status_if_not_met": "INSUFFICIENT_CONFIRMATORY_INFORMATION",
+    "note": "Frozen before protected counts are inspected; this is a design floor, not a power guarantee."
+  },
+  "bootstrap": {
+    "replicates": 10000,
+    "seed": 20260912,
+    "pairing": "shared resample of positive episode units and negative quiet-block units reused for fixed-threshold and controller policies",
+    "interval": "paired_percentile_95"
+  },
+  "confirmation_gates": {
+    "all_required": [
+      "information floor met",
+      "controller point FPR <= 0.30",
+      "paired 95% interval for controller FPR minus fixed-threshold FPR strictly below 0",
+      "paired 95% interval for controller POD minus fixed-threshold POD has lower bound > -0.10",
+      "paired 95% interval for controller TSS minus fixed-threshold TSS has lower bound > 0",
+      "protected pool remained sealed from development side until conclusion freeze"
+    ],
+    "interpretation_if_failed": "Do not claim prospective controller improvement; report failure or insufficient information exactly as observed."
+  },
+  "custodian": {
+    "independent_adult_custodian_required": true,
+    "development_side_receives_before_conclusion_freeze": [
+      "source-only software test status",
+      "hash receipts",
+      "execution readiness status without protected counts"
+    ],
+    "development_side_receives_after_conclusion_freeze": [
+      "aggregate cohort counts",
+      "aggregate confusion tables",
+      "aggregate metric tables",
+      "paired bootstrap contrast summaries",
+      "execution/hash receipts"
+    ],
+    "row_level_targets_or_positive_timestamps_to_development_side": "FORBIDDEN"
+  },
+  "claim_boundary": {
+    "allowed_if_all_gates_pass": "prospective evidence that the frozen adaptive threshold policy improves the operating point of the separately frozen source model under this protocol",
+    "not_allowed": [
+      "state-of-the-art forecasting claim without same-cohort comparator reproduction",
+      "operational readiness",
+      "universal FPR guarantee",
+      "economic savings",
+      "award outcome"
+    ]
+  }
+}
