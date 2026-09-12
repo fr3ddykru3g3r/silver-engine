@@ -1,0 +1,61 @@
+{
+  "freeze_id": "IRIS_SEP_FPR_CONTROLLER_V2_FREEZE",
+  "status": "FROZEN_FOR_FUTURE_UNINSPECTED_EVALUATION_ONLY",
+  "frozen_utc_date": "2026-09-12",
+  "development_origin": {
+    "study_id": "IRIS_SEP_FPR_CONTROLLER_V2",
+    "development_config_path": "config/fpr_controller_v2_development_2026-09-12.json",
+    "development_config_git_blob_sha": "50dd8eb1feaa57f35724f183e709f7770e20560c",
+    "controller_runner_path": "tools/run_fpr_controller_v2.py",
+    "controller_runner_git_blob_sha": "ef44bcb5293c57fa02b029e9c84409df1d46f86d",
+    "execution_commit": "7768a16cb8dcc89c781bb0cf3815010c4f3df408",
+    "workflow_run": 34636205524,
+    "artifact_id": 10277871843,
+    "artifact_zip_sha256": "c7756a24fee8519b5975bd6a0cac8e3f83303c88389e4a476ae500e7ea7f96ad",
+    "development_cohort": "2017 Phase II score rows",
+    "development_cohort_already_inspected": true
+  },
+  "frozen_policy": {
+    "controller_type": "causal rolling negative-score quantile threshold",
+    "quantile": 0.80,
+    "internal_negative_exceedance_target": 0.20,
+    "history_window_days": 120,
+    "minimum_resolved_negative_history": 30,
+    "forecast_horizon_hours": 24,
+    "post_horizon_label_buffer_hours": 1,
+    "quantile_method": "higher",
+    "threshold_floor": "source model frozen fixed threshold",
+    "history_membership": "only prior rows known to be negative after their complete forecast horizon and availability buffer",
+    "current_label_use": "FORBIDDEN",
+    "future_label_use": "FORBIDDEN",
+    "future_score_use": "FORBIDDEN"
+  },
+  "development_result_for_context_only": {
+    "rows": 210,
+    "positive_onsets": 1,
+    "fpr": 0.23923444976076555,
+    "pod": 1.0,
+    "tss": 0.7607655502392344,
+    "far": 0.9803921568627451,
+    "confusion": {"tp": 1, "fn": 0, "fp": 50, "tn": 159},
+    "claim_status": "POSTHOC_DEVELOPMENT_ONLY"
+  },
+  "no_more_2017_selection": {
+    "controller_quantile_tuning": "FORBIDDEN_FOR_ANY_FRESH_CLAIM",
+    "history_window_tuning": "FORBIDDEN_FOR_ANY_FRESH_CLAIM",
+    "minimum_history_tuning": "FORBIDDEN_FOR_ANY_FRESH_CLAIM",
+    "label_buffer_tuning": "FORBIDDEN_FOR_ANY_FRESH_CLAIM",
+    "cooldown_or_veto_tuning": "FORBIDDEN_FOR_ANY_FRESH_CLAIM",
+    "reason": "2017 and both controller V1/V2 outputs are development-exposed"
+  },
+  "future_evaluation_requirement": {
+    "source_model_must_be_separately_frozen_before_outcome_access": true,
+    "source_model_inputs_must_be_verified_issue_time_causal": true,
+    "independent_custodian_required_for_protected_pool": true,
+    "development_side_protected_labels_or_event_identities": "FORBIDDEN",
+    "minimum_distinct_onset_episodes": 50,
+    "minimum_quiet_blocks": 500,
+    "if_information_floor_not_met": "INSUFFICIENT_CONFIRMATORY_INFORMATION"
+  },
+  "claim_boundary": "The frozen controller is an engineering candidate. The 23.92% FPR and 0.761 TSS are not validated operational performance. No performance claim may be upgraded without a genuinely uninspected or prospective frozen-model evaluation."
+}
