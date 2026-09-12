@@ -1,0 +1,73 @@
+{
+  "registry_id": "iris-sep-inspected-evidence-v3",
+  "supersedes": "iris-sep-inspected-evidence-v2",
+  "status": "ACTIVE_DEVELOPMENT_GUARD",
+  "updated_utc_date": "2026-09-12",
+  "purpose": "Extend the inspected-evidence guard after Phase II onset-forecaster and FPR-controller development so none of the 2017 rows or controller outputs can later be relabelled fresh or held out.",
+  "inheritance": {
+    "all_entries_from": "config/inspected_evidence_registry_v2.json",
+    "inherited_registry_git_blob_sha": "31a1e34a1174d39533e74b496cea901a30a6325c",
+    "rule": "All V2 inspected and protected entries remain active. V3 adds the entries below; evaluation overlap checks must consult both registries."
+  },
+  "new_inspected_entries": [
+    {
+      "name": "phase2_v1_2017_onset_score",
+      "status": "INSPECTED_DEVELOPMENT_RESULT",
+      "source": "architecture/PHASE2_V1_DEVELOPMENT_RESULT_2026-09-11.md",
+      "workflow_run": 34628549602,
+      "execution_commit": "fe7fe95010c6da1c1595bd5ac56a542cdec4e24c",
+      "artifact_id": 10275033377,
+      "artifact_sha256": "4fce9da1be1764b2cab4a59e6398bdf6642b8dbe6f7d5cd7246d8b24128e9984",
+      "cohort": "2017 Phase II onset-eligible score rows",
+      "rows": 210,
+      "positive_onsets": 1,
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "fpr_controller_v1_2017_replay",
+      "status": "INSPECTED_POSTHOC_ENGINEERING_RESULT",
+      "workflow_run": 34635582111,
+      "execution_commit": "6fa43da657879f351552ffb416c9f48df328214f",
+      "artifact_id": 10277940827,
+      "artifact_sha256": "6acce6e7916f8aaaf735fd786d59b3d5283391b734d0bab0f438d14ffe25701f",
+      "cohort": "same 2017 Phase II score rows",
+      "result_summary": "FPR 0.1962 but POD 0.0; controller V1 closed as utility failure",
+      "fresh_final_evidence": false
+    },
+    {
+      "name": "fpr_controller_v2_2017_replay",
+      "status": "INSPECTED_POSTHOC_ENGINEERING_RESULT",
+      "workflow_run": 34636205524,
+      "execution_commit": "7768a16cb8dcc89c781bb0cf3815010c4f3df408",
+      "artifact_id": 10277871843,
+      "artifact_sha256": "c7756a24fee8519b5975bd6a0cac8e3f83303c88389e4a476ae500e7ea7f96ad",
+      "cohort": "same 2017 Phase II score rows",
+      "result_summary": "FPR 0.2392, POD 1.0, TSS 0.7608; development gate passed but only one positive onset",
+      "fresh_final_evidence": false
+    }
+  ],
+  "selection_contamination_guard": {
+    "2017_phase2_rows_may_be_used_for": [
+      "reproducibility checks",
+      "causal-invariance unit tests that do not choose a new operating point",
+      "descriptive posthoc engineering clearly labelled development"
+    ],
+    "2017_phase2_rows_may_not_be_used_for": [
+      "fresh validation",
+      "independent confirmation",
+      "selection of a controller then presentation of the same rows as held out",
+      "state-of-the-art or operational superiority claims"
+    ]
+  },
+  "protected_candidate_carry_forward": {
+    "name": "post_monitor_prospective_candidate_after_2025_09_10",
+    "status": "PROTECTED_NOT_INSPECTED",
+    "development_side_outcomes_accessed": false,
+    "development_side_event_counts_accessed": false,
+    "development_side_event_identities_accessed": false,
+    "development_side_model_scores_accessed": false,
+    "authorized_for_development": false,
+    "rule": "Do not query, count, inspect, score, stratify, or use protected outcomes to tune the source model or frozen V2 controller."
+  },
+  "maintenance_rule": "Append every newly inspected cohort or policy-selection output. Never delete negative or inconvenient entries. A future untouched claim requires independent custodian attestation and overlap checks against every registry version."
+}
