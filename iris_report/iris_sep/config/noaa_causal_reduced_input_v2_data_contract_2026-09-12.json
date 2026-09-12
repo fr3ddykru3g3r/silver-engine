@@ -1,0 +1,125 @@
+{
+  "format": "IRIS_SEP_NOAA_CAUSAL_REDUCED_INPUT_DATA_CONTRACT_V2",
+  "study_id": "NOAA_CAUSAL_REDUCED_INPUT_V2",
+  "date": "2026-09-12",
+  "status": "FROZEN_BEFORE_V2_SOURCE_READINESS_AND_BEFORE_TRAINING",
+  "supersedes_for_new_work_only": "config/noaa_causal_reduced_input_v1_data_contract_2026-09-09.json",
+  "v1_blocker": {
+    "workflow_run_id": 34677384293,
+    "receipt_sha256": "485daade7f102dab9744a536c5100220c3f9b447f845fbb3a276d388f6f9ce0b",
+    "finding": "GOES-16 SGPS operational L2 daily files expose 1-500 MeV differential proton channels plus a >500 MeV integral channel; they do not directly expose the >=10 MeV integral quantity required by V1. Two fixed-day SGPS files were also absent even though the year directories exist.",
+    "mutation_rule": "V1 is preserved as a negative source-readiness result. V2 is a separately named study and may not relabel the >500 MeV channel as >=10 MeV or reinterpret the V1 failure as a pass."
+  },
+  "target": {
+    "id": "NEW_GT10MEV_GE10PFU_SWPC_EVENT_ONSET_WITHIN_24H",
+    "horizon_hours": 24,
+    "positive_definition": "At least one official NOAA/SWPC >=10 MeV, >=10 pfu proton-event onset occurs in (issue_time, issue_time+24h].",
+    "already_active_issue_times_are_ineligible": true,
+    "active_interval_definition": "[official_event_start, official_event_end] using NOAA/SWPC event records; no proxy duration is allowed.",
+    "event_start_source": "NOAA/NCEI Solar Proton Events Affecting the Earth Environment list (1976-present)",
+    "event_end_source": "Archived NOAA/SWPC post-event summaries in Space Weather Highlights/PRF or SGAS products that explicitly state the event end/drop-below-threshold time.",
+    "catalogue_start_without_resolved_end": "UNRESOLVED_LABEL_INTERVAL_DO_NOT_TRAIN_OR_SCORE_AFFECTED_PERIOD",
+    "manual_or_heuristic_end_time_invention_allowed": false
+  },
+  "historical_predictor_interval": {
+    "satellite": "GOES-16",
+    "start_utc_inclusive": "2020-03-11T00:00:00+00:00",
+    "end_utc_inclusive": "2025-04-03T23:59:59+00:00",
+    "routing": "GOES16_ONLY_FOR_HISTORICAL_PREDICTORS",
+    "fallback_satellite_allowed": false,
+    "reason": "Keep one satellite and one calibration regime for the development study; preserve source gaps instead of outcome-dependent stitching."
+  },
+  "historical_products": {
+    "xrs": {
+      "provider": "NOAA_NCEI",
+      "product": "GOES-R XRSF L2 1-minute operational averages",
+      "root": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l2/data/xrsf-l2-avg1m/",
+      "required_variables_or_semantics": [
+        "XRS-A and XRS-B irradiance/flux variables identifiable from metadata",
+        "UTC-convertible time coordinate",
+        "units and fill values",
+        "quality/status variables retained"
+      ]
+    },
+    "proton_predictors": {
+      "provider": "NOAA_NCEI",
+      "product": "GOES-R SEISS SGPS L2 1-minute operational averages",
+      "root": "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l2/data/sgps-l2-avg1m/",
+      "allowed_signal": "DOCUMENTED_DIFFERENTIAL_PROTON_CHANNELS_ONLY",
+      "required_variables_or_semantics": [
+        "AvgDiffProtonFlux or an equivalently documented 1-500 MeV differential proton-flux tensor",
+        "documented lower/upper/effective energies for the differential channels",
+        "UTC-convertible time coordinate",
+        "units and fill values",
+        "quality/status or valid-sample metadata retained"
+      ],
+      "forbidden_as_v2_predictor": [
+        "retrospectively reconstructed >=10 MeV integral proton flux",
+        "the >500 MeV integral SGPS channel relabelled as >=10 MeV",
+        "future samples",
+        "cross-satellite fill chosen after inspecting labels"
+      ]
+    }
+  },
+  "live_products": {
+    "xrs": "https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json",
+    "proton_predictors": "https://services.swpc.noaa.gov/json/goes/primary/differential-protons-7-day.json",
+    "routing": "https://services.swpc.noaa.gov/json/goes/instrument-sources.json",
+    "compatibility_rule": "Live readiness requires the public primary feeds to expose XRS flux and differential-proton energy/flux/time fields. The current live satellite identity does not rewrite the historical GOES-16 cohort."
+  },
+  "label_products": {
+    "event_catalog": "https://www.ngdc.noaa.gov/stp/space-weather/interplanetary-data/solar-proton-events/SEP%20page%20code.html",
+    "weekly_report_root": "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/weekly_reports/PRFs_of_SGD/",
+    "sgas_root": "https://www.ngdc.noaa.gov/stp/space-weather/swpc-products/daily_reports/solar_geophysical_activity_summaries/",
+    "event_definition_reference": "NOAA/SWPC defines the start as the threshold crossing at >=10 MeV and 10 pfu and the end as the last time the >=10 MeV flux is at or above 10 pfu.",
+    "training_gate": "Every event onset inside the historical predictor interval must be paired with one authoritative end time before labels are generated."
+  },
+  "source_readiness_probe": {
+    "predictor_anchor_months": [
+      "2020-11",
+      "2022-03",
+      "2024-05",
+      "2025-03"
+    ],
+    "anchor_selection_rule": "For each frozen month, inspect the archive listing and choose the lexicographically first operational daily file. This uses directory metadata only and is independent of event labels.",
+    "must_verify": [
+      "XRS operational files remain retrievable and carry the required XRS/time/quality semantics",
+      "SGPS operational archive exposes documented differential-proton channels with energy metadata and quality information",
+      "the NOAA event catalogue is retrievable and states the official start/end threshold semantics",
+      "at least two archived NOAA/SWPC post-event reports explicitly contain proton-event end/drop-below-threshold times",
+      "live XRS, live differential-proton, and instrument-routing JSON endpoints have non-empty machine-readable schemas",
+      "no training, label derivation, forecast scoring, or protected-outcome access occurs during source readiness"
+    ],
+    "passing_meaning": "SOURCE_INTERFACE_READY_ONLY",
+    "does_not_mean": [
+      "complete event-interval extraction",
+      "sufficient positive support",
+      "forecast skill",
+      "independent validation",
+      "operational readiness"
+    ]
+  },
+  "pretraining_completeness_gate": {
+    "required_before_any_model_fit": true,
+    "requirements": [
+      "complete coverage inventory across the historical interval using filenames/timestamps only",
+      "complete event start/end interval table for every NOAA/SWPC event onset inside the interval",
+      "zero unresolved event ends",
+      "event intervals are non-overlapping after applying the official SWPC event definition or ambiguities are explicitly marked and excluded",
+      "chronological fit/calibration/threshold/score boundaries are frozen before model probabilities are inspected",
+      "minimum eligible issue coverage fraction >= 0.80",
+      "minimum fit-role positive onsets >= 10; otherwise report INSUFFICIENT_SUPPORT and stop"
+    ],
+    "failure_action": "NO_TRAINING"
+  },
+  "causality": {
+    "predictor_window": "[issue-24h, issue)",
+    "issue_time_measurement_excluded": true,
+    "outcome_window": "(issue, issue+24h]",
+    "future_fill_allowed": false,
+    "interpolation_across_missing_samples_allowed": false,
+    "quality_flagged_values_promoted_to_observed_allowed": false,
+    "retrospective_science_quality_substitution_allowed": false
+  },
+  "claim_boundary": "V2 corrects the source semantics exposed by the V1 failure. Passing source readiness only demonstrates that the causal predictor and official-label interfaces are technically usable. It does not establish model skill, independent superiority, company benefit, or operational certification."
+}
