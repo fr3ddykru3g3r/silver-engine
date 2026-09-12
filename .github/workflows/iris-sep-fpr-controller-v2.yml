@@ -6,8 +6,14 @@ on:
       - codex/iris-sep-fpr-controller-v2-20260912
     paths:
       - 'iris_report/iris_sep/config/fpr_controller_v2_development_2026-09-12.json'
+      - 'iris_report/iris_sep/config/fpr_controller_v2_freeze_2026-09-12.json'
+      - 'iris_report/iris_sep/config/prospective_fpr_controller_confirmation_v1_preregistration_2026-09-12.json'
+      - 'iris_report/iris_sep/config/prospective_fpr_controller_execution_manifest_template_v1.json'
+      - 'iris_report/iris_sep/config/inspected_evidence_registry_v3.json'
       - 'iris_report/iris_sep/tools/run_fpr_controller_v2.py'
+      - 'iris_report/iris_sep/tools/validate_prospective_fpr_controller_freeze_v1.py'
       - 'iris_report/iris_sep/tests/test_fpr_controller_v2.py'
+      - 'iris_report/iris_sep/tests/test_fpr_controller_v2_freeze.py'
       - '.github/workflows/iris-sep-fpr-controller-v2.yml'
   workflow_dispatch:
 
@@ -47,13 +53,15 @@ jobs:
           python -m py_compile iris_report/iris_sep/tools/run_fpr_controller_v2.py
           python -m py_compile iris_report/iris_sep/tools/run_fpr_controller_v1.py
           python -m py_compile iris_report/iris_sep/tools/run_onset_forecaster_phase2_v1_execution.py
+          python -m py_compile iris_report/iris_sep/tools/validate_prospective_fpr_controller_freeze_v1.py
 
-      - name: Run V2 boundary tests
+      - name: Run V2 boundary and causal-invariance tests
         env:
           PYTHONPATH: iris_report/iris_sep
         run: |
           python -m pytest -q \
             iris_report/iris_sep/tests/test_fpr_controller_v2.py \
+            iris_report/iris_sep/tests/test_fpr_controller_v2_freeze.py \
             iris_report/iris_sep/tests/test_fpr_controller_v1.py \
             iris_report/iris_sep/tests/test_onset_forecaster_phase2_v1.py
 
@@ -67,7 +75,29 @@ jobs:
           assert cfg['evaluation']['already_inspected'] is True
           assert cfg['protected_boundary']['protected_post_2025_outcomes_may_be_accessed'] is False
           assert cfg['controller']['quantile'] == 0.80
-          print('V2 boundary validated: post-hoc development only; protected outcomes remain sealed.')
+          freeze = json.loads(Path('iris_report/iris_sep/config/fpr_controller_v2_freeze_2026-09-12.json').read_text())
+          assert freeze['status'] == 'FROZEN_FOR_FUTURE_UNINSPECTED_EVALUATION_ONLY'
+          assert freeze['no_more_2017_selection']['controller_quantile_tuning'] == 'FORBIDDEN_FOR_ANY_FRESH_CLAIM'
+          print('V2 development and future-evaluation freeze boundaries validated.')
+          PY
+
+      - name: Verify prospective package fails closed before custodian/model freeze
+        env:
+          PYTHONPATH: iris_report/iris_sep
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from tools.validate_prospective_fpr_controller_freeze_v1 import load_json, validate_contracts, validate_manifest
+          root = Path('iris_report/iris_sep')
+          prereg = load_json(root / 'config/prospective_fpr_controller_confirmation_v1_preregistration_2026-09-12.json')
+          freeze = load_json(root / 'config/fpr_controller_v2_freeze_2026-09-12.json')
+          manifest = load_json(root / 'config/prospective_fpr_controller_execution_manifest_template_v1.json')
+          validate_contracts(prereg, freeze)
+          result = validate_manifest(manifest)
+          assert result['execution_ready'] is False
+          assert result['status'] == 'BLOCKED_FAIL_CLOSED'
+          assert result['protected_outcome_access_performed_by_validator'] is False
+          print('Prospective FPR-controller package is correctly blocked pending a frozen causal source model and independent custodian.')
           PY
 
       - name: Run V2 causal FPR-controller replay
