@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import hashlib
+import html as html_lib
 import io
 import json
 from pathlib import Path
@@ -231,7 +232,8 @@ def probe_anchor_month(
 
 
 def event_catalog_semantics(html: str) -> dict[str, Any]:
-    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)).lower()
+    decoded = html_lib.unescape(html)
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", decoded)).lower()
     checks = {
         "title": "solar proton events affecting the earth environment" in text,
         "begin_time_header": "begin time" in text,
