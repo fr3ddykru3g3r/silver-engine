@@ -1,0 +1,37 @@
+name: IRIS-SEP prospective contract source-only
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-episode-benchmark-v1-20260909
+    paths:
+      - 'iris_report/iris_sep/config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json'
+      - 'iris_report/iris_sep/config/prospective_operational_execution_manifest_template_v1.json'
+      - 'iris_report/iris_sep/tools/run_custodian_prospective_episode_evaluation_v1.py'
+      - 'iris_report/iris_sep/tests/test_prospective_operational_confirmation_contract.py'
+      - '.github/workflows/iris-sep-prospective-contract-source-only.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile custodian evaluator
+        run: python -m py_compile iris_report/iris_sep/tools/run_custodian_prospective_episode_evaluation_v1.py
+      - name: Parse frozen JSON contracts
+        run: |
+          python -m json.tool iris_report/iris_sep/config/prospective_operational_confirmation_v1_preregistration_2026-09-11.json >/dev/null
+          python -m json.tool iris_report/iris_sep/config/prospective_operational_execution_manifest_template_v1.json >/dev/null
+      - name: Run prospective source-only tests
+        run: python -m unittest discover -s iris_report/iris_sep/tests -p 'test_prospective_operational_confirmation_contract.py' -v

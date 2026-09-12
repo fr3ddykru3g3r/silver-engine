@@ -1,0 +1,73 @@
+{
+  "format": "IRIS_SEP_PRISM_EXTERNAL_CONFIRMATION_V1",
+  "status": "FROZEN_BEFORE_EXTERNAL_OUTCOME_BREAKDOWN_INSPECTION",
+  "frozen_at_date": "2026-09-10",
+  "purpose": "Higher-powered public-data confirmation of the episode-multiplicity and onset-versus-persistence mechanisms identified in IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1. This is external/public confirmation and does not access the protected post-2025 local cohort.",
+  "upstream": {
+    "repository": "yuyian/SEP-Prediction-V2",
+    "commit": "e138dcd72c1952a00e11e1a0b025337f9e7c93fb",
+    "primary_24h_table": "Data/rolling_combinded_seq_24hours.csv",
+    "episode_catalog": "GOES_integral_PRIMARY.1986-02-03.2025-09-10_sep_events.csv",
+    "public_description_expected_rows": 14464,
+    "public_description_expected_positive_rows": 650,
+    "date_span": ["1986-02-03", "2025-09-10"]
+  },
+  "primary_questions": [
+    "How many nominal 24-hour positive windows correspond to distinct physical >=10 MeV, >=10 pfu SEP episodes?",
+    "How many positive windows are already-active persistence cases versus genuine new-onset cases?",
+    "How much total positive statistical mass is removed when every physical SEP episode receives total weight 1?",
+    "Does the public stored target agree with an independent event-interval reconstruction of the stated next-24-hour operational threshold target?"
+  ],
+  "frozen_semantics": {
+    "issue_time": "start of the 24-hour prediction window derived from the published predictor/prediction-window timestamp fields; if that mapping is ambiguous, stop before scoring",
+    "forecast_interval": "(issue_time, issue_time + 24h] for new onset; overlap diagnostics additionally report any intersection with [issue_time, issue_time + 24h]",
+    "physical_episode": "one catalogued operational >10 MeV episode with threshold >=10 pfu, using published start/end fields without merging distinct catalog rows post hoc",
+    "persistence": "issue_time lies inside a physical operational threshold episode",
+    "new_onset": "issue_time is not already inside an episode and an episode start occurs in (issue_time, issue_time + 24h]",
+    "episode_normalization": "for uniquely mapped positive windows, each physical episode receives total positive weight exactly 1 split equally across its mapped positive windows",
+    "ambiguous_mapping": "a window mapping to more than one physical episode is reported separately and excluded from episode-level inferential weighting; it is not silently assigned",
+    "unresolved": "missing or contradictory required timestamps/episode bounds are unresolved rather than imputed"
+  },
+  "primary_outputs": [
+    "total windows and stored target counts",
+    "independently reconstructed overlap/onset/persistence counts",
+    "stored-target reconciliation matrix",
+    "unique physical episodes represented",
+    "episode multiplicity factor = uniquely mapped positive windows / represented episodes",
+    "distribution of windows per physical episode",
+    "persistence-to-onset ratio",
+    "episode-normalized positive mass versus ordinary positive-window mass",
+    "complete row-level audit CSV",
+    "complete episode-level multiplicity CSV",
+    "source file hashes and exact upstream commit"
+  ],
+  "predeclared_interpretation": {
+    "strong_confirmation": "Episode multiplicity factor >=1.5 AND persistence windows exceed new-onset windows, with both effects directly reproducible from public timestamps.",
+    "partial_confirmation": "Either episode multiplicity factor >1.0 or persistence constitutes a substantial positive-window fraction, but not both strong-confirmation conditions.",
+    "null_or_refutation": "Episode multiplicity factor is approximately 1 and already-active persistence is rare relative to genuine onset; retain result without redefining episodes or windows."
+  },
+  "secondary_model_analysis": {
+    "authorization": "Allowed only after the primary model-free audit is complete and only if the pinned repository exposes timestamp-aligned prediction probabilities or a clearly leakage-safe feature table whose future-target/event metadata columns can be excluded deterministically.",
+    "no_posthoc_architecture_search": true,
+    "preferred_models_if_refit_is_needed": [
+      "fit-prevalence climatology",
+      "current-proton-active persistence diagnostic if issue-time proton state is directly available",
+      "elastic-net logistic regression with the already-frozen IRIS benchmark settings",
+      "five-seed-median XGBoost with the already-frozen IRIS benchmark settings"
+    ],
+    "evaluation_views": [
+      "WINDOW_OCCURRENCE_STANDARD",
+      "EPISODE_NORMALIZED_OCCURRENCE",
+      "NEW_ONSET_CAUSAL",
+      "EPISODE_NORMALIZED_ONSET"
+    ],
+    "rule": "If safe timestamp/prediction alignment or leakage-safe feature definition cannot be established from the pinned public source, do not improvise; report model analysis as not admissible."
+  },
+  "claim_boundary": {
+    "development_model_tuning_allowed": false,
+    "protected_post_2025_local_outcomes_accessed": false,
+    "may_claim_universal_literature_bias": false,
+    "may_claim_SEPNET_final_score_wrong": false,
+    "may_claim_independent_public_confirmation_if_primary_passes": true
+  }
+}

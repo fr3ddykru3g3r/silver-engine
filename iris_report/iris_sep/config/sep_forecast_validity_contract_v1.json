@@ -1,0 +1,93 @@
+{
+  "contract_id": "IRIS_SEP_FORECAST_VALIDITY_V1",
+  "status": "FROZEN_INTERFACE_NOT_OPERATIONALLY_CERTIFIED",
+  "purpose": "Expose whether a pre-issue SEP forecast record is scientifically interpretable and whether its inputs and provenance passed the frozen validity gates. This is an audit layer, not a new operational forecaster.",
+  "protected_outcomes_accessed": false,
+  "validity_states": [
+    "VALID",
+    "DEGRADED",
+    "ABSTAIN"
+  ],
+  "record_fields": {
+    "issue_time": "UTC timestamp",
+    "alert": "boolean for VALID/DEGRADED; null for ABSTAIN",
+    "validity_state": "VALID | DEGRADED | ABSTAIN",
+    "reason_codes": "sorted unique array",
+    "input_age_seconds": "mapping from input/source id to non-negative age in seconds",
+    "input_max_age_seconds": "optional mapping of separately frozen source-specific freshness limits applied by the evaluator",
+    "forward_fill_gap_seconds": "optional mapping of causal recovery gap lengths actually used",
+    "forward_fill_max_gap_seconds": "optional mapping of separately frozen source-specific recovery limits applied by the evaluator",
+    "source_hashes": "mapping from source id to SHA-256",
+    "model_hash": "SHA-256 of frozen model/rule artifact",
+    "threshold_hash": "SHA-256 of frozen threshold/rule artifact",
+    "ledger_previous_hash": "SHA-256 of previous record, or null only for an explicitly declared genesis record"
+  },
+  "reason_codes": {
+    "STALE_INPUT": {
+      "severity": "ABSTAIN",
+      "meaning": "At least one required input exceeded its separately frozen source-specific age limit."
+    },
+    "REQUIRED_FEED_ABSENT": {
+      "severity": "ABSTAIN",
+      "meaning": "A required forecast-time feed was absent."
+    },
+    "AMBIGUOUS_PROTON_CHANNEL": {
+      "severity": "ABSTAIN",
+      "meaning": "The required integral >=10 MeV proton quantity could not be identified unambiguously."
+    },
+    "STRUCTURAL_UNAVAILABILITY": {
+      "severity": "ABSTAIN",
+      "meaning": "A required quantity was not authoritatively available in the source/instrument regime; it must not be reconstructed and relabelled as an observation."
+    },
+    "EXCESSIVE_TRANSIENT_LOSS": {
+      "severity": "ABSTAIN",
+      "meaning": "Transient loss exceeded the separately frozen, validated recovery envelope."
+    },
+    "CAUSAL_AVAILABILITY_RECEIPT_FAILED": {
+      "severity": "ABSTAIN",
+      "meaning": "A required input or attempted recovery lacked the frozen issue-time causal-availability evidence needed for use."
+    },
+    "LEDGER_INTEGRITY_FAILURE": {
+      "severity": "ABSTAIN",
+      "meaning": "The append-only prediction ledger or previous-record link failed integrity verification."
+    },
+    "FUTURE_OBSERVATION": {
+      "severity": "ABSTAIN",
+      "meaning": "At least one supplied predictor observation occurred after the forecast issue time."
+    },
+    "PROVENANCE_UNCERTAIN": {
+      "severity": "ABSTAIN",
+      "meaning": "Required source identity, hash, routing or provenance could not be verified."
+    },
+    "TRANSIENT_FORWARD_FILL_APPLIED": {
+      "severity": "DEGRADED",
+      "meaning": "A short transient gap was recovered causally within a separately frozen source-specific limit; the recovered value is not relabelled as an observation."
+    }
+  },
+  "precedence": [
+    "If any ABSTAIN-severity reason is present, validity_state=ABSTAIN and alert=null.",
+    "Else if any DEGRADED-severity reason is present, validity_state=DEGRADED and the pre-existing candidate alert may be exposed.",
+    "Else validity_state=VALID and the pre-existing candidate alert may be exposed."
+  ],
+  "source_specific_limit_rule": [
+    "This contract does not choose source-specific freshness or recovery limits.",
+    "If frozen input_max_age_seconds are supplied, age greater than the corresponding limit causes STALE_INPUT.",
+    "If forward_fill_gap_seconds are supplied, a corresponding frozen forward_fill_max_gap_seconds value is required.",
+    "A forward-fill gap within its frozen source-specific limit is DEGRADED; a gap beyond the limit is ABSTAIN; a recovery attempt without a frozen limit is ABSTAIN."
+  ],
+  "missingness_dependency": {
+    "contract": "config/missingness_recovery_contract_v1.json",
+    "rule": "Do not infer an operational recovery threshold from synthetic masking percentages alone. Source-specific freshness and recovery limits must be separately frozen before prospective execution.",
+    "historical_working_evidence": "Development-only random observed-cell masking tested 5%, 20% and 40% loss. Causal forward-fill preserved probability space relatively well under 5-20% loss, while the 40% condition showed detectably worse Brier quality and material degradation under the POD80_MIN_FAR decision policy. This is stress-test evidence, not blanket operational certification."
+  },
+  "magnetic_reconstruction_policy": {
+    "status": "EXPERIMENTAL_NOT_PROMOTED",
+    "promotion_requires": [
+      "preregistered comparison on hidden real magnetic maps",
+      "better reconstruction performance than persistence on the frozen comparison",
+      "preservation of downstream causal new-onset forecasting utility",
+      "forecast-time provenance and uncertainty exposed"
+    ]
+  },
+  "claim_boundary": "A VALID or DEGRADED record means only that the frozen validity interface passed its declared pre-issue checks. It does not establish forecast skill, operational certification, company benefit, economic savings or prospective confirmation."
+}

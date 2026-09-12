@@ -1,0 +1,30 @@
+{
+  "format": "IRIS_SEP_PAST_PROTON_ACTIVE_PROXY_RULE_V1",
+  "study_id": "IRIS_SEP_PROSPECTIVE_OPERATIONAL_CONFIRMATION_V1",
+  "model_id": "past_proton_active_proxy",
+  "date": "2026-09-11",
+  "status": "RULE_FROZEN_INPUT_CAUSALITY_NOT_YET_CERTIFIED",
+  "input": {
+    "source_contract": "config/prospective_live_input_sources_v1.json",
+    "source_id": "NOAA_SWPC_PRIMARY_PROTON_7D",
+    "quantity": "primary GOES integral proton flux >=10 MeV",
+    "units": "pfu",
+    "selection": "latest finite eligible observation at or before issue_time that was present in a snapshot retrieved at or before issue_time",
+    "maximum_observation_age_minutes_at_issue": 15,
+    "interpolation": false,
+    "backfill": false,
+    "alternate_source_substitution": false
+  },
+  "decision": {
+    "threshold_pfu": 10.0,
+    "alert_if": "selected_flux_pfu >= 10.0",
+    "probability_output": "1.0 when alert else 0.0",
+    "missing_stale_or_invalid_input": "ABSTAIN"
+  },
+  "scientific_role": "mechanism comparator testing whether occurrence evaluation rewards recognition of an already-active radiation storm",
+  "not_a_claim": [
+    "probabilistic calibration",
+    "operational forecast skill",
+    "state-of-the-art performance"
+  ]
+}

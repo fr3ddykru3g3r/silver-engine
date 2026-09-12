@@ -51,15 +51,18 @@ jobs:
             scipy==1.18.1 \
             scikit-learn==1.8.0 \
             xgboost==3.0.4 \
+            matplotlib==3.10.6 \
+            netCDF4==1.7.4 \
             requests==2.32.5 \
             pytest==8.4.2
           python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
 
       - name: Record runtime
         run: |
-          python - <<'PY'
+          mkdir -p source_only_ci_logs
+          python - <<'PY' | tee source_only_ci_logs/runtime.txt
           import platform
-          import numpy, pandas, pytest, requests, scipy, sklearn, torch, xgboost
+          import matplotlib, netCDF4, numpy, pandas, pytest, requests, scipy, sklearn, torch, xgboost
           print('python', platform.python_version())
           print('numpy', numpy.__version__)
           print('pandas', pandas.__version__)
@@ -68,6 +71,8 @@ jobs:
           print('scipy', scipy.__version__)
           print('scikit_learn', sklearn.__version__)
           print('xgboost', xgboost.__version__)
+          print('matplotlib', matplotlib.__version__)
+          print('netCDF4', netCDF4.__version__)
           print('torch', torch.__version__)
           PY
 
@@ -88,8 +93,10 @@ jobs:
           PY
 
       - name: Run every source-only test and inventory data-bound exclusions
+        shell: bash
         run: |
-          python -m iris_report.iris_sep.tools.run_source_only_tests
+          set -o pipefail
+          python -m iris_report.iris_sep.tools.run_source_only_tests 2>&1 | tee source_only_ci_logs/pytest.txt
 
       - name: Verify JSON configuration parses
         run: |
@@ -113,3 +120,12 @@ jobs:
           print('deselected data-bound nodeids:', len(data['deselect_nodeids']))
           print('source-only success does not establish data-dependent test success or forecasting usefulness')
           PY
+
+      - name: Upload source-only diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-source-only-pandas-${{ matrix.pandas }}-${{ github.sha }}
+          path: source_only_ci_logs/
+          if-no-files-found: error
+          retention-days: 14

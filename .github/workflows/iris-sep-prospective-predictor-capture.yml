@@ -1,0 +1,65 @@
+name: IRIS-SEP prospective predictor capture
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_time_utc:
+        description: 'Frozen issue time, exactly YYYY-MM-DDT00:00:00Z; run before this time'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  capture-predictor-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact branch revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install bounded dependency
+        run: python -m pip install requests==2.32.5
+
+      - name: Record source revision
+        run: |
+          mkdir -p prospective_capture
+          git rev-parse HEAD | tee prospective_capture/source_commit.txt
+
+      - name: Capture predictor-only NOAA inputs
+        run: |
+          python -m iris_report.iris_sep.tools.capture_prospective_input_snapshot_v1 \
+            --issue-time '${{ inputs.issue_time_utc }}' \
+            --output-dir prospective_capture/input_snapshot
+
+      - name: Explicit protected-outcome boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('prospective_capture/input_snapshot/snapshot_receipt.json')
+          r = json.loads(p.read_text())
+          assert r['protected_outcomes_accessed'] is False
+          assert r['gates']['features_verified_causal_changed'] is False
+          assert r['status'] == 'CANDIDATE_PREISSUE_INPUT_RECEIPT'
+          print('predictor-only boundary: PASS')
+          PY
+
+      - name: Upload immutable predictor snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-prospective-input-${{ github.run_id }}
+          path: prospective_capture/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 6
+
+# Intentionally no schedule and no outcome/evaluation step.
+# Activate recurring collection only after student/SRC approval and a frozen
+# execution plan. This workflow cannot set features_verified_causal=true.

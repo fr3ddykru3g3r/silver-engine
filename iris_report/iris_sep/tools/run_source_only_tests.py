@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -52,6 +53,17 @@ def command(data: dict) -> list[str]:
     return args
 
 
+def test_environment() -> dict[str, str]:
+    """Resolve legacy tools imports and src packages in the pytest subprocess."""
+    env = os.environ.copy()
+    paths = [str(ROOT), str(TEST_ROOT.parent), str(TEST_ROOT.parent / "src")]
+    existing = env.get("PYTHONPATH")
+    if existing:
+        paths.append(existing)
+    env["PYTHONPATH"] = os.pathsep.join(paths)
+    return env
+
+
 def run(registry: Path = DEFAULT_REGISTRY) -> int:
     data = load_registry(registry)
     validate_registry(data)
@@ -61,7 +73,7 @@ def run(registry: Path = DEFAULT_REGISTRY) -> int:
     for nodeid in data["deselect_nodeids"]:
         print("  nodeid:", nodeid)
     print("These tests remain required when their hash-pinned local inputs are materialized.")
-    return subprocess.run(command(data), cwd=ROOT, check=False).returncode
+    return subprocess.run(command(data), cwd=ROOT, env=test_environment(), check=False).returncode
 
 
 def main() -> None:

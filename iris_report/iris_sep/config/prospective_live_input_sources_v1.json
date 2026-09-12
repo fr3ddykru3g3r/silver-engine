@@ -1,0 +1,63 @@
+{
+  "format": "IRIS_SEP_PROSPECTIVE_LIVE_INPUT_SOURCES_V1",
+  "study_id": "IRIS_SEP_PROSPECTIVE_OPERATIONAL_CONFIRMATION_V1",
+  "date": "2026-09-11",
+  "status": "SOURCE_READINESS_ONLY_NOT_EXECUTION_FROZEN",
+  "issue_protocol": {
+    "cadence": "daily",
+    "issue_time_utc": "00:00:00",
+    "required_relation": "snapshot retrieval and prediction creation must be no later than issue_time",
+    "raw_response_retention": true,
+    "future_or_post_issue_rows_allowed": false
+  },
+  "sources": {
+    "primary_integral_protons": {
+      "source_id": "NOAA_SWPC_PRIMARY_PROTON_7D",
+      "url": "https://services.swpc.noaa.gov/json/goes/primary/integral-protons-7-day.json",
+      "provider": "NOAA_SWPC",
+      "required_keys": ["time_tag", "satellite", "flux", "energy"],
+      "target_energy_labels": [">=10 MeV", ">10 MeV"],
+      "units": "pfu",
+      "role": "required input for past_proton_active_proxy"
+    },
+    "primary_xrs": {
+      "source_id": "NOAA_SWPC_PRIMARY_XRS_7D",
+      "url": "https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json",
+      "provider": "NOAA_SWPC",
+      "required_keys": ["time_tag", "satellite", "flux", "energy"],
+      "role": "source-readiness candidate for optional future operational learned model"
+    },
+    "instrument_sources": {
+      "source_id": "NOAA_SWPC_GOES_INSTRUMENT_SOURCES",
+      "url": "https://services.swpc.noaa.gov/json/goes/instrument-sources.json",
+      "provider": "NOAA_SWPC",
+      "role": "routing provenance receipt"
+    }
+  },
+  "past_proton_input_gate": {
+    "threshold_pfu": 10.0,
+    "maximum_observation_age_minutes_at_issue": 15,
+    "selection": "latest finite primary-GOES >=10 MeV integral-proton observation strictly before or equal to issue_time and already present in a snapshot retrieved no later than issue_time",
+    "interpolation_allowed": false,
+    "future_fill_allowed": false,
+    "alternate_satellite_substitution_allowed": false,
+    "unrecognized_energy_label_action": "BLOCK",
+    "stale_or_missing_value_action": "ABSTAIN"
+  },
+  "evidence_boundary": {
+    "allowed": [
+      "public predictor-interface snapshots",
+      "retrieval timestamps",
+      "raw response SHA-256 hashes",
+      "schema inventories",
+      "pre-issue predictor values"
+    ],
+    "forbidden": [
+      "protected post-2025 target labels",
+      "protected event counts",
+      "protected episode identities",
+      "protected model scores"
+    ]
+  },
+  "claim_boundary": "This contract can establish source and timestamp readiness only. It cannot by itself set features_verified_causal=true, unseal outcomes, or establish forecast skill."
+}

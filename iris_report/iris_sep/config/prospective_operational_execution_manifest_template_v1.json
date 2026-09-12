@@ -1,0 +1,23 @@
+{
+  "study_id": "IRIS_SEP_PROSPECTIVE_OPERATIONAL_CONFIRMATION_V1",
+  "status": "TEMPLATE_NOT_EXECUTABLE",
+  "protected_pool": {"not_before_utc": "2025-09-10T00:00:00Z"},
+  "bootstrap": {"replicates": 10000, "seed": 20260911},
+  "information_floor": {"minimum_distinct_onset_episodes": 50, "minimum_quiet_blocks": 500},
+  "frozen_models": {
+    "past_proton_active_proxy": {
+      "artifact_or_rule_sha256": "REPLACE_WITH_64_HEX_BEFORE_EXECUTION",
+      "feature_schema_sha256": "REPLACE_WITH_64_HEX_BEFORE_EXECUTION",
+      "features_verified_causal": false,
+      "decision_threshold": 10.0,
+      "training_data_boundary": "deterministic_rule_no_training"
+    }
+  },
+  "primary_contrasts": [
+    {"id": "PAST_PROTON_PERSISTENCE_EFFECT", "model_slot": "past_proton_active_proxy"}
+  ],
+  "claim_boundary": {
+    "allowed_if_confirmed": "prospective evidence that occurrence scoring and causal onset scoring measure materially different behavior under the frozen protocol",
+    "not_allowed": ["operational readiness", "state-of-the-art forecasting performance", "universal literature bias", "economic savings", "award outcome"]
+  }
+}

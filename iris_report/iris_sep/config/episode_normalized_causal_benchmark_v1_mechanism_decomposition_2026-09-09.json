@@ -1,0 +1,108 @@
+{
+  "format": "IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1_MECHANISM_DECOMPOSITION",
+  "study_id": "IRIS_EPISODE_NORMALIZED_CAUSAL_BENCHMARK_V1",
+  "status": "FROZEN_BEFORE_NEW_REAL_DATA_SCORING",
+  "reason": "The closest published SEPNET benchmark uses fixed non-overlapping 24-hour predictor windows and explicitly notes that one physical SEP event can create multiple positive prediction windows when it persists longer than 24 hours. This clarification separates repeated-window weighting from persistence-state exclusion instead of collapsing both mechanisms into one contrast.",
+  "published_reference": {
+    "repository": "yuyian/SEP-Prediction",
+    "pinned_commit": "d0eb54e46b7dd6c760325e123d2ad86f9420fbff",
+    "construction_script": "Data-Construct.R",
+    "rolling_table": "data/rolling_combinded.csv",
+    "event_table": "data/df_SEP.csv",
+    "operational_target_column": "future_Operational_SEP_label",
+    "window_cadence_hours": 24,
+    "prediction_horizon_hours": 24
+  },
+  "evaluation_views": [
+    "WINDOW_OCCURRENCE_STANDARD",
+    "EPISODE_NORMALIZED_OCCURRENCE",
+    "NEW_ONSET_CAUSAL",
+    "EPISODE_NORMALIZED_ONSET",
+    "PROTON_STATE_BLIND_ONSET",
+    "PERSISTENCE_DIAGNOSTIC"
+  ],
+  "mechanism_contrasts": {
+    "multiplicity_only": "EPISODE_NORMALIZED_OCCURRENCE - WINDOW_OCCURRENCE_STANDARD",
+    "persistence_exclusion": "NEW_ONSET_CAUSAL - EPISODE_NORMALIZED_OCCURRENCE",
+    "onset_episode_weighting": "EPISODE_NORMALIZED_ONSET - NEW_ONSET_CAUSAL",
+    "direct_proton_history": "PROTON_STATE_BLIND_ONSET versus otherwise-identical proton-aware onset model",
+    "persistence_probability_shift": "proton-aware versus proton-blind probabilities/alerts on ALREADY_ACTIVE_PERSISTENCE rows"
+  },
+  "occurrence_episode_mapping": {
+    "physical_episode_source": "operational >10 MeV >=10 pfu start/end intervals",
+    "positive_window_mapping": "map each occurrence-positive prediction window to operational threshold episodes whose active interval overlaps the 24-hour prediction window",
+    "exactly_one_episode_required_for_primary_episode_normalized_occurrence": true,
+    "zero_or_multiple_matches": "DUPLICATE_OR_AMBIGUOUS_FOR_EPISODE_NORMALIZED_OCCURRENCE_BUT_RETAIN_IN_STANDARD_REFERENCE",
+    "positive_episode_total_weight": 1.0
+  },
+  "onset_semantics": {
+    "issue_at_or_after_episode_start_and_before_episode_end": "ALREADY_ACTIVE_PERSISTENCE",
+    "issue_below_threshold_and_episode_start_strictly_after_issue_and_before_horizon_end": "ELIGIBLE_ONSET_POSITIVE",
+    "issue_below_threshold_and_no_episode_start_in_horizon": "ELIGIBLE_ONSET_NEGATIVE",
+    "horizon_end_exclusive": true,
+    "exact_start_at_issue": "ALREADY_ACTIVE_PERSISTENCE"
+  },
+  "model_training_protocol": {
+    "purpose": "freeze prediction files first, then rescore identical probabilities under all compatible evaluation views",
+    "primary_training_target": "WINDOW_OCCURRENCE_STANDARD",
+    "fit_role": "2011-2014 exposed development",
+    "calibration_role": "2015 exposed development",
+    "threshold_role": "2016 exposed development",
+    "score_role": "2017 exposed development only",
+    "threshold_policy": "MAX_TSS_ON_2016_STANDARD_OCCURRENCE_ONLY",
+    "models": {
+      "elastic_net_joint": {
+        "penalty": "elasticnet",
+        "C": 1.0,
+        "l1_ratio": 0.5,
+        "solver": "saga",
+        "class_weight": "balanced",
+        "max_iter": 5000,
+        "random_state": 42
+      },
+      "xgboost_joint": {
+        "n_estimators": 300,
+        "learning_rate": 0.03,
+        "max_depth": 3,
+        "min_child_weight": 5,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0,
+        "reg_alpha": 0.0,
+        "tree_method": "hist",
+        "seeds": [7, 13, 26, 42, 73],
+        "aggregation": "median_probability"
+      },
+      "xgboost_proton_blind": "same XGBoost specification with direct proton-history feature family removed"
+    },
+    "architecture_search_after_scoring": false
+  },
+  "two_arms": {
+    "A_published_SEPNET_data_audit": {
+      "goal": "independently quantify operational-positive window multiplicity, persistence share, episode mapping, and target-construction reconciliation on the authors' pinned public rolling/event tables",
+      "model_training": false,
+      "claim": "published-data audit only; no claim that the paper's reported SEPVAL test score is biased unless the exact published test evaluation is reproduced"
+    },
+    "B_IRIS_GOES_exposed_mechanism_replay": {
+      "goal": "train fixed simple models on the already-exposed 2011-2017 GOES-13 proton + GOES-15 XRS development archive and measure the frozen mechanism contrasts with complete prediction-level evidence",
+      "independent_final_evidence": false,
+      "protected_post_2025_outcomes_accessed": false
+    }
+  },
+  "original_H3_preserved": true,
+  "H3_directional_interpretation": "The original preregistered H3 remains part of the record. In addition, report the proton-aware minus proton-blind effect separately for onset and persistence without choosing a favorable direction post hoc.",
+  "shared_uncertainty": {
+    "replicates": 10000,
+    "positive_units": "physical operational SEP episodes",
+    "negative_units": "predeclared contiguous seven-day quiet blocks",
+    "stratified": true,
+    "same_draw_tensor_for_every_model_view_and_contrast": true
+  },
+  "forbidden": [
+    "post-result model tuning",
+    "changing window cadence after results",
+    "combining multiplicity and persistence effects into one causal claim",
+    "calling the published SEPVAL test biased without reproducing its exact evaluation",
+    "opening protected post-2025 outcomes"
+  ]
+}
