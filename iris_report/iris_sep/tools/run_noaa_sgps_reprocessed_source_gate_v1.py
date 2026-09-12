@@ -230,6 +230,7 @@ def run(output: Path) -> dict[str, Any]:
         "anchor_schema_and_energy_stable": bool(inventories) and all(signature(item) == signature(inventories[0]) for item in inventories),
         "live_13_channel_schema_passed": live["passed"],
         "historical_to_live_energy_match_passed": match["passed"],
+        "live_sensor_reduction_verified_for_both_yaw_states": False,
     }
     gates["source_interface_ready"] = all(gates.values())
     receipt = {
@@ -237,7 +238,13 @@ def run(output: Path) -> dict[str, Any]:
         "contract_sha256": hashlib.sha256(CONTRACT.read_bytes()).hexdigest(), "listing_inventory": listing_hashes,
         "missing_dates": missing_dates, "anchor_files": inventories,
         "live": {"url": contract["live_differential_url"], "sha256": sha256_bytes(live_body), **live},
-        "energy_binding": match, "gates": gates,
+        "energy_binding": match,
+        "sensor_binding": {
+            "status": "PENDING_BOTH_YAW_STATES",
+            "reason": "NOAA documentation supports a westward reduction, but this gate has not yet immutably verified the live feed against both upright and yaw-flipped L2 sensor series.",
+            "training_allowed": False
+        },
+        "gates": gates,
         "decision": contract["pass_action"] if gates["source_interface_ready"] else contract["failure_action"],
         "labels_derived": False, "training_performed": False, "forecast_skill_computed": False,
         "protected_outcomes_accessed": False, "claim_boundary": contract["claim_boundary"],

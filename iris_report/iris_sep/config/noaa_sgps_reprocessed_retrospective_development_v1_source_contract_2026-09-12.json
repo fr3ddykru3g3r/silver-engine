@@ -22,12 +22,14 @@
     "anchor_schemas_stable": true,
     "historical_flux_shape_contains_sensor_unit_2_and_channel_13": true,
     "historical_minus_x_energy_bounds_match_live_within_five_percent": true,
+    "live_sensor_reduction_verified_for_both_yaw_states": true,
     "quality_and_fill_metadata_present": true,
     "no_training_or_labels": true
   },
   "failure_action": "NSRRD_SOURCE_REJECTED_DO_NOT_TRAIN",
   "pass_action": "NSRRD_SOURCE_INTERFACE_READY_COMPLETE_LABEL_AND_SUPPORT_GATE_BEFORE_TRAINING",
   "sensor_reduction": "Use the westward-looking SGPS unit only: minus-X sensor index 0 when YawFlipFlag is 0 and plus-X sensor index 1 when YawFlipFlag is 1. Any unrecognized yaw flag is missing. This rule is frozen from NOAA instrument documentation, not outcomes.",
+  "sensor_binding_gate": "Before training, a label-free minute/channel comparison must show that the live feed tracks the westward series for at least one frozen upright witness and one frozen yaw-flipped witness, with all 13 channels represented. Until both states have immutable receipts, the source gate must reject training.",
   "domain_shift": "The live primary feed may route to another GOES-R flight model. Require the same 13 NOAA channel IDs and energy bounds within 5%; record every difference and treat it as a prospective domain shift, not historical live equivalence.",
   "claim_boundary": "A pass establishes a NOAA science-prefixed L2 to live differential-channel semantic binding for a 2023-2025 retrospective development study. Science files were released after their observation dates, and a pass does not establish historical operational replay, causal precursor discovery, forecast skill, prospective validation, operational readiness, company benefit, or permission to inspect protected post-2025-09-10 outcomes.",
   "protected_outcome_boundary": "2025-09-10T00:00:00Z"

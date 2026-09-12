@@ -9,6 +9,7 @@ on:
       - 'iris_report/iris_sep/config/noaa_sgps_reprocessed_retrospective_development_v1_preregistration_2026-09-12.json'
       - 'iris_report/iris_sep/tools/run_noaa_sgps_reprocessed_source_gate_v1.py'
       - 'iris_report/iris_sep/tests/test_noaa_sgps_reprocessed_source_gate_v1.py'
+      - 'iris_report/iris_sep/architecture/NSRRD_V1_SOURCE_GATE_CORRECTION_2026-09-12.md'
       - '.github/workflows/iris-sep-nsrrd-v1-source-gate.yml'
 
 permissions:
