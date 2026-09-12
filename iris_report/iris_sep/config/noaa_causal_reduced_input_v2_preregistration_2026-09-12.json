@@ -1,0 +1,136 @@
+{
+  "status": "PREREGISTERED_BEFORE_V2_SOURCE_READINESS_AND_BEFORE_TRAINING",
+  "study_id": "NOAA_CAUSAL_REDUCED_INPUT_V2",
+  "date": "2026-09-12",
+  "reason_for_new_study": "V1 correctly failed source readiness because the historical SGPS L2 operational product does not directly contain the >=10 MeV integral proton quantity assumed by V1 and fixed-day SGPS archive availability is imperfect. V2 separates predictors from labels: documented differential SGPS proton channels are predictors; official NOAA/SWPC proton-event onset/end records define the target and already-active intervals.",
+  "parent_data_contract": "config/noaa_causal_reduced_input_v2_data_contract_2026-09-12.json",
+  "target": "NEW_OFFICIAL_SWPC_GT10MEV_GE10PFU_EVENT_ONSET_WITHIN_24H",
+  "horizon_hours": 24,
+  "already_active_issue_times_are_ineligible": true,
+  "official_event_intervals_required": true,
+  "locked_or_protected_post_2025_09_10_outcomes_accessed": false,
+  "training_allowed_before_source_readiness_and_pretraining_completeness_gates": false,
+  "feature_policy": {
+    "lookback_hours": 24,
+    "issue_time_excluded": true,
+    "xrs_features": [
+      "for XRS-A and XRS-B separately: finite count, coverage fraction, minimum, maximum, mean, median, standard deviation, last causal value, and age of last causal value",
+      "maximum causal first difference and maximum causal log-flux change"
+    ],
+    "proton_features": [
+      "for each documented SGPS differential proton energy channel retained after source binding: finite count, coverage fraction, minimum, maximum, mean, median, standard deviation, last causal value, and age of last causal value",
+      "per-channel maximum causal first difference and maximum causal log-flux change",
+      "fixed low-dimensional spectral summaries computed only from simultaneously available differential channels: log-flux slope across energy, low/mid/high-band sums, and spectral curvature when at least three documented bands are available"
+    ],
+    "missingness_features": [
+      "XRS coverage fraction",
+      "SGPS differential-channel coverage fraction",
+      "age of most recent XRS observation",
+      "age of most recent SGPS observation"
+    ],
+    "forbidden_features": [
+      "official event label fields",
+      "future observations",
+      "post-issue data-quality revisions",
+      "reconstructed >=10 MeV integral flux used as a predictor",
+      "manual event associations or flare/CME metadata selected after outcome inspection"
+    ],
+    "feature_selection_from_outcomes": false,
+    "post_score_feature_expansion": false
+  },
+  "models": {
+    "primary": {
+      "id": "XRS_PLUS_SGPS_DIFFERENTIAL_XGBOOST_V2",
+      "hyperparameters": {
+        "n_estimators": 300,
+        "learning_rate": 0.03,
+        "max_depth": 3,
+        "min_child_weight": 5,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0,
+        "reg_alpha": 0.0,
+        "tree_method": "hist"
+      },
+      "seeds": [7, 13, 26, 42, 73],
+      "aggregation": "median probability across seeds"
+    },
+    "comparators": [
+      {
+        "id": "XRS_ONLY_XGBOOST_V2",
+        "rule": "same hyperparameters/seeds using XRS and missingness features only"
+      },
+      {
+        "id": "SGPS_DIFFERENTIAL_ONLY_XGBOOST_V2",
+        "rule": "same hyperparameters/seeds using differential-proton and missingness features only"
+      },
+      {
+        "id": "FIT_PREVALENCE_CLIMATOLOGY_V2",
+        "rule": "constant probability equal to fit-role eligible positive prevalence"
+      }
+    ],
+    "hyperparameter_sweep": false,
+    "architecture_search_after_score_inspection": false
+  },
+  "roles": {
+    "fit": {
+      "start": "2020-03-11T00:00:00Z",
+      "end": "2022-12-31T23:59:59Z"
+    },
+    "calibration": {
+      "start": "2023-01-01T00:00:00Z",
+      "end": "2023-06-30T23:59:59Z"
+    },
+    "threshold": {
+      "start": "2023-07-01T00:00:00Z",
+      "end": "2023-12-31T23:59:59Z"
+    },
+    "score": {
+      "start": "2024-01-01T00:00:00Z",
+      "end": "2025-04-03T23:59:59Z",
+      "status": "DEVELOPMENT_COMPARISON_NOT_INDEPENDENT_FINAL_TEST"
+    },
+    "boundary_mutation_after_label_or_score_inspection_allowed": false,
+    "insufficient_support_action": "REPORT_INSUFFICIENT_SUPPORT_DO_NOT_MOVE_BOUNDARIES"
+  },
+  "thresholds": {
+    "primary": "MAX_TSS selected on threshold role only",
+    "secondary_diagnostic": "minimum false-alert threshold among points with POD >= 0.80 on threshold role only",
+    "no_post_score_threshold_tuning": true
+  },
+  "same_cohort_requirement": {
+    "all_models_bound_to_same_issue_ids": true,
+    "all_models_bound_to_same_official_event_interval_labels": true,
+    "already_active_issue_times_excluded_equally": true,
+    "missing predictor windows are reported rather than silently dropped": true
+  },
+  "metrics": {
+    "primary": [
+      "TSS",
+      "POD",
+      "FPR",
+      "FAR",
+      "detected onsets",
+      "missed onsets",
+      "false alerts",
+      "true quiet decisions",
+      "forecast coverage fraction"
+    ],
+    "secondary": [
+      "HSS",
+      "Brier score",
+      "ECE",
+      "AUROC",
+      "AUPRC"
+    ],
+    "uncertainty": "paired physical-event/quiet-block bootstrap where support permits; otherwise descriptive intervals only"
+  },
+  "decision_rule": {
+    "source_readiness_must_pass": true,
+    "pretraining_completeness_must_pass": true,
+    "if_either_fails": "NO_TRAINING",
+    "if_support_is_insufficient": "NO_MODEL_CLAIM",
+    "if_score_result_is_negative": "REPORT_NEGATIVE_RESULT_WITHOUT_RETUNING"
+  },
+  "claim_boundary": "This is a retrospective development study designed to create a causally reproducible live-compatible source model for later frozen prospective confirmation. It cannot establish state-of-the-art superiority, independent validation, operational readiness, economic value, or company benefit."
+}
