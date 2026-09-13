@@ -37,12 +37,14 @@ def month_iter(start: date, end: date):
             m = 1
 
 
-def fetch(session: requests.Session, url: str) -> bytes:
+def fetch_listing(session: requests.Session, url: str) -> tuple[int, bytes]:
     r = session.get(url, timeout=TIMEOUT, headers={"User-Agent": UA})
+    if r.status_code == 404:
+        return 404, b""
     r.raise_for_status()
     if not r.content:
         raise RuntimeError(f"empty response: {url}")
-    return r.content
+    return r.status_code, r.content
 
 
 def parse_listing(html: str) -> list[dict[str, str]]:
@@ -59,7 +61,7 @@ def parse_listing(html: str) -> list[dict[str, str]]:
 def regime_key(row: dict[str, Any]) -> str:
     prefixes = row["prefixes"]
     versions = row["versions"]
-    if len(prefixes) == 1 and len(versions) == 1:
+    if row.get("available") and len(prefixes) == 1 and len(versions) == 1:
         return f"{prefixes[0]}|{versions[0]}"
     return "MIXED_OR_EMPTY"
 
@@ -84,15 +86,35 @@ def run(output: Path) -> dict[str, Any]:
     for y, m in month_iter(START, END):
         ym = f"{y:04d}-{m:02d}"
         url = urljoin(ROOT, f"{y:04d}/{m:02d}/")
-        body = fetch(session, url)
-        files = parse_listing(body.decode("utf-8", errors="replace"))
+        status, body = fetch_listing(session, url)
         expected = calendar.monthrange(y, m)[1]
+        if status == 404:
+            months.append({
+                "year_month": ym,
+                "url": url,
+                "http_status": 404,
+                "available": False,
+                "listing_sha256": None,
+                "expected_days": expected,
+                "file_count": 0,
+                "unique_day_count": 0,
+                "complete_daily_coverage": False,
+                "prefixes": [],
+                "versions": [],
+                "first_file": None,
+                "last_file": None,
+            })
+            continue
+
+        files = parse_listing(body.decode("utf-8", errors="replace"))
         days = sorted({r["day"] for r in files})
         prefixes = sorted({r["prefix"] for r in files})
         versions = sorted({r["version"] for r in files})
         months.append({
             "year_month": ym,
             "url": url,
+            "http_status": status,
+            "available": True,
             "listing_sha256": hashlib.sha256(body).hexdigest(),
             "expected_days": expected,
             "file_count": len(files),
@@ -118,7 +140,7 @@ def run(output: Path) -> dict[str, Any]:
         "months": months,
         "regimes": regimes,
         "longest_complete_homogeneous_regime": eligible_sorted[0] if eligible_sorted else None,
-        "selection_rule": "If a new development study is opened, use the longest contiguous >=12-month regime with one filename prefix, one product version, and complete daily filename coverage. Ties resolve to the later end month. This rule was fixed before event labels are derived.",
+        "selection_rule": "If a new development study is opened, use the longest contiguous >=12-month regime with one filename prefix, one product version, and complete daily filename coverage. Ties resolve to the later end month. Missing monthly directories are recorded, not treated as fatal probe errors. This rule was fixed before event labels are derived.",
         "claim_boundary": "Filename/provenance inventory only; it does not establish measurement equivalence, live-feed equivalence, forecast skill, or independent validation."
     }
     (output / "sgps_l2_source_regimes_v1.json").write_text(json.dumps(receipt, indent=2, sort_keys=True)+"\n", encoding="utf-8")
