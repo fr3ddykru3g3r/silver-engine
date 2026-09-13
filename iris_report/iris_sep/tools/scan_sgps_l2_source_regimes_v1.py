@@ -61,7 +61,7 @@ def parse_listing(html: str) -> list[dict[str, str]]:
 def regime_key(row: dict[str, Any]) -> str:
     prefixes = row["prefixes"]
     versions = row["versions"]
-    if row.get("available") and len(prefixes) == 1 and len(versions) == 1:
+    if row.get("available", True) and len(prefixes) == 1 and len(versions) == 1:
         return f"{prefixes[0]}|{versions[0]}"
     return "MIXED_OR_EMPTY"
 
