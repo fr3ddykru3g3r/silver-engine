@@ -1,0 +1,56 @@
+name: IRIS-SEP SGPS L2 filename transition V1
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-award-validation-v1-20260913
+    paths:
+      - 'iris_report/iris_sep/tools/probe_sgps_l2_filename_transition_v1.py'
+      - 'iris_report/iris_sep/tests/test_sgps_l2_filename_transition_v1.py'
+      - '.github/workflows/iris-sep-sgps-l2-filename-transition-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Install bounded dependencies
+        run: python -m pip install requests==2.32.5 pytest==8.4.2
+      - name: Run offline tests
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/probe_sgps_l2_filename_transition_v1.py
+          python -m pytest -q iris_report/iris_sep/tests/test_sgps_l2_filename_transition_v1.py
+      - name: Run source-only diagnostic
+        run: |
+          rm -rf /tmp/sgps-l2-filename-transition-v1
+          python -m iris_report.iris_sep.tools.probe_sgps_l2_filename_transition_v1 --output /tmp/sgps-l2-filename-transition-v1
+      - name: Verify safety boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/sgps-l2-filename-transition-v1/sgps_l2_filename_transition_v1.json')
+          d=json.loads(p.read_text())
+          assert d['source_only'] is True
+          assert d['labels_read'] is False
+          assert d['training_performed'] is False
+          assert d['forecast_skill_computed'] is False
+          assert d['protected_outcomes_accessed'] is False
+          print(json.dumps(d, indent=2, sort_keys=True))
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-sgps-l2-filename-transition-v1-${{ github.sha }}
+          path: /tmp/sgps-l2-filename-transition-v1
+          if-no-files-found: warn
+          retention-days: 30
