@@ -1,0 +1,58 @@
+name: IRIS-SEP SGPS L2 source regimes V1
+
+on:
+  push:
+    branches:
+      - codex/iris-sep-award-validation-v1-20260913
+    paths:
+      - 'iris_report/iris_sep/tools/scan_sgps_l2_source_regimes_v1.py'
+      - 'iris_report/iris_sep/tests/test_sgps_l2_source_regimes_v1.py'
+      - '.github/workflows/iris-sep-sgps-l2-source-regimes-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Install bounded dependencies
+        run: python -m pip install requests==2.32.5 pytest==8.4.2
+      - name: Run offline tests
+        run: |
+          python -m py_compile iris_report/iris_sep/tools/scan_sgps_l2_source_regimes_v1.py
+          python -m pytest -q iris_report/iris_sep/tests/test_sgps_l2_source_regimes_v1.py
+      - name: Inventory filename/provenance regimes only
+        run: |
+          rm -rf /tmp/sgps-l2-source-regimes-v1
+          python -m iris_report.iris_sep.tools.scan_sgps_l2_source_regimes_v1 --output /tmp/sgps-l2-source-regimes-v1
+      - name: Verify no-label boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/sgps-l2-source-regimes-v1/sgps_l2_source_regimes_v1.json').read_text())
+          assert d['source_only'] is True
+          assert d['labels_read'] is False
+          assert d['training_performed'] is False
+          assert d['forecast_skill_computed'] is False
+          assert d['protected_outcomes_accessed'] is False
+          print(json.dumps({
+            'regimes': d['regimes'],
+            'longest_complete_homogeneous_regime': d['longest_complete_homogeneous_regime'],
+          }, indent=2, sort_keys=True))
+          PY
+      - name: Upload inventory evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-sep-sgps-l2-source-regimes-v1-${{ github.sha }}
+          path: /tmp/sgps-l2-source-regimes-v1
+          if-no-files-found: warn
+          retention-days: 30
