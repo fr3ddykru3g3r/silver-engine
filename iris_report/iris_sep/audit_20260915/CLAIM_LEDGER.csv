@@ -1,0 +1,18 @@
+level,statement,support,qualification
+A,"Fixed joint predictions have different mapped, episode and onset scores",Strict diagnostic immutable archive; results tables,Historical development-exposed; not independent
+B,Multiplicity gap equals finite-population covariance divided by mean multiplicity,Proof and numerical residuals,Common negative measure for TSS
+B,Mapped-to-onset decomposes into multiplicity and persistence terms,Proof and admitted one-onset invariant,Not a causal attribution
+A,The proxy loses most skill in the onset view,Strict diagnostic paired intervals,Past-proton proxy is not exact storm-state truth
+C,No-proton is a useful contrast with little pooled multiplicity gap,Pooled/fold results,No proof of independence; sign varies by fold
+C,Calendar-bin bootstrap supports robustness of signs,New post-hoc temporal bootstrap,Stationarity and selection uncertainty remain
+A,Controller V2 retrospectively achieves FPR below 30 percent,Pinned threshold reconstruction,One onset; FAR98 percent; post-hoc
+X,Controller TSS0.76 is validated useful operational performance,Contradicted by sample support/provenance,Remove
+X,The covariance identity is a new theorem,Known reweighting and informative cluster-size literature,Remove
+C,Fixed-forecast SEP decomposition is an original application combination,Bounded fresh literature audit,Priority not established
+X,Conventional SEP scores are universally wrong,Different valid operational estimands exist,Remove
+X,No-proton is statistically superior for onset,Paired interval includes zero,Remove
+A,Complete science filename coverage includes17monthsubrun,Pinned source receipt and corrected parser,No live equivalence or latency claim
+D,Dual reporting could improve operational model selection,Use-case reasoning,No adoption/economic-impact study
+D,Sealed future data could falsify generalization,Protected prospective contract,No prospective results inspected
+X,Full original endpoint was independently reverified in this audit,Protected boundary blocks unrestricted replay,Remove
+X,Kish concentration is the effective independent sample size,No stochastic dependence model supplied,Remove

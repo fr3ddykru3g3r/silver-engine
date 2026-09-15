@@ -18,7 +18,10 @@ def save(fig,name):
     fig.text(.06,.02,FOOT,fontsize=8,color='#444444',va='bottom')
     fig.subplots_adjust(bottom=.22,top=.84,left=.12,right=.95)
     for ext in ['png','pdf','svg']:
-        fig.savefig(ROOT/'figures'/f'{name}.{ext}',dpi=300,bbox_inches='tight')
+        path = ROOT/'figures'/f'{name}.{ext}'
+        fig.savefig(path,dpi=300,bbox_inches='tight')
+        if ext == 'svg':
+            path.write_text('\n'.join(line.rstrip() for line in path.read_text().splitlines())+'\n')
     plt.close(fig)
 
 
