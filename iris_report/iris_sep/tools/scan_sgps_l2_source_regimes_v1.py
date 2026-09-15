@@ -68,14 +68,23 @@ def regime_key(row: dict[str, Any]) -> str:
 
 def contiguous_regimes(months: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
+    previous_ordinal = None
+    previous_complete = None
     for row in months:
         key = regime_key(row)
-        if not out or out[-1]["key"] != key:
+        year, month = map(int, row["year_month"].split("-"))
+        ordinal = 12 * year + month
+        complete = bool(row["complete_daily_coverage"])
+        # A partial month or calendar gap must not erase an adjacent complete run.
+        if (not out or out[-1]["key"] != key or
+                ordinal != previous_ordinal + 1 or complete != previous_complete):
             out.append({"key": key, "start_month": row["year_month"], "end_month": row["year_month"], "months": 1, "complete_months": int(row["complete_daily_coverage"])})
         else:
             out[-1]["end_month"] = row["year_month"]
             out[-1]["months"] += 1
             out[-1]["complete_months"] += int(row["complete_daily_coverage"])
+        previous_ordinal = ordinal
+        previous_complete = complete
     return out
 
 

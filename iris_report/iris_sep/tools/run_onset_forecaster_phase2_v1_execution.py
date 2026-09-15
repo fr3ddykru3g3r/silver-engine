@@ -85,7 +85,8 @@ def corrected_engineered_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, li
     created: list[str] = []
 
     def add(name: str, values: Iterable[float] | pd.Series) -> None:
-        arr = np.asarray(values, dtype=float)
+        # Pandas Copy-on-Write may expose a read-only NumPy view.
+        arr = np.array(values, dtype=float, copy=True)
         arr[~np.isfinite(arr)] = np.nan
         out[name] = arr
         created.append(name)

@@ -24,3 +24,12 @@ def test_contiguous_regimes_do_not_merge_version_changes():
     assert len(regimes)==2
     assert regimes[0]["key"]=="dn|2-0-0"
     assert regimes[1]["key"]=="sci|3-0-2"
+
+
+def test_partial_endpoint_preserves_complete_subrun_and_gaps_split():
+    months = [dict(year_month=f"2024-{m:02d}", prefixes=["sci"],
+                   versions=["3"], complete_daily_coverage=m < 12)
+              for m in range(1, 13)]
+    regimes = contiguous_regimes(months)
+    assert [(r["months"], r["complete_months"]) for r in regimes] == [(11, 11), (1, 0)]
+    assert len(contiguous_regimes([months[0], months[2]])) == 2
