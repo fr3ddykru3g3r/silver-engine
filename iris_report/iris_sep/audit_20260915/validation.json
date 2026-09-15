@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-15",
+  "selected_scientific_tests": 51,
+  "passed": 51,
+  "failed": 0,
+  "runtime": "Python 3.14; exact versions in environment.json",
+  "suite_scope": [
+    "new audit estimands",
+    "new followups",
+    "multiplicity covariance",
+    "controller V1/V2",
+    "direct Phase II adapter",
+    "SGPS regimes",
+    "episode semantics",
+    "prospective contract"
+  ],
+  "original_models_retrained": false,
+  "full_repository_test_suite_run": false,
+  "deterministic_aggregate_reproduction": "3 of 3 outputs byte-identical"
+}

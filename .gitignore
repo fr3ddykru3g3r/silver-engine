@@ -1,0 +1,2 @@
+# Local downloaded archives include protected-boundary records; keep out of commits.
+/audit_evidence/

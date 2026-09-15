@@ -1,0 +1,194 @@
+[
+  {
+    "branch": "codex/iris-base-report-2026-08-31",
+    "sha": "f6f6c62af27bd1cd91acc788b385da8f85644695",
+    "commit_count": 100,
+    "merge_base_with_audit": "cdf0b2a5bf37fe793f948158adc4cf007c5141f0",
+    "audit_only_branch_only": "562\t34",
+    "subject": "Retain graph for capped physics gradients"
+  },
+  {
+    "branch": "codex/iris-sep-award-validation-v1-20260913",
+    "sha": "13f692a90fc3006181d1c4488da78ff135f24f87",
+    "commit_count": 628,
+    "merge_base_with_audit": "13f692a90fc3006181d1c4488da78ff135f24f87",
+    "audit_only_branch_only": "0\t0",
+    "subject": "IRIS-SEP: record exact multiplicity-covariance mechanism result"
+  },
+  {
+    "branch": "codex/iris-sep-continuation-20260905",
+    "sha": "63ece2bfec5998c49687801103ba4dce305603da",
+    "commit_count": 453,
+    "merge_base_with_audit": "63ece2bfec5998c49687801103ba4dce305603da",
+    "audit_only_branch_only": "175\t0",
+    "subject": "Freeze clear judge-facing story"
+  },
+  {
+    "branch": "codex/iris-sep-episode-benchmark-v1-20260909",
+    "sha": "972cee3d8ddfc1c7bea2fcb2b7f261f7a758fcdb",
+    "commit_count": 586,
+    "merge_base_with_audit": "bc577948340cb9641ac392e785f2edd9a745c144",
+    "audit_only_branch_only": "54\t12",
+    "subject": "Fail closed on unresolved live SGPS sensor binding"
+  },
+  {
+    "branch": "codex/iris-sep-fpr-controller-v1-20260912",
+    "sha": "b622c3d934271b6019cc74e78a5604869bb29681",
+    "commit_count": 592,
+    "merge_base_with_audit": "b622c3d934271b6019cc74e78a5604869bb29681",
+    "audit_only_branch_only": "36\t0",
+    "subject": "IRIS-SEP: close FPR controller V1 after utility failure"
+  },
+  {
+    "branch": "codex/iris-sep-fpr-controller-v2-20260912",
+    "sha": "92bf009d0b50d2a9acf7e96c40516d1e36dd7eff",
+    "commit_count": 616,
+    "merge_base_with_audit": "92bf009d0b50d2a9acf7e96c40516d1e36dd7eff",
+    "audit_only_branch_only": "12\t0",
+    "subject": "IRIS-SEP: add SGPS L1b-to-live source-binding CI"
+  },
+  {
+    "branch": "codex/iris-sep-onset-forecaster-phase2-20260911",
+    "sha": "1a318dbf8b6953d01eb76fb7b98d92266a95e900",
+    "commit_count": 585,
+    "merge_base_with_audit": "1a318dbf8b6953d01eb76fb7b98d92266a95e900",
+    "audit_only_branch_only": "43\t0",
+    "subject": "IRIS-SEP Phase II: close V1 with immutable underpowered development result"
+  },
+  {
+    "branch": "codex/iris-sep-onset-forecaster-v2-20260911-prereg",
+    "sha": "bc577948340cb9641ac392e785f2edd9a745c144",
+    "commit_count": 574,
+    "merge_base_with_audit": "bc577948340cb9641ac392e785f2edd9a745c144",
+    "audit_only_branch_only": "54\t0",
+    "subject": "Add live IRIS and human-participant compliance gates"
+  },
+  {
+    "branch": "codex/iris-sep-onset-forecaster-v2-20260911",
+    "sha": "c943224f34993a3d3cad5a2539696e206926939f",
+    "commit_count": 581,
+    "merge_base_with_audit": "bc577948340cb9641ac392e785f2edd9a745c144",
+    "audit_only_branch_only": "54\t7",
+    "subject": "Run same-cohort released-architecture comparator for Phase II"
+  },
+  {
+    "branch": "codex/iris-sep-senior-review-20260908",
+    "sha": "d0a7152647840e9dec3eae948b90e950ec119652",
+    "commit_count": 344,
+    "merge_base_with_audit": "27692b5fac31d2e0094a66e0e2f3caa09a401a2a",
+    "audit_only_branch_only": "285\t1",
+    "subject": "Fix incomplete SEP outcome labels and qualify prospective evidence"
+  },
+  {
+    "branch": "iris-benchmark-seeds",
+    "sha": "e71e9037a3a9cb888b2c3de7a8728f46b017c84f",
+    "commit_count": 101,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t44",
+    "subject": "Remove legacy PFIA/PFMA files"
+  },
+  {
+    "branch": "iris-benchmark-v1",
+    "sha": "a6811c1f19c21faf5d50f5747e7b6eb77fc92f6d",
+    "commit_count": 94,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t37",
+    "subject": "Remove legacy PFIA/PFMA files"
+  },
+  {
+    "branch": "iris-cdr-data",
+    "sha": "ca23b8d092b1ce4c47e7026ff69d45a9987781a8",
+    "commit_count": 89,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t32",
+    "subject": "Remove legacy PFIA/PFMA files"
+  },
+  {
+    "branch": "iris-cdr-v1",
+    "sha": "989f4e535143a7f70fe5fb7fb7534b16c1af7bda",
+    "commit_count": 122,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t65",
+    "subject": "Remove legacy PFIA/PFMA files"
+  },
+  {
+    "branch": "iris-gate0-data",
+    "sha": "7c27cdcf88d971cd056c46413d5140057b83cadd",
+    "commit_count": 74,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t17",
+    "subject": "IRIS Gate 0: keep only newest full collection run"
+  },
+  {
+    "branch": "iris-generator-historical",
+    "sha": "3c789ce7f1ea70ad818741b4caf82b6ee337bd6f",
+    "commit_count": 106,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t49",
+    "subject": "IRIS augmentation: execute frozen six-arm one-shot locked test"
+  },
+  {
+    "branch": "iris-historical-data",
+    "sha": "a6f1964954d06c3337f95a74829be53c5d33c91c",
+    "commit_count": 77,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t20",
+    "subject": "IRIS historical: add full-HMI evidence collection workflow"
+  },
+  {
+    "branch": "iris-label-integrity",
+    "sha": "cc741829756cd33b3be9ba04397f5df9d7a278d5",
+    "commit_count": 82,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t25",
+    "subject": "IRIS labels: add unresolved-flare censoring workflow"
+  },
+  {
+    "branch": "iris-label-resolution",
+    "sha": "6404f62c0c57fadfe015e7b141cf71485a230767",
+    "commit_count": 80,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t23",
+    "subject": "IRIS labels: add historical flare-region resolution workflow"
+  },
+  {
+    "branch": "iris-model-v1",
+    "sha": "e3a741f23ce20dbe0d31b383d4ae44bc214d2f18",
+    "commit_count": 90,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t33",
+    "subject": "IRIS model: add matched-exposure downstream augmentation trainer"
+  },
+  {
+    "branch": "iris-pil-real-validation",
+    "sha": "0344129285602e4637219ec50eef76f3a52beecf",
+    "commit_count": 88,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t31",
+    "subject": "IRIS PIL validation: run real SHARP overlay audit"
+  },
+  {
+    "branch": "iris-v2-physics-transfer",
+    "sha": "29fd7b7ea8ce1c23cb11321baac699eeac5add47",
+    "commit_count": 188,
+    "merge_base_with_audit": "29bf01468d60e62d9c17a683a0b40ba14396452a",
+    "audit_only_branch_only": "571\t131",
+    "subject": "IRIS v2: retrigger optimized final frozen summary"
+  },
+  {
+    "branch": "iris-v3-cvae",
+    "sha": "b42575f83feac1772ca692fb56a6d950488fe333",
+    "commit_count": 70,
+    "merge_base_with_audit": "cdf0b2a5bf37fe793f948158adc4cf007c5141f0",
+    "audit_only_branch_only": "562\t4",
+    "subject": "IRIS v3: launch CVAE fidelity and latent-noise pilot"
+  },
+  {
+    "branch": "main",
+    "sha": "cdf0b2a5bf37fe793f948158adc4cf007c5141f0",
+    "commit_count": 66,
+    "merge_base_with_audit": "cdf0b2a5bf37fe793f948158adc4cf007c5141f0",
+    "audit_only_branch_only": "562\t0",
+    "subject": "Sync CDR study and locked-test tooling to main"
+  }
+]

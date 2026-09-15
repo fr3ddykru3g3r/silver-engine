@@ -1,0 +1,735 @@
+{
+  "status": "PASS",
+  "evidence_class": "POSTHOC_STRICT_PREBOUNDARY_DIAGNOSTIC",
+  "temporal_bootstrap": {
+    "27": {
+      "grouping": "27",
+      "calendar_bins": 280,
+      "positive_episodes": 85,
+      "draws": 10000,
+      "seed": 20260916,
+      "conditional_on_fixed_forecasts": true,
+      "stationarity_not_established": true,
+      "results": {
+        "xgb_joint": {
+          "normalized_minus_mapped": {
+            "median": -0.10386658290973666,
+            "interval95": [
+              -0.14617850306199726,
+              -0.06313102653254875
+            ],
+            "interval98333": [
+              -0.15653830713778819,
+              -0.054175605402225824
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.18379790940766547,
+            "interval95": [
+              -0.24780189695930263,
+              -0.12540680548760597
+            ],
+            "interval98333": [
+              -0.2620535074244751,
+              -0.11262707330123056
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.28813681755075865,
+            "interval95": [
+              -0.3552289980091148,
+              -0.2245535216734991
+            ],
+            "interval98333": [
+              -0.3728114423098737,
+              -0.21263619126414293
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "past_proton_ge10_proxy": {
+          "normalized_minus_mapped": {
+            "median": -0.1518828726753784,
+            "interval95": [
+              -0.19112700891969284,
+              -0.1133460972096901
+            ],
+            "interval98333": [
+              -0.20014587832841493,
+              -0.10512422150526005
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.35478427344826413,
+            "interval95": [
+              -0.41796953125,
+              -0.2910273714176746
+            ],
+            "interval98333": [
+              -0.43339761904761903,
+              -0.27824711345381453
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.5071528751753156,
+            "interval95": [
+              -0.5606934159886832,
+              -0.4502621320069901
+            ],
+            "interval98333": [
+              -0.5713129023617405,
+              -0.43789890296294465
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "xgb_no_proton": {
+          "normalized_minus_mapped": {
+            "median": 0.005949976084680619,
+            "interval95": [
+              -0.04133125803320517,
+              0.04993764135526241
+            ],
+            "interval98333": [
+              -0.05161329328662554,
+              0.05963911196712477
+            ],
+            "bootstrap_sign_fraction_negative": 0.3939,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.03680542441695789,
+            "interval95": [
+              -0.09252261904761895,
+              0.014121166161105585
+            ],
+            "interval98333": [
+              -0.10498897707231039,
+              0.024424714835429167
+            ],
+            "bootstrap_sign_fraction_negative": 0.9207,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.031733453942844214,
+            "interval95": [
+              -0.09859498241182786,
+              0.03639883183408293
+            ],
+            "interval98333": [
+              -0.1136662277516491,
+              0.05241832800529308
+            ],
+            "bootstrap_sign_fraction_negative": 0.8231,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        }
+      }
+    },
+    "90": {
+      "grouping": "90",
+      "calendar_bins": 84,
+      "positive_episodes": 85,
+      "draws": 10000,
+      "seed": 20260916,
+      "conditional_on_fixed_forecasts": true,
+      "stationarity_not_established": true,
+      "results": {
+        "xgb_joint": {
+          "normalized_minus_mapped": {
+            "median": -0.10364066010617734,
+            "interval95": [
+              -0.14474850858682364,
+              -0.0676781855476178
+            ],
+            "interval98333": [
+              -0.1544369530435625,
+              -0.05771710318353215
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.18258515428172306,
+            "interval95": [
+              -0.24573910074418212,
+              -0.1258963361600349
+            ],
+            "interval98333": [
+              -0.26046571813760894,
+              -0.11351266379613707
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.28731515398182067,
+            "interval95": [
+              -0.34775237897243505,
+              -0.2317974204343011
+            ],
+            "interval98333": [
+              -0.36100089007791997,
+              -0.21935927283534773
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "past_proton_ge10_proxy": {
+          "normalized_minus_mapped": {
+            "median": -0.15169784109556353,
+            "interval95": [
+              -0.1871863226832004,
+              -0.11411326480557717
+            ],
+            "interval98333": [
+              -0.19494932043396726,
+              -0.1053829729107574
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.35317460317460314,
+            "interval95": [
+              -0.42057910492964307,
+              -0.2870323703805847
+            ],
+            "interval98333": [
+              -0.43734321984321983,
+              -0.27309907147116447
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.5063372717508057,
+            "interval95": [
+              -0.5638119500843719,
+              -0.44041113743926813
+            ],
+            "interval98333": [
+              -0.5766174097651109,
+              -0.4241167158858114
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "xgb_no_proton": {
+          "normalized_minus_mapped": {
+            "median": 0.006287378559986623,
+            "interval95": [
+              -0.042235617888106466,
+              0.05084615077702634
+            ],
+            "interval98333": [
+              -0.05259073519627425,
+              0.06069716510961256
+            ],
+            "bootstrap_sign_fraction_negative": 0.398,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.03600998571562075,
+            "interval95": [
+              -0.09595741758241742,
+              0.011456791173884822
+            ],
+            "interval98333": [
+              -0.10937849884386014,
+              0.0204433573183577
+            ],
+            "bootstrap_sign_fraction_negative": 0.9267,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.03169014084507038,
+            "interval95": [
+              -0.1048016738833758,
+              0.039580038608998794
+            ],
+            "interval98333": [
+              -0.12305432140958453,
+              0.05420975779861439
+            ],
+            "bootstrap_sign_fraction_negative": 0.8075,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        }
+      }
+    },
+    "quarter": {
+      "grouping": "quarter",
+      "calendar_bins": 83,
+      "positive_episodes": 85,
+      "draws": 10000,
+      "seed": 20260916,
+      "conditional_on_fixed_forecasts": true,
+      "stationarity_not_established": true,
+      "results": {
+        "xgb_joint": {
+          "normalized_minus_mapped": {
+            "median": -0.10324899922502673,
+            "interval95": [
+              -0.14599554103310544,
+              -0.064976655926957
+            ],
+            "interval98333": [
+              -0.15686574577765097,
+              -0.05840992687170389
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.18351464148877936,
+            "interval95": [
+              -0.23915567030024854,
+              -0.12881537861046047
+            ],
+            "interval98333": [
+              -0.25153401878649406,
+              -0.11904761904761896
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.28650623837191,
+            "interval95": [
+              -0.3441705747955748,
+              -0.23616743989135527
+            ],
+            "interval98333": [
+              -0.3571028669865879,
+              -0.22515053853813524
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "past_proton_ge10_proxy": {
+          "normalized_minus_mapped": {
+            "median": -0.151492956009454,
+            "interval95": [
+              -0.18924758304316253,
+              -0.11281447164521699
+            ],
+            "interval98333": [
+              -0.19843426528995345,
+              -0.10478994715262442
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.35326046597976424,
+            "interval95": [
+              -0.4167222028730932,
+              -0.28660026469514427
+            ],
+            "interval98333": [
+              -0.42965290806754214,
+              -0.2702864583333332
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.505757127377257,
+            "interval95": [
+              -0.5606967010924401,
+              -0.4386776885521853
+            ],
+            "interval98333": [
+              -0.5723045510492256,
+              -0.4227352429526936
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "xgb_no_proton": {
+          "normalized_minus_mapped": {
+            "median": 0.00610400621232815,
+            "interval95": [
+              -0.04359190905654582,
+              0.0536285243667526
+            ],
+            "interval98333": [
+              -0.05552744831562473,
+              0.06521347182021787
+            ],
+            "bootstrap_sign_fraction_negative": 0.3997,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.036300868081689974,
+            "interval95": [
+              -0.09194907148782015,
+              0.010938834024771549
+            ],
+            "interval98333": [
+              -0.10829623287671224,
+              0.020448879551820898
+            ],
+            "bootstrap_sign_fraction_negative": 0.9329,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.031569831628915135,
+            "interval95": [
+              -0.09863632349193781,
+              0.032146150000261026
+            ],
+            "interval98333": [
+              -0.11446582334257442,
+              0.04544474921630095
+            ],
+            "bootstrap_sign_fraction_negative": 0.8327,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        }
+      }
+    },
+    "year": {
+      "grouping": "year",
+      "calendar_bins": 21,
+      "positive_episodes": 85,
+      "draws": 10000,
+      "seed": 20260916,
+      "conditional_on_fixed_forecasts": true,
+      "stationarity_not_established": true,
+      "results": {
+        "xgb_joint": {
+          "normalized_minus_mapped": {
+            "median": -0.10501134187118011,
+            "interval95": [
+              -0.15382482165606723,
+              -0.058371651210277826
+            ],
+            "interval98333": [
+              -0.16552666957552128,
+              -0.0474242026355994
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.18481894476003466,
+            "interval95": [
+              -0.24556522609043624,
+              -0.11752373802830607
+            ],
+            "interval98333": [
+              -0.2574203936893907,
+              -0.10356480078775933
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.2888097885327526,
+            "interval95": [
+              -0.3371389317981229,
+              -0.24268333769249265
+            ],
+            "interval98333": [
+              -0.34978775261160505,
+              -0.23263520953253097
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "past_proton_ge10_proxy": {
+          "normalized_minus_mapped": {
+            "median": -0.15328909579883246,
+            "interval95": [
+              -0.185424096948907,
+              -0.11662094639532579
+            ],
+            "interval98333": [
+              -0.19300671572203842,
+              -0.10758549496976913
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.3534745424274127,
+            "interval95": [
+              -0.4135385299592376,
+              -0.2873904305462404
+            ],
+            "interval98333": [
+              -0.4261150445691048,
+              -0.2672459639742524
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.5073051948051948,
+            "interval95": [
+              -0.5484578228477861,
+              -0.4505632236952509
+            ],
+            "interval98333": [
+              -0.5565269223590892,
+              -0.42990679654697134
+            ],
+            "bootstrap_sign_fraction_negative": 1.0,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        },
+        "xgb_no_proton": {
+          "normalized_minus_mapped": {
+            "median": 0.005015097436824212,
+            "interval95": [
+              -0.03413269168367204,
+              0.04144175189368003
+            ],
+            "interval98333": [
+              -0.04436607654621771,
+              0.05136025970136493
+            ],
+            "bootstrap_sign_fraction_negative": 0.3856,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_normalized": {
+            "median": -0.036605752113929635,
+            "interval95": [
+              -0.08843834971046174,
+              0.009055625496952052
+            ],
+            "interval98333": [
+              -0.10060344827586204,
+              0.015982740485752732
+            ],
+            "bootstrap_sign_fraction_negative": 0.9373,
+            "sign_fraction_is_not_p_value": true
+          },
+          "onset_minus_mapped": {
+            "median": -0.03237405106970326,
+            "interval95": [
+              -0.0947790023883962,
+              0.028468864617392727
+            ],
+            "interval98333": [
+              -0.11094591464640971,
+              0.04679054987565629
+            ],
+            "bootstrap_sign_fraction_negative": 0.859,
+            "sign_fraction_is_not_p_value": true
+          },
+          "valid_draws": 10000
+        }
+      }
+    }
+  },
+  "controller_audit": {
+    "phase2_all_models": {
+      "direct_onset_engineered": {
+        "threshold": 0.0012980843325713367,
+        "tp": 1.0,
+        "fn": 0.0,
+        "fp": 107.0,
+        "tn": 102.0,
+        "pod": 1.0,
+        "fpr": 0.5119617224880383,
+        "far": 0.9907407407407407,
+        "tss": 0.4880382775119617,
+        "hss": 0.00899708917703096,
+        "brier": 0.004786045548339375,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      },
+      "direct_onset_joint": {
+        "threshold": 0.00040394732450138614,
+        "tp": 1.0,
+        "fn": 0.0,
+        "fp": 205.0,
+        "tn": 4.0,
+        "pod": 1.0,
+        "fpr": 0.9808612440191388,
+        "far": 0.9951456310679612,
+        "tss": 0.019138755980861233,
+        "hss": 0.00018579590320033442,
+        "brier": 0.0061839320630892045,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      },
+      "direct_onset_xrs": {
+        "threshold": 0.0013255810151018023,
+        "tp": 1.0,
+        "fn": 0.0,
+        "fp": 167.0,
+        "tn": 42.0,
+        "pod": 1.0,
+        "fpr": 0.7990430622009569,
+        "far": 0.9940476190476191,
+        "tss": 0.2009569377990431,
+        "hss": 0.0023894862604540022,
+        "brier": 0.004830519928520156,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      },
+      "occurrence_trained_xrs_baseline": {
+        "threshold": 0.003917328869899086,
+        "tp": 1.0,
+        "fn": 0.0,
+        "fp": 123.0,
+        "tn": 86.0,
+        "pod": 1.0,
+        "fpr": 0.5885167464114832,
+        "far": 0.9919354838709677,
+        "tss": 0.4114832535885168,
+        "hss": 0.006614875778786247,
+        "brier": 0.0045497163653556725,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      },
+      "threshold_selected_blend": {
+        "threshold": 0.0012980843325713367,
+        "tp": 1.0,
+        "fn": 0.0,
+        "fp": 107.0,
+        "tn": 102.0,
+        "pod": 1.0,
+        "fpr": 0.5119617224880383,
+        "far": 0.9907407407407407,
+        "tss": 0.4880382775119617,
+        "hss": 0.00899708917703096,
+        "brier": 0.004786045548339375,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      }
+    },
+    "10277940827": {
+      "quantile": 0.85,
+      "metrics": {
+        "tp": 0.0,
+        "fn": 1.0,
+        "fp": 41.0,
+        "tn": 168.0,
+        "pod": 0.0,
+        "fpr": 0.19617224880382775,
+        "far": 1.0,
+        "tss": -0.19617224880382775,
+        "hss": -0.009384298466468299,
+        "brier": 0.004786045548339376,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      },
+      "probabilities_match_frozen_phase2": true,
+      "thresholds_independently_reconstructed": true,
+      "historical_label_availability_assumed_25h_not_operationally_verified": true
+    },
+    "10277871843": {
+      "quantile": 0.8,
+      "metrics": {
+        "tp": 1.0,
+        "fn": 0.0,
+        "fp": 50.0,
+        "tn": 159.0,
+        "pod": 1.0,
+        "fpr": 0.23923444976076555,
+        "far": 0.9803921568627451,
+        "tss": 0.7607655502392344,
+        "hss": 0.029395452024403773,
+        "brier": 0.004786045548339376,
+        "positive_mass": 1.0,
+        "negative_mass": 209.0,
+        "rows": 210
+      },
+      "probabilities_match_frozen_phase2": true,
+      "thresholds_independently_reconstructed": true,
+      "historical_label_availability_assumed_25h_not_operationally_verified": true
+    }
+  },
+  "source_inventory_correction": {
+    "original_longest": null,
+    "corrected_complete_runs": [
+      {
+        "key": "dn|1-0-1",
+        "start_month": "2020-11",
+        "end_month": "2021-02",
+        "months": 4
+      },
+      {
+        "key": "dn|1-0-1",
+        "start_month": "2021-04",
+        "end_month": "2021-07",
+        "months": 4
+      },
+      {
+        "key": "dn|2-0-0",
+        "start_month": "2021-09",
+        "end_month": "2022-03",
+        "months": 7
+      },
+      {
+        "key": "sci|3-0-0",
+        "start_month": "2022-05",
+        "end_month": "2023-02",
+        "months": 10
+      },
+      {
+        "key": "sci|3-0-1",
+        "start_month": "2023-05",
+        "end_month": "2023-09",
+        "months": 5
+      },
+      {
+        "key": "sci|3-0-2",
+        "start_month": "2023-11",
+        "end_month": "2025-03",
+        "months": 17
+      }
+    ],
+    "longest_complete": {
+      "key": "sci|3-0-2",
+      "start_month": "2023-11",
+      "end_month": "2025-03",
+      "months": 17
+    },
+    "source_only": true,
+    "training_authorized": false,
+    "live_equivalence_established": false,
+    "reason": "Original scanner grouped incomplete endpoint months with complete months, then rejected the entire regime."
+  },
+  "exact_binomial_pod_interval_one_detection_one_event": [
+    0.025,
+    1.0
+  ]
+}

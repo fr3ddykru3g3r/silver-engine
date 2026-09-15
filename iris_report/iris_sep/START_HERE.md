@@ -1,5 +1,8 @@
 # IRIS-SEP GitHub continuation
 
+**Independent audit overlay (2026-09-15):** [report, verified diagnostics and student workbook](audit_20260915/README.md).
+Read its protected-horizon warning before replaying outcomes: the inclusive prospective boundary conflicts with older endpoint wording. The overlay preserves original frozen results and labels its stricter historical diagnostic separately.
+
 **Primary work branch:** `codex/iris-sep-episode-benchmark-v1-20260909`  
 **Umbrella continuation:** `codex/iris-sep-continuation-20260905`  
 **Dedicated PR:** #5, open against the umbrella branch. Do not merge automatically.
