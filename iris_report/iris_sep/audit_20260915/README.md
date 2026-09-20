@@ -4,6 +4,8 @@
 
 For paper preparation, start with [all audited results in one file](PAPER_RESULTS_20260920.md).
 
+The compiled research-reference manuscript is in [LaTeX and PDF form](../docs/README.md).
+
 Start with [Audit report](AUDIT_REPORT.md), then [complete result tables](RESULTS_AND_EVIDENCE.md), [proofs](MATHEMATICAL_MECHANISM.md), and [submission reference workbook](SUBMISSION_REFERENCE_WORKBOOK.md).
 
 | Resource | Purpose |

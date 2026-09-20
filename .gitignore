@@ -3,3 +3,9 @@
 
 # Finder metadata is not research evidence.
 .DS_Store
+
+# LaTeX build intermediates; keep the reviewed PDF.
+*.aux
+*.log
+*.out
+*.synctex.gz
