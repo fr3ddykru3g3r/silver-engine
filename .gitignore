@@ -1,2 +1,5 @@
 # Local downloaded archives include protected-boundary records; keep out of commits.
 /audit_evidence/
+
+# Finder metadata is not research evidence.
+.DS_Store

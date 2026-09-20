@@ -2,6 +2,8 @@
 
 **Internal research assistance and student study material. Not submission prose.** Prepared with AI assistance; the student must independently interpret results, read sources, document their own work and write their submission. Nothing here certifies eligibility, approval, student ownership, operational readiness or an award outcome.
 
+For paper preparation, start with [all audited results in one file](PAPER_RESULTS_20260920.md).
+
 Start with [Audit report](AUDIT_REPORT.md), then [complete result tables](RESULTS_AND_EVIDENCE.md), [proofs](MATHEMATICAL_MECHANISM.md), and [submission reference workbook](SUBMISSION_REFERENCE_WORKBOOK.md).
 
 | Resource | Purpose |

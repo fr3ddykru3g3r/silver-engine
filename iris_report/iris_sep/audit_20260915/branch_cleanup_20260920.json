@@ -1,0 +1,26 @@
+[
+  {
+    "branch": "codex/iris-sep-fpr-controller-v1-20260912",
+    "sha": "b622c3d934271b6019cc74e78a5604869bb29681",
+    "archive_tag": "archive/2026-09-20/codex/iris-sep-fpr-controller-v1-20260912",
+    "reason": "Fully contained in retained remote award-validation branch; not an open PR head or base"
+  },
+  {
+    "branch": "codex/iris-sep-fpr-controller-v2-20260912",
+    "sha": "92bf009d0b50d2a9acf7e96c40516d1e36dd7eff",
+    "archive_tag": "archive/2026-09-20/codex/iris-sep-fpr-controller-v2-20260912",
+    "reason": "Fully contained in retained remote award-validation branch; not an open PR head or base"
+  },
+  {
+    "branch": "codex/iris-sep-onset-forecaster-phase2-20260911",
+    "sha": "1a318dbf8b6953d01eb76fb7b98d92266a95e900",
+    "archive_tag": "archive/2026-09-20/codex/iris-sep-onset-forecaster-phase2-20260911",
+    "reason": "Fully contained in retained remote award-validation branch; not an open PR head or base"
+  },
+  {
+    "branch": "codex/iris-sep-onset-forecaster-v2-20260911-prereg",
+    "sha": "bc577948340cb9641ac392e785f2edd9a745c144",
+    "archive_tag": "archive/2026-09-20/codex/iris-sep-onset-forecaster-v2-20260911-prereg",
+    "reason": "Fully contained in retained remote award-validation branch; not an open PR head or base"
+  }
+]

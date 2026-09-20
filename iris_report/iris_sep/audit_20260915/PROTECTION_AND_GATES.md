@@ -28,4 +28,4 @@ A freeze created after a time interval does not make forecasts for that interval
 | Physical generalization | Expert-reviewed, predeclared preboundary alternative-catalog/flux protocol with source provenance; no outcome-driven definition selection. |
 | Operational equivalence | Source provider documentation and both-yaw sensor mapping plus issuance/release latency evidence; current science coverage alone fails. |
 
-No messages to organizers, reviewers or mentors have been sent. No branch has been merged or pushed by this audit. No fresh model has been trained.
+No messages to organizers, reviewers or mentors have been sent. No branch has been merged and no fresh model has been trained. On September 20, four fully superseded remote branches were retired with exact-SHA archive tags; see REPOSITORY_CLEANUP_20260920.md. Scientific conclusions and protected boundaries are unchanged.

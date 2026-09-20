@@ -1,5 +1,7 @@
 # IRIS-SEP GitHub continuation
 
+**Paper evidence consolidation (2026-09-20):** [all audited results, uncertainty, proofs and negative results](audit_20260915/PAPER_RESULTS_20260920.md). The bounded historical study is ready for writing; deployment and submission eligibility remain separate gates.
+
 **Independent audit overlay (2026-09-15):** [report, verified diagnostics and student workbook](audit_20260915/README.md).
 Read its protected-horizon warning before replaying outcomes: the inclusive prospective boundary conflicts with older endpoint wording. The overlay preserves original frozen results and labels its stricter historical diagnostic separately.
 
