@@ -1,0 +1,67 @@
+{
+  "manifest_id": "IRIS_SEP_OPERATIONAL_SOURCE_MANIFEST_V1",
+  "frozen_date": "2026-09-21",
+  "policy": {
+    "current_endpoint_presence_does_not_prove_historical_issue_time_availability": true,
+    "unknown_features_fail_closed": true,
+    "no_family_is_verified_without_field_level_receipts": true
+  },
+  "families": [
+    {
+      "family": "SHARP_AR",
+      "prefixes": ["SHARP_AR_"],
+      "status": "SCHEMA_MISMATCH",
+      "physical_source": "SDO/HMI or harmonized magnetic active-region products",
+      "reason": "Retrospective/definitive active-region features cannot be assumed identical to near-real-time products; field-level equivalence is unresolved.",
+      "verification_needed": ["NRT field availability", "unit equivalence", "definition equivalence", "release-time evidence"]
+    },
+    {
+      "family": "SHARP",
+      "prefixes": ["SHARP_"],
+      "status": "SCHEMA_MISMATCH",
+      "physical_source": "SDO/HMI or harmonized magnetic active-region products",
+      "reason": "The frozen magnetic-feature interface is not established as reproducible from the near-real-time source as a set.",
+      "verification_needed": ["NRT field availability", "unit equivalence", "definition equivalence", "release-time evidence"]
+    },
+    {
+      "family": "FLARE",
+      "prefixes": ["Flare_"],
+      "status": "UNVERIFIED_LATENCY",
+      "physical_source": "GOES/HEK or harmonized flare catalog products",
+      "reason": "A flare product exists, but historical first-seen timing and retrospective catalog finalization must be established field by field.",
+      "verification_needed": ["first-seen timestamp", "catalog revision policy", "issue-time field availability"]
+    },
+    {
+      "family": "DONKI_CME",
+      "prefixes": ["DONKICME_"],
+      "status": "UNVERIFIED_LATENCY",
+      "physical_source": "NASA DONKI / fused CME information",
+      "reason": "Present-day access does not establish when every historical CME field became available or whether fused retrospective values match the near-real-time representation.",
+      "verification_needed": ["first-seen timestamp", "field publication latency", "fusion provenance", "schema equivalence"]
+    },
+    {
+      "family": "CDAW_CME",
+      "prefixes": ["CDAWCME_"],
+      "status": "RETROSPECTIVE_ONLY",
+      "physical_source": "CDAW CME catalog",
+      "reason": "Treat as retrospective unless a timestamped operational publication path and equivalent field semantics are demonstrated.",
+      "verification_needed": ["operational endpoint evidence", "first-seen timestamp", "field equivalence"]
+    },
+    {
+      "family": "PROTON_FLUX",
+      "prefixes": ["ProtonFlux_", "ProtonFlux"],
+      "status": "UNVERIFIED_LATENCY",
+      "physical_source": "GOES integral proton flux",
+      "reason": "Near-real-time proton streams exist, but historical issue-time availability, spacecraft routing, processing and exact feature equivalence require receipts.",
+      "verification_needed": ["instrument routing", "measurement timestamp semantics", "first-seen latency", "processing equivalence"]
+    },
+    {
+      "family": "XRS",
+      "prefixes": ["XRSB_", "XRSB"],
+      "status": "UNVERIFIED_LATENCY",
+      "physical_source": "GOES X-ray Sensor",
+      "reason": "Near-real-time XRS streams exist, but historical issue-time publication and feature-extraction equivalence are not yet proven.",
+      "verification_needed": ["instrument routing", "first-seen latency", "processing equivalence"]
+    }
+  ]
+}
