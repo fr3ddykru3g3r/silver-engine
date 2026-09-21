@@ -1,0 +1,93 @@
+{
+  "study_id": "IRIS_SEP_OPERATIONAL_REPRODUCIBILITY_V1",
+  "frozen_date": "2026-09-21",
+  "status": "PREREGISTERED_DEVELOPMENT_STUDY",
+  "primary_question": "Can the retrospective 24-hour SEP forecasting interface be reproduced using only predictor values proven available before forecast issue time?",
+  "secondary_question": "How much predictor coverage and forecast behavior remain after issue-time causal availability is enforced?",
+  "scientific_scope": {
+    "retrospective_interface_predictor_count": 259,
+    "forecast_horizon_hours": 24,
+    "protected_outcomes_from": "2025-09-10T00:00:00Z",
+    "protected_outcomes_must_remain_sealed": true,
+    "development_results_are_not_prospective_validation": true
+  },
+  "availability_statuses": [
+    "VERIFIED",
+    "UNVERIFIED_LATENCY",
+    "SCHEMA_MISMATCH",
+    "RETROSPECTIVE_ONLY",
+    "NO_EQUIVALENT"
+  ],
+  "verified_definition": {
+    "required": [
+      "physical_variable_identified",
+      "source_identity_identified",
+      "measurement_timestamp_semantics_known",
+      "issue_time_or_first_seen_availability_supported",
+      "units_match",
+      "field_definition_matches",
+      "processing_or_revision_policy_known",
+      "no_future_or_outcome_dependent_information"
+    ],
+    "default_if_evidence_missing": "UNVERIFIED_LATENCY"
+  },
+  "phase_a_interface_audit": {
+    "primary_outputs": [
+      "predictor_count_by_availability_status",
+      "verified_predictor_fraction",
+      "source_family_status_table",
+      "unmapped_predictor_count"
+    ],
+    "unknown_predictor_policy": "FAIL_CLOSED",
+    "current_api_presence_is_not_historical_availability_proof": true
+  },
+  "phase_b_replay": {
+    "allowed_population": "development-exposed historical outcomes strictly before protected boundary",
+    "retrospective_condition": "archived feature interface and frozen historical prediction where available",
+    "operational_condition": "only predictor values with issue-time availability and schema equivalence evidence",
+    "structural_unavailability_policy": "ABSTAIN_OR_USE_SEPARATELY_FROZEN_REDUCED_MODEL",
+    "forbidden": [
+      "zero_fill_structurally_unavailable_feature_and_call_it_same_model",
+      "later_definitive_value_substituted_as_if_available_at_issue",
+      "similarly_named_field_substituted_without_equivalence_test",
+      "threshold_or_feature_selection_using_protected_outcomes"
+    ],
+    "outputs_if_identical_schema_replay_possible": [
+      "forecast_issue_coverage_fraction",
+      "probability_mean_absolute_difference",
+      "probability_max_absolute_difference"
+    ],
+    "outputs_if_separate_causal_model_is_frozen": [
+      "TSS",
+      "POD",
+      "FPR",
+      "FAR"
+    ]
+  },
+  "phase_c_product_equivalence": {
+    "compare_near_real_time_and_definitive_products_at_matched_measurement_times": true,
+    "tolerances_must_be_frozen_before_inspecting_error_distribution": true,
+    "minimum_outputs": [
+      "matched_timestamp_count",
+      "absolute_difference_summary",
+      "relative_difference_summary",
+      "fraction_outside_frozen_tolerance"
+    ]
+  },
+  "primary_descriptive_metric": {
+    "name": "operationally_reproducible_feature_fraction",
+    "formula": "VERIFIED predictor columns / total audited predictor columns",
+    "interpretation": "interface reproducibility ratio, not a physical constant or new theorem"
+  },
+  "hypotheses": {
+    "null": "Enforcing issue-time causal availability produces no material reduction in usable interface coverage or replay behavior.",
+    "alternative": "At least one predictor family is not causally reproducible and enforcing availability materially reduces interface coverage and/or changes replay behavior."
+  },
+  "claim_limits": [
+    "no_claim_original_model_invalid",
+    "no_claim_all_retrospective_SEP_models_leak_future_information",
+    "no_claim_current_endpoint_proves_historical_latency",
+    "no_claim_reduced_model_is_same_as_259_feature_retrospective_model",
+    "no_first_ever_claim"
+  ]
+}
