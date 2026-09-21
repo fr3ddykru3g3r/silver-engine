@@ -1,67 +1,21 @@
 {
   "manifest_id": "IRIS_SEP_OPERATIONAL_SOURCE_MANIFEST_V1",
   "frozen_date": "2026-09-21",
+  "evidence_updated_date": "2026-09-21",
   "policy": {
     "current_endpoint_presence_does_not_prove_historical_issue_time_availability": true,
     "unknown_features_fail_closed": true,
-    "no_family_is_verified_without_field_level_receipts": true
+    "no_family_is_verified_without_field_level_receipts": true,
+    "unverified_does_not_mean_unavailable": true,
+    "status_applies_to_exact_frozen_feature_construction_not_to_physical_sensor_existence": true
   },
   "families": [
-    {
-      "family": "SHARP_AR",
-      "prefixes": ["SHARP_AR_"],
-      "status": "SCHEMA_MISMATCH",
-      "physical_source": "SDO/HMI or harmonized magnetic active-region products",
-      "reason": "Retrospective/definitive active-region features cannot be assumed identical to near-real-time products; field-level equivalence is unresolved.",
-      "verification_needed": ["NRT field availability", "unit equivalence", "definition equivalence", "release-time evidence"]
-    },
-    {
-      "family": "SHARP",
-      "prefixes": ["SHARP_"],
-      "status": "SCHEMA_MISMATCH",
-      "physical_source": "SDO/HMI or harmonized magnetic active-region products",
-      "reason": "The frozen magnetic-feature interface is not established as reproducible from the near-real-time source as a set.",
-      "verification_needed": ["NRT field availability", "unit equivalence", "definition equivalence", "release-time evidence"]
-    },
-    {
-      "family": "FLARE",
-      "prefixes": ["Flare_"],
-      "status": "UNVERIFIED_LATENCY",
-      "physical_source": "GOES/HEK or harmonized flare catalog products",
-      "reason": "A flare product exists, but historical first-seen timing and retrospective catalog finalization must be established field by field.",
-      "verification_needed": ["first-seen timestamp", "catalog revision policy", "issue-time field availability"]
-    },
-    {
-      "family": "DONKI_CME",
-      "prefixes": ["DONKICME_"],
-      "status": "UNVERIFIED_LATENCY",
-      "physical_source": "NASA DONKI / fused CME information",
-      "reason": "Present-day access does not establish when every historical CME field became available or whether fused retrospective values match the near-real-time representation.",
-      "verification_needed": ["first-seen timestamp", "field publication latency", "fusion provenance", "schema equivalence"]
-    },
-    {
-      "family": "CDAW_CME",
-      "prefixes": ["CDAWCME_"],
-      "status": "RETROSPECTIVE_ONLY",
-      "physical_source": "CDAW CME catalog",
-      "reason": "Treat as retrospective unless a timestamped operational publication path and equivalent field semantics are demonstrated.",
-      "verification_needed": ["operational endpoint evidence", "first-seen timestamp", "field equivalence"]
-    },
-    {
-      "family": "PROTON_FLUX",
-      "prefixes": ["ProtonFlux_", "ProtonFlux"],
-      "status": "UNVERIFIED_LATENCY",
-      "physical_source": "GOES integral proton flux",
-      "reason": "Near-real-time proton streams exist, but historical issue-time availability, spacecraft routing, processing and exact feature equivalence require receipts.",
-      "verification_needed": ["instrument routing", "measurement timestamp semantics", "first-seen latency", "processing equivalence"]
-    },
-    {
-      "family": "XRS",
-      "prefixes": ["XRSB_", "XRSB"],
-      "status": "UNVERIFIED_LATENCY",
-      "physical_source": "GOES X-ray Sensor",
-      "reason": "Near-real-time XRS streams exist, but historical issue-time publication and feature-extraction equivalence are not yet proven.",
-      "verification_needed": ["instrument routing", "first-seen latency", "processing equivalence"]
-    }
+    {"family":"SHARP_AR","prefixes":["SHARP_AR_"],"status":"SCHEMA_MISMATCH","physical_source":"SDO/HMI SHARP/SMARP fused active-region subset","reason":"The frozen table is constructed from definitive SHARP/SMARP-derived features and retrospective fusion. Definitive SHARP geometry uses the region complete life history; NRT and definitive HARPNUMs differ. The SHARP/SMARP fusion also performs nearest-time imputation and learned cross-instrument reconstruction, so the exact historical feature values are not the NRT interface.","evidence":["https://doi.org/10.1007/s11207-014-0529-3","https://data.nasa.gov/dataset/sharp-near-real-time-data","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/sharp-smarp_fusion.R","yuyian/SEP-Prediction-V2@e138dcd:Pycode/fetch_solar_data.ipynb"],"verification_needed":["matched NRT-vs-definitive field comparison","HARPNUM/region matching rule","issue-time release receipts"]},
+    {"family":"SHARP","prefixes":["SHARP_"],"status":"SCHEMA_MISMATCH","physical_source":"SDO/HMI SHARP/SMARP fused active-region product","reason":"Historical acquisition tries the definitive SHARP series first; definitive SHARP is delayed and uses complete active-region life history. The subsequent SHARP/SMARP fusion uses nearest-time imputation and stepwise reconstruction, so the exact frozen feature construction is not the NRT series.","evidence":["https://doi.org/10.1007/s11207-014-0529-3","https://data.nasa.gov/dataset/sharp-near-real-time-data","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/sharp-smarp_fusion.R","yuyian/SEP-Prediction-V2@e138dcd:Pycode/fetch_solar_data.ipynb"],"verification_needed":["matched NRT-vs-definitive field comparison","issue-time release receipts"]},
+    {"family":"FLARE","prefixes":["Flare_"],"status":"UNVERIFIED_LATENCY","physical_source":"GOES flare events queried from HEK and retrospectively summarized","reason":"The frozen table uses archived HEK event records and derives duration, rise time and peak-strength summaries. The audit has not established historical first-seen timestamps or shown that every event field used in each hourly issue existed before that issue time.","evidence":["yuyian/SEP-Prediction-V2@e138dcd:Pycode/fetch_solar_data.ipynb","yuyian/SEP-Prediction-V2@e138dcd:Rcode/All_features_RData.R","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Data_Aggregation.R"],"verification_needed":["historical first-seen event timestamps","field revision policy","issue-time availability of start/peak/end/class"]},
+    {"family":"DONKI_CME","prefixes":["DONKICME_"],"status":"RETROSPECTIVE_ONLY","physical_source":"NASA DONKI plus CDAW-derived reconstructed CME table","reason":"The frozen CDAWDONKI table is not a direct DONKI feed: missing values are kNN-imputed, events are paired across catalogs, and stepwise regression reconstructs DONKI-like parameters from CDAW in earlier periods. Those reconstructed values are retrospective by construction.","evidence":["https://ccmc.gsfc.nasa.gov/tools/DONKI/","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/CDAW_DONKI-fusion.R"],"verification_needed":["separate direct-DONKI-only causal interface if desired"]},
+    {"family":"CDAW_CME","prefixes":["CDAWCME_"],"status":"RETROSPECTIVE_ONLY","physical_source":"SOHO/LASCO CDAW manual CME catalog","reason":"CDAW is manually identified/measured and its catalog has been retrospectively revised, including addition of thousands of previously unidentified historical CMEs in v2. The frozen feature construction therefore cannot be assumed to be an issue-time feed.","evidence":["https://cdaw.gsfc.nasa.gov/CME_list/catalog_description.htm","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/CDAW_DONKI-fusion.R"],"verification_needed":["none for exact CDAW frozen construction; a different operational CME product would define a different interface"]},
+    {"family":"PROTON_FLUX","prefixes":["ProtonFlux_","ProtonFlux"],"status":"SCHEMA_MISMATCH","physical_source":"multi-satellite GOES >10 MeV proton flux fused onto a retrospective 5-minute series","reason":"Operational GOES proton measurements exist, but the frozen series linearly interpolates gaps within per-satellite histories and then fills remaining gaps from a HAPI archive before aggregation. Exact interpolated values are not guaranteed to have existed causally at the missing timestamp.","evidence":["https://www.ncei.noaa.gov/products/goes-1-15/space-weather-instruments","https://services.swpc.noaa.gov/json/goes/primary/","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/GOES-Sats_Fusion.R","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/GOES-HAPI-proton-flux_fusion.R"],"verification_needed":["rebuild from archived operational stream without two-sided interpolation","timestamp-level source routing receipts"]},
+    {"family":"XRS","prefixes":["XRSB_","XRS_","XRSB","XRS"],"status":"SCHEMA_MISMATCH","physical_source":"multi-satellite GOES XRS 0.1-0.8 nm flux fused onto a retrospective 5-minute series","reason":"Operational XRS measurements exist, but the frozen pipeline bins and linearly interpolates per-satellite gaps before selecting primary-satellite intervals. NOAA separately documents that science-quality XRS can include retrospective fixes/calibrations, so exact archived values must not be treated as automatically equivalent to issue-time operational values.","evidence":["https://www.ncei.noaa.gov/products/goes-1-15/space-weather-instruments","https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncei.swx%3Aexis-l1b-sfxr-goesr","yuyian/SEP-Prediction-V2@e138dcd:Rcode/Dataset_Preprocessing/GOES-Sats_Fusion.R"],"verification_needed":["rebuild from archived operational XRS without two-sided interpolation","timestamp-level primary-satellite routing receipts"]}
   ]
 }

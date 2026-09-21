@@ -2,68 +2,65 @@
 
 **Active branch:** `codex/iris-sep-operational-reproducibility-20260921`  
 **Active study:** `IRIS_SEP_OPERATIONAL_REPRODUCIBILITY_V1`  
-**Frozen:** 21 September 2026
+**Frozen:** 21 September 2026  
+**Status:** `PHASE_A_COMPLETE — PHASE_B BLOCKED BY PREREGISTERED INTERFACE GATE`
 
 ## Research question
 
-> **Can a retrospective 24-hour solar energetic particle forecast be reproduced using only predictor values that were genuinely available before each forecast issue time?**
+> **Can a retrospective 24-hour solar energetic particle forecast be reproduced using only predictor values that were genuinely available in an equivalent form before each forecast issue time?**
 
-Secondary question: how much predictor coverage and forecast behavior remain when issue-time causal availability is enforced?
+## Headline result
 
-## Why this is the active project
+The immutable replay artifact contains **259 exact predictors**. The completed interface audit finds:
 
-Several earlier directions were abandoned after novelty checks. Onset/persistence verification, proton-history attribution, lag/forecastability curves and physics-guided counterfactual explanations all have close prior SEP literature. They remain historical evidence only.
+- **248 / 259 (95.75%)** are directly classified as `SCHEMA_MISMATCH` or `RETROSPECTIVE_ONLY` because their frozen construction differs from an issue-time/NRT construction or explicitly uses retrospective reconstruction;
+- **11 / 259 (4.25%)** remain `UNVERIFIED_LATENCY` (flare family);
+- **0 / 259** currently meet every criterion for exact `VERIFIED` issue-time equivalence.
 
-The active novelty target is narrower: a **feature-by-feature causal-availability audit and quantitative retrospective-to-operational reproducibility gap for a modern multi-source SEP machine-learning interface**. We do not claim that latency or real-time availability themselves are new ideas.
+Do **not** translate this to “95.75% of measurements were unavailable in real time.” Many underlying sensors/products have operational streams. The result is about exact feature construction and causal reproducibility.
 
 ## Read in this order
 
-1. `ACTIVE_PROJECT_2026-09-21.md` — IB Physics-level question and experimental design.
-2. `NOVELTY_AUDIT_OPERATIONAL_REPRODUCIBILITY_2026-09-21.md` — hostile novelty check and kill conditions.
-3. `config/operational_reproducibility_preregistration_2026-09-21.json` — frozen rules before result hunting.
-4. `config/operational_source_manifest_v1.json` — conservative source-family status ledger.
-5. `tools/audit_operational_reproducibility_v1.py` — fail-closed interface audit.
-6. `tests/test_operational_reproducibility_v1.py` — invariant tests.
-7. `architecture/PROSPECTIVE_OPERATIONAL_FEATURE_AVAILABILITY_CONTRACT_2026-09-11.md` — earlier causal-availability contract that motivated the new study.
-8. `audit_20260915/AUDIT_REPORT.md` — preserved independent audit and historical evidence.
+1. `ACTIVE_PROJECT_2026-09-21.md` — question, result and IB Physics-level explanation.
+2. `OPERATIONAL_REPRODUCIBILITY_RESULTS_2026-09-21.md` — complete Phase A result and why Phase B is stopped.
+3. `SOURCE_AVAILABILITY_EVIDENCE_2026-09-21.md` — evidence ledger for every source family.
+4. `NOVELTY_AUDIT_OPERATIONAL_REPRODUCIBILITY_2026-09-21.md` — hostile prior-art audit and bounded novelty claim.
+5. `config/operational_reproducibility_preregistration_2026-09-21.json` — rules frozen before result acceptance.
+6. `PREREGISTRATION_EXECUTION_NOTE_2026-09-21.md` — schema bug found/fixed and execution deviations.
+7. `config/frozen_joint_feature_schema_v1.json` — canonical ordered 259-predictor interface and cryptographic provenance.
+8. `config/operational_source_manifest_v1.json` — source-family evidence/status ledger.
+9. `audit_operational_reproducibility_20260921/interface_audit_v1.json` — machine-readable audit summary.
+10. `tools/audit_operational_reproducibility_v1.py` — fail-closed audit implementation.
+11. `tests/test_audit_operational_reproducibility_v1.py` — regression tests for the exact schema rules.
+12. `docs/operational_reproducibility_ib_physics_paper.tex` — internal IB-level paper scaffold; evidence-locked, not submission text.
 
-## Existing evidence boundary
+## Frozen provenance
 
-The previous repository audit established a retrospective 259-predictor joint interface, but it did **not** establish that every predictor existed in an operationally equivalent form before its nominal forecast issue time. The prospective contract therefore already blocks the 259-column interface as a set until field-level availability is demonstrated.
+- GitHub Actions artifact id: `10137507101`
+- artifact digest: `sha256:81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0`
+- artifact `feature_schema.json` SHA-256: `b70c1b9137cfe7493787f8ddcc328ce81e1153314bbcade8d12013c94948fcf1`
+- ordered 259-feature SHA-256: `cf0fc9e07b1e9b173ad0c330fb021452b5a527ab796dfdbd9282c29a5e3047d4`
+- upstream 24-hour table SHA-256: `4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb`
+- upstream revision: `yuyian/SEP-Prediction-V2@e138dcd72c1952a00e11e1a0b025337f9e7c93fb`
 
-That observation is motivation, not the final result. The new study must audit the feature lineage rather than assume the answer.
+## Why Phase B is blocked
 
-## Availability rule
+The preregistration forbids silently replacing a structurally non-equivalent retrospective input with zero, a later definitive value, or a similarly named NRT field and still calling the result the same model.
 
-A predictor may be labeled `VERIFIED` only when evidence supports all of the following:
+Since the exact interface does not pass the causal-equivalence gate, an honest 259-feature same-model operational replay cannot be run. A future NRT-only model must be explicitly declared as a **new causal interface**, frozen before outcome evaluation, and judged separately.
 
-- the physical variable and source are identified;
-- measurement-time semantics are known;
-- issue-time / first-seen availability is supported;
-- units and field definitions match;
-- retrospective correction/reprocessing is understood; and
-- no future or outcome-dependent information is used.
+Protected post-`2025-09-10T00:00:00Z` outcomes remain sealed.
 
-Otherwise it remains `UNVERIFIED_LATENCY`, `SCHEMA_MISMATCH`, `RETROSPECTIVE_ONLY`, or `NO_EQUIVALENT`.
+## Test status
 
-Unknown predictor columns fail closed.
+Corrected local audit tests:
 
-## Protected-data rule
+```text
+4 passed in 0.09s
+```
 
-Protected post-`2025-09-10T00:00:00Z` outcomes remain sealed. They may not be used to choose sources, tolerances, features, thresholds, models or narrative. Historical pre-boundary analyses remain development-exposed evidence, not prospective validation.
-
-## What this project is not
-
-- not a new XGBoost algorithm;
-- not a claim that the published model is invalid;
-- not another generic missing-data experiment;
-- not a claim that every retrospective forecast leaks future information;
-- not a first-ever claim.
-
-## Judge version
-
-> A forecast can only use measurements that actually existed when it was issued. I am checking a modern solar-radiation forecast feature by feature to see whether its retrospective inputs can really be reconstructed from near-real-time data, then measuring what changes when I enforce that rule.
+The correction was necessary because the immutable schema proved that present-time fields such as `SHARP_label`, `Flare_label`, `ProtonFlux_label` and `XRS_label` are predictors. The audit now uses the exact frozen list rather than removing all `*_label` columns by name pattern.
 
 ## Historical material
 
-All earlier branches, fixed forecasts, negative results, source-preflight work and episode/onset analyses are preserved for provenance. They should not be reused as the current novelty narrative.
+Earlier onset/persistence, missing-sensor, direct-onset, blackout-horizon and other branches are preserved for provenance only. They are not the current novelty narrative.

@@ -1,15 +1,13 @@
-# Research-reference paper
+# Research-reference papers
 
-- Source: [`sep_evaluation_research_reference.tex`](sep_evaluation_research_reference.tex)
-- Compiled PDF: [`build/sep_evaluation_research_reference.pdf`](build/sep_evaluation_research_reference.pdf)
+## Active project
 
-This is an AI-authored internal reference built from the audited evidence package. It explains the findings, equations, usefulness, limitations, negative results, falsification conditions, and competition assessment in research-paper form. It is not student-authored initial submission prose.
+- Source: [`operational_reproducibility_ib_physics_paper.tex`](operational_reproducibility_ib_physics_paper.tex)
+- Study: `IRIS_SEP_OPERATIONAL_REPRODUCIBILITY_V1`
+- Status: internal evidence-locked IB Physics-level scaffold; **not student-authored submission prose**.
 
-Compile from the LaTeX plugin root with:
+The active paper explains the frozen 259-predictor interface, the operational-equivalence audit, the 248/259 result, the preregistered replay gate, physical interpretation, novelty limits and next causal experiment using mathematics no more advanced than simple ratios.
 
-```sh
-python3 scripts/compile_latex.py /absolute/path/to/sep_evaluation_research_reference.tex \
-  --compiler texlive --output-directory /absolute/path/to/docs/build
-```
+## Historical paper
 
-Run the command twice to resolve internal references. The PDF embeds the three disclosed historical-diagnostic figures from `audit_20260915/figures/`.
+`sep_evaluation_research_reference.tex` and its compiled material belong to the previous episode/onset-evaluation research direction. They are preserved for provenance but are not the current IRIS narrative.

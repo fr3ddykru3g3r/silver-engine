@@ -1,0 +1,21 @@
+{
+  "predictor_count": 259,
+  "ordered_columns_sha256": "cf0fc9e07b1e9b173ad0c330fb021452b5a527ab796dfdbd9282c29a5e3047d4",
+  "expected_predictor_count": 259,
+  "predictor_count_matches_expected": true,
+  "verified_predictor_count": 0,
+  "operationally_reproducible_feature_fraction": 0.0,
+  "directly_non_equivalent_or_retrospective_count": 248,
+  "directly_non_equivalent_or_retrospective_fraction": 0.9575289575289575,
+  "unresolved_predictor_count": 11,
+  "unresolved_predictor_fraction": 0.04247104247104247,
+  "status_counts": {"RETROSPECTIVE_ONLY":26,"SCHEMA_MISMATCH":222,"UNVERIFIED_LATENCY":11},
+  "family_counts": {"CDAW_CME":14,"DONKI_CME":12,"FLARE":11,"PROTON_FLUX":4,"SHARP":107,"SHARP_AR":107,"XRS":4},
+  "feature_level_result_reproduction": {
+    "schema": "../config/frozen_joint_feature_schema_v1.json",
+    "manifest": "../config/operational_source_manifest_v1.json",
+    "tool": "../tools/audit_operational_reproducibility_v1.py",
+    "note": "Re-run audit to regenerate per-feature rows; summary is committed to avoid duplicating 259 feature records already frozen in schema."
+  },
+  "interpretation_guardrail": "UNVERIFIED_LATENCY means evidence threshold not met, not proof the physical source was unavailable."
+}

@@ -1,0 +1,163 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,booktabs,array,longtable,graphicx,hyperref,xcolor,enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\title{Can a ``Real-Time'' Solar-Radiation Forecast Be Reproduced in Real Time?\\A Causal Audit of 259 Solar Energetic Particle Forecast Inputs}
+\author{Internal evidence-locked research-paper scaffold}
+\date{21 September 2026}
+\begin{document}
+\maketitle
+\begin{center}\fbox{\parbox{0.92\textwidth}{\textbf{Internal scaffold, not submission text.} This document keeps the evidence, calculations and argument structure consistent at approximately IB Physics mathematical level. Any competition submission must follow the applicable fair's authorship/AI rules and must be explainable by the student in their own words.}}\end{center}
+
+\begin{abstract}
+Solar energetic particle (SEP) events can expose spacecraft and astronauts to enhanced radiation. Modern forecasting systems combine magnetic-field measurements, solar-flare information, coronal-mass-ejection (CME) catalogues, X-ray flux and proton flux to estimate whether an SEP event will occur in the next 24 hours. However, a forecast is operational only if every input value could actually have existed when the forecast was issued. This study audits the exact 259 predictors in a frozen multi-source SEP forecasting interface. Each predictor family was traced through the pinned upstream preprocessing code and classified according to whether the archived value had a demonstrated issue-time equivalent. Of 259 predictors, 248 (95.75\%) use a construction that is directly retrospective or not equivalent to the corresponding near-real-time construction. The remaining 11 predictors (4.25\%) are flare features whose historical publication latency remains unresolved. No archived predictor currently satisfies every criterion of the study's strict exact-equivalence rule. Because the preregistered protocol forbids substituting later definitive data, zeros, or merely similar near-real-time fields, the study does not manufacture an operational skill score for the unchanged 259-input model. The result identifies a clear next step: construct and freeze a separate causal, near-real-time feature interface before testing operational forecasting skill.
+\end{abstract}
+
+\section{Introduction}
+Solar energetic particles are high-energy charged particles accelerated during energetic solar activity. Large SEP events can raise radiation exposure beyond Earth's protective atmosphere and magnetosphere and can affect spacecraft operations. Recent machine-learning systems combine active-region magnetic fields, flares, CMEs, soft X-rays and existing proton flux. A scientifically reasonable historical dataset can still differ from what a forecaster possessed live.
+
+A forecast issued at time $t$ must obey the causal rule
+\begin{equation}\text{information used by the forecast}\leq t.\end{equation}
+A measurement taken before $t$ can still violate operational causality if its final archived value depends on later calibration, later observations, future active-region evolution, two-sided interpolation or a catalogue entry published after $t$.
+
+The research question is therefore: \textbf{Can a retrospective 24-hour SEP forecasting interface be reproduced using only predictor values genuinely available in an equivalent form before each forecast issue time?}
+
+\section{Physical background}
+\subsection{Magnetic active regions}
+HMI SHARP products summarize active-region magnetic properties such as unsigned flux, gradients and current-related quantities. Bobra et al. describe NRT products available within hours, while definitive SHARP products are produced weeks later. Definitive HARP geometry can use the complete lifetime of the region. This is useful for consistent science products, but it is not the same object available to a forecaster early in the region's life.
+
+\subsection{Soft X-rays, flares and particles}
+GOES instruments measure soft X-rays and energetic proton flux. Historical archives may combine satellites, revise calibration and fill missing samples. If a missing value at $t_0$ is interpolated using a sample after $t_0$, the completed value is retrospective even though the physical variable itself is observed operationally.
+
+\subsection{Coronal mass ejections}
+CME speed and geometry are physically relevant to SEP acceleration and propagation. Catalogue values may involve manual measurement, later correction, cross-catalogue matching or statistical reconstruction. Such processing is useful for retrospective science but must be separated from an issue-time CME estimate.
+
+\section{Frozen data interface and provenance}
+The audit uses the exact feature schema preserved in an immutable GitHub Actions replay artifact rather than reconstructing a feature list from a later script.
+
+\begin{table}[h]\centering
+\begin{tabular}{p{0.38\textwidth}p{0.53\textwidth}}\toprule
+Item & Frozen identifier \\\midrule
+Predictor count & 259 \\
+Artifact id & 10137507101 \\
+Artifact digest & \texttt{sha256:81ec33ee08c89d0e4627e6761fbfa993eccf29e436b6ac32efbfc6f7d954c9b0} \\
+Feature-schema SHA-256 & \texttt{b70c1b9137cfe7493787f8ddcc328ce81e1153314bbcade8d12013c94948fcf1} \\
+Ordered 259-column SHA-256 & \texttt{cf0fc9e07b1e9b173ad0c330fb021452b5a527ab796dfdbd9282c29a5e3047d4} \\
+Upstream table SHA-256 & \texttt{4691cedd3209a2823b9e3c5e3dfe5676bde42befc1af14e33f35a220b6dfa0fb} \\
+Upstream revision & \texttt{e138dcd72c1952a00e11e1a0b025337f9e7c93fb} \\\bottomrule
+\end{tabular}\caption{Frozen provenance of the audited interface.}\end{table}
+
+The upstream table has 274 columns. Removing \texttt{window\_begin}, \texttt{window\_end}, \texttt{OSEP\_label}, \texttt{GSEP\_label} and all \texttt{Future\_*} fields reproduces the exact ordered 259 predictors. Present-time indicators such as \texttt{SHARP\_label} and \texttt{ProtonFlux\_label} remain predictors.
+
+\section{Method}
+A predictor was labelled \texttt{VERIFIED} only if evidence supported the physical variable, source identity, measurement-time meaning, issue-time availability, matching units and field definition, known revision policy, and absence of future/outcome-dependent information. Otherwise it was labelled \texttt{UNVERIFIED\_LATENCY}, \texttt{SCHEMA\_MISMATCH}, \texttt{RETROSPECTIVE\_ONLY}, or \texttt{NO\_EQUIVALENT}.
+
+Let $N=259$ and $N_V$ be the number that pass the exact-equivalence rule. The verified fraction is
+\begin{equation}R=\frac{N_V}{N}.\end{equation}
+Let $N_D$ be the number directly demonstrated to use a retrospective-only or schema-mismatched construction:
+\begin{equation}D=\frac{N_D}{N}.\end{equation}
+If $N_U$ remain unresolved, an upper bound for the unchanged interface is
+\begin{equation}U=\frac{N_V+N_U}{N},\end{equation}
+assuming all unresolved fields later verify. These are bookkeeping ratios, not physical constants.
+
+Each source family was traced through pinned upstream code for definitive-versus-NRT selection, nearest-time imputation, two-sided interpolation, cross-satellite stitching, catalogue matching, kNN imputation, regression reconstruction and later revision.
+
+\section{Results}
+\begin{table}[h]\centering
+\begin{tabular}{lrrl}\toprule
+Status & Count & Fraction & Meaning \\\midrule
+\texttt{VERIFIED} & 0 & 0.00\% & Exact issue-time equivalence demonstrated \\
+\texttt{SCHEMA\_MISMATCH} & 222 & 85.71\% & Live source may exist, archived construction differs \\
+\texttt{RETROSPECTIVE\_ONLY} & 26 & 10.04\% & Explicit retrospective reconstruction/cataloguing \\
+\texttt{UNVERIFIED\_LATENCY} & 11 & 4.25\% & Historical issue-time evidence unresolved \\\bottomrule
+\end{tabular}\caption{Audit status of all 259 exact predictors.}\end{table}
+
+Thus
+\begin{equation}D=\frac{248}{259}=0.9575\approx95.75\%,\end{equation}
+\begin{equation}R=\frac{0}{259}=0,\end{equation}
+and
+\begin{equation}U=\frac{11}{259}=0.0425\approx4.25\%.\end{equation}
+Even if every unresolved flare field later passes, the remaining 248 predictors would still require their feature construction to change before the unchanged interface could be called operationally equivalent.
+
+\begin{table}[h]\centering
+\begin{tabular}{lrl}\toprule
+Family & Predictors & Status \\\midrule
+SHARP & 107 & \texttt{SCHEMA\_MISMATCH} \\
+SHARP\_AR & 107 & \texttt{SCHEMA\_MISMATCH} \\
+Flare & 11 & \texttt{UNVERIFIED\_LATENCY} \\
+DONKI CME & 12 & \texttt{RETROSPECTIVE\_ONLY} \\
+CDAW CME & 14 & \texttt{RETROSPECTIVE\_ONLY} \\
+Proton flux & 4 & \texttt{SCHEMA\_MISMATCH} \\
+XRS & 4 & \texttt{SCHEMA\_MISMATCH} \\\bottomrule
+\end{tabular}\caption{Feature-family decomposition.}\end{table}
+
+\section{Why the families differ from an issue-time interface}
+\textbf{SHARP/SHARP\_AR (214):} the downloader attempts definitive SHARP first, while the magnetic fusion also performs nearest-time imputation and statistical mapping between SHARP and SMARP eras. Definitive HARP geometry can depend on full active-region history, so NRT SHARP is a different operational product.
+
+\textbf{CME families (26):} the preprocessing uses kNN imputation, matches CDAW and DONKI events, and fits regressions reconstructing DONKI-like quantities from CDAW for earlier periods. These are retrospective surrogates rather than native issue-time measurements.
+
+\textbf{Proton flux and XRS (8):} the series are stitched across GOES satellites and missing values are linearly interpolated; proton history is additionally gap-filled from a HAPI archive. NOAA also distinguishes operational products from reprocessed science-quality products.
+
+\textbf{Flare family (11):} the archived HEK event values may be operationally obtainable, but the audit has not yet established the historical first-seen/revision time of every exact field, so they remain unresolved rather than failed.
+
+\section{Why no operational skill score is reported}
+The preregistration forbids filling structurally unavailable features with zero, substituting later definitive values, or replacing fields with merely similar NRT fields while calling it the same model. No reduced causal model was frozen before outcome inspection. Therefore Phase B stops at the interface gate. A future NRT-only model must be declared as a new causal interface and evaluated separately.
+
+Protected post-10 September 2025 outcomes remain sealed.
+
+\section{Discussion}
+The result shows that retrospective forecast performance and operational reproducibility are different properties. A model can be scientifically useful on a harmonized historical dataset even when its exact historical feature values cannot be replayed live.
+
+The result does \textbf{not} show that 95.75\% of physical measurements were absent in real time, that the published model is invalid, that the model contains future SEP outcome labels, or that an NRT-trained model would perform badly.
+
+The largest source of interface mismatch is magnetic: 214 of 259 predictors are SHARP/SHARP\_AR fields. This points toward rebuilding magnetic inputs from NRT products rather than discarding magnetic physics.
+
+\section{Novelty}
+Operational forecasting literature already requires pre-event data, distinguishes NRT from definitive products, and studies latency/data gaps. Those general ideas are not claimed as new. The bounded contribution is the specific combination of a frozen complete predictor schema, code-level preprocessing lineage, fail-closed feature classification, a quantitative exact-interface reproducibility audit, and a preregistered gate that prevents an operational skill claim when the interface itself cannot be causally reconstructed. A hostile search found no exact duplicate of this combination for the audited modern multi-source SEP interface, but no universal first-ever claim is made.
+
+\section{Limitations}
+\begin{enumerate}
+\item The audit classifies feature constructions rather than every individual timestamp.
+\item Eleven flare predictors remain unresolved.
+\item A schema mismatch does not measure the numerical size of NRT-versus-definitive differences; that requires a matched-product experiment.
+\item No operational skill score is reported for the unchanged model because the causal replay gate failed.
+\item The novelty search is adversarial but not an exhaustive systematic review.
+\end{enumerate}
+
+\section{Next experiment}
+The next study should collect matched NRT and definitive SHARP/GOES products, freeze equivalence tolerances before inspecting error distributions, replace two-sided interpolation with one-sided processing, use CME/flare products with recorded first-seen timestamps, freeze a new NRT-only feature schema/model, and evaluate it on a prospectively collected or otherwise predeclared causal cohort.
+
+\section{Conclusion}
+In the frozen 259-input interface, 248 predictors (95.75\%) are directly tied to retrospective-only or schema-mismatched constructions and 11 (4.25\%) remain unresolved for historical publication latency. None currently meets every requirement of the strict exact-equivalence rule. The preregistered protocol therefore blocks an unchanged-interface operational replay rather than allowing a substitute dataset to be presented as the same model. The practical requirement is clear: rebuild the forecast around a separately frozen causal/NRT interface, then measure its operational skill prospectively.
+
+\section*{References}
+\begin{enumerate}
+\item Y. Yu et al., ``Realtime forecasting of solar energetic particle event and proton flux using multi-source solar observations and multi-task deep learning,'' \textit{Scientific Reports}, 2026. DOI: \href{https://doi.org/10.1038/s41598-026-66110-2}{10.1038/s41598-026-66110-2}.
+\item M. G. Bobra et al., ``The Helioseismic and Magnetic Imager (HMI) Vector Magnetic Field Pipeline: SHARPs -- Space-Weather HMI Active Region Patches,'' \textit{Solar Physics}, 289, 3549--3578, 2014. DOI: \href{https://doi.org/10.1007/s11207-014-0529-3}{10.1007/s11207-014-0529-3}.
+\item NOAA NCEI, ``GOES 1--15 Space Weather Instruments,'' \url{https://www.ncei.noaa.gov/products/goes-1-15/space-weather-instruments}.
+\item NOAA NCEI, ``GOES-R Series Level 1b EXIS X-Ray Sensor (XRS) Product,'' \url{https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncei.swx%3Aexis-l1b-sfxr-goesr}.
+\item NASA CCMC, ``SHINE/ISWAT/ESWW SEP Model Validation Challenge,'' \url{https://ccmc.gsfc.nasa.gov/challenges/sep/}.
+\item HESPERIA, ``Data Retrieval Tool: real-time and historical SEP forecasting outputs,'' \url{https://hesperia.astro.noa.gr/data-retrieval-tool/}.
+\item Y. Yu et al., \texttt{SEP-Prediction-V2} pinned at \texttt{e138dcd72c1952a00e11e1a0b025337f9e7c93fb}, \url{https://github.com/yuyian/SEP-Prediction-V2/tree/e138dcd72c1952a00e11e1a0b025337f9e7c93fb}.
+\end{enumerate}
+
+\appendix
+\section{Defence numbers}
+\begin{table}[h]\centering
+\begin{tabular}{lr}\toprule Quantity & Value \\\midrule
+Frozen predictors & 259 \\
+SHARP + SHARP\_AR & 214 \\
+CME predictors & 26 \\
+Proton/XRS predictors & 8 \\
+Flare predictors & 11 \\
+Direct retrospective/schema mismatch & 248 \\
+Unresolved & 11 \\
+Verified exact-equivalence predictors & 0 \\
+$248/259$ & 95.75\% \\
+$11/259$ & 4.25\% \\\bottomrule
+\end{tabular}\end{table}
+
+\textbf{Wrong:} ``Only 4.25\% of the solar measurements existed in real time.''
+
+\textbf{Correct:} ``For the unchanged archived interface, 95.75\% of predictor columns use a construction already shown to differ from an issue-time construction; the remaining 4.25\% still need historical latency verification.''
+\end{document}
